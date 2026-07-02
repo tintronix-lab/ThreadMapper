@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "filters": [
+    {
+      "file": "Sources/**/*.swift",
+      "rules": [
+        { "id": "empty_count", "severity": "off" },
+        { "id": "trailing_comma", "severity": "off" },
+        { "id": "line_length", "severity": "off" }
+      ]
+    }
+  ]
+}

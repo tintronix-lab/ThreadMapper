@@ -1,0 +1,31 @@
+disabled_rules:
+  - line_length
+  - trailing_whitespace
+  - trailing_newline
+  - vertical_whitespace
+  - trailing_comma
+  - empty_count
+  - empty_xctest_method
+  - valid_docs
+  - explicit_self # moved out because sourcekitd crashes without full Xcode in some envs
+
+opt_in_rules:
+  - force_unwrapping
+  - extension_access_modifier
+  - no_grouping_extension
+  - sorted_imports
+
+included:
+  - Sources
+  - Tests
+
+excluded:
+  - .build
+  - DerivedData
+  - project.yml
+  - tools
+  - README.md
+  - CONTRIBUTING.md
+  - LICENSE
+
+reporter: "xcode"
