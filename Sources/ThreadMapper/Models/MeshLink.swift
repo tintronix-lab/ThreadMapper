@@ -1,15 +1,14 @@
-import SwiftData
+import Foundation
 
-@Model
-final class MeshLink {
+final class MeshLink: Identifiable, ObservableObject {
     var id: UUID
-    var sourceID: String
-    var targetID: String
+    var sourceID: UUID
+    var targetID: UUID
     var linkQuality: Int
     var inRoute: Bool
     var lastUpdated: Date
 
-    init(id: UUID = UUID(), sourceID: String, targetID: String,
+    init(id: UUID = UUID(), sourceID: UUID, targetID: UUID,
          linkQuality: Int = 1, inRoute: Bool = true) {
         self.id = id
         self.sourceID = sourceID

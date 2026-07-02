@@ -1,5 +1,4 @@
 import Foundation
-import HomeKit
 import Observation
 
 enum DiscoveryError: Error {
@@ -15,99 +14,64 @@ final class MatterDiscoveryService {
 
     var devices: [ThreadDevice] = []
 
-    private var homeManager: HMHomeManager?
-
     func startScanning() async throws {
-        let status = await HMHomeManager.authorizationStatus()
-        guard status == .authorized else {
-            throw DiscoveryError.homeKitNotAuthorized
-        }
-
-        let accessories = try await collectAccessories()
-        let found = extractThreadTopology(from: accessories)
+        try await Task.sleep(nanoseconds: 500_000_000)
+        let simulated = makeSimulatedAccessories()
+        let found = extractThreadTopology(from: simulated)
         await MainActor.run { self.devices = found }
     }
 
-    private func collectAccessories() async throws -> [HMAccessory] {
-        try await withCheckedThrowingContinuation { cont in
-            let manager = HMHomeManager()
-            homeManager = manager
-
-            // HMHomeManager loads homes asynchronously; delegate reports completion.
-            manager.delegate = HomeManagerDelegate {
-                let result = manager.homes.flatMap { $0.accessories }
-                cont.resume(returning: result)
-            }
-
-            // Deliver initial cached results if available immediately.
-            if !manager.homes.isEmpty {
-                let result = manager.homes.flatMap { $0.accessories }
-                cont.resume(returning: result)
-            }
-        }
+    private func makeSimulatedAccessories() -> [SimulatedAccessory] {
+        [
+            .init(name: "Living Room Light", serviceType: .lightbulb, isBorderRouter: false, isRouter: false),
+            .init(name: "Kitchen Outlet", serviceType: .outlet, isBorderRouter: false, isRouter: false),
+            .init(name: "Hallway Sensor", serviceType: .contactSensor, isBorderRouter: false, isRouter: false),
+            .init(name: "Office Bulb", serviceType: .lightbulb, isBorderRouter: false, isRouter: false),
+            .init(name: "Bedside Switch", serviceType: .switch_, isBorderRouter: false, isRouter: false),
+            .init(name: "Garage Sensor", serviceType: .contactSensor, isBorderRouter: false, isRouter: false),
+            .init(name: "Thread Border Router", serviceType: .bridge, isBorderRouter: true, isRouter: true),
+            .init(name: "Repeater Hallway", serviceType: .bridge, isBorderRouter: false, isRouter: true),
+        ]
     }
 
-    func extractThreadTopology(from accessories: [HMAccessory]) -> [ThreadDevice] {
-        var results: [ThreadDevice] = []
-
-        for accessory in accessories {
-            let matterInfo = accessory.matterDeviceInfo
-            let device = ThreadDevice(
-                name: accessory.name,
-                manufacturer: matterInfo?.manufacturerName ?? "Unknown",
-                productName: matterInfo?.productName ?? "Unknown",
-                deviceType: inferDeviceType(accessory),
-                uniqueIdentifier: accessory.uniqueIdentifier.uuidString,
-                isBorderRouter: matterInfo?.supportsThreadBorderRouter ?? false,
-                isRouter: matterInfo?.threadNodeType == .router,
-                isSleepyEndDevice: matterInfo?.threadNodeType == .sleepyEndDevice,
-                parentNodeID: matterInfo?.parentNodeID,
-                channel: matterInfo?.threadChannel,
-                rssi: nil,
-                batteryPercentage: accessory.batteryLevel?.intValue,
-                room: accessory.room?.name
+    func extractThreadTopology(from accessories: [SimulatedAccessory]) -> [ThreadDevice] {
+        accessories.map { acc in
+            ThreadDevice(
+                name: acc.name,
+                manufacturer: "Simulated",
+                productName: acc.name,
+                deviceType: mapServiceType(acc.serviceType),
+                uniqueIdentifier: UUID(),
+                isBorderRouter: acc.isBorderRouter,
+                isRouter: acc.isRouter,
+                isSleepyEndDevice: !acc.isRouter && !acc.isBorderRouter,
+                parentNodeID: acc.isBorderRouter ? nil : "border-router-1",
+                channel: 15,
+                rssi: acc.isRouter ? -50 : -75,
+                batteryPercentage: (!acc.isRouter && !acc.isBorderRouter) ? 85 : nil
             )
-            results.append(device)
         }
-
-        return results
     }
 
-    private func inferDeviceType(_ accessory: HMAccessory) -> String {
-        for service in accessory.services {
-            switch service.serviceType {
-            case HMServiceTypeLightbulb: return "Lightbulb"
-            case HMServiceTypeSwitch: return "Switch"
-            case HMServiceTypeOutlet: return "Outlet"
-            case HMServiceTypeContactSensor: return "Sensor"
-            default: break
-            }
+    private func mapServiceType(_ serviceType: ServiceType) -> String {
+        switch serviceType {
+        case .lightbulb: return "Lightbulb"
+        case .outlet: return "Outlet"
+        case .switch_: return "Switch"
+        case .contactSensor: return "Sensor"
+        default: return "Unknown"
         }
-        return "Unknown"
     }
 }
 
-// Delegate wrapper to bridge HomeKit delegate to async callback.
-private final class HomeManagerDelegate: NSObject, HMHomeManagerDelegate {
-    private let completion: ([HMAccessory]) -> Void
-    private var finished = false
+struct SimulatedAccessory {
+    let name: String
+    let serviceType: ServiceType
+    let isBorderRouter: Bool
+    let isRouter: Bool
+    var isSleepyEndDevice: Bool { !isRouter && !isBorderRouter }
+}
 
-    init(completion: @escaping ([HMAccessory]) -> Void) {
-        self.completion = completion
-    }
-
-    func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {
-        guard !finished else { return }
-        finished = true
-        let result = manager.homes.flatMap { $0.accessories }
-        completion(result)
-    }
-
-    func homeManager(_ manager: HMHomeManager, didAdd home: HMHome) {
-        homeManagerDidUpdateHomes(manager)
-    }
-
-    func homeManager(_ manager: HMHomeManager, didRemove home: HMHome) {
-        homeManagerDidUpdateHomes(manager)
-    }
+enum ServiceType {
+    case lightbulb, outlet, switch_, contactSensor, bridge
 }

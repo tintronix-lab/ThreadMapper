@@ -1,13 +1,14 @@
-import SwiftData
+import Foundation
+import Observation
 
-@Model
-final class ThreadDevice {
+@Observable
+final class ThreadDevice: Identifiable, ObservableObject {
     var id: UUID
     var name: String
     var manufacturer: String
     var productName: String
     var deviceType: String
-    var uniqueIdentifier: String
+    var uniqueIdentifier: UUID
     var isBorderRouter: Bool
     var isRouter: Bool
     var isSleepyEndDevice: Bool
@@ -20,7 +21,7 @@ final class ThreadDevice {
     var assignedAccessory: String?
 
     init(id: UUID = UUID(), name: String, manufacturer: String, productName: String,
-         deviceType: String, uniqueIdentifier: String,
+         deviceType: String, uniqueIdentifier: UUID,
          isBorderRouter: Bool = false, isRouter: Bool = false,
          isSleepyEndDevice: Bool = false, parentNodeID: String? = nil,
          channel: Int? = nil, rssi: Int? = nil, batteryPercentage: Int? = nil,

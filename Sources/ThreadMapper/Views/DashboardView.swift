@@ -1,15 +1,12 @@
 import SwiftUI
-import SwiftData
+import Observation
 
 struct DashboardView: View {
-    @Environment(\.modelContext) private var context
-    @State private var viewModel: MeshViewModel
+    @Environment(MeshViewModel.self) private var viewModel
     @State private var selectedRoom: String? = nil
     @State private var sortOrder: SortOrder = .name
 
-    init(context: ModelContext) {
-        _viewModel = State(initialValue: MeshViewModel(context: context))
-    }
+    init() {}
 
     private var filteredDevices: [ThreadDevice] {
         let base = selectedRoom == nil ? viewModel.devices : viewModel.devices.filter { $0.room == selectedRoom }
@@ -40,7 +37,12 @@ struct DashboardView: View {
                         DeviceListRow(device: device)
                             .onTapGesture { viewModel.selectedDevice = device }
                     }
-                } footer: Text("\(filteredDevices.count) device(s) shown")
+                }
+                Section {
+                    EmptyView()
+                } footer: {
+                    Text("\(filteredDevices.count) device(s) shown")
+                }
             }
             .navigationTitle("Thread Mesh")
             .toolbar {
@@ -52,9 +54,6 @@ struct DashboardView: View {
                     }
                     .disabled(viewModel.isScanning)
                 }
-            }
-            .sheet(item: $viewModel.selectedDevice) { device in
-                DeviceDetailView(device: device)
             }
             .overlay {
                 if let error = viewModel.scanError {

@@ -6,7 +6,6 @@ struct MeshTopologyBuilder {
         var links: [MeshLink] = []
 
         let routers = devices.filter { $0.isRouter || $0.isBorderRouter }
-        let ends = devices.filter { !$0.isRouter && !$0.isBorderRouter }
 
         for device in routers {
             let kind: MeshNodeKind = device.isBorderRouter ? .borderRouter : .router
@@ -15,9 +14,10 @@ struct MeshTopologyBuilder {
 
         for device in devices {
             guard let parentID = device.parentNodeID else { continue }
+            guard let parentUUID = UUID(uuidString: parentID) ?? devices.first(where: { $0.parentNodeID == parentID })?.id else { continue }
             links.append(MeshLink(
-                sourceID: parentID,
-                targetID: device.uniqueIdentifier,
+                sourceID: parentUUID,
+                targetID: device.id,
                 linkQuality: estimateLinkQuality(device)
             ))
         }

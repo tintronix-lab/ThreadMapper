@@ -25,12 +25,10 @@ struct DeviceListRow: View {
     }
 
     private func signalColor(for rssi: Int) -> Color {
-        switch rssi {
-        case -50...: .green
-        case -65...: .mint
-        case -80...: .orange
-        default: .red
-        }
+        if rssi >= -50 { return .green }
+        if rssi >= -65 { return .mint }
+        if rssi >= -80 { return .orange }
+        return .red
     }
 
     private func battColor(for batt: Int) -> Color {

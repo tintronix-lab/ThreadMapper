@@ -1,11 +1,12 @@
-import Foundation
+import SwiftUI
+import CoreLocation
 import Observation
 
 @Observable
 final class SurveyViewModel {
     var isRecording = false
     var currentRSSI: Int?
-    var weakDevices: [ThreadDevice] = []
+    var weakDevices: [WeakDevice] = []
 
     private let manager = SurveySessionManager()
 

@@ -1,4 +1,5 @@
 import Foundation
+import CoreLocation
 
 struct Extrapolator {
     static func interpolateRSSI(samples: [Int], at coordinate: CLLocationCoordinate2D) -> Double? {

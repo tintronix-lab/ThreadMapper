@@ -1,6 +1,4 @@
 import SwiftUI
-import SwiftUI
-import Combine
 
 struct MeshGraphView: View {
     let nodes: [MeshNode]
@@ -11,7 +9,6 @@ struct MeshGraphView: View {
 
     @State private var layout: [UUID: CGPoint] = [:]
     @State private var selectedNodeID: UUID?
-    @State private var dragCurrent: CGPoint? = nil
 
     var body: some View {
         GeometryReader { geo in
@@ -21,8 +18,7 @@ struct MeshGraphView: View {
             }
             .gesture(
                 DragGesture(minimumDistance: 0)
-                    .onChanged { value in
-                        dragCurrent = value.location
+                    .onEnded { value in
                         if let hit = hitTest(location: value.location) {
                             selectedNodeID = hit.id
                             onSelectNode(hit)
@@ -78,43 +74,60 @@ struct MeshGraphView: View {
     private func applyForceDirectedLayout(size: CGSize) {
         guard !nodes.isEmpty else { return }
         var positions: [UUID: CGPoint] = [:]
-        for node in nodes { positions[node.id] = CGPoint(x: .random(in: 40...(size.width - 40)), y: .random(in: 40...(size.height - 40))) }
+        for node in nodes {
+            positions[node.id] = CGPoint(
+                x: CGFloat.random(in: 40...(size.width - 40)),
+                y: CGFloat.random(in: 40...(size.height - 40))
+            )
+        }
+
         let area = size.width * size.height
         let k = sqrt(area / CGFloat(nodes.count))
-        var temp: CGFloat = 0.1; let cooling: CGFloat = 0.995
+        var temp: CGFloat = 0.1
+        let cooling: CGFloat = 0.995
+
         for _ in 0..<300 {
             var displacements: [UUID: CGPoint] = [:]
+
             for node in nodes {
-                var disp = CGPoint.zero
+                var fx: CGFloat = 0; var fy: CGFloat = 0
                 for other in nodes where other.id != node.id {
-                    let delta = positions[node.id]! - positions[other.id]!
-                    let dist = max(sqrt(delta.x*delta.x + delta.y*delta.y), 0.1)
-                    disp += (delta/dist) * (k*k/dist)
+                    guard let o = positions[other.id], let s = positions[node.id] else { continue }
+                    let dx = s.x - o.x; let dy = s.y - o.y
+                    let dist = max(sqrt(dx*dx + dy*dy), 0.1)
+                    let f = (k*k)/dist
+                    fx += (dx/dist)*f
+                    fy += (dy/dist)*f
                 }
-                displacements[node.id] = disp
+                displacements[node.id] = CGPoint(x: fx, y: fy)
             }
+
             for link in links {
                 guard let a = positions[link.sourceID], let b = positions[link.targetID] else { continue }
-                let delta = a - b
-                let dist = max(sqrt(delta.x*delta.x + delta.y*delta.y), 0.1)
+                let dx = a.x - b.x; let dy = a.y - b.y
+                let dist = max(sqrt(dx*dx + dy*dy), 0.1)
                 let force = (dist*dist)/k
-                let dir = delta/dist
-                displacements[link.sourceID, default: .zero] -= dir*force*0.5
-                displacements[link.targetID, default: .zero] += dir*force*0.5
+                let dirX = dx/dist; let dirY = dy/dist
+                displacements[link.sourceID, default: .zero] = CGPoint(x: displacements[link.sourceID, default: .zero].x - dirX*force*0.5, y: displacements[link.sourceID, default: .zero].y - dirY*force*0.5)
+                displacements[link.targetID, default: .zero] = CGPoint(x: displacements[link.targetID, default: .zero].x + dirX*force*0.5, y: displacements[link.targetID, default: .zero].y + dirY*force*0.5)
             }
+
             for node in nodes {
-                let disp = displacements[node.id, default: .zero]
+                guard let pos = positions[node.id], let disp = displacements[node.id] else { continue }
                 let mag = sqrt(disp.x*disp.x + disp.y*disp.y)
                 if mag > 0 {
-                    let limited = disp/mag * min(mag, temp)
-                    var newPos = positions[node.id]! + limited
+                    let limitedX = (disp.x/mag)*min(mag, temp)
+                    let limitedY = (disp.y/mag)*min(mag, temp)
+                    var newPos = CGPoint(x: pos.x + limitedX, y: pos.y + limitedY)
                     newPos.x = max(20, min(size.width - 20, newPos.x))
                     newPos.y = max(20, min(size.height - 20, newPos.y))
                     positions[node.id] = newPos
                 }
             }
+
             temp *= cooling
         }
+
         layout = positions
     }
 }

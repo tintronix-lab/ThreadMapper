@@ -1,12 +1,8 @@
 import SwiftUI
+import Observation
 
 struct SurveyWalkView: View {
-    @State private var viewModel: SurveyViewModel
-    @State private var selectedDeviceID: String?
-
-    init() {
-        _viewModel = State(initialValue: SurveyViewModel())
-    }
+    @State private var viewModel = SurveyViewModel()
 
     var body: some View {
         NavigationStack {
@@ -23,28 +19,19 @@ struct SurveyWalkView: View {
 
                 Section("Current Reading") {
                     if let rssi = viewModel.currentRSSI {
-                        Text("RSSI: \(rssi) dBm").font(.monospacedDigit())
+                        Text("RSSI: \(rssi) dBm").font(.system(.body, design: .monospaced))
                     } else {
                         Text("No readings yet").foregroundStyle(.secondary)
                     }
                 }
 
                 Section("Weak Links") {
-                    if viewModel.weakDevices.isEmpty {
-                        Text("None")
-                    } else {
-                        ForEach(viewModel.weakDevices) { device in
-                            Text(device.name)
-                        }
+                    ForEach(viewModel.weakDevices) { device in
+                        Text(device.name)
                     }
                 }
             }
             .navigationTitle("Survey Walk")
         }
     }
-}
-
-struct WeakDevice: Identifiable {
-    let id = UUID()
-    let name: String
 }

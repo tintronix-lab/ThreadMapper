@@ -1,5 +1,4 @@
 import SwiftUI
-import SwiftData
 import Observation
 
 @Observable
@@ -12,11 +11,6 @@ final class MeshViewModel {
     var scanError: String?
 
     private let discovery = MatterDiscoveryService.shared
-    private let context: ModelContext
-
-    init(context: ModelContext) {
-        self.context = context
-    }
 
     func startScan() async {
         await MainActor.run { isScanning = true; scanError = nil }
@@ -29,19 +23,11 @@ final class MeshViewModel {
                 self.devices = found
                 self.nodes = graph.0
                 self.links = graph.1
-                self.persist()
             }
         } catch {
             await MainActor.run { scanError = error.localizedDescription }
         }
         await MainActor.run { isScanning = false }
-    }
-
-    private func persist() {
-        for device in devices {
-            context.insert(device)
-        }
-        try? context.save()
     }
 
     func routerDensity(for room: String? = nil) -> Int {

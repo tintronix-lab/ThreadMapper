@@ -23,40 +23,48 @@ struct GraphLayout {
         let cooling: CGFloat = 0.995
 
         for _ in 0..<iterations {
-            var displacements: [UUID: CGPoint] = [:]
+            var displacements: [UUID: (dx: CGFloat, dy: CGFloat)] = [:]
 
             for node in nodes {
-                var disp = CGPoint.zero
+                guard let s = positions[node.id] else { continue }
+                var fx: CGFloat = 0; var fy: CGFloat = 0
                 for other in nodes where other.id != node.id {
-                    let delta = positions[node.id]! - positions[other.id]!
-                    let dist = max(sqrt(delta.x * delta.x + delta.y * delta.y), 0.1)
-                    disp += (delta / dist) * (k * k / dist)
+                    guard let o = positions[other.id] else { continue }
+                    let dx = s.x - o.x; let dy = s.y - o.y
+                    let dist = max(sqrt(dx*dx + dy*dy), 0.1)
+                    let f = (k*k)/dist
+                    fx += (dx/dist)*f
+                    fy += (dy/dist)*f
                 }
-                displacements[node.id] = disp
+                displacements[node.id] = (fx, fy)
             }
 
             for link in links {
-                guard let a = positions[link.sourceID],
-                      let b = positions[link.targetID] else { continue }
-                let delta = a - b
-                let dist = max(sqrt(delta.x * delta.x + delta.y * delta.y), 0.1)
-                let force = (dist * dist) / k
-                let dir = delta / dist
-                displacements[link.sourceID, default: .zero] -= dir * force * 0.5
-                displacements[link.targetID, default: .zero] += dir * force * 0.5
+                guard let a = positions[link.sourceID], let b = positions[link.targetID] else { continue }
+                let dx = a.x - b.x; let dy = a.y - b.y
+                let dist = max(sqrt(dx*dx + dy*dy), 0.1)
+                let force = (dist*dist)/k
+                let dirX = dx/dist; let dirY = dy/dist
+
+                let src = displacements[link.sourceID, default: (0,0)]
+                let dst = displacements[link.targetID, default: (0,0)]
+                displacements[link.sourceID] = (src.dx - dirX*force*0.5, src.dy - dirY*force*0.5)
+                displacements[link.targetID] = (dst.dx + dirX*force*0.5, dst.dy + dirY*force*0.5)
             }
 
             for node in nodes {
-                let disp = displacements[node.id, default: .zero]
-                let mag = sqrt(disp.x * disp.x + disp.y * disp.y)
+                guard let pos = positions[node.id], let disp = displacements[node.id] else { continue }
+                let mag = sqrt(disp.dx*disp.dx + disp.dy*disp.dy)
                 if mag > 0 {
-                    let limited = disp / mag * min(mag, temp)
-                    var newPos = positions[node.id]! + limited
+                    let limitedX = (disp.dx/mag)*min(mag, temp)
+                    let limitedY = (disp.dy/mag)*min(mag, temp)
+                    var newPos = CGPoint(x: pos.x + limitedX, y: pos.y + limitedY)
                     newPos.x = max(20, min(size.width - 20, newPos.x))
                     newPos.y = max(20, min(size.height - 20, newPos.y))
                     positions[node.id] = newPos
                 }
             }
+
             temp *= cooling
         }
 

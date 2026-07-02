@@ -1,10 +1,12 @@
-import SwiftData
+import Foundation
 import CoreLocation
+import Observation
 
-@Model
-final class SurveyPoint {
+@Observable
+final class SurveyPoint: Identifiable {
     var id: UUID
-    var coordinate: Data
+    var latitude: Double
+    var longitude: Double
     var sampleCount: Int
     var meanRSSI: Double
     var weakDevices: String
@@ -15,7 +17,8 @@ final class SurveyPoint {
          meanRSSI: Double, weakDevices: [String], sampleCount: Int = 1,
          note: String? = nil) {
         self.id = id
-        self.coordinate = try! JSONEncoder().encode(coordinate)
+        self.latitude = coordinate.latitude
+        self.longitude = coordinate.longitude
         self.sampleCount = sampleCount
         self.meanRSSI = meanRSSI
         self.weakDevices = weakDevices.joined(separator: ",")
@@ -23,7 +26,7 @@ final class SurveyPoint {
         self.note = note
     }
 
-    var decodedCoordinate: CLLocationCoordinate2D? {
-        try? JSONDecoder().decode(CLLocationCoordinate2D.self, from: coordinate)
+    var coordinate: CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
 }

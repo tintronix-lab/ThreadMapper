@@ -1,24 +1,26 @@
 import SwiftUI
-import SwiftData
 
 @main
 struct ThreadMapperApp: App {
-    let modelContainer: ModelContainer
-
-    init() {
-        let schema = Schema([ThreadDevice.self, MeshLink.self, SurveyPoint.self])
-        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-        do {
-            modelContainer = try ModelContainer(for: schema, configurations: [config])
-        } catch {
-            fatalError("SwiftData model container failed: \(error)")
-        }
-    }
+    init() {}
 
     var body: some Scene {
         WindowGroup {
-            DashboardView()
-                .modelContainer(modelContainer)
+            NavigationStack {
+                ContentView()
+            }
         }
+    }
+}
+
+struct ContentView: View {
+    @State private var viewModel = MeshViewModel()
+
+    var body: some View {
+        DashboardView()
+            .sheet(item: $viewModel.selectedDevice) { device in
+                DeviceDetailView(device: device)
+            }
+            .environment(viewModel)
     }
 }

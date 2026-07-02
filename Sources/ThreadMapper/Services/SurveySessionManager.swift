@@ -1,7 +1,6 @@
-import Foundation
-import SwiftData
-import Observation
 import CoreLocation
+import Foundation
+import Observation
 
 @Observable
 final class SurveySessionManager {
@@ -18,15 +17,15 @@ final class SurveySessionManager {
     }
 
     func endSession() -> SurveyPoint? {
-        guard let session = activeSession, !samples.isEmpty else { return nil }
-        let meanRSSI = samples.map(\.rssi).reduce(0, +) / Double(samples.count)
-        let weak = samples.filter { $0.rssi < -80 }.map(\.deviceID)
+        guard !samples.isEmpty else { return nil }
+        let meanRSSI = samples.map { Double($0.rssi) }.reduce(0, +) / Double(samples.count)
+        let weakIDs = samples.filter { $0.rssi < -80 }.map(\.deviceID)
         let coord = samples.first?.location ?? CLLocationCoordinate2D(latitude: 0, longitude: 0)
 
         let point = SurveyPoint(
             coordinate: coord,
             meanRSSI: meanRSSI,
-            weakDevices: weak,
+            weakDevices: weakIDs,
             sampleCount: samples.count
         )
         activeSession = nil
