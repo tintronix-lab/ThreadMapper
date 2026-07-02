@@ -7,14 +7,13 @@ let package = Package(
     products: [
         .library(name: "ThreadMapper", targets: ["ThreadMapper"]),
     ],
-    dependencies: [
-        .package(url: "https://github.com/apple/swift-collections", from: "1.1.0"),
-    ],
     targets: [
         .target(
             name: "ThreadMapper",
-            dependencies: [
-                .product(name: "Collections", package: "swift-collections"),
+            dependencies: [],
+            exclude: [
+                "Info.plist",
+                "ThreadMapper.entitlements",
             ]
         ),
         .testTarget(name: "ThreadMapperTests", dependencies: ["ThreadMapper"]),

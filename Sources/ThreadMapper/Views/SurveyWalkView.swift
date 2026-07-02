@@ -2,7 +2,11 @@ import SwiftUI
 import Observation
 
 struct SurveyWalkView: View {
-    @State private var viewModel = SurveyViewModel()
+    @State private var viewModel: SurveyViewModel
+
+    init() {
+        _viewModel = State(initialValue: SurveyViewModel())
+    }
 
     var body: some View {
         NavigationStack {

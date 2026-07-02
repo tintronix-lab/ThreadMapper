@@ -1,19 +1,30 @@
-import CoreLocation
 import Foundation
 import Observation
+import CoreLocation
 
 @Observable
 final class SurveySessionManager {
-    var activeSession: SurveySession?
+    var activeSession: SurveySession
     private var samples: [SurveySample] = []
+    var currentMeanRSSI: Double?
+    var currentWeakIDs: [String] = []
 
-    func startSession() {
+    init() {
         activeSession = SurveySession(startedAt: Date())
         samples.removeAll()
     }
 
     func recordSample(deviceID: String, rssi: Int, location: CLLocationCoordinate2D) {
         samples.append(SurveySample(deviceID: deviceID, rssi: rssi, location: location))
+        currentMeanRSSI = samples.map { Double($0.rssi) }.reduce(0, +) / Double(samples.count)
+        currentWeakIDs = samples.filter { $0.rssi < -80 }.map(\.deviceID)
+    }
+
+    func startSession() {
+        activeSession = SurveySession(startedAt: Date())
+        samples.removeAll()
+        currentMeanRSSI = nil
+        currentWeakIDs = []
     }
 
     func endSession() -> SurveyPoint? {
@@ -28,8 +39,9 @@ final class SurveySessionManager {
             weakDevices: weakIDs,
             sampleCount: samples.count
         )
-        activeSession = nil
         samples.removeAll()
+        currentMeanRSSI = nil
+        currentWeakIDs = []
         return point
     }
 }
