@@ -1,0 +1,41 @@
+# --- Xcode / iOS ---
+*.xcworkspace
+*.xcuserdata
+*.xcodeproj/*
+!*.xcodeproj/project.xcworkspace
+!*.xcodeproj/xcshareddata
+*.ipa
+*.dSYM
+*.ipa
+
+# --- SPM / Swift ---
+.build/
+DerivedData/
+*.swiftpm
+Package.resolved
+
+# --- macOS / system ---
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems
+
+# --- Build artifacts ---
+*.o
+*.pyc
+__pycache__/
+*.so
+*.dylib
+
+# --- Credentials / secrets ---
+*.p12
+*.pem
+*.mobileprovision
+*.cer
+*.p8
+AuthKey_*.p8
