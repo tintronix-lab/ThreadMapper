@@ -15,7 +15,7 @@ final class DeviceStatsStore {
 
     private(set) var readings: [String: [Reading]] = [:]
 
-    @ObservationIgnored private let maxReadings = 60   // 5 min at 5-second interval
+    @ObservationIgnored private let maxReadings = 360  // 30 min at 5-second interval
     @ObservationIgnored private let storeURL: URL = {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("device_stats.json")
@@ -41,6 +41,32 @@ final class DeviceStatsStore {
             maxRSSI: values.max()!,
             avgRSSI: values.reduce(0, +) / values.count
         )
+    }
+
+    /// Returns time-bucketed network-wide average RSSI over the last `minutes` minutes.
+    func networkTrendBuckets(minutes: Int = 30, bucketMinutes: Int = 3) -> [(timestamp: Date, avgRSSI: Int)] {
+        let now = Date()
+        let cutoff = now.addingTimeInterval(-Double(minutes) * 60)
+        let bucketSec = Double(bucketMinutes) * 60
+        let bucketCount = Int(Double(minutes) * 60 / bucketSec)
+
+        var sums = [Int: Int]()
+        var counts = [Int: Int]()
+
+        for deviceReadings in readings.values {
+            for r in deviceReadings where r.timestamp > cutoff {
+                let idx = Int(now.timeIntervalSince(r.timestamp) / bucketSec)
+                guard idx < bucketCount else { continue }
+                sums[idx, default: 0] += r.rssi
+                counts[idx, default: 0] += 1
+            }
+        }
+
+        return (0..<bucketCount).compactMap { idx in
+            guard let c = counts[idx], c > 0, let s = sums[idx] else { return nil }
+            let ts = now.addingTimeInterval(-Double(idx) * bucketSec - bucketSec / 2)
+            return (timestamp: ts, avgRSSI: s / c)
+        }.sorted { $0.timestamp < $1.timestamp }
     }
 
     func clear(for deviceName: String) {
