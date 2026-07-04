@@ -22,6 +22,22 @@ struct DashboardView: View {
             }
             .navigationTitle("Dashboard")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        Task { await viewModel.startScan() }
+                    } label: {
+                        if viewModel.isScanning {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Label("Rescan", systemImage: "arrow.clockwise")
+                                .font(.caption.weight(.medium))
+                        }
+                    }
+                    .disabled(viewModel.isScanning)
+                }
+            }
             .sheet(item: $selectedDevice) { device in
                 DeviceDetailView(device: device)
             }
