@@ -64,6 +64,22 @@ struct NetworkHealthScore {
             tips.append("Replace or charge batteries in low-power devices")
         }
 
+        // Channel interference — Thread channels that overlap 2.4 GHz WiFi channels 1, 6, or 11
+        // WiFi ch 1 ≈ Thread ch 11-14, WiFi ch 6 ≈ Thread ch 17-19, WiFi ch 11 ≈ Thread ch 22-24
+        let usedChannels = Set(devices.compactMap(\.channel))
+        let wifiOverlapChannels: Set<Int> = [11, 12, 13, 14, 17, 18, 19, 22, 23, 24]
+        let conflicting = usedChannels.intersection(wifiOverlapChannels)
+        if !conflicting.isEmpty {
+            let chList = conflicting.sorted().map { "CH\($0)" }.joined(separator: ", ")
+            score -= 5
+            issues.append(Issue(
+                message: "Thread channel overlaps 2.4 GHz WiFi (\(chList))",
+                icon: "wifi.router.fill",
+                isCritical: false
+            ))
+            tips.append("Switch to Thread channels 15, 20, or 25 to reduce WiFi interference")
+        }
+
         score = max(0, score)
 
         let (grade, color, summary): (String, Color, String)

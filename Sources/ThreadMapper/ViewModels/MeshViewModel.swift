@@ -41,7 +41,11 @@ final class MeshViewModel {
     @ObservationIgnored private var knownDeviceNames: Set<String> = []
     @ObservationIgnored private var offlineDeviceNames: Set<String> = []
     @ObservationIgnored private var pendingOfflineTasks: [String: Task<Void, Never>] = [:]
-    static let offlineGracePeriod: TimeInterval = 60
+
+    private var effectiveGracePeriod: TimeInterval {
+        let stored = UserDefaults.standard.double(forKey: "offlineGracePeriod")
+        return stored > 0 ? stored : 60
+    }
 
     init() {
         keepAliveTask = Task { [weak self] in
@@ -101,8 +105,9 @@ final class MeshViewModel {
                         if isOffline && !self.offlineDeviceNames.contains(device.name) {
                             self.offlineDeviceNames.insert(device.name)
                             let name = device.name; let room = device.room
-                            let t = Task {
-                                try? await Task.sleep(for: .seconds(Self.offlineGracePeriod))
+                            let gracePeriod = self.effectiveGracePeriod
+                        let t = Task {
+                                try? await Task.sleep(for: .seconds(gracePeriod))
                                 guard !Task.isCancelled else { return }
                                 await MainActor.run {
                                     if self.offlineDeviceNames.contains(name) {
@@ -147,6 +152,7 @@ final class MeshViewModel {
                     AppGroupStore.writeDeviceStates(
                         Dictionary(self.devices.map { ($0.name, $0.rssi != -100) }, uniquingKeysWith: { _, new in new })
                     )
+                    HealthHistoryStore.shared.record(score: health.score, grade: health.grade)
                 }
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
             }

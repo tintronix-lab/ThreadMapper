@@ -27,7 +27,8 @@ final class NotificationService {
     }
 
     func notifyDeviceOffline(_ name: String, room: String?) {
-        guard isAuthorized else { return }
+        guard isAuthorized,
+              UserDefaults.standard.object(forKey: "notifyOffline") as? Bool ?? true else { return }
         let content = UNMutableNotificationContent()
         content.title = "Thread Device Offline"
         content.body = room != nil ? "\(name) (\(room!)) is unreachable" : "\(name) is unreachable"
@@ -42,7 +43,8 @@ final class NotificationService {
     }
 
     func notifyTopologyChange(joined: [String], left: [String]) {
-        guard isAuthorized, !joined.isEmpty || !left.isEmpty else { return }
+        guard isAuthorized, !joined.isEmpty || !left.isEmpty,
+              UserDefaults.standard.object(forKey: "notifyTopology") as? Bool ?? true else { return }
         let content = UNMutableNotificationContent()
         content.title = "Thread Network Changed"
         var parts: [String] = []

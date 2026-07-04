@@ -1,9 +1,11 @@
 import SwiftUI
+import Charts
 import Observation
 
 struct DashboardView: View {
-    @Environment(MeshViewModel.self) private var viewModel
-    @Environment(DeviceStatsStore.self) private var statsStore
+    @Environment(MeshViewModel.self)       private var viewModel
+    @Environment(DeviceStatsStore.self)    private var statsStore
+    @Environment(HealthHistoryStore.self)  private var historyStore
     @State private var selectedDevice: ThreadDevice?
     @State private var selectedRoom: String? = nil
 
@@ -34,9 +36,11 @@ struct DashboardView: View {
                     tipsSection
                 }
                 trendSection
+                healthHistorySection
                 if !roomGroups.isEmpty {
                     roomCoverageSection
                 }
+                placementSection
                 deviceSection
             }
             .navigationTitle("Dashboard")
@@ -353,6 +357,94 @@ struct DashboardView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Health History Chart
+
+    @ViewBuilder
+    private var healthHistorySection: some View {
+        if historyStore.entries.count >= 2 {
+            Section {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text("Health Score — Last 24h")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        if let latest = historyStore.entries.last {
+                            Text("Now: \(latest.score)")
+                                .font(.caption2.monospacedDigit())
+                                .foregroundStyle(gradeColor(latest.grade))
+                        }
+                    }
+                    Chart(historyStore.entries) { entry in
+                        LineMark(
+                            x: .value("Time", entry.timestamp),
+                            y: .value("Score", entry.score)
+                        )
+                        .foregroundStyle(Color.accentColor)
+                        .interpolationMethod(.catmullRom)
+                        AreaMark(
+                            x: .value("Time", entry.timestamp),
+                            y: .value("Score", entry.score)
+                        )
+                        .foregroundStyle(Color.accentColor.opacity(0.1))
+                        .interpolationMethod(.catmullRom)
+                    }
+                    .chartYScale(domain: 0...100)
+                    .chartXAxis(.hidden)
+                    .chartYAxis {
+                        AxisMarks(values: [0, 50, 75, 100]) { value in
+                            AxisGridLine()
+                            AxisValueLabel {
+                                if let v = value.as(Int.self) {
+                                    Text("\(v)").font(.system(size: 7))
+                                }
+                            }
+                        }
+                    }
+                    .frame(height: 64)
+                }
+                .padding(.vertical, 4)
+            }
+        }
+    }
+
+    // MARK: - Placement Suggestions
+
+    @ViewBuilder
+    private var placementSection: some View {
+        let suggestions = buildPlacementSuggestions()
+        if !suggestions.isEmpty {
+            Section("Placement Suggestions") {
+                ForEach(suggestions, id: \.self) { suggestion in
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "arrow.up.forward.circle.fill")
+                            .foregroundStyle(.blue)
+                            .imageScale(.small)
+                            .frame(width: 18)
+                        Text(suggestion)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+    }
+
+    private func buildPlacementSuggestions() -> [String] {
+        var suggestions: [String] = []
+        for group in roomGroups {
+            let avgRSSIs = group.devices.compactMap { statsStore.stats(for: $0.name)?.avgRSSI }
+            guard !avgRSSIs.isEmpty else { continue }
+            let roomAvg = avgRSSIs.reduce(0, +) / avgRSSIs.count
+            guard roomAvg < -75 else { continue }
+            let quality = roomAvg < -85 ? "very weak" : "weak"
+            suggestions.append(
+                "Signal in \(group.room) is \(quality) (avg \(roomAvg) dBm) — consider adding a Thread router nearby"
+            )
+        }
+        return suggestions
     }
 
     // MARK: - Helpers

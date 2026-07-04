@@ -7,6 +7,7 @@ struct ContentView: View {
     @State private var surveyVM = SurveyViewModel()
     @State private var statsStore = DeviceStatsStore.shared
     @State private var notesStore = DeviceNotesStore.shared
+    @State private var historyStore = HealthHistoryStore.shared
 
     var body: some View {
         if !hasSeenOnboarding {
@@ -21,6 +22,7 @@ struct ContentView: View {
                 .environment(surveyVM)
                 .environment(statsStore)
                 .environment(notesStore)
+                .environment(historyStore)
                 .task {
                     await NotificationService.shared.requestAuthorization()
                     BackgroundRefreshHandler.schedule()
@@ -43,6 +45,9 @@ struct MainTabView: View {
 
             AppChecklistView()
                 .tabItem { Label("Checklist", systemImage: "checklist") }
+
+            SettingsView()
+                .tabItem { Label("Settings", systemImage: "gearshape") }
         }
     }
 }
