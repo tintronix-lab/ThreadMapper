@@ -21,7 +21,10 @@ struct ContentView: View {
                 .environment(surveyVM)
                 .environment(statsStore)
                 .environment(notesStore)
-                .task { await NotificationService.shared.requestAuthorization() }
+                .task {
+                    await NotificationService.shared.requestAuthorization()
+                    BackgroundRefreshHandler.schedule()
+                }
         }
     }
 }

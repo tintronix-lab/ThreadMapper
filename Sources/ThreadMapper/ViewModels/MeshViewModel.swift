@@ -40,6 +40,8 @@ final class MeshViewModel {
     @ObservationIgnored private var pollTick = 0
     @ObservationIgnored private var knownDeviceNames: Set<String> = []
     @ObservationIgnored private var offlineDeviceNames: Set<String> = []
+    @ObservationIgnored private var pendingOfflineTasks: [String: Task<Void, Never>] = [:]
+    static let offlineGracePeriod: TimeInterval = 60
 
     init() {
         keepAliveTask = Task { [weak self] in
@@ -93,17 +95,58 @@ final class MeshViewModel {
                     }
                     self.scanError = errorMsg
 
-                    // Offline / online transitions
+                    // Offline / online transitions (with grace period to avoid false positives)
                     for device in self.devices {
                         let isOffline = device.rssi == -100
                         if isOffline && !self.offlineDeviceNames.contains(device.name) {
                             self.offlineDeviceNames.insert(device.name)
-                            NotificationService.shared.notifyDeviceOffline(device.name, room: device.room)
+                            let name = device.name; let room = device.room
+                            let t = Task {
+                                try? await Task.sleep(for: .seconds(Self.offlineGracePeriod))
+                                guard !Task.isCancelled else { return }
+                                await MainActor.run {
+                                    if self.offlineDeviceNames.contains(name) {
+                                        NotificationService.shared.notifyDeviceOffline(name, room: room)
+                                    }
+                                    self.pendingOfflineTasks[name] = nil
+                                }
+                            }
+                            self.pendingOfflineTasks[device.name] = t
                         } else if !isOffline && self.offlineDeviceNames.contains(device.name) {
+                            self.pendingOfflineTasks[device.name]?.cancel()
+                            self.pendingOfflineTasks[device.name] = nil
                             self.offlineDeviceNames.remove(device.name)
                             NotificationService.shared.clearOfflineNotification(for: device.name)
                         }
                     }
+
+                    // Badge = number of confirmed offline devices
+                    let offlineCount = self.devices.filter { $0.rssi == -100 }.count
+                    NotificationService.shared.updateBadge(offlineCount)
+
+                    // Write snapshot to App Group for widget and BGTask
+                    let health = NetworkHealthScore.compute(devices: self.devices)
+                    let roomGroups = Dictionary(grouping: self.devices) { $0.room ?? "Unknown" }
+                    let roomSnaps = roomGroups.map { room, devs in
+                        WidgetSnapshot.RoomSnapshot(
+                            name: room,
+                            deviceCount: devs.count,
+                            offlineCount: devs.filter { $0.rssi == -100 }.count,
+                            weakCount: devs.filter { let r = $0.rssi ?? -65; return r < -80 && r > -100 }.count
+                        )
+                    }.sorted { $0.name < $1.name }
+                    AppGroupStore.writeSnapshot(WidgetSnapshot(
+                        grade: health.grade,
+                        score: health.score,
+                        deviceCount: self.devices.count,
+                        offlineCount: offlineCount,
+                        weakCount: self.devices.filter { let r = $0.rssi ?? -65; return r < -80 && r > -100 }.count,
+                        updatedAt: Date(),
+                        rooms: roomSnaps
+                    ))
+                    AppGroupStore.writeDeviceStates(
+                        Dictionary(uniqueKeysWithValues: self.devices.map { ($0.name, $0.rssi != -100) })
+                    )
                 }
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
             }

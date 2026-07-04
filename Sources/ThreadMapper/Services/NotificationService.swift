@@ -53,6 +53,13 @@ final class NotificationService {
         schedule(content, id: "topology-\(Int(Date().timeIntervalSince1970))")
     }
 
+    func updateBadge(_ count: Int) {
+        guard isAuthorized else { return }
+        Task {
+            try? await UNUserNotificationCenter.current().setBadgeCount(count)
+        }
+    }
+
     private func schedule(_ content: UNMutableNotificationContent, id: String) {
         let request = UNNotificationRequest(identifier: id, content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request)
