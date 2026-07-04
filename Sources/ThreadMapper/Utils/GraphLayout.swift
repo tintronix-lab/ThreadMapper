@@ -7,17 +7,21 @@ struct GraphLayout {
         size: CGSize,
         iterations: Int = 300
     ) -> [UUID: CGPoint] {
-        guard !nodes.isEmpty else { return [:] }
+        guard !nodes.isEmpty, size.width > 1, size.height > 1 else { return [:] }
+
+        let safeW = max(size.width, 100)
+        let safeH = max(size.height, 100)
+        let margin: CGFloat = min(40, safeW * 0.2, safeH * 0.2)
 
         var positions: [UUID: CGPoint] = [:]
         for node in nodes {
             positions[node.id] = CGPoint(
-                x: CGFloat.random(in: 40...(size.width - 40)),
-                y: CGFloat.random(in: 40...(size.height - 40))
+                x: CGFloat.random(in: margin...(safeW - margin)),
+                y: CGFloat.random(in: margin...(safeH - margin))
             )
         }
 
-        let area = size.width * size.height
+        let area = safeW * safeH
         let k = sqrt(area / CGFloat(nodes.count))
         var temp: CGFloat = 0.1
         let cooling: CGFloat = 0.995
@@ -59,8 +63,8 @@ struct GraphLayout {
                     let limitedX = (disp.x/mag)*min(mag, temp)
                     let limitedY = (disp.y/mag)*min(mag, temp)
                     var newPos = CGPoint(x: pos.x + limitedX, y: pos.y + limitedY)
-                    newPos.x = max(20, min(size.width - 20, newPos.x))
-                    newPos.y = max(20, min(size.height - 20, newPos.y))
+                    newPos.x = max(margin, min(safeW - margin, newPos.x))
+                    newPos.y = max(margin, min(safeH - margin, newPos.y))
                     positions[node.id] = newPos
                 }
             }
