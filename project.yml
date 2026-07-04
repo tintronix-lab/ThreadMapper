@@ -28,9 +28,10 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.tintronixlab.ThreadMapper
         INFOPLIST_FILE: Sources/ThreadMapper/Info.plist
         CODE_SIGN_ENTITLEMENTS: Sources/ThreadMapper/ThreadMapper.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
       signing:
         style: automatic
-        team: QCSX955Y7P
+        team: QCSX955Y7Pi 
     scheme:
       shared: true
 
