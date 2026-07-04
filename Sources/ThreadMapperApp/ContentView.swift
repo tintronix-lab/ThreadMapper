@@ -5,6 +5,7 @@ struct ContentView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @State private var meshVM = MeshViewModel()
     @State private var surveyVM = SurveyViewModel()
+    @State private var statsStore = DeviceStatsStore.shared
 
     var body: some View {
         if !hasSeenOnboarding {
@@ -17,6 +18,7 @@ struct ContentView: View {
             MainTabView()
                 .environment(meshVM)
                 .environment(surveyVM)
+                .environment(statsStore)
         }
     }
 }

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DeviceListRow: View {
     let device: ThreadDevice
+    @Environment(DeviceStatsStore.self) private var statsStore
 
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
@@ -30,14 +31,17 @@ struct DeviceListRow: View {
                 }
             }
             Spacer(minLength: 4)
-            if let rssi = device.rssi {
-                VStack(alignment: .trailing, spacing: 1) {
+            VStack(alignment: .trailing, spacing: 2) {
+                if let rssi = device.rssi {
                     Text("\(rssi) dBm")
                         .font(.caption2.monospacedDigit())
                         .foregroundStyle(rssi.rssiColor)
-                    Text(rssi.rssiQualityLabel)
-                        .font(.system(size: 10))
-                        .foregroundStyle(rssi.rssiColor.opacity(0.8))
+                }
+                if let stats = statsStore.stats(for: device.name) {
+                    Text(stats.healthGrade)
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .foregroundStyle(stats.healthColor)
+                        .frame(minWidth: 14, alignment: .trailing)
                 }
             }
         }

@@ -29,6 +29,7 @@ final class MeshViewModel {
 
     private let discovery = MatterDiscoveryService.shared
     @ObservationIgnored private var keepAliveTask: Task<Void, Error>?
+    @ObservationIgnored private var pollTick = 0
 
     init() {
         keepAliveTask = Task { [weak self] in
@@ -39,6 +40,16 @@ final class MeshViewModel {
                     let errorMsg = self.discovery.discoveryError?.userMessage
                     if latest != self.devices { self.devices = latest }
                     self.scanError = errorMsg
+                    // Record per-device RSSI every 5 ticks (5 seconds)
+                    self.pollTick += 1
+                    if self.pollTick % 5 == 0 {
+                        for device in latest {
+                            DeviceStatsStore.shared.record(
+                                deviceName: device.name,
+                                rssi: device.rssi ?? -65
+                            )
+                        }
+                    }
                 }
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
             }

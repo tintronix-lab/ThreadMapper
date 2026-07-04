@@ -154,6 +154,14 @@ final class SurveyViewModel {
         (rssi.rssiQualityLabel, rssi.rssiColor)
     }
 
+    func deleteSavedPoints(at offsets: IndexSet) {
+        savedPoints.remove(atOffsets: offsets)
+    }
+
+    func deleteAllSavedPoints() {
+        savedPoints.removeAll()
+    }
+
     func dedupedSavedPoints() -> [SurveyPoint] {
         var seenIDs: Set<String> = []
         return savedPoints.filter { point in
