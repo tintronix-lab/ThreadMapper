@@ -1,88 +1,163 @@
 import SwiftUI
+import MapKit
 import CoreLocation
-import Observation
 
 struct SurveyMapView: View {
     let points: [SurveyPoint]
+    var highlighted: UUID? = nil
+
     @State private var selectedID: UUID?
+    @State private var cameraPosition: MapCameraPosition
+
+    init(points: [SurveyPoint], highlighted: UUID? = nil) {
+        self.points = points
+        self.highlighted = highlighted
+        self._selectedID = State(initialValue: highlighted)
+        self._cameraPosition = State(initialValue: Self.initialCamera(for: points))
+    }
 
     var body: some View {
-        GeometryReader { geo in
-            let size = geo.size
-            Canvas { ctx, _ in
-                guard let effective = effectiveBounds else { return }
-                for point in points {
-                    let x = CGFloat((point.coordinate.longitude - effective.minLng) / max(effective.spanLng, 1e-9)) * size.width
-                    let y = CGFloat(1.0 - (point.coordinate.latitude - effective.minLat) / max(effective.spanLat, 1e-9)) * size.height
-                    let rawRSSI = point.meanRSSI + 100
-                    let boundedRSSI = max(0, min(rawRSSI, 50))
-                    let r: CGFloat = 6 + min(CGFloat(boundedRSSI) * 0.35, 10)
-                    ctx.fill(
-                        Path(ellipseIn: CGRect(x: x - r, y: y - r, width: r * 2, height: r * 2)),
-                        with: .color(color(for: point.meanRSSI))
-                    )
-                    ctx.stroke(
-                        Path(ellipseIn: CGRect(x: x - r - 2, y: y - r - 2, width: (r + 2) * 2, height: (r + 2) * 2)),
-                        with: .color(.black.opacity(0.12)),
-                        style: .init(lineWidth: 1)
-                    )
-                    if selectedID == point.id {
-                        ctx.stroke(
-                            Path(ellipseIn: CGRect(x: x - r - 6, y: y - r - 6, width: (r + 6) * 2, height: (r + 6) * 2)),
-                            with: .color(.accentColor),
-                            style: .init(lineWidth: 2.5, lineCap: .round)
-                        )
-                    }
-                }
-            }
-            .background(Color(white: 0.96).cornerRadius(10))
-            .onTapGesture { location in
-                guard let effective = effectiveBounds else { return }
-                for point in points {
-                    let x = CGFloat((point.coordinate.longitude - effective.minLng) / max(effective.spanLng, 1e-9)) * size.width
-                    let y = CGFloat(1.0 - (point.coordinate.latitude - effective.minLat) / max(effective.spanLat, 1e-9)) * size.height
-                    if abs(location.x - x) < 16 && abs(location.y - y) < 16 {
-                        selectedID = point.id
-                        return
-                    }
-                }
-                if selectedID != nil { selectedID = nil }
-            }
-            .overlay(alignment: .topTrailing) {
-                if let point = points.first(where: { $0.id == selectedID }) {
-                    VStack(alignment: .trailing, spacing: 4) {
-                        Text(point.timestamp, style: .date)
-                        Text(String(format: "%.5f, %.5f", point.coordinate.latitude, point.coordinate.longitude))
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                        Text("RSSI \(String(format: "%.1f", point.meanRSSI)) dBm")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding(10)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-                    .padding(10)
+        Map(position: $cameraPosition) {
+            ForEach(points) { point in
+                Annotation("", coordinate: point.coordinate) {
+                    annotationDot(for: point)
                 }
             }
         }
+        .mapStyle(.standard(elevation: .realistic))
         .navigationTitle("Survey Map")
+        .navigationBarTitleDisplayMode(.inline)
+        .overlay(alignment: .bottomLeading) {
+            legend
+        }
+        .safeAreaInset(edge: .bottom) {
+            if let point = points.first(where: { $0.id == selectedID }) {
+                detailCard(point)
+            }
+        }
     }
 
-    private var effectiveBounds: (minLat: Double, maxLat: Double, minLng: Double, maxLng: Double, spanLat: Double, spanLng: Double)? {
-        guard !points.isEmpty else { return nil }
-        let lats = points.map { $0.coordinate.latitude }
-        let lngs = points.map { $0.coordinate.longitude }
-        let minLat = lats.min() ?? 0
-        let maxLat = lats.max() ?? 0
-        let minLng = lngs.min() ?? 0
-        let maxLng = lngs.max() ?? 0
-        return (minLat, maxLat, minLng, maxLng, max(maxLat - minLat, 1e-9), max(maxLng - minLng, 1e-9))
+    // MARK: - Annotation
+
+    @ViewBuilder
+    private func annotationDot(for point: SurveyPoint) -> some View {
+        let color = rssiColor(for: point.meanRSSI)
+        let selected = point.id == selectedID
+        ZStack {
+            Circle()
+                .fill(color.opacity(0.2))
+                .frame(width: selected ? 44 : 28)
+            Circle()
+                .fill(color)
+                .frame(width: selected ? 20 : 12)
+            if selected {
+                Circle()
+                    .stroke(color, lineWidth: 2.5)
+                    .frame(width: 44)
+            }
+        }
+        .animation(.spring(duration: 0.2), value: selected)
+        .onTapGesture {
+            selectedID = selectedID == point.id ? nil : point.id
+        }
     }
 
-    private func color(for rssi: Double) -> Color {
+    // MARK: - Detail card
+
+    @ViewBuilder
+    private func detailCard(_ point: SurveyPoint) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(point.timestamp, style: .date)
+                        .font(.subheadline.weight(.semibold))
+                    Text(point.timestamp, style: .time)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button {
+                    selectedID = nil
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            HStack(spacing: 14) {
+                Label(
+                    String(format: "%.1f dBm", point.meanRSSI),
+                    systemImage: "wifi"
+                )
+                .foregroundStyle(rssiColor(for: point.meanRSSI))
+
+                Label("\(point.sampleCount) samples", systemImage: "waveform.path")
+                    .foregroundStyle(.secondary)
+
+                let weakCount = point.weakDevices.isEmpty ? 0
+                    : point.weakDevices.split(separator: ",").count
+                if weakCount > 0 {
+                    Label("\(weakCount) weak", systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+                }
+            }
+            .font(.caption)
+
+            Text(String(format: "%.5f, %.5f",
+                        point.coordinate.latitude, point.coordinate.longitude))
+                .font(.caption2.monospacedDigit())
+                .foregroundStyle(.tertiary)
+        }
+        .padding()
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .padding(.horizontal)
+        .padding(.bottom, 6)
+    }
+
+    // MARK: - Legend
+
+    private var legend: some View {
+        HStack(spacing: 8) {
+            ForEach([
+                ("≥ −50", Color.green),
+                ("−65", Color.yellow),
+                ("−80", Color.orange),
+                ("< −80", Color.red),
+            ], id: \.0) { label, color in
+                HStack(spacing: 3) {
+                    Circle().fill(color).frame(width: 8, height: 8)
+                    Text(label).font(.system(size: 9))
+                }
+            }
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .padding(.leading, 12)
+        .padding(.bottom, selectedID == nil ? 12 : 130)
+        .animation(.easeInOut(duration: 0.2), value: selectedID)
+    }
+
+    // MARK: - Helpers
+
+    private func rssiColor(for rssi: Double) -> Color {
         if rssi < -80 { return .red }
         if rssi < -65 { return .orange }
         if rssi < -50 { return .yellow }
         return .green
+    }
+
+    private static func initialCamera(for points: [SurveyPoint]) -> MapCameraPosition {
+        guard !points.isEmpty else { return .automatic }
+        let lats = points.map(\.latitude)
+        let lngs = points.map(\.longitude)
+        let centerLat = (lats.min()! + lats.max()!) / 2
+        let centerLng = (lngs.min()! + lngs.max()!) / 2
+        let spanLat = max((lats.max()! - lats.min()!) * 2.0, 0.004)
+        let spanLng = max((lngs.max()! - lngs.min()!) * 2.0, 0.004)
+        return .region(MKCoordinateRegion(
+            center: CLLocationCoordinate2D(latitude: centerLat, longitude: centerLng),
+            span: MKCoordinateSpan(latitudeDelta: spanLat, longitudeDelta: spanLng)
+        ))
     }
 }

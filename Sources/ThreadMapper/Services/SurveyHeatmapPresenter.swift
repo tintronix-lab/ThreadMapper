@@ -16,7 +16,6 @@ struct SurveyHeatmapPresenter {
         guard !points.isEmpty else { return [] }
 
         let bounds = boundingBox(for: points)
-        guard bounds.size > 0 else { return [] }
 
         var cells: [Cell] = []
         var lat = bounds.minLat
@@ -64,8 +63,16 @@ struct SurveyHeatmapPresenter {
         let maxLat = coords.map(\.latitude).max() ?? 0
         let minLng = coords.map(\.longitude).min() ?? 0
         let maxLng = coords.map(\.longitude).max() ?? 0
-        let size = max((maxLat - minLat), (maxLng - minLng))
-        return (minLat, maxLat, minLng, maxLng, size)
+        // Add ~60m minimum spread so single-location surveys still produce heatmap cells
+        let minDelta = 0.0006
+        let padLat = max((maxLat - minLat) < minDelta ? minDelta / 2 : 0, 0)
+        let padLng = max((maxLng - minLng) < minDelta ? minDelta / 2 : 0, 0)
+        let pMinLat = minLat - padLat
+        let pMaxLat = maxLat + padLat
+        let pMinLng = minLng - padLng
+        let pMaxLng = maxLng + padLng
+        let size = max(pMaxLat - pMinLat, pMaxLng - pMinLng, minDelta)
+        return (pMinLat, pMaxLat, pMinLng, pMaxLng, size)
     }
 
     private static func scoreForMeanRSSI(_ mean: Double) -> Double {

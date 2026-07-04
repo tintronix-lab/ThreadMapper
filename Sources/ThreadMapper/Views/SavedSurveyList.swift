@@ -53,7 +53,7 @@ struct SavedSurveyList: View {
         }
         .sheet(item: $selectedPoint) { point in
             NavigationStack {
-                SurveyMapView(points: [point])
+                SurveyMapView(points: points, highlighted: point.id)
                     .toolbar {
                         ToolbarItem(placement: .primaryAction) {
                             Button("Done") { selectedPoint = nil }
