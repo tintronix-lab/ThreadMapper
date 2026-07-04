@@ -344,6 +344,9 @@ extern "C" {
 #if __has_warning("-Watimport-in-framework-header")
 #pragma clang diagnostic ignored "-Watimport-in-framework-header"
 #endif
+@import CoreLocation;
+@import Foundation;
+@import ObjectiveC;
 #endif
 
 #endif // defined(__OBJC__)
@@ -365,6 +368,18 @@ extern "C" {
 #endif
 
 #if defined(__OBJC__)
+
+SWIFT_CLASS("_TtC12ThreadMapper15LocationTracker")
+@interface LocationTracker : NSObject
+- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
+@class CLLocationManager;
+@class CLLocation;
+@interface LocationTracker (SWIFT_EXTENSION(ThreadMapper)) <CLLocationManagerDelegate>
+- (void)locationManager:(CLLocationManager * _Nonnull)manager didUpdateLocations:(NSArray<CLLocation *> * _Nonnull)locations;
+- (void)locationManagerDidChangeAuthorization:(CLLocationManager * _Nonnull)manager;
+@end
 
 #endif // defined(__OBJC__)
 #if __has_attribute(external_source_symbol)

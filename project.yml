@@ -10,7 +10,7 @@ settings:
   base:
     SWIFT_VERSION: "5"
     CODE_SIGN_STYLE: "Automatic"
-    DEVELOPMENT_TEAM: YOUR_TEAM_ID
+    DEVELOPMENT_TEAM: QCSX955Y7P
 
 configs:
   Debug: debug
@@ -30,7 +30,7 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Sources/ThreadMapper/ThreadMapper.entitlements
       signing:
         style: automatic
-        team: YOUR_TEAM_ID
+        team: QCSX955Y7P
     scheme:
       shared: true
 

@@ -80,6 +80,11 @@
     "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.5\/Foundation.swiftmodule\/arm64e-apple-ios.swiftmodule"
   },
   {
+    "isFramework" : true,
+    "moduleName" : "HomeKit",
+    "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.5\/HomeKit.swiftmodule\/arm64e-apple-ios.swiftmodule"
+  },
+  {
     "isFramework" : false,
     "moduleName" : "Metal",
     "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.5\/Metal.swiftmodule\/arm64e-apple-ios.swiftmodule"
@@ -196,406 +201,413 @@
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/Accessibility.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/Accessibility-1IA394L0CD3VUSEYED7VLU8V5.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/Accessibility-4HZCUX7FQ52ULXOJPGV2Y1SV5.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Accessibility"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/CFNetwork.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/CFNetwork-5JPWUTXCM33NKZRV59CPG724J.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/CFNetwork-CDZNQNAAHHTDMCR638ERGRUO7.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CFNetwork"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/CoreData.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/CoreData-H52ZDC6WFG4AVZTFUKX6YMHL.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/CoreData-SNBV0A43O74PPUXUKIRM24DF.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CoreData"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/CoreFoundation.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/CoreFoundation-99R672VIYDD0R24QG3C1EMLX9.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/CoreFoundation-7RME9XOYYJXRMXRP8IF38DBJ5.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CoreFoundation"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/CoreGraphics.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/CoreGraphics-A4KODSQOZFR8MQJ87WH7QRY0Z.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/CoreGraphics-77940RZ1TNTI948GGSIEM0QJN.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CoreGraphics"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/CoreImage.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/CoreImage-6W7W0YT2B6DNFMJXC8CEAOMPK.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/CoreImage-4AYHJBB5JRAVC8BSEM2DAKCK4.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CoreImage"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/CoreLocation.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/CoreLocation-EYQMN8DJQVWEWAXKC9QOB3JKJ.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/CoreLocation-DFTS90A81G3OYK2PXBWK52JQP.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CoreLocation"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/CoreText.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/CoreText-1K30JD7C16EPMC0PP57YUPC1F.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/CoreText-EIGFNH46Y1JBLTO53KG9NJ1SN.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CoreText"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/CoreTransferable.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/CoreTransferable-9ZIWFEBEBBSFTQ0ZNIHF20HA.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/CoreTransferable-8BX56ILXI44W97JCESIO6FHFG.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CoreTransferable"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/CoreVideo.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/CoreVideo-BLRC2VRZHW0U4NQD1QLURAQAR.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/CoreVideo-5LTVG2KA9DT3WPWWILVKX9EYI.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CoreVideo"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/include\/Darwin.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/Darwin-1IJ1C9RCU8Z9JVXQZMIN83PQ3.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/Darwin-AS9XGYFBRIYIAZRGAC9XVV6B9.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Darwin"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/DataDetection.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/DataDetection-62ODDNTZZDX8IX4TKBJ1NGDCG.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/DataDetection-8RZGW06PZQA5N9JS1Q6Q3P6N1.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "DataDetection"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/DeveloperToolsSupport.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/DeveloperToolsSupport-6FZ7VGQW581SABMMOUW1S3BZB.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/DeveloperToolsSupport-5XAZN35S5GBXEMFPLLJEY8RMV.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "DeveloperToolsSupport"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/include\/dispatch.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/Dispatch-5829LLB6EZFJO9XNXRK0NZJLY.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/Dispatch-ACHQ3KZT4JQBMURSC93AN87GP.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Dispatch"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/FileProvider.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/FileProvider-3IYE5QALF3N6OEG0FT2HE840W.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/FileProvider-3BU72VDA2TTU2UPZEOU3DN81M.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "FileProvider"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/Foundation.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/Foundation-7Z9FFF31ZCQBD2VVY6AT77TBM.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/Foundation-A7W31RTLAZZ9VD3CHQ8Y1FFAR.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Foundation"
   },
   {
+    "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/HomeKit.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/HomeKit-6WDQTD4H45GISYJA8RJCJZ66O.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "HomeKit"
+  },
+  {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/IOSurface.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/IOSurface-DP4ELUAPC2ZXMRELAX0EE94E7.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/IOSurface-5OJCCBNZIXVEXHW1FCM1MICGI.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "IOSurface"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/ImageIO.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/ImageIO-1D1KL3UGUNJON08FQP6TOSV2S.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/ImageIO-B88OT9NZ6O9AUTEXLCURGR9HZ.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "ImageIO"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/include\/DarwinBasic.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/MachO-A7OKN31RBZB8B72ZDHNTQLBZ4.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/MachO-AAER8HEKQRC3DNAYMNENH131U.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "MachO"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/Metal.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/Metal-ENZN0UM2S2D93UTW9M92IN44D.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/Metal-4YX4K1N4IE3NTLWXMD9Y2LE7E.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Metal"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/OSLog.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/OSLog-D26A7BZC67TZ8LLTJIW0QRXE0.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/OSLog-C63II34UPRXMFAOWR3SEP84I7.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "OSLog"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/include\/ObjectiveC.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/ObjectiveC-5NYJUKZD314YCLR55XIWGXA2B.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/ObjectiveC-AKHVM4UFTPIFGSAHJMFNR9TE2.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "ObjectiveC"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/OpenGLES.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/OpenGLES-E8P7ZV8VF6FT7ZRUQPIJYZA29.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/OpenGLES-BV9OCQPO9YHRGZPOI8SSWUQEJ.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "OpenGLES"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/QuartzCore.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/QuartzCore-NK8CYOXH9RRYGDGNZ304D08T.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/QuartzCore-BLSCDV71WO5LACUMSZOVLE4P8.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "QuartzCore"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/Security.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/Security-2OOZPEZAXU07B04POTJ8XYD97.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/Security-F4UORAWN7O1UZHOI6NKBE6C1K.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Security"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/include\/Spatial\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/Spatial-AOYM05EC04X8MCVVY0B5LP188.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/Spatial-8JDBLELZFEKI5EMIT0UE0UHZC.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Spatial"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/lib\/swift\/shims\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/SwiftShims-MSXR4D8ZXS93AVZE41B8XR8L.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/SwiftShims-9UW4ZOP7LPAAERLT2DCHN8S4B.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "SwiftShims"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/SwiftUI.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/SwiftUI-4B2O2JHHV50XVP2J8HBTYCYBT.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/SwiftUI-F3TM0HR16OY7IX3WOLZYWCCBR.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "SwiftUI"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/SwiftUICore.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/SwiftUICore-EWOCG8WHOC5PO74EMFUIUKE5H.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/SwiftUICore-65HMFL60EPMI7QC8YFEI7JTGB.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "SwiftUICore"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/Symbols.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/Symbols-2JOBKYXOGPBR46YCCF9465H9G.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/Symbols-EJC8F60K1H4H4E54UZ8EBYBXP.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Symbols"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/UIKit.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/UIKit-68UZVLN4OPPQL1UCM466NYR3D.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/UIKit-BJ2G870DZ4NI73J6WZOKAFOH2.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "UIKit"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/SubFrameworks\/UIUtilities.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/UIUtilities-9E019OJT1BT6AUM002TD6BSK0.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/UIUtilities-AJI4V3AT53O3UPHAUGM8STSWW.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "UIUtilities"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/UniformTypeIdentifiers.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/UniformTypeIdentifiers-CC86PK1861AHKRVN5K7JNCVP0.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/UniformTypeIdentifiers-7ADC9A56H5ZHDUUEF0603X7NU.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "UniformTypeIdentifiers"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/UserNotifications.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/UserNotifications-104TT9CFJD4LQ29OV65X4Z22I.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/UserNotifications-3URQYJTH94BY9ZNDPSR0YZTGP.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "UserNotifications"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/include\/xpc.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/XPC-8BOUPEBH3P8AI6V7XD49VYK69.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/XPC-4U07V3PXENJH878TD576RNLUV.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "XPC"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/include\/DarwinFoundation1.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_AvailabilityInternal-F6RZI0LO6CS4J8HQ50ET3GV7.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_AvailabilityInternal-AQOFNC1UF90QM8ILWNMXRDR2V.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_AvailabilityInternal"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_float-1SAUXF1CR3HJL81FK9NBE92GN.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_float-1QL3Q5BZ96LARKIS0B3ZEALPH.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_float"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_intrinsics-D5ZV2TIICPU4IYW7NM30L861S.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_intrinsics-BVO1G2OJHVCRDTWBP7N8JU07T.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_intrinsics"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_inttypes-D44911FSIWJKQ3M8QSMO442AU.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_inttypes-1L8LSUTEAL9SP90WMMFKXHHQO.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_inttypes"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_limits-8O2172SR632JOUFDFD6OUNYJ0.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_limits-6NVHY50RNIM7KARS10BNAB6Z0.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_limits"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_stdarg-44U05695XPME0EETYOECC62HQ.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_stdarg-4X4L5ZS3AEZVHWGGDJMU12FXK.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_stdarg"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_stdatomic-1IILTAU2UZ1NHK6I3PMOL5ECK.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_stdatomic-4B9PI0WPGO3TMMQ8LY4D5Z9U2.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_stdatomic"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_stdbool-F04EUFRVZ4DDHHBRSLI11J1UC.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_stdbool-1G2C6G6TJDJCG6G7UVTHXVAKW.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_stdbool"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_stddef-ALMOGPIQ6BLURTBYCHD7NR7C6.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_stddef-9IR56IELQLYR8245L3IYVA2AW.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_stddef"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_stdint-8OXSBO69VNGF6IYPEZAREJZ3A.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_stdint-2NVL7SU8G2WDNACMUQJOHY5JB.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_stdint"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_tgmath-5RJLLRXRRVD35XP7GBMLT68MW.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_Builtin_tgmath-BQM9O3YH03HA6WUR9I05XG1G0.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_tgmath"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/include\/DarwinFoundation1.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_DarwinFoundation1-AUDHNR138F2EU3Z3OTX0XITZJ.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_DarwinFoundation1-OZ3BJYDZ8DGBTEK123XSVMR0.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_DarwinFoundation1"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/include\/DarwinFoundation2.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_DarwinFoundation2-6PJLS0NMM1HRZ7HXSF9AY95P9.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_DarwinFoundation2-E0CK56EZTT503TJ8C0K5ZON9D.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_DarwinFoundation2"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/include\/DarwinFoundation3.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_DarwinFoundation3-DYEXX2Q0LATGSNYWHPPTV7KC1.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_DarwinFoundation3-9EVZMIXAY3NOCHYFGLQUZYE9Y.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_DarwinFoundation3"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/_LocationEssentials.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_LocationEssentials-6IWJVEAYVQOURK48JAULE1ZIQ.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_LocationEssentials-909NI2KOIYZA4O2TFRRF8DEF1.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_LocationEssentials"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/lib\/swift\/shims\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_SwiftConcurrencyShims-8HU3Z5SLVB8QPD9S08SO69AQD.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/_SwiftConcurrencyShims-DSTA6HGJGO5ZNZ971T0X2TTT3.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_SwiftConcurrencyShims"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/include\/os.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/os-EDD8SFKXCTF1QV1A5IQOBM5FX.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/os-DCYN0HSZWXVWX82QJPHP9J8M.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "os"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/include\/os.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/os_object-29QJ5XNEATJYSK17171JYO7YJ.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/os_object-715YYIGQYFF1C90GTUY5CLWDK.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "os_object"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/include\/os.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/os_workgroup-AQ8T4XGVTYVVRHI08CYFOPBJ3.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/os_workgroup-2ZZ58TIK79D1U4RB9H59E49H4.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "os_workgroup"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/ptrauth-1KSRCIZD0GXY35O1S3KP11L3N.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/ptrauth-8A3SKZ0WJNIACML6WY6J9DCMU.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "ptrauth"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/21\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/ptrcheck-3BR4GGRHY10D8EKMYLLI83HOR.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/ptrcheck-BNLTQ60AKCACG56JU0IH908SB.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "ptrcheck"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/include\/simd\/module.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/simd-EWAFAIOJGOEDYZFZ2AG7SRTOV.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/simd-4QAAUQFKV55ZOHJH61CDSI596.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "simd"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/include\/DarwinFoundation2.modulemap",
-    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/sys_types-BCF30BWFJNZ17U4WJ507L3OKZ.pcm",
+    "clangModulePath" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/build\/DerivedDataDevice\/ModuleCache.noindex\/sys_types-8LLT7UH2CXHH2T53TYASCNNMT.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "sys_types"

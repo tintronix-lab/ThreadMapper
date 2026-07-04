@@ -4,6 +4,8 @@
 <dict>
 	<key>application-identifier</key>
 	<string>QCSX955Y7P.com.tintronixlab.ThreadMapper</string>
+	<key>com.apple.developer.homekit</key>
+	<true/>
 	<key>com.apple.developer.team-identifier</key>
 	<string>QCSX955Y7P</string>
 	<key>get-task-allow</key>
