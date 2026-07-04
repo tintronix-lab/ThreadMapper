@@ -10,6 +10,7 @@ struct SurveyWalkView: View {
     @State private var resolutionMeters: Double = 12
     @State private var heatmapPoints: [SurveyHeatmapPresenter.Cell] = []
     @State private var sampleTask: Task<Void, Never>?
+    @State private var lastUpdateTime: Date?
 
     var body: some View {
         NavigationStack {
@@ -21,11 +22,11 @@ struct SurveyWalkView: View {
             }
             .navigationTitle("Survey Walk")
             .navigationBarTitleDisplayMode(.inline)
-            .onAppear { refreshHeatmap() }
-            .onDisappear { stopSampling() }
-            .onChange(of: viewModel.isRecording) { _, recording in
-                if recording { startSampling() } else { stopSampling() }
+            .onAppear {
+                refreshHeatmap()
+                startSampling()  // always run live display, sampling only records when isRecording
             }
+            .onDisappear { stopSampling() }
         }
     }
 
@@ -84,48 +85,81 @@ struct SurveyWalkView: View {
 
     @ViewBuilder
     private var currentReadingSection: some View {
-        Section("Current Reading") {
-            // Location status
-            HStack(spacing: 8) {
-                Image(systemName: "location.fill")
-                    .foregroundStyle(.blue)
-                    .imageScale(.small)
-                Text(viewModel.locationStatusLabel)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
-
-            // RSSI reading
-            if let rssi = viewModel.currentRSSI {
-                let q = viewModel.signalQuality(for: rssi)
-                HStack {
-                    Text("\(rssi) dBm")
-                        .font(.system(.subheadline, design: .monospaced).weight(.medium))
-                    Spacer()
-                    Text(q.label)
-                        .font(.caption2)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(q.color.opacity(0.15), in: Capsule())
-                        .foregroundStyle(q.color)
-                }
-            } else {
-                Text(viewModel.isRecording
-                     ? (meshVM.devices.isEmpty ? "No Thread devices — connect via HomeKit first" : "Waiting for first sample…")
-                     : "Tap Start Survey to begin")
+        Section {
+            if meshVM.devices.isEmpty {
+                Label("No Thread devices — connect via HomeKit first", systemImage: "antenna.radiowaves.left.and.right.slash")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+            } else {
+                ForEach(meshVM.devices) { device in
+                    let rssi = device.rssi
+                    let q = viewModel.signalQuality(for: rssi ?? -65)
+                    HStack(spacing: 10) {
+                        Image(systemName: rssi == nil ? "wifi.slash" : "wifi")
+                            .foregroundStyle(rssi == nil ? Color.secondary : q.color)
+                            .imageScale(.small)
+                            .frame(width: 18)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(device.name)
+                                .font(.caption.weight(.medium))
+                                .lineLimit(1)
+                            if let room = device.room {
+                                Text(room)
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
+                            }
+                        }
+                        Spacer()
+                        if let rssi {
+                            VStack(alignment: .trailing, spacing: 1) {
+                                Text("\(rssi) dBm")
+                                    .font(.caption2.monospacedDigit().weight(.medium))
+                                    .foregroundStyle(q.color)
+                                Text(q.label)
+                                    .font(.system(size: 9))
+                                    .foregroundStyle(q.color.opacity(0.8))
+                            }
+                        } else {
+                            Text("Measuring…")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 1)
+                }
+
+                HStack(spacing: 6) {
+                    Image(systemName: "location.fill")
+                        .foregroundStyle(.blue)
+                        .imageScale(.small)
+                    Text(viewModel.locationStatusLabel)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    if let t = lastUpdateTime {
+                        Text("Updated \(t, style: .relative) ago")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
             }
 
-            // Sample & weak counts
             if viewModel.isRecording || viewModel.sessionSampleCount > 0 {
                 HStack(spacing: 16) {
-                    Label("\(viewModel.sessionSampleCount)", systemImage: "waveform.path")
+                    Label("\(viewModel.sessionSampleCount) samples", systemImage: "waveform.path")
                     Label("\(viewModel.sessionWeakCount) weak", systemImage: "exclamationmark.triangle.fill")
                         .foregroundStyle(viewModel.sessionWeakCount > 0 ? .orange : .secondary)
                 }
                 .font(.caption2)
                 .foregroundStyle(.secondary)
+            }
+        } header: {
+            HStack {
+                Text("Live Signal")
+                Spacer()
+                Text("Via HomeKit latency")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
             }
         }
     }
@@ -248,10 +282,13 @@ struct SurveyWalkView: View {
         sampleTask?.cancel()
         sampleTask = Task {
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(3))
+                try? await Task.sleep(for: .seconds(5))
                 guard !Task.isCancelled else { break }
                 await MainActor.run {
-                    viewModel.recordCurrentDevices(meshVM.devices)
+                    lastUpdateTime = Date()
+                    if viewModel.isRecording {
+                        viewModel.recordCurrentDevices(meshVM.devices)
+                    }
                 }
             }
         }

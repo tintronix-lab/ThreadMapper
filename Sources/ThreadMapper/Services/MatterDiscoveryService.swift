@@ -37,6 +37,7 @@ final class MatterDiscoveryService {
 
     @ObservationIgnored private let homeTracker = HomeTracker()
     @ObservationIgnored private var deviceIDCache: [String: UUID] = [:]
+    @ObservationIgnored private var accessoryCache: [UUID: HMAccessory] = [:]
 
     private init() {
         homeTracker.onHomesUpdated = { [weak self] homes in
@@ -70,6 +71,7 @@ final class MatterDiscoveryService {
                 let key = accessory.uniqueIdentifier.uuidString
                 let id = cachedID(for: key)
                 let isBridge = accessory.category.categoryType == HMAccessoryCategoryTypeBridge
+                accessoryCache[accessory.uniqueIdentifier] = accessory
                 return ThreadDevice(
                     id: id,
                     name: accessory.name,
@@ -82,11 +84,50 @@ final class MatterDiscoveryService {
                     isSleepyEndDevice: !isBridge,
                     parentNodeID: nil,
                     channel: nil,
-                    rssi: nil,
+                    rssi: accessory.isReachable ? nil : -100,
                     batteryPercentage: batteryLevel(for: accessory),
                     room: accessory.room?.name ?? home.name
                 )
             }
+        }
+    }
+
+    /// Reads one characteristic per accessory and maps response latency → estimated RSSI.
+    /// Returns a dict keyed by accessory uniqueIdentifier.
+    func measureSignalQualities() async -> [UUID: Int] {
+        let snapshot = accessoryCache
+        return await withTaskGroup(of: (UUID, Int).self, returning: [UUID: Int].self) { group in
+            for (uuid, accessory) in snapshot {
+                group.addTask {
+                    let rssi = await Self.latencyRSSI(for: accessory)
+                    return (uuid, rssi)
+                }
+            }
+            var out: [UUID: Int] = [:]
+            for await (uuid, rssi) in group { out[uuid] = rssi }
+            return out
+        }
+    }
+
+    private static func latencyRSSI(for accessory: HMAccessory) async -> Int {
+        guard accessory.isReachable else { return -100 }
+        guard let char = accessory.services
+            .flatMap(\.characteristics)
+            .first(where: { $0.properties.contains(HMCharacteristicPropertyReadable) })
+        else { return -65 }
+
+        let start = Date()
+        let success = await withCheckedContinuation { (cont: CheckedContinuation<Bool, Never>) in
+            char.readValue { err in cont.resume(returning: err == nil) }
+        }
+        guard success else { return -92 }
+        let ms = Date().timeIntervalSince(start) * 1000
+        switch ms {
+        case ..<60:   return -55
+        case 60..<150: return -65
+        case 150..<350: return -75
+        case 350..<800: return -85
+        default:      return -92
         }
     }
 

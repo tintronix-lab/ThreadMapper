@@ -35,21 +35,34 @@ final class MeshViewModel {
         keepAliveTask = Task { [weak self] in
             while !Task.isCancelled {
                 guard let self else { break }
+
+                // Every 5 seconds: measure latency-based signal quality for all devices
+                self.pollTick += 1
+                if self.pollTick % 5 == 0 {
+                    let qualities = await self.discovery.measureSignalQualities()
+                    await MainActor.run {
+                        for device in self.devices {
+                            if let q = qualities[device.uniqueIdentifier] {
+                                device.rssi = q
+                                DeviceStatsStore.shared.record(deviceName: device.name, rssi: q)
+                            }
+                        }
+                    }
+                }
+
                 await MainActor.run {
                     let latest = self.discovery.devices
                     let errorMsg = self.discovery.discoveryError?.userMessage
-                    if latest != self.devices { self.devices = latest }
-                    self.scanError = errorMsg
-                    // Record per-device RSSI every 5 ticks (5 seconds)
-                    self.pollTick += 1
-                    if self.pollTick % 5 == 0 {
+                    if latest != self.devices {
+                        // Preserve measured rssi values when HomeKit refreshes the list
+                        let existingRSSI = Dictionary(uniqueKeysWithValues:
+                            self.devices.compactMap { d in d.rssi.map { (d.uniqueIdentifier, $0) } })
                         for device in latest {
-                            DeviceStatsStore.shared.record(
-                                deviceName: device.name,
-                                rssi: device.rssi ?? -65
-                            )
+                            device.rssi = existingRSSI[device.uniqueIdentifier] ?? device.rssi
                         }
+                        self.devices = latest
                     }
+                    self.scanError = errorMsg
                 }
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
             }
