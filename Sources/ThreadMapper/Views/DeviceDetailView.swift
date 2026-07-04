@@ -41,6 +41,7 @@ struct DeviceDetailView: View {
                 }
             }
             .navigationTitle(device.name)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .primaryAction) { Button("Done") { dismiss() } } }
         }
     }

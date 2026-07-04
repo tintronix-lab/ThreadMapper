@@ -98,19 +98,19 @@ struct MeshGraphView: View {
     }
 
     @ViewBuilder private var emptyState: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 6) {
             Image(systemName: "network.slash")
-                .font(.system(size: 36))
+                .font(.system(size: 26))
                 .foregroundStyle(.secondary)
             Text("No Thread devices")
-                .font(.headline)
+                .font(.subheadline)
                 .foregroundStyle(.secondary)
             Text("Add Thread accessories in the Home app,\nthen tap Scan.")
-                .font(.caption)
+                .font(.caption2)
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
         }
-        .padding(24)
+        .padding(16)
     }
 
     private func makeSelectedHUD() -> AnyView? {
@@ -118,20 +118,20 @@ struct MeshGraphView: View {
               let node = nodes.first(where: { $0.id == selectedNodeID }),
               let device = devices.first(where: { $0.id == node.deviceID }) else { return nil }
         return AnyView(
-            VStack(alignment: .leading, spacing: 8) {
-                HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
                     Circle()
                         .fill(node.kind == .borderRouter ? Color.blue : device.rssi.rssiColor)
-                        .frame(width: 12, height: 12)
+                        .frame(width: 8, height: 8)
                     Text(device.name)
-                        .font(.subheadline.weight(.semibold))
+                        .font(.caption.weight(.semibold))
                         .lineLimit(1)
                     Spacer()
                     Text(node.kind.rawValue)
-                        .font(.caption2)
+                        .font(.system(size: 10))
                         .foregroundStyle(.secondary)
                 }
-                HStack(spacing: 16) {
+                HStack(spacing: 12) {
                     if let rssi = device.rssi {
                         Label("\(rssi) dBm", systemImage: rssi.rssiSystemIcon)
                             .foregroundStyle(rssi.rssiColor)
@@ -146,40 +146,41 @@ struct MeshGraphView: View {
                         Label("CH \(ch)", systemImage: "wave.3.right")
                     }
                 }
-                .font(.caption2)
+                .font(.system(size: 10))
                 .foregroundStyle(.secondary)
             }
-            .padding(12)
-            .frame(maxWidth: .infinity, minHeight: 56)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity, minHeight: 40)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
         )
     }
 
     @ViewBuilder private var legendView: some View {
-        VStack(alignment: .leading, spacing: 5) {
+        VStack(alignment: .leading, spacing: 3) {
             legendItem(color: .blue,   label: "Border Router")
-            legendItem(color: .green,  label: "Strong signal")
-            legendItem(color: .orange, label: "Fair signal")
-            legendItem(color: .red,    label: "Weak signal")
+            legendItem(color: .green,  label: "Strong")
+            legendItem(color: .orange, label: "Fair")
+            legendItem(color: .red,    label: "Weak")
         }
-        .padding(10)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .padding(7)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
     private func fitResetButton(size: CGSize) -> some View {
         Button { fitToView(size: size) } label: {
             Image(systemName: "arrow.up.left.and.arrow.down.right")
-                .font(.caption2)
-                .padding(8)
+                .font(.system(size: 10))
+                .padding(6)
                 .background(.ultraThinMaterial, in: Circle())
         }
         .accessibilityLabel("Fit graph to view")
     }
 
     @ViewBuilder private func legendItem(color: Color, label: String) -> some View {
-        HStack(spacing: 6) {
-            Circle().fill(color).frame(width: 9, height: 9)
-            Text(label).font(.caption2).foregroundStyle(.secondary)
+        HStack(spacing: 4) {
+            Circle().fill(color).frame(width: 7, height: 7)
+            Text(label).font(.system(size: 10)).foregroundStyle(.secondary)
         }
     }
 }
@@ -222,8 +223,8 @@ extension MeshGraphView {
 
         if let hit = nodes.first(where: { node in
             guard let pos = layout[node.id] else { return false }
-            let radius: CGFloat = node.kind == .borderRouter ? 18 : 13
-            return distance(CGPoint(x: canvasX, y: canvasY), pos) <= (radius + 12) / scale
+            let radius: CGFloat = node.kind == .borderRouter ? 13 : 9
+            return distance(CGPoint(x: canvasX, y: canvasY), pos) <= (radius + 10) / scale
         }) {
             withAnimation(.easeInOut(duration: 0.15)) {
                 selectedNodeID = hit.id
@@ -259,9 +260,9 @@ extension MeshGraphView {
     private func drawNodes(ctx: inout GraphicsContext) {
         for node in nodes {
             guard let pos = layout[node.id] else { continue }
-            let baseRadius: CGFloat = node.kind == .borderRouter ? 18 : 13
+            let baseRadius: CGFloat = node.kind == .borderRouter ? 13 : 9
             let isSelected = node.id == selectedNodeID
-            let radius = baseRadius + (isSelected ? 3 : 0)
+            let radius = baseRadius + (isSelected ? 2 : 0)
             let device = devices.first { $0.id == node.deviceID }
             let color: Color = node.kind == .borderRouter ? .blue : (device?.rssi.rssiColor ?? .gray)
 
@@ -275,29 +276,29 @@ extension MeshGraphView {
             // Selection ring
             if isSelected {
                 ctx.stroke(
-                    Path(ellipseIn: CGRect(x: pos.x - radius - 4, y: pos.y - radius - 4,
-                                           width: (radius + 4) * 2, height: (radius + 4) * 2)),
+                    Path(ellipseIn: CGRect(x: pos.x - radius - 3, y: pos.y - radius - 3,
+                                           width: (radius + 3) * 2, height: (radius + 3) * 2)),
                     with: .color(.accentColor),
-                    style: .init(lineWidth: 2.5)
+                    style: .init(lineWidth: 2)
                 )
             }
 
             // Weak device ring (static, no animation to avoid state-update cycles)
             if let rssi = device?.rssi, rssi < -80 {
-                let pr = radius + 8
+                let pr = radius + 5
                 ctx.stroke(
                     Path(ellipseIn: CGRect(x: pos.x - pr, y: pos.y - pr,
                                            width: pr * 2, height: pr * 2)),
                     with: .color(.red.opacity(0.55)),
-                    style: .init(lineWidth: 2)
+                    style: .init(lineWidth: 1.5)
                 )
             }
 
             // Label
             let label = ctx.resolve(Text(node.name)
                 .foregroundStyle(Color(UIColor.label))
-                .font(.caption2))
-            ctx.draw(label, at: CGPoint(x: pos.x, y: pos.y - radius - 10))
+                .font(.system(size: 9)))
+            ctx.draw(label, at: CGPoint(x: pos.x, y: pos.y - radius - 7))
         }
     }
 

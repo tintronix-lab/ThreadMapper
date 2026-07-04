@@ -22,5 +22,13 @@
 	<string>ThreadMapper uses your location during survey walks to tag signal strength readings on a map.</string>
 	<key>NSHomeKitUsageDescription</key>
 	<string>ThreadMapper uses HomeKit to discover Thread mesh network devices in your home.</string>
+	<key>UILaunchScreen</key>
+	<dict/>
+	<key>UIRequiresFullScreen</key>
+	<true/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
 </dict>
 </plist>

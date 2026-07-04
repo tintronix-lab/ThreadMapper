@@ -82,24 +82,26 @@ struct DashboardView: View {
         if !weak.isEmpty {
             Section("Weak Spots") {
                 ForEach(weak) { device in
-                    HStack(alignment: .center, spacing: 10) {
+                    HStack(alignment: .center, spacing: 8) {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundStyle(.orange)
-                        VStack(alignment: .leading) {
+                            .imageScale(.small)
+                        VStack(alignment: .leading, spacing: 1) {
                             Text(device.name)
-                                .font(.headline)
+                                .font(.subheadline.weight(.medium))
+                                .lineLimit(1)
                             Text(device.room ?? "Unknown Room")
-                                .font(.caption)
+                                .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }
                         Spacer()
                         if let rssi = device.rssi {
                             Text("\(rssi) dBm")
-                                .font(.caption2)
+                                .font(.caption2.monospacedDigit())
                                 .foregroundStyle(.orange)
                         }
                     }
-                    .padding(.vertical, 4)
+                    .padding(.vertical, 2)
                 }
             }
         }

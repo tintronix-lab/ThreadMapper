@@ -7,6 +7,10 @@ final class SurveyViewModel {
     var isRecording = false
     var currentRSSI: Int?
     var weakDevices: [WeakDevice] = []
+    // Stored so @Observable tracks them (computed props through @ObservationIgnored manager don't propagate)
+    var sessionSampleCount: Int = 0
+    var sessionWeakCount: Int = 0
+    var locationStatus: String = "No location fix"
 
     @ObservationIgnored
     private let manager = SurveySessionManager()
@@ -32,6 +36,8 @@ final class SurveyViewModel {
             isRecording = false
             currentRSSI = nil
             weakDevices.removeAll()
+            sessionSampleCount = 0
+            sessionWeakCount = 0
         } else {
             manager.startSession()
             isRecording = true
@@ -41,15 +47,42 @@ final class SurveyViewModel {
     func record(deviceID: String, rssi: Int, location: CLLocationCoordinate2D) {
         manager.recordSample(deviceID: deviceID, rssi: rssi, location: location)
         currentRSSI = rssi
-        if rssi < -80 {
+        syncSessionStats()
+        if rssi < -80, !weakDevices.contains(where: { $0.name == deviceID }) {
             weakDevices.append(WeakDevice(name: deviceID, rssi: rssi))
         }
+    }
+
+    /// Called periodically by the view while recording; location is resolved internally by the manager.
+    func recordCurrentDevices(_ devices: [ThreadDevice]) {
+        guard isRecording, !devices.isEmpty else { return }
+        var lastRSSI: Int?
+        for device in devices {
+            let rssi = device.rssi ?? -65
+            manager.recordSample(deviceID: device.name, rssi: rssi, location: nil)
+            lastRSSI = rssi
+            if rssi < -80, !weakDevices.contains(where: { $0.name == device.name }) {
+                weakDevices.append(WeakDevice(name: device.name, rssi: rssi))
+            }
+        }
+        currentRSSI = lastRSSI
+        syncSessionStats()
     }
 
     func resetSession() {
         manager.startSession()
         currentRSSI = nil
         weakDevices.removeAll()
+        sessionSampleCount = 0
+        sessionWeakCount = 0
+    }
+
+    private func syncSessionStats() {
+        sessionSampleCount = manager.sampleCount
+        sessionWeakCount = manager.currentWeakIDs.count
+        if let coord = manager.lastKnownLocation {
+            locationStatus = String(format: "%.4f, %.4f", coord.latitude, coord.longitude)
+        }
     }
 
     func exportCSVURL() -> URL? {
@@ -57,7 +90,7 @@ final class SurveyViewModel {
         guard !points.isEmpty else { return nil }
         let header = "timestamp,latitude,longitude,meanRSSI,weakDevices,sampleCount\n"
         let rows = points.map { point in
-            let ts = ISO8601DateFormatter().string(from: point.timestamp)
+            let ts = Self.isoFormatter.string(from: point.timestamp)
             let weaks = point.weakDevices.replacingOccurrences(of: ",", with: ";")
             return "\(ts),\(point.latitude),\(point.longitude),\(point.meanRSSI),\"\(weaks)\",\(point.sampleCount)"
         }.joined(separator: "\n")
@@ -73,7 +106,7 @@ final class SurveyViewModel {
         guard !points.isEmpty else { return nil }
         let header = "timestamp,latitude,longitude,meanRSSI,weakDevices,sampleCount\n"
         let rows = points.map { point in
-            let ts = ISO8601DateFormatter().string(from: point.timestamp)
+            let ts = Self.isoFormatter.string(from: point.timestamp)
             let weaks = point.weakDevices.replacingOccurrences(of: ",", with: ";")
             return "\(ts),\(point.latitude),\(point.longitude),\(point.meanRSSI),\"\(weaks)\",\(point.sampleCount)"
         }.joined(separator: "\n")
@@ -91,8 +124,6 @@ final class SurveyViewModel {
         }
     }
 
-    var sessionSampleCount: Int { manager.sampleCount }
-    var sessionWeakCount: Int { manager.currentWeakIDs.count }
     var savedPointCount: Int { savedPoints.count }
     var hasSavedPoints: Bool { !savedPoints.isEmpty }
     var hasWeakDevices: Bool { !weakDevices.isEmpty }
@@ -116,14 +147,7 @@ final class SurveyViewModel {
         savedPoints.filter { $0.weakDevices.contains(deviceID) }
     }
 
-    var locationStatusLabel: String {
-        if let coord = manager.lastKnownLocation {
-            let lat = String(format: "%.4f", coord.latitude)
-            let lng = String(format: "%.4f", coord.longitude)
-            return "Last fix: \(lat), \(lng)"
-        }
-        return "No location fix"
-    }
+    var locationStatusLabel: String { locationStatus }
 
     // Convenience wrapper used by SurveyWalkView
     func signalQuality(for rssi: Int) -> (label: String, color: Color) {

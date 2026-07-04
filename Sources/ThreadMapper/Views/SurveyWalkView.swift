@@ -1,175 +1,240 @@
 import SwiftUI
 import CoreLocation
-import Observation
 
 struct SurveyWalkView: View {
     @Environment(SurveyViewModel.self) private var viewModel
+    @Environment(MeshViewModel.self) private var meshVM
+
     @State private var showHeatmap = false
     @State private var radiusMeters: Double = 35
     @State private var resolutionMeters: Double = 12
     @State private var heatmapPoints: [SurveyHeatmapPresenter.Cell] = []
+    @State private var sampleTask: Task<Void, Never>?
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Library") {
-                    NavigationLink("Saved Surveys") {
-                        SavedSurveyList()
-                    }
-                }
-
-                Section {
-                    Button {
-                        viewModel.toggleRecording()
-                        if !viewModel.isRecording {
-                            viewModel.loadRecentSamplePoints { points in
-                                if showHeatmap {
-                                    heatmapPoints = SurveyHeatmapPresenter.present(
-                                        points: points,
-                                        radiusMeters: radiusMeters,
-                                        resolutionMeters: resolutionMeters
-                                    )
-                                }
-                            }
-                        }
-                    } label: {
-                        Label(viewModel.isRecording ? "Stop Survey" : "Start Survey",
-                              systemImage: viewModel.isRecording ? "stop.circle.fill" : "record.circle")
-                    }
-                    .tint(viewModel.isRecording ? .red : .green)
-
-                    Button("Reset Survey") {
-                        viewModel.resetSession()
-                        heatmapPoints.removeAll()
-                    }
-                    .disabled(viewModel.isRecording)
-                }
-
-                Section("Current Reading") {
-                    locationGuidance
-                    readingAndQuality
-                    sessionStats
-                }
-
-                Section("Heatmap") {
-                    Toggle("Show Heatmap", isOn: $showHeatmap)
-                    if showHeatmap {
-                        Text("\(heatmapPoints.count) cell\(heatmapPoints.count == 1 ? "" : "s") loaded")
-                        Slider(value: $radiusMeters, in: 10...80, step: 5) {
-                            Text("Radius: \(Int(radiusMeters))m")
-                        }
-                        .onChange(of: radiusMeters) { refreshHeatmap() }
-                        Slider(value: $resolutionMeters, in: 6...25, step: 1) {
-                            Text("Resolution: \(Int(resolutionMeters))m")
-                        }
-                        .onChange(of: resolutionMeters) { refreshHeatmap() }
-
-                        heatmapVisualization
-                        weakSpotSummary(from: heatmapPoints)
-                    }
-
-                    exportActions
-                }
-
-                Section("Weak Links") {
-                    weakLinksContent
-                }
+                recordingSection
+                currentReadingSection
+                heatmapSection
+                weakLinksSection
             }
             .navigationTitle("Survey Walk")
+            .navigationBarTitleDisplayMode(.inline)
             .onAppear { refreshHeatmap() }
+            .onDisappear { stopSampling() }
+            .onChange(of: viewModel.isRecording) { _, recording in
+                if recording { startSampling() } else { stopSampling() }
+            }
+        }
+    }
+
+    // MARK: - Sections
+
+    @ViewBuilder
+    private var recordingSection: some View {
+        Section {
+            Button {
+                viewModel.toggleRecording()
+                if !viewModel.isRecording { refreshHeatmap() }
+            } label: {
+                Label(
+                    viewModel.isRecording ? "Stop Survey" : "Start Survey",
+                    systemImage: viewModel.isRecording ? "stop.circle.fill" : "record.circle"
+                )
+                .foregroundStyle(viewModel.isRecording ? .red : .green)
+            }
+
+            if viewModel.isRecording {
+                HStack(spacing: 6) {
+                    Circle().fill(.red).frame(width: 7, height: 7)
+                    Text("Recording — \(viewModel.sessionSampleCount) samples")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    if meshVM.devices.isEmpty {
+                        Text("No devices")
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                    } else {
+                        Text("\(meshVM.devices.count) device\(meshVM.devices.count == 1 ? "" : "s")")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
+            Button("Reset") {
+                viewModel.resetSession()
+                heatmapPoints.removeAll()
+            }
+            .foregroundStyle(.secondary)
+            .disabled(viewModel.isRecording)
+        } header: {
+            HStack {
+                Text("Survey")
+                Spacer()
+                NavigationLink("Saved (\(viewModel.savedPointCount))") {
+                    SavedSurveyList()
+                }
+                .font(.caption)
+            }
         }
     }
 
     @ViewBuilder
-    private var locationGuidance: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "location.north.fill")
-            VStack(alignment: .leading, spacing: 2) {
+    private var currentReadingSection: some View {
+        Section("Current Reading") {
+            // Location status
+            HStack(spacing: 8) {
+                Image(systemName: "location.fill")
+                    .foregroundStyle(.blue)
+                    .imageScale(.small)
                 Text(viewModel.locationStatusLabel)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-                Text("Best results while walking near Thread devices.")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
             }
-        }
-    }
 
-    private var readingAndQuality: some View {
-        Group {
+            // RSSI reading
             if let rssi = viewModel.currentRSSI {
-                let quality = viewModel.signalQuality(for: rssi)
+                let q = viewModel.signalQuality(for: rssi)
                 HStack {
-                    Text("RSSI: \(Int(rssi)) dBm")
-                        .font(.system(.body, design: .monospaced))
+                    Text("\(rssi) dBm")
+                        .font(.system(.subheadline, design: .monospaced).weight(.medium))
                     Spacer()
-                    Text(quality.label)
+                    Text(q.label)
                         .font(.caption2)
                         .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(quality.color.opacity(0.2))
-                        .foregroundStyle(quality.color)
-                        .clipShape(Capsule())
+                        .padding(.vertical, 3)
+                        .background(q.color.opacity(0.15), in: Capsule())
+                        .foregroundStyle(q.color)
                 }
             } else {
-                Text("No readings yet").foregroundStyle(.secondary)
+                Text(viewModel.isRecording
+                     ? (meshVM.devices.isEmpty ? "No Thread devices — connect via HomeKit first" : "Waiting for first sample…")
+                     : "Tap Start Survey to begin")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            // Sample & weak counts
+            if viewModel.isRecording || viewModel.sessionSampleCount > 0 {
+                HStack(spacing: 16) {
+                    Label("\(viewModel.sessionSampleCount)", systemImage: "waveform.path")
+                    Label("\(viewModel.sessionWeakCount) weak", systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(viewModel.sessionWeakCount > 0 ? .orange : .secondary)
+                }
+                .font(.caption2)
+                .foregroundStyle(.secondary)
             }
         }
     }
 
-    private var sessionStats: some View {
-        HStack(spacing: 12) {
-            Label("\(viewModel.sessionSampleCount) samples", systemImage: "waveform.path")
-            Label("\(viewModel.sessionWeakCount) weak", systemImage: "exclamationmark.triangle.fill")
-                .foregroundStyle(viewModel.sessionWeakCount > 0 ? .orange : .secondary)
-            Spacer()
-            Text(viewModel.locationStatusLabel)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+    @ViewBuilder
+    private var heatmapSection: some View {
+        Section("Heatmap") {
+            Toggle("Show Heatmap", isOn: $showHeatmap)
+
+            if showHeatmap {
+                if heatmapPoints.isEmpty {
+                    Text("No survey data yet")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    HeatmapCanvas(cells: heatmapPoints, focus: viewModel.lastSavedFocus)
+                        .frame(height: 140)
+                        .padding(.vertical, 2)
+
+                    Text("\(heatmapPoints.count) cell\(heatmapPoints.count == 1 ? "" : "s")")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+
+                    weakSpotSummary(from: heatmapPoints)
+                }
+
+                VStack(spacing: 2) {
+                    HStack {
+                        Text("Radius")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text("\(Int(radiusMeters)) m")
+                            .font(.caption2.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                    }
+                    Slider(value: $radiusMeters, in: 10...80, step: 5)
+                        .onChange(of: radiusMeters) { refreshHeatmap() }
+                }
+
+                VStack(spacing: 2) {
+                    HStack {
+                        Text("Resolution")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text("\(Int(resolutionMeters)) m")
+                            .font(.caption2.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                    }
+                    Slider(value: $resolutionMeters, in: 6...25, step: 1)
+                        .onChange(of: resolutionMeters) { refreshHeatmap() }
+                }
+
+                exportActions
+            }
         }
-        .font(.caption2)
-        .foregroundStyle(.secondary)
     }
+
+    @ViewBuilder
+    private var weakLinksSection: some View {
+        let ordered = viewModel.weakDevices.sorted { $0.name < $1.name }
+        Section("Weak Links") {
+            if ordered.isEmpty {
+                Text("None — threshold RSSI < −80 dBm")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(ordered) { device in
+                    let q = viewModel.signalQuality(for: device.rssi)
+                    HStack(spacing: 8) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                            .imageScale(.small)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(device.name)
+                                .font(.subheadline)
+                                .lineLimit(1)
+                            Text("\(device.rssi) dBm · \(q.label)")
+                                .font(.caption2)
+                                .foregroundStyle(q.color)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Sub-views
 
     @ViewBuilder
     private var exportActions: some View {
-        if let surveyURL = viewModel.exportCSVURL() {
-            ShareLink("Export Survey CSV", item: surveyURL)
-        }
-
-        if let deviceURL = viewModel.exportURLForCurrentSessionPerDevice() {
-            ShareLink("Export Device CSV", item: deviceURL)
-        }
-
-        if viewModel.savedPointCount > 0 {
-            Text("Saved surveys: \(viewModel.savedPointCount)")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+        if let url = viewModel.exportCSVURL() {
+            ShareLink("Export CSV", item: url)
+                .font(.caption)
         }
     }
 
     @ViewBuilder
-    private var weakLinksContent: some View {
-        let ordered = viewModel.weakDevices.sorted { $0.name < $1.name }
-        if ordered.isEmpty {
-            LabeledContent("Threshold", value: "RSSI < -80 dBm")
-            Text("No weak links recorded in this session.")
-                .foregroundStyle(.secondary)
-        } else {
-            ForEach(ordered) { device in
-                let q = viewModel.signalQuality(for: device.rssi)
-                HStack(spacing: 10) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.orange)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(device.name)
-                            .font(.body)
-                        Text(q.label)
-                            .font(.caption2)
-                            .foregroundStyle(q.color)
-                    }
-                    Spacer()
-                    Text("\(device.rssi) dBm")
+    private func weakSpotSummary(from cells: [SurveyHeatmapPresenter.Cell]) -> some View {
+        let spots = SurveyHeatmapPresenter.weakSpots(from: cells)
+        if !spots.isEmpty {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Weak spots: \(spots.count)")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.orange)
+                ForEach(Array(spots.enumerated()), id: \.offset) { _, cell in
+                    Text(String(format: "%.5f, %.5f  (score %.2f)",
+                                cell.coordinate.latitude, cell.coordinate.longitude, cell.score))
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
@@ -177,58 +242,39 @@ struct SurveyWalkView: View {
         }
     }
 
-    @ViewBuilder
-    private func weakSpotSummary(from cells: [SurveyHeatmapPresenter.Cell]) -> some View {
-        let spots = SurveyHeatmapPresenter.weakSpots(from: cells)
-        if spots.isEmpty {
-            Text("No weak coverage detected.")
-                .foregroundStyle(.secondary)
-        } else {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Weak spots:")
-                ForEach(Array(spots.enumerated()), id: \.offset) { _, cell in
-                    HStack(alignment: .top, spacing: 8) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundStyle(.orange)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(String(format: "Coverage %.2f • %d weak device(s)", cell.score, cell.weakDeviceCount))
-                                .font(.caption)
-                                .foregroundStyle(.orange)
-                            Text(String(format: "%.5f, %.5f", cell.coordinate.latitude, cell.coordinate.longitude))
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .padding(.vertical, 2)
+    // MARK: - Sampling
+
+    private func startSampling() {
+        sampleTask?.cancel()
+        sampleTask = Task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(3))
+                guard !Task.isCancelled else { break }
+                await MainActor.run {
+                    viewModel.recordCurrentDevices(meshVM.devices)
                 }
             }
         }
     }
 
-    private func refreshHeatmap() {
-        if showHeatmap {
-            viewModel.loadRecentSamplePoints { points in
-                heatmapPoints = SurveyHeatmapPresenter.present(
-                    points: points,
-                    radiusMeters: radiusMeters,
-                    resolutionMeters: resolutionMeters
-                )
-            }
-        }
+    private func stopSampling() {
+        sampleTask?.cancel()
+        sampleTask = nil
     }
 
-    @ViewBuilder
-    private var heatmapVisualization: some View {
-        if heatmapPoints.isEmpty {
-            Text("No heatmap data yet")
-                .foregroundStyle(.secondary)
-        } else {
-            HeatmapCanvas(cells: heatmapPoints, focus: viewModel.lastSavedFocus)
-                .frame(height: 160)
-                .padding(.vertical, 4)
+    private func refreshHeatmap() {
+        guard showHeatmap else { return }
+        viewModel.loadRecentSamplePoints { points in
+            heatmapPoints = SurveyHeatmapPresenter.present(
+                points: points,
+                radiusMeters: radiusMeters,
+                resolutionMeters: resolutionMeters
+            )
         }
     }
 }
+
+// MARK: - HeatmapCanvas
 
 struct HeatmapCanvas: View {
     let cells: [SurveyHeatmapPresenter.Cell]
@@ -237,43 +283,35 @@ struct HeatmapCanvas: View {
     var body: some View {
         GeometryReader { geo in
             let size = geo.size
-            Canvas { ctx, canvasSize in
-                guard let effectiveBounds = effectiveBounds else { return }
+            Canvas { ctx, _ in
+                guard let b = bounds else { return }
                 for cell in cells {
-                    let x = CGFloat((cell.coordinate.longitude - effectiveBounds.minLng) / max(effectiveBounds.spanLng, 1e-9)) * size.width
-                    let y = CGFloat(1.0 - (cell.coordinate.latitude - effectiveBounds.minLat) / max(effectiveBounds.spanLat, 1e-9)) * size.height
-                    let rect = CGRect(x: x - 4, y: y - 4, width: 8, height: 8)
+                    let x = CGFloat((cell.coordinate.longitude - b.minLng) / b.spanLng) * size.width
+                    let y = CGFloat(1 - (cell.coordinate.latitude - b.minLat) / b.spanLat) * size.height
                     ctx.fill(
-                        Path(roundedRect: rect, cornerRadius: 3),
-                        with: .color(color(for: cell.score))
+                        Path(roundedRect: CGRect(x: x - 4, y: y - 4, width: 8, height: 8), cornerRadius: 2),
+                        with: .color(heatColor(for: cell.score))
                     )
                 }
             }
-            .background(Color(white: 0.96).cornerRadius(10))
+            .background(Color(UIColor.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8))
         }
-        .frame(height: 160)
     }
 
-    private var effectiveBounds: (minLat: Double, maxLat: Double, minLng: Double, maxLng: Double, spanLat: Double, spanLng: Double)? {
+    private var bounds: (minLat: Double, minLng: Double, spanLat: Double, spanLng: Double)? {
         guard !cells.isEmpty else { return nil }
         var lats = cells.map { $0.coordinate.latitude }
         var lngs = cells.map { $0.coordinate.longitude }
-        if let focus {
-            lats.append(focus.latitude)
-            lngs.append(focus.longitude)
-        }
-        let minLat = lats.min() ?? 0
-        let maxLat = lats.max() ?? 0
-        let minLng = lngs.min() ?? 0
-        let maxLng = lngs.max() ?? 0
-        return (minLat, maxLat, minLng, maxLng, max(maxLat - minLat, 1e-9), max(maxLng - minLng, 1e-9))
+        if let f = focus { lats.append(f.latitude); lngs.append(f.longitude) }
+        let minLat = lats.min()!, maxLat = lats.max()!
+        let minLng = lngs.min()!, maxLng = lngs.max()!
+        return (minLat, minLng, max(maxLat - minLat, 1e-9), max(maxLng - minLng, 1e-9))
     }
 
-    private func color(for score: Double) -> Color {
+    private func heatColor(for score: Double) -> Color {
         if score < 0.35 { return .red }
         if score < 0.55 { return .orange }
         if score < 0.75 { return .yellow }
         return .green
     }
 }
-
