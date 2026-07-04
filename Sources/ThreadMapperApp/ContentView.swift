@@ -6,6 +6,7 @@ struct ContentView: View {
     @State private var meshVM = MeshViewModel()
     @State private var surveyVM = SurveyViewModel()
     @State private var statsStore = DeviceStatsStore.shared
+    @State private var notesStore = DeviceNotesStore.shared
 
     var body: some View {
         if !hasSeenOnboarding {
@@ -19,6 +20,8 @@ struct ContentView: View {
                 .environment(meshVM)
                 .environment(surveyVM)
                 .environment(statsStore)
+                .environment(notesStore)
+                .task { await NotificationService.shared.requestAuthorization() }
         }
     }
 }

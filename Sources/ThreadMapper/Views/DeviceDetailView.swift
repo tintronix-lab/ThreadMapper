@@ -5,6 +5,9 @@ struct DeviceDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(SurveyViewModel.self) private var surveyVM
     @Environment(DeviceStatsStore.self) private var statsStore
+    @Environment(DeviceNotesStore.self) private var notesStore
+    @State private var noteText = ""
+    @State private var isEditingNote = false
 
     private var stats: DeviceStats? { statsStore.stats(for: device.name) }
     private var surveyPoints: [SurveyPoint] { surveyVM.surveys(for: device.name) }
@@ -17,9 +20,11 @@ struct DeviceDetailView: View {
                 deviceSection
                 if device.batteryPercentage != nil { batterySection }
                 surveySection
+                notesSection
             }
             .navigationTitle(device.name)
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear { noteText = notesStore.note(for: device.uniqueIdentifier.uuidString) }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Done") { dismiss() }
@@ -296,6 +301,20 @@ struct DeviceDetailView: View {
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Notes
+
+    @ViewBuilder
+    private var notesSection: some View {
+        Section("Notes") {
+            TextField("Add a note about this device…", text: $noteText, axis: .vertical)
+                .lineLimit(3...6)
+                .font(.subheadline)
+                .onChange(of: noteText) { _, new in
+                    notesStore.setNote(new, for: device.uniqueIdentifier.uuidString)
+                }
+        }
     }
 
     // MARK: - Helpers

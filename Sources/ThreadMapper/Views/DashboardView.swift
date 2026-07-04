@@ -25,6 +25,7 @@ struct DashboardView: View {
     var body: some View {
         NavigationStack {
             List {
+                topologyBanner
                 healthSection
                 if !health.issues.filter(\.isCritical).isEmpty || !health.issues.isEmpty {
                     issuesSection
@@ -62,6 +63,40 @@ struct DashboardView: View {
                 if !viewModel.isScanning {
                     Task { await viewModel.startScan() }
                 }
+            }
+        }
+    }
+
+    // MARK: - Topology Change Banner
+
+    @ViewBuilder
+    private var topologyBanner: some View {
+        let recent = viewModel.recentTopologyChanges.filter {
+            Date().timeIntervalSince($0.timestamp) < 300
+        }
+        if let change = recent.first {
+            Section {
+                HStack(spacing: 10) {
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                        .foregroundStyle(.blue)
+                        .imageScale(.medium)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Network topology changed")
+                            .font(.subheadline.weight(.semibold))
+                        if !change.joined.isEmpty {
+                            Text("Joined: \(change.joined.joined(separator: ", "))")
+                                .font(.caption2).foregroundStyle(.green)
+                        }
+                        if !change.left.isEmpty {
+                            Text("Left: \(change.left.joined(separator: ", "))")
+                                .font(.caption2).foregroundStyle(.red)
+                        }
+                        Text(change.timestamp, style: .relative)
+                            .font(.caption2).foregroundStyle(.secondary)
+                            .padding(.top, 1)
+                    }
+                }
+                .padding(.vertical, 4)
             }
         }
     }

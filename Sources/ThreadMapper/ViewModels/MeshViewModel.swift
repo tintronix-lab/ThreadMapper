@@ -13,6 +13,14 @@ final class MeshViewModel {
     var isScanning = false
     var scanError: String?
 
+    struct TopologyChange: Identifiable {
+        let id = UUID()
+        let timestamp: Date
+        let joined: [String]
+        let left: [String]
+    }
+    var recentTopologyChanges: [TopologyChange] = []
+
     var selectedRoom: String? = nil { didSet { applyFilters() } }
     var selectedChannel: Int? = nil { didSet { applyFilters() } }
 
@@ -30,6 +38,8 @@ final class MeshViewModel {
     private let discovery = MatterDiscoveryService.shared
     @ObservationIgnored private var keepAliveTask: Task<Void, Error>?
     @ObservationIgnored private var pollTick = 0
+    @ObservationIgnored private var knownDeviceNames: Set<String> = []
+    @ObservationIgnored private var offlineDeviceNames: Set<String> = []
 
     init() {
         keepAliveTask = Task { [weak self] in
@@ -60,9 +70,40 @@ final class MeshViewModel {
                         for device in latest {
                             device.rssi = existingRSSI[device.uniqueIdentifier] ?? device.rssi
                         }
+
+                        // Topology change detection (skip on first population)
+                        if !self.knownDeviceNames.isEmpty {
+                            let currentNames = Set(latest.map(\.name))
+                            let joined = currentNames.subtracting(self.knownDeviceNames)
+                            let left   = self.knownDeviceNames.subtracting(currentNames)
+                            if !joined.isEmpty || !left.isEmpty {
+                                let change = TopologyChange(timestamp: Date(),
+                                                            joined: Array(joined).sorted(),
+                                                            left: Array(left).sorted())
+                                self.recentTopologyChanges.insert(change, at: 0)
+                                if self.recentTopologyChanges.count > 20 {
+                                    self.recentTopologyChanges = Array(self.recentTopologyChanges.prefix(20))
+                                }
+                                NotificationService.shared.notifyTopologyChange(
+                                    joined: Array(joined), left: Array(left))
+                            }
+                        }
+                        self.knownDeviceNames = Set(latest.map(\.name))
                         self.devices = latest
                     }
                     self.scanError = errorMsg
+
+                    // Offline / online transitions
+                    for device in self.devices {
+                        let isOffline = device.rssi == -100
+                        if isOffline && !self.offlineDeviceNames.contains(device.name) {
+                            self.offlineDeviceNames.insert(device.name)
+                            NotificationService.shared.notifyDeviceOffline(device.name, room: device.room)
+                        } else if !isOffline && self.offlineDeviceNames.contains(device.name) {
+                            self.offlineDeviceNames.remove(device.name)
+                            NotificationService.shared.clearOfflineNotification(for: device.name)
+                        }
+                    }
                 }
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
             }

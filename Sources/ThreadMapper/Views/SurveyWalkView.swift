@@ -11,6 +11,7 @@ struct SurveyWalkView: View {
     @State private var heatmapPoints: [SurveyHeatmapPresenter.Cell] = []
     @State private var sampleTask: Task<Void, Never>?
     @State private var lastUpdateTime: Date?
+    @State private var showGuidedSurvey = false
 
     var body: some View {
         NavigationStack {
@@ -24,9 +25,13 @@ struct SurveyWalkView: View {
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 refreshHeatmap()
-                startSampling()  // always run live display, sampling only records when isRecording
+                startSampling()
             }
             .onDisappear { stopSampling() }
+            .sheet(isPresented: $showGuidedSurvey) {
+                GuidedSurveyView(isPresented: $showGuidedSurvey, rooms: meshVM.rooms)
+                    .onDisappear { refreshHeatmap() }
+            }
         }
     }
 
@@ -75,6 +80,12 @@ struct SurveyWalkView: View {
             HStack {
                 Text("Survey")
                 Spacer()
+                if !meshVM.rooms.isEmpty {
+                    Button("Guided Walk") {
+                        showGuidedSurvey = true
+                    }
+                    .font(.caption)
+                }
                 NavigationLink("Saved (\(viewModel.savedPointCount))") {
                     SavedSurveyList()
                 }
