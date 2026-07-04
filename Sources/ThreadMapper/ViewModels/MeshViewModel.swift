@@ -145,7 +145,7 @@ final class MeshViewModel {
                         rooms: roomSnaps
                     ))
                     AppGroupStore.writeDeviceStates(
-                        Dictionary(uniqueKeysWithValues: self.devices.map { ($0.name, $0.rssi != -100) })
+                        Dictionary(self.devices.map { ($0.name, $0.rssi != -100) }, uniquingKeysWith: { _, new in new })
                     )
                 }
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
