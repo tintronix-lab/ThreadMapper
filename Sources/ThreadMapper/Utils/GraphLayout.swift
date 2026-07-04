@@ -23,7 +23,7 @@ struct GraphLayout {
         let cooling: CGFloat = 0.995
 
         for _ in 0..<iterations {
-            var displacements: [UUID: (dx: CGFloat, dy: CGFloat)] = [:]
+            var displacements: [UUID: CGPoint] = [:]
 
             for node in nodes {
                 guard let s = positions[node.id] else { continue }
@@ -36,7 +36,7 @@ struct GraphLayout {
                     fx += (dx/dist)*f
                     fy += (dy/dist)*f
                 }
-                displacements[node.id] = (fx, fy)
+                displacements[node.id] = CGPoint(x: fx, y: fy)
             }
 
             for link in links {
@@ -46,18 +46,18 @@ struct GraphLayout {
                 let force = (dist*dist)/k
                 let dirX = dx/dist; let dirY = dy/dist
 
-                let src = displacements[link.sourceID, default: (0,0)]
-                let dst = displacements[link.targetID, default: (0,0)]
-                displacements[link.sourceID] = (src.dx - dirX*force*0.5, src.dy - dirY*force*0.5)
-                displacements[link.targetID] = (dst.dx + dirX*force*0.5, dst.dy + dirY*force*0.5)
+                displacements[link.sourceID, default: .zero].x -= dirX*force*0.5
+                displacements[link.sourceID, default: .zero].y -= dirY*force*0.5
+                displacements[link.targetID, default: .zero].x += dirX*force*0.5
+                displacements[link.targetID, default: .zero].y += dirY*force*0.5
             }
 
             for node in nodes {
                 guard let pos = positions[node.id], let disp = displacements[node.id] else { continue }
-                let mag = sqrt(disp.dx*disp.dx + disp.dy*disp.dy)
+                let mag = sqrt(disp.x*disp.x + disp.y*disp.y)
                 if mag > 0 {
-                    let limitedX = (disp.dx/mag)*min(mag, temp)
-                    let limitedY = (disp.dy/mag)*min(mag, temp)
+                    let limitedX = (disp.x/mag)*min(mag, temp)
+                    let limitedY = (disp.y/mag)*min(mag, temp)
                     var newPos = CGPoint(x: pos.x + limitedX, y: pos.y + limitedY)
                     newPos.x = max(20, min(size.width - 20, newPos.x))
                     newPos.y = max(20, min(size.height - 20, newPos.y))

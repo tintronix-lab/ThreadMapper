@@ -3,6 +3,7 @@ import SwiftUI
 struct DeviceDetailView: View {
     let device: ThreadDevice
     @Environment(\.dismiss) private var dismiss
+    @Environment(SurveyViewModel.self) private var surveyVM
 
     var body: some View {
         NavigationStack {
@@ -26,6 +27,16 @@ struct DeviceDetailView: View {
                     }
                     if let batt = device.batteryPercentage {
                         LabeledContent("Battery", value: "\(batt)%")
+                    }
+                }
+
+                Section("Survey") {
+                    Button("Export CSV for This Device") {
+                        _ = surveyVM.exportCSV(for: device.name)
+                    }
+
+                    NavigationLink("Survey History") {
+                        DeviceSurveyHistory(deviceID: device.name)
                     }
                 }
             }

@@ -1,0 +1,30 @@
+{
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/ViewModels/MeshViewModel.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshViewModel.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshViewModel.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshViewModel.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshViewModel.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshViewModel.swiftdeps"
+  },
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/MeshView.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshView.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshView.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshView.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshView.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshView.swiftdeps"
+  },
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/OnboardingFlow.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/OnboardingFlow.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/OnboardingFlow.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/OnboardingFlow.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/OnboardingFlow.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/OnboardingFlow.swiftdeps"
+  },
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/RoomFilterView.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/RoomFilterView.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/RoomFilterView.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/RoomFilterView.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/RoomFilterView.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/RoomFilterView.swiftdeps"
+  }
+}

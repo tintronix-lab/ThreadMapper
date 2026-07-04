@@ -2,58 +2,40 @@ import XCTest
 @testable import ThreadMapper
 
 final class ThreadTopologyBuilderTests: XCTestCase {
-    func testBuildGraph_withParentNode_buildsLink() throws {
-        let dev = ThreadDevice(
-            name: "Sensor",
-            manufacturer: "Test",
-            productName: "Sensor",
-            deviceType: "Sensor",
-            uniqueIdentifier: "child",
-            parentNodeID: "parent",
-            rssi: -60
-        )
-        let (nodes, links) = MeshTopologyBuilder.buildGraph(from: [dev])
-        XCTAssertTrue(nodes.isEmpty, "child-only should not create router node when no router exists")
-        XCTAssertEqual(links.count, 1)
-        XCTAssertEqual(links.first?.sourceID, "parent")
-        XCTAssertEqual(links.first?.targetID, "child")
-        XCTAssertEqual(links.first?.linkQuality, 3)
-    }
-
-    func testBuildGraph_withRouter_addsNodes() throws {
-        let router = ThreadDevice(
-            name: "Router",
-            manufacturer: "Test",
-            productName: "Router",
-            deviceType: "Router",
-            uniqueIdentifier: "router1",
-            isRouter: true
+    func testBuildGraph_withBorderRouter_createsLinks() throws {
+        let br = ThreadDevice(
+            id: UUID(), name: "BR", manufacturer: "Test", productName: "Bridge", deviceType: "Bridge",
+            uniqueIdentifier: UUID(), isBorderRouter: true, isRouter: true, isSleepyEndDevice: false
         )
         let end = ThreadDevice(
-            name: "End",
-            manufacturer: "Test",
-            productName: "End",
-            deviceType: "Sensor",
-            uniqueIdentifier: "end1",
-            parentNodeID: "router1",
-            rssi: -75
+            id: UUID(), name: "End", manufacturer: "Test", productName: "End", deviceType: "Sensor",
+            uniqueIdentifier: UUID(), isBorderRouter: false, isRouter: false, isSleepyEndDevice: true,
+            parentNodeID: br.id.uuidString, rssi: -75
         )
-        let (nodes, links) = MeshTopologyBuilder.buildGraph(from: [router, end])
-        XCTAssertEqual(nodes.count, 1)
-        XCTAssertEqual(nodes.first?.name, "Router")
+        let (nodes, links) = MeshTopologyBuilder.buildGraph(from: [br, end])
+        XCTAssertEqual(nodes.count, 2)
         XCTAssertEqual(links.count, 1)
-        XCTAssertEqual(links.first?.linkQuality, 2)
+        XCTAssertEqual(nodes.first(where: { $0.name == "BR" })?.kind, .borderRouter)
     }
 
-    func testBuildGraph_noParents_returnsEmptyLinks() throws {
+    func testBuildGraph_noBorderRouter_returnsNodesOnly() throws {
         let dev = ThreadDevice(
-            name: "Orphan",
-            manufacturer: "Test",
-            productName: "Unknown",
-            deviceType: "Unknown",
-            uniqueIdentifier: "orphan"
+            id: UUID(), name: "Orphan", manufacturer: "Test", productName: "Unknown", deviceType: "Unknown",
+            uniqueIdentifier: UUID(), isBorderRouter: false, isRouter: false, isSleepyEndDevice: true
         )
-        let (_, links) = MeshTopologyBuilder.buildGraph(from: [dev])
+        let (nodes, links) = MeshTopologyBuilder.buildGraph(from: [dev])
+        XCTAssertEqual(nodes.count, 1)
         XCTAssertTrue(links.isEmpty)
+        XCTAssertEqual(nodes.first?.kind, .endDevice)
+    }
+
+    func testBuildGraph_borderRouterIsClassified() throws {
+        let br = ThreadDevice(
+            id: UUID(), name: "BR", manufacturer: "Test", productName: "Bridge", deviceType: "Bridge",
+            uniqueIdentifier: UUID(), isBorderRouter: true, isRouter: false, isSleepyEndDevice: false
+        )
+        let (nodes, _) = MeshTopologyBuilder.buildGraph(from: [br])
+        XCTAssertEqual(nodes.count, 1)
+        XCTAssertEqual(nodes.first?.kind, .borderRouter)
     }
 }

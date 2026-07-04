@@ -2,12 +2,12 @@ import Foundation
 import CoreLocation
 
 struct Extrapolator {
-    static func interpolateRSSI(samples: [Int], at coordinate: CLLocationCoordinate2D) -> Double? {
+    static func interpolateRSSI(samples: [Int]) -> Double? {
         guard samples.count >= 3 else { return nil }
         let sorted = samples.sorted()
         let trimmed = sorted.dropFirst(max(1, samples.count / 10)).dropLast(max(1, samples.count / 10))
-        guard let sum = trimmed.reduce(0, +) as Int? else { return nil }
-        return Double(sum) / Double(trimmed.count)
+        guard !trimmed.isEmpty else { return nil }
+        return Double(trimmed.reduce(0, +)) / Double(trimmed.count)
     }
 
     static func clusterDevices(_ devices: [ThreadDevice], radius: CLLocationDistance = 30.0) -> [[ThreadDevice]] {

@@ -1,0 +1,30 @@
+{
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Models/MeshLink.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshLink.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshLink.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshLink.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshLink.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshLink.swiftdeps"
+  },
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Models/MeshNode.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshNode.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshNode.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshNode.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshNode.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshNode.swiftdeps"
+  },
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Services/MatterDiscoveryService.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MatterDiscoveryService.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MatterDiscoveryService.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MatterDiscoveryService.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MatterDiscoveryService.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MatterDiscoveryService.swiftdeps"
+  },
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/MeshGraphView.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshGraphView.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshGraphView.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshGraphView.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshGraphView.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapper.build/Objects-normal/arm64/MeshGraphView.swiftdeps"
+  }
+}

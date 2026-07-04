@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 
 enum MeshNodeKind: String, Codable {
     case borderRouter = "Border Router"
@@ -6,19 +7,13 @@ enum MeshNodeKind: String, Codable {
     case endDevice = "End Device"
 }
 
-struct MeshNode: Identifiable, Codable {
+struct MeshNode: Identifiable, Codable, Equatable, Hashable {
     let id: UUID
-    let name: String
+    var name: String
     let kind: MeshNodeKind
-    var x: CGFloat
-    var y: CGFloat
-
-    init(id: UUID = UUID(), name: String, kind: MeshNodeKind,
-         x: CGFloat = 0, y: CGFloat = 0) {
-        self.id = id
-        self.name = name
-        self.kind = kind
-        self.x = x
-        self.y = y
-    }
+    var x: CGFloat = 0
+    var y: CGFloat = 0
+    var deviceID: UUID?
+    var room: String?
+    var channel: Int?
 }

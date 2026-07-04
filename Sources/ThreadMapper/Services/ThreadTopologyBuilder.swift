@@ -5,31 +5,32 @@ struct MeshTopologyBuilder {
         var nodes: [MeshNode] = []
         var links: [MeshLink] = []
 
-        let routers = devices.filter { $0.isRouter || $0.isBorderRouter }
-
-        for device in routers {
-            let kind: MeshNodeKind = device.isBorderRouter ? .borderRouter : .router
-            nodes.append(MeshNode(name: device.name, kind: kind))
-        }
+        let borderRouterID = devices.first { $0.isBorderRouter }?.id
 
         for device in devices {
-            guard let parentID = device.parentNodeID else { continue }
-            guard let parentUUID = UUID(uuidString: parentID) ?? devices.first(where: { $0.parentNodeID == parentID })?.id else { continue }
-            links.append(MeshLink(
-                sourceID: parentUUID,
-                targetID: device.id,
-                linkQuality: estimateLinkQuality(device)
+            let kind: MeshNodeKind = {
+                if device.isBorderRouter { return .borderRouter }
+                if device.isRouter { return .router }
+                return .endDevice
+            }()
+            nodes.append(MeshNode(
+                id: device.id,
+                name: device.name,
+                kind: kind,
+                deviceID: device.id,
+                room: device.room,
+                channel: device.channel
             ))
+
+            if !device.isBorderRouter, let parentID = borderRouterID {
+                links.append(MeshLink(
+                    sourceID: parentID,
+                    targetID: device.id,
+                    linkQuality: device.rssi?.rssiLinkQuality ?? 2
+                ))
+            }
         }
 
         return (nodes, links)
-    }
-
-    private static func estimateLinkQuality(_ device: ThreadDevice) -> Int {
-        guard let rssi = device.rssi else { return 2 }
-        if rssi > -50 { return 4 }
-        if rssi > -65 { return 3 }
-        if rssi > -80 { return 2 }
-        return 1
     }
 }

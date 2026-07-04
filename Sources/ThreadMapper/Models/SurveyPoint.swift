@@ -15,14 +15,14 @@ final class SurveyPoint: Identifiable {
 
     init(id: UUID = UUID(), coordinate: CLLocationCoordinate2D,
          meanRSSI: Double, weakDevices: [String], sampleCount: Int = 1,
-         note: String? = nil) {
+         timestamp: Date? = nil, note: String? = nil) {
         self.id = id
         self.latitude = coordinate.latitude
         self.longitude = coordinate.longitude
         self.sampleCount = sampleCount
         self.meanRSSI = meanRSSI
         self.weakDevices = weakDevices.joined(separator: ",")
-        self.timestamp = Date()
+        self.timestamp = timestamp ?? Date()
         self.note = note
     }
 

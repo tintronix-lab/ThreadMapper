@@ -8,14 +8,7 @@ let package = Package(
         .library(name: "ThreadMapper", targets: ["ThreadMapper"]),
     ],
     targets: [
-        .target(
-            name: "ThreadMapper",
-            dependencies: [],
-            exclude: [
-                "Info.plist",
-                "ThreadMapper.entitlements",
-            ]
-        ),
+        .target(name: "ThreadMapper"),
         .testTarget(name: "ThreadMapperTests", dependencies: ["ThreadMapper"]),
     ]
 )

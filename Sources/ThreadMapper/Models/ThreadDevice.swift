@@ -1,9 +1,8 @@
 import Foundation
 import Observation
 
-@Observable
-final class ThreadDevice: Identifiable, ObservableObject {
-    var id: UUID
+final class ThreadDevice: Identifiable, Codable, Hashable, Equatable {
+    let id: UUID
     var name: String
     var manufacturer: String
     var productName: String
@@ -14,18 +13,13 @@ final class ThreadDevice: Identifiable, ObservableObject {
     var isSleepyEndDevice: Bool
     var parentNodeID: String?
     var channel: Int?
-    var lastSeen: Date
     var rssi: Int?
     var batteryPercentage: Int?
     var room: String?
-    var assignedAccessory: String?
 
-    init(id: UUID = UUID(), name: String, manufacturer: String, productName: String,
-         deviceType: String, uniqueIdentifier: UUID,
-         isBorderRouter: Bool = false, isRouter: Bool = false,
-         isSleepyEndDevice: Bool = false, parentNodeID: String? = nil,
-         channel: Int? = nil, rssi: Int? = nil, batteryPercentage: Int? = nil,
-         room: String? = nil, assignedAccessory: String? = nil) {
+    init(id: UUID = UUID(), name: String, manufacturer: String, productName: String, deviceType: String,
+         uniqueIdentifier: UUID, isBorderRouter: Bool, isRouter: Bool, isSleepyEndDevice: Bool = false,
+         parentNodeID: String? = nil, channel: Int? = nil, rssi: Int? = nil, batteryPercentage: Int? = nil, room: String? = nil) {
         self.id = id
         self.name = name
         self.manufacturer = manufacturer
@@ -37,10 +31,16 @@ final class ThreadDevice: Identifiable, ObservableObject {
         self.isSleepyEndDevice = isSleepyEndDevice
         self.parentNodeID = parentNodeID
         self.channel = channel
-        self.lastSeen = Date()
         self.rssi = rssi
         self.batteryPercentage = batteryPercentage
         self.room = room
-        self.assignedAccessory = assignedAccessory
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(uniqueIdentifier)
+    }
+
+    static func == (lhs: ThreadDevice, rhs: ThreadDevice) -> Bool {
+        lhs.uniqueIdentifier == rhs.uniqueIdentifier
     }
 }

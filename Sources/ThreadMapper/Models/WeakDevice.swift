@@ -1,10 +1,7 @@
 import Foundation
 
-struct WeakDevice: Identifiable, Equatable, Hashable, Sendable {
-    let id: UUID
+struct WeakDevice: Identifiable, Codable, Equatable, Hashable {
+    var id: UUID = UUID()
     let name: String
-    init(id: UUID = UUID(), name: String) {
-        self.id = id
-        self.name = name
-    }
+    let rssi: Int
 }

@@ -1,77 +1,143 @@
 import Foundation
+import HomeKit
 import Observation
 
-enum DiscoveryError: Error {
+enum LiveDiscoveryError: Error {
     case homeKitNotAuthorized
-    case noThreadDevicesFound
     case homeManagerFailed(Error)
+    case noThreadDevicesFound
+}
+
+extension LiveDiscoveryError {
+    var userMessage: String {
+        switch self {
+        case .homeKitNotAuthorized:
+            return "HomeKit access denied. Enable it in Settings → Privacy & Security → HomeKit."
+        case .homeManagerFailed(let err):
+            return "HomeKit error: \(err.localizedDescription)"
+        case .noThreadDevicesFound:
+            return "No devices found. Add Thread accessories in the Home app."
+        }
+    }
+}
+
+protocol LiveDiscoveryService: Observable {
+    var devices: [ThreadDevice] { get set }
+    var discoveryError: LiveDiscoveryError? { get set }
+    func startScanning() async throws
+    func stopScanning()
 }
 
 @Observable
 final class MatterDiscoveryService {
     static let shared = MatterDiscoveryService()
-    private init() {}
 
     var devices: [ThreadDevice] = []
+    var discoveryError: LiveDiscoveryError?
+
+    @ObservationIgnored private let homeTracker = HomeTracker()
+    @ObservationIgnored private var deviceIDCache: [String: UUID] = [:]
+
+    private init() {
+        homeTracker.onHomesUpdated = { [weak self] homes in
+            guard let self else { return }
+            let found = self.extractThreadDevices(from: homes)
+            Task { @MainActor in
+                self.devices = found
+                self.discoveryError = found.isEmpty ? .noThreadDevicesFound : nil
+            }
+        }
+        homeTracker.onNotAuthorized = { [weak self] in
+            Task { @MainActor in
+                self?.discoveryError = .homeKitNotAuthorized
+                self?.devices = []
+            }
+        }
+    }
 
     func startScanning() async throws {
-        try await Task.sleep(nanoseconds: 500_000_000)
-        let simulated = makeSimulatedAccessories()
-        let found = extractThreadTopology(from: simulated)
-        await MainActor.run { self.devices = found }
+        await MainActor.run { discoveryError = nil }
+        homeTracker.start()
     }
 
-    private func makeSimulatedAccessories() -> [SimulatedAccessory] {
-        [
-            .init(name: "Living Room Light", serviceType: .lightbulb, isBorderRouter: false, isRouter: false),
-            .init(name: "Kitchen Outlet", serviceType: .outlet, isBorderRouter: false, isRouter: false),
-            .init(name: "Hallway Sensor", serviceType: .contactSensor, isBorderRouter: false, isRouter: false),
-            .init(name: "Office Bulb", serviceType: .lightbulb, isBorderRouter: false, isRouter: false),
-            .init(name: "Bedside Switch", serviceType: .switch_, isBorderRouter: false, isRouter: false),
-            .init(name: "Garage Sensor", serviceType: .contactSensor, isBorderRouter: false, isRouter: false),
-            .init(name: "Thread Border Router", serviceType: .bridge, isBorderRouter: true, isRouter: true),
-            .init(name: "Repeater Hallway", serviceType: .bridge, isBorderRouter: false, isRouter: true),
-        ]
+    func stopScanning() {
+        homeTracker.stop()
     }
 
-    func extractThreadTopology(from accessories: [SimulatedAccessory]) -> [ThreadDevice] {
-        accessories.map { acc in
-            ThreadDevice(
-                name: acc.name,
-                manufacturer: "Simulated",
-                productName: acc.name,
-                deviceType: mapServiceType(acc.serviceType),
-                uniqueIdentifier: UUID(),
-                isBorderRouter: acc.isBorderRouter,
-                isRouter: acc.isRouter,
-                isSleepyEndDevice: !acc.isRouter && !acc.isBorderRouter,
-                parentNodeID: acc.isBorderRouter ? nil : "border-router-1",
-                channel: 15,
-                rssi: acc.isRouter ? -50 : -75,
-                batteryPercentage: (!acc.isRouter && !acc.isBorderRouter) ? 85 : nil
-            )
+    private func extractThreadDevices(from homes: [HMHome]) -> [ThreadDevice] {
+        homes.flatMap { home in
+            home.accessories.map { accessory in
+                let key = accessory.uniqueIdentifier.uuidString
+                let id = cachedID(for: key)
+                let isBridge = accessory.category.categoryType == HMAccessoryCategoryTypeBridge
+                return ThreadDevice(
+                    id: id,
+                    name: accessory.name,
+                    manufacturer: accessory.manufacturer ?? "Unknown",
+                    productName: accessory.model ?? accessory.name,
+                    deviceType: accessory.category.localizedDescription,
+                    uniqueIdentifier: accessory.uniqueIdentifier,
+                    isBorderRouter: isBridge,
+                    isRouter: isBridge,
+                    isSleepyEndDevice: !isBridge,
+                    parentNodeID: nil,
+                    channel: nil,
+                    rssi: nil,
+                    batteryPercentage: batteryLevel(for: accessory),
+                    room: accessory.room?.name ?? home.name
+                )
+            }
         }
     }
 
-    private func mapServiceType(_ serviceType: ServiceType) -> String {
-        switch serviceType {
-        case .lightbulb: return "Lightbulb"
-        case .outlet: return "Outlet"
-        case .switch_: return "Switch"
-        case .contactSensor: return "Sensor"
-        default: return "Unknown"
+    private func cachedID(for key: String) -> UUID {
+        if let id = deviceIDCache[key] { return id }
+        let id = UUID()
+        deviceIDCache[key] = id
+        return id
+    }
+
+    private func batteryLevel(for accessory: HMAccessory) -> Int? {
+        for service in accessory.services where service.serviceType == HMServiceTypeBattery {
+            for char in service.characteristics where char.characteristicType == HMCharacteristicTypeBatteryLevel {
+                return char.value as? Int
+            }
         }
+        return nil
     }
 }
 
-struct SimulatedAccessory {
-    let name: String
-    let serviceType: ServiceType
-    let isBorderRouter: Bool
-    let isRouter: Bool
-    var isSleepyEndDevice: Bool { !isRouter && !isBorderRouter }
-}
+private final class HomeTracker: NSObject, HMHomeManagerDelegate {
+    var onHomesUpdated: (([HMHome]) -> Void)?
+    var onNotAuthorized: (() -> Void)?
 
-enum ServiceType {
-    case lightbulb, outlet, switch_, contactSensor, bridge
+    private var manager: HMHomeManager?
+
+    func start() {
+        guard manager == nil else { return }
+        let m = HMHomeManager()
+        m.delegate = self
+        manager = m
+    }
+
+    func stop() {
+        manager?.delegate = nil
+        manager = nil
+    }
+
+    func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {
+        if manager.authorizationStatus.contains(.authorized) {
+            onHomesUpdated?(manager.homes)
+        } else {
+            onNotAuthorized?()
+        }
+    }
+
+    func homeManager(_ manager: HMHomeManager, didAdd home: HMHome) {
+        onHomesUpdated?(manager.homes)
+    }
+
+    func homeManager(_ manager: HMHomeManager, didRemove home: HMHome) {
+        onHomesUpdated?(manager.homes)
+    }
 }

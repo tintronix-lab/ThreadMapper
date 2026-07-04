@@ -3,86 +3,141 @@ import Observation
 
 struct DashboardView: View {
     @Environment(MeshViewModel.self) private var viewModel
+    @State private var selectedDevice: ThreadDevice?
     @State private var selectedRoom: String? = nil
-    @State private var sortOrder: SortOrder = .name
 
-    init() {}
-
-    private var filteredDevices: [ThreadDevice] {
-        let base = selectedRoom == nil ? viewModel.devices : viewModel.devices.filter { $0.room == selectedRoom }
-        switch sortOrder {
-        case .name: return base.sorted { $0.name < $1.name }
-        case .type: return base.sorted { $0.deviceType < $1.deviceType }
-        case .signal: return base.sorted { ($0.rssi ?? -999) > ($1.rssi ?? -999) }
-        }
-    }
-
-    private var rooms: [String] {
-        Array(Set(viewModel.devices.compactMap(\.room))).sorted()
+    var filteredDevices: [ThreadDevice] {
+        let all = viewModel.devices
+        guard let room = selectedRoom else { return all }
+        return all.filter { $0.room == room }
     }
 
     var body: some View {
         NavigationStack {
             List {
-                if !viewModel.warnings().isEmpty {
-                    Section("Alerts") {
-                        ForEach(viewModel.warnings(), id: \.self) { msg in
-                            Text(msg).foregroundStyle(.orange)
-                        }
-                    }
-                }
-
-                Section {
-                    ForEach(filteredDevices) { device in
-                        DeviceListRow(device: device)
-                            .onTapGesture { viewModel.selectedDevice = device }
-                    }
-                }
-                Section {
-                    EmptyView()
-                } footer: {
-                    Text("\(filteredDevices.count) device(s) shown")
-                }
+                summarySection
+                filterSection
+                weakSpotsSection
+                deviceSection
             }
-            .navigationTitle("Thread Mesh")
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        Task { await viewModel.startScan() }
-                    } label: {
-                        if viewModel.isScanning { ProgressView() } else { Label("Scan", systemImage: "antenna.radiowaves.left.and.right") }
-                    }
-                    .disabled(viewModel.isScanning)
-                }
+            .navigationTitle("Dashboard")
+            .navigationBarTitleDisplayMode(.inline)
+            .sheet(item: $selectedDevice) { device in
+                DeviceDetailView(device: device)
             }
-            .overlay {
-                if let error = viewModel.scanError {
-                    VStack {
-                        Text(error).foregroundStyle(.red).padding()
-                        Button("Dismiss") { viewModel.scanError = nil }
-                    }
+            .onAppear {
+                if !viewModel.isScanning {
+                    Task { await viewModel.startScan() }
                 }
-            }
-            .safeAreaInset(edge: .top) {
-                VStack(spacing: 0) {
-                    RoomFilterView(selectedRoom: $selectedRoom, rooms: rooms)
-                    Picker("Sort", selection: $sortOrder) {
-                        Text("Name").tag(SortOrder.name)
-                        Text("Type").tag(SortOrder.type)
-                        Text("Signal").tag(SortOrder.signal)
-                    }
-                    .pickerStyle(.segmented)
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
-                    Divider()
-                }
-                .background(.regularMaterial)
             }
         }
     }
 
-    enum SortOrder: String, CaseIterable, Identifiable {
-        case name, type, signal
-        var id: String { rawValue }
+    @ViewBuilder
+    private var summarySection: some View {
+        Section {
+            let devices = viewModel.devices
+            let routers = devices.filter { $0.isRouter || $0.isBorderRouter }
+            let weak = devices.filter { ($0.rssi ?? -120) < -80 }
+            HStack {
+                statCell(value: "\(devices.count)", label: "Devices")
+                Spacer()
+                statCell(value: "\(routers.count)", label: "Routers")
+                Spacer()
+                statCell(
+                    value: "\(weak.count)",
+                    label: "Weak",
+                    valueColor: weak.isEmpty ? .green : .red
+                )
+            }
+            .padding(.vertical, 2)
+        }
+    }
+
+    @ViewBuilder
+    private func statCell(value: String, label: String, valueColor: Color = .primary) -> some View {
+        VStack(alignment: .center, spacing: 1) {
+            Text(value)
+                .font(.title3.bold())
+                .foregroundStyle(valueColor)
+            Text(label)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    @ViewBuilder
+    private var filterSection: some View {
+        let rooms = Array(Set(viewModel.devices.compactMap { $0.room })).sorted()
+        if !rooms.isEmpty {
+            Section {
+                RoomFilterView(selectedRoom: $selectedRoom, rooms: rooms)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var weakSpotsSection: some View {
+        let weak = filteredDevices.filter { ($0.rssi ?? -120) < -80 }
+        if !weak.isEmpty {
+            Section("Weak Spots") {
+                ForEach(weak) { device in
+                    HStack(alignment: .center, spacing: 10) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                        VStack(alignment: .leading) {
+                            Text(device.name)
+                                .font(.headline)
+                            Text(device.room ?? "Unknown Room")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        if let rssi = device.rssi {
+                            Text("\(rssi) dBm")
+                                .font(.caption2)
+                                .foregroundStyle(.orange)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var deviceSection: some View {
+        Section("Devices") {
+            if filteredDevices.isEmpty {
+                if viewModel.isScanning {
+                    HStack {
+                        Spacer()
+                        VStack(spacing: 8) {
+                            ProgressView()
+                            Text("Contacting HomeKit…")
+                                .foregroundStyle(.secondary)
+                                .font(.subheadline)
+                        }
+                        .padding()
+                        Spacer()
+                    }
+                } else {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label("No Thread devices found", systemImage: "network.slash")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Text("Open the Home app and add your Thread border router and accessories, then tap Scan.")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding(.vertical, 6)
+                }
+            } else {
+                ForEach(filteredDevices) { device in
+                    DeviceListRow(device: device)
+                        .onTapGesture { selectedDevice = device }
+                }
+            }
+        }
     }
 }

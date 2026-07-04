@@ -6,37 +6,32 @@ struct RoomFilterView: View {
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 12) {
-                Button {
+            HStack(spacing: 6) {
+                chip(title: "All", selected: selectedRoom == nil) {
                     selectedRoom = nil
-                } label: {
-                    Text("All")
-                        .font(.caption.weight(.semibold))
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(selectedRoom == nil ? Color.accentColor : Color.secondary.opacity(0.15))
-                        .foregroundStyle(selectedRoom == nil ? .white : .primary)
-                        .clipShape(Capsule())
                 }
-                .buttonStyle(.plain)
-
                 ForEach(rooms, id: \.self) { room in
-                    Button {
+                    chip(title: room, selected: selectedRoom == room) {
                         selectedRoom = room
-                    } label: {
-                        Text(room)
-                            .font(.caption.weight(.semibold))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(selectedRoom == room ? Color.accentColor : Color.secondary.opacity(0.15))
-                            .foregroundStyle(selectedRoom == room ? .white : .primary)
-                            .clipShape(Capsule())
                     }
-                    .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 4)
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 2)
+    }
+
+    @ViewBuilder
+    private func chip(title: String, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.caption2.weight(.semibold))
+                .padding(.horizontal, 9)
+                .padding(.vertical, 4)
+                .background(selected ? Color.accentColor : Color.secondary.opacity(0.12),
+                            in: Capsule())
+                .foregroundStyle(selected ? .white : .primary)
+        }
+        .buttonStyle(.plain)
     }
 }

@@ -1,7 +1,7 @@
 import XCTest
 @testable import ThreadMapper
 
-final class SignalExtrapolatorTests: XCTestCase {
+final class SignalExtrapolatorOnlyTests: XCTestCase {
     func testCoverageScore_emptyDevices_isZero() throws {
         XCTAssertEqual(SignalExtrapolator.coverageScore(for: []), 0.0)
     }
@@ -9,12 +9,8 @@ final class SignalExtrapolatorTests: XCTestCase {
     func testCoverageScore_withWeakRSSI_scoresDown() throws {
         let devices = [
             ThreadDevice(
-                name: "Weak",
-                manufacturer: "Test",
-                productName: "X",
-                deviceType: "Sensor",
-                uniqueIdentifier: "w",
-                rssi: -90
+                name: "Weak", manufacturer: "Test", productName: "X", deviceType: "Sensor",
+                uniqueIdentifier: UUID(), isBorderRouter: false, isRouter: false, isSleepyEndDevice: true, rssi: -90
             )
         ]
         let score = SignalExtrapolator.coverageScore(for: devices)
@@ -25,16 +21,11 @@ final class SignalExtrapolatorTests: XCTestCase {
     func testRecommendations_noRouter() throws {
         let devices = [
             ThreadDevice(
-                name: "Bulb",
-                manufacturer: "Test",
-                productName: "B",
-                deviceType: "Lightbulb",
-                uniqueIdentifier: "b1",
-                isRouter: false,
-                isBorderRouter: false
+                name: "Bulb", manufacturer: "Test", productName: "B", deviceType: "Lightbulb",
+                uniqueIdentifier: UUID(), isBorderRouter: false, isRouter: false, isSleepyEndDevice: true
             )
         ]
         let recs = SignalExtrapolator.recommendations(for: devices)
-        XCTAssertTrue(recs.contains { $0.contains("Border router") })
+        XCTAssertTrue(recs.contains { $0.contains("Add at least one Thread border router") })
     }
 }
