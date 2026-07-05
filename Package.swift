@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 5.10
 import PackageDescription
 
 let package = Package(
@@ -8,7 +8,14 @@ let package = Package(
         .library(name: "ThreadMapper", targets: ["ThreadMapper"]),
     ],
     targets: [
-        .target(name: "ThreadMapper"),
+        .target(
+            name: "ThreadMapper",
+            path: "Sources",
+            exclude: ["ThreadMapper/Assets.xcassets",
+                      "ThreadMapper/Info.plist",
+                      "ThreadMapper/ThreadMapper.entitlements"],
+            sources: ["ThreadMapper", "Shared"]
+        ),
         .testTarget(name: "ThreadMapperTests", dependencies: ["ThreadMapper"]),
     ]
 )
