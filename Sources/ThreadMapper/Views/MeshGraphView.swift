@@ -12,6 +12,7 @@ struct MeshGraphView: View {
     @State private var scale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
     @State private var lastDragOffset: CGSize = .zero
+    @State private var viewSize: CGSize = .zero   // needed to invert scaleEffect in hit-testing
 
     var body: some View {
         GeometryReader { geo in
@@ -34,19 +35,19 @@ struct MeshGraphView: View {
                     drawNodes(ctx: &ctx)
                 }
                 .scaleEffect(scale)
-                // Use minimumDistance: 8 so short taps don't become drags
+                // Divide translation by scale so pan speed is constant at any zoom level.
                 .gesture(
                     DragGesture(minimumDistance: 8)
                         .onChanged { value in
                             offset = CGSize(
-                                width: value.translation.width + lastDragOffset.width,
-                                height: value.translation.height + lastDragOffset.height
+                                width:  value.translation.width  / scale + lastDragOffset.width,
+                                height: value.translation.height / scale + lastDragOffset.height
                             )
                         }
                         .onEnded { value in
                             lastDragOffset = CGSize(
-                                width: value.translation.width + lastDragOffset.width,
-                                height: value.translation.height + lastDragOffset.height
+                                width:  value.translation.width  / scale + lastDragOffset.width,
+                                height: value.translation.height / scale + lastDragOffset.height
                             )
                         }
                 )
@@ -61,7 +62,7 @@ struct MeshGraphView: View {
                             }
                         }
                 )
-                // SpatialTapGesture (iOS 17+) gives location and runs simultaneously with drag
+                // SpatialTapGesture (iOS 17+) gives location in visual (post-scaleEffect) space.
                 .simultaneousGesture(
                     SpatialTapGesture()
                         .onEnded { value in
@@ -80,17 +81,17 @@ struct MeshGraphView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
             }
             .onAppear {
+                viewSize = size
                 if !nodes.isEmpty {
                     applyLayout(size: size)
                 }
             }
-            // Re-layout whenever node set changes (e.g., scan results arrive after view appears)
             .onChange(of: nodes) { _, _ in
                 guard !nodes.isEmpty else { return }
                 applyLayout(size: size)
             }
-            // Re-layout if size becomes valid after an initial zero-size pass
             .onChange(of: size) { _, newSize in
+                viewSize = newSize
                 guard !nodes.isEmpty, layout.isEmpty else { return }
                 applyLayout(size: newSize)
             }
@@ -133,10 +134,11 @@ struct MeshGraphView: View {
                 }
                 HStack(spacing: 12) {
                     if let rssi = device.rssi {
-                        Label("\(rssi) dBm", systemImage: rssi.rssiSystemIcon)
+                        // H4: show quality label, not raw dBm (values are latency-estimated)
+                        Label("\(rssi.rssiQualityLabel) (est.)", systemImage: rssi.rssiSystemIcon)
                             .foregroundStyle(rssi.rssiColor)
                     } else {
-                        Label("No RSSI", systemImage: "wifi.slash")
+                        Label("No Signal", systemImage: "wifi.slash")
                             .foregroundStyle(.secondary)
                     }
                     if let room = device.room {
@@ -162,6 +164,12 @@ struct MeshGraphView: View {
             legendItem(color: .green,  label: "Strong")
             legendItem(color: .orange, label: "Fair")
             legendItem(color: .red,    label: "Weak")
+            Divider().padding(.vertical, 1)
+            // H5: make clear this is an estimated star topology, not real mesh links
+            Text("Estimated topology")
+                .font(.system(size: 8))
+                .foregroundStyle(.tertiary)
+                .italic()
         }
         .padding(7)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
@@ -214,17 +222,21 @@ extension MeshGraphView {
         lastDragOffset = offset
     }
 
+    // H11: SpatialTapGesture reports location in visual (post-scaleEffect) space.
+    // scaleEffect anchors at the view's center, so we must invert that transform
+    // to get the canvas-space coordinate for hit testing.
     private func handleTap(at location: CGPoint) {
-        // Invert the canvas transform: canvas draws at (layoutPos + offset), then scaleEffect(scale)
-        // scaleEffect scales from view center, but for hit testing SwiftUI reports location in
-        // the view's local (pre-scale) coordinate space. Adjust for offset only.
-        let canvasX = location.x - offset.width
-        let canvasY = location.y - offset.height
+        guard viewSize.width > 0, viewSize.height > 0 else { return }
+        let cx = viewSize.width  / 2
+        let cy = viewSize.height / 2
+        // Invert scaleEffect: visual → canvas pre-offset → layout position
+        let canvasX = (location.x - cx) / scale + cx - offset.width
+        let canvasY = (location.y - cy) / scale + cy - offset.height
 
         if let hit = nodes.first(where: { node in
             guard let pos = layout[node.id] else { return false }
             let radius: CGFloat = node.kind == .borderRouter ? 13 : 9
-            return distance(CGPoint(x: canvasX, y: canvasY), pos) <= (radius + 10) / scale
+            return distance(CGPoint(x: canvasX, y: canvasY), pos) <= radius + 10
         }) {
             withAnimation(.easeInOut(duration: 0.15)) {
                 selectedNodeID = hit.id
@@ -283,7 +295,7 @@ extension MeshGraphView {
                 )
             }
 
-            // Weak device ring (static, no animation to avoid state-update cycles)
+            // Weak device ring
             if let rssi = device?.rssi, rssi < -80 {
                 let pr = radius + 5
                 ctx.stroke(
