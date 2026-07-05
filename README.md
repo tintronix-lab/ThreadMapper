@@ -1,28 +1,146 @@
 # ThreadMapper
 
-Thread mesh coverage mapper for iOS 17+.
+**Thread mesh network monitor for iOS 17+** — visualizes HomeKit Thread devices, measures response quality, surveys coverage room-by-room, and alerts you when devices go offline.
 
-## Build
-```bash
-cd /Users/MAC/Projects/ThreadMapper
-swift package resolve
-swift build
-swift test
+---
+
+## Features
+
+### Dashboard
+- **Network health grade** (A–F, 0–100 score) computed from device count, offline/weak ratios, and border-router presence
+- **24-hour health history** chart (Charts framework)
+- **Room coverage** summary with per-room signal grades
+- **Issue + tip cards** — critical issues flagged in red, recommendations in amber
+- **Placement suggestions** — rooms with poor average signal flagged for router addition
+- **30-minute signal trend** sparkline across all devices
+- **Topology change banner** — shows devices that joined or left the mesh in the last 5 minutes
+
+### Devices
+- Per-device **signal sparkline** with live/avg/min/max stats and quality distribution bar
+- **Device health grade** (A–F) from rolling signal history
+- **Role badges** — Border Router, Router, End Device, Sleepy End Device
+- **Battery level** with low-battery warning
+- **Survey history** and CSV export per device
+- **Device notes** — persistent, debounced (one write per pause, not per keystroke)
+- **Troubleshooter** — guided step-by-step fix flow for offline and weak-signal devices, role-aware steps
+
+### Mesh Graph
+- **Force-directed layout** visualizing logical device topology
+- Filter by room or Thread channel
+- Tap a node to open device detail
+
+### Survey
+- **Guided room-by-room survey** — walk each room, capture response-quality samples tagged to the room
+- **Free-walk survey** — continuous sampling with GPS for outdoor or large-space mapping
+- **Heatmap overlay** — color-coded signal strength across surveyed points
+- Survey sessions stored with room tag; viewable per-device in Device Detail
+- CSV export of survey data
+- Location permission requested at survey start, not app launch
+
+### Activity Feed
+- Chronological log of device offline/online events, topology changes, and health score shifts ≥ 15 points
+- Events persist for 7 days (max 500), grouped by day
+- Clear-all action in toolbar
+
+### Notifications & Monitoring
+- **Offline device push notifications** with configurable grace period (30 s – 5 min)
+- **Topology change notifications** when devices join or leave the mesh
+- **Badge count** = number of confirmed offline devices; cleared on recovery
+- **Background refresh** task keeps the widget current when the app is closed
+- Poll loop pauses while the app is backgrounded; resumes immediately on foreground
+
+### Widget
+- Home-screen widget showing grade, score, device count, offline count, and per-room summary
+- Widget reloads throttled (content-diffed, 60 s minimum interval) to stay within WidgetKit budget
+
+### Settings
+- Toggle offline and topology notifications
+- Configurable offline grace period
+- Clear signal history, health score history, and activity feed independently
+- Setup Checklist accessible from Settings → Tools
+
+---
+
+## Architecture
+
+```
+Sources/
+  ThreadMapper/         # Main app — views, view models, services, models
+    Models/             # ThreadDevice, SurveyPoint, ActivityEvent, MeshNode/Link
+    ViewModels/         # MeshViewModel (poll loop), SurveyViewModel
+    Services/           # MatterDiscoveryService, DeviceStatsStore, ActivityStore,
+                        # HealthHistoryStore, DeviceNotesStore, AppGroupStore,
+                        # SurveySessionManager, NotificationService
+    Views/              # DashboardView, MeshGraphView, SurveyWalkView,
+                        # DeviceDetailView, ActivityFeedView, TroubleshooterView,
+                        # SettingsView, OnboardingFlow, AppChecklistView, …
+    Utils/              # NetworkHealthScore, MeshTopologyBuilder, GraphLayout,
+                        # SignalStrength extensions
+  ThreadMapperApp/      # App entry point, ContentView, BackgroundRefreshHandler
+  Shared/               # WidgetSnapshot, TMStyle (grade colors, room icons)
+  ThreadMapperWidget/   # WidgetKit extension
 ```
 
-## Runs
-- `DashboardView` shows discovered Thread/Matter devices
-- `MeshGraphView` renders links with force-directed layout
-- `SurveyWalkView` captures manual signal samples
-- `DeviceDetailView` shows Thread metadata
+**Key design decisions:**
+- `@Observable` throughout — no Combine
+- Persistence: debounced JSON files via `Codable` (Documents directory)
+- Signal values are **latency-derived response quality estimates**, not radio-measured RSSI — labeled as "estimated" in the UI
+- Topology links are **logical estimates** (non-BR devices linked to nearest border router) — not from Thread diagnostics
 
-## Notes
-- Requires iOS 17.0+
-- HomeKit authorization needed for device discovery
-- Matter topology is limited by HomeKit API exposure
+---
 
-## Pushing to GitHub
+## Build & Run
+
+**Requirements:** Xcode 26+, iOS 17+ device or simulator, HomeKit-enabled home for real data.
+
 ```bash
-git remote add origin git@github.com:<owner>/ThreadMapper.git
-git push -u origin main
+# Generate Xcode project (required after adding source files)
+xcodegen generate
+
+# Open in Xcode
+open ThreadMapper.xcodeproj
+
+# Or build for device via xcodebuild
+xcrun xcodebuild -project ThreadMapper.xcodeproj \
+  -scheme ThreadMapper \
+  -destination 'id=<device-udid>' \
+  -configuration Debug build
 ```
+
+**CI:** GitHub Actions runs SwiftLint + xcodegen + `xcodebuild test` on an iOS Simulator on every push. See `.github/workflows/ci.yml`.
+
+---
+
+## Data Honesty
+
+| What you see | What it actually is |
+|---|---|
+| Signal strength / dBm | Latency-derived quality estimate (HomeKit round-trip time bucketed to a −55…−92 scale) |
+| Mesh graph links | Logical estimate — every non-border-router linked to the nearest border router |
+| Parent node | Populated only if HomeKit exposes it (rare) |
+
+Real Thread diagnostics (true RSSI, LQI, actual parent/child links) require the Matter Thread Network Diagnostics cluster, which Apple's HomeKit APIs do not currently expose for third-party apps.
+
+---
+
+## Roadmap
+
+See [REVIEW.md](REVIEW.md) for the full technical-lead review and 72-idea feature backlog.
+
+**Iteration 3 (next):**
+- `Reachability` enum replacing the `-100`/`-92` Int sentinels for offline/error state
+- `DiscoveryService` protocol + `DemoDiscoveryService` (demo mode, Previews, testable poll loop)
+- Re-key `DeviceStatsStore` / `ActivityStore` / notifications by `uniqueIdentifier` (survives device renames)
+
+**Sprint 2 (planned):** Room-first survey as primary flow, demo network for App Review, empty-state polish.
+
+**Sprint 3 (planned):** Matter diagnostics spike, resilience score, uptime history, notification digests.
+
+---
+
+## Privacy
+
+- HomeKit device inventory and survey location data stored locally in the app's Documents directory
+- App Group data shared with the widget contains only aggregate counts (grade, score, device count) — no device names or coordinates
+- Location used only during surveys; permission requested at survey start
+- No analytics, no remote telemetry
