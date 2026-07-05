@@ -7,9 +7,11 @@ struct SettingsView: View {
 
     @Environment(DeviceStatsStore.self)   private var statsStore
     @Environment(HealthHistoryStore.self) private var historyStore
+    @Environment(ActivityStore.self)      private var activityStore
 
-    @State private var showClearStatsConfirm   = false
-    @State private var showClearHistoryConfirm = false
+    @State private var showClearStatsConfirm    = false
+    @State private var showClearHistoryConfirm  = false
+    @State private var showClearActivityConfirm = false
 
     private let gracePeriodOptions: [(label: String, seconds: Double)] = [
         ("30 seconds",  30),
@@ -82,6 +84,19 @@ struct SettingsView: View {
             ) {
                 Button("Clear History", role: .destructive) {
                     historyStore.clearAll()
+                }
+            }
+
+            Button("Clear Activity Feed", role: .destructive) {
+                showClearActivityConfirm = true
+            }
+            .confirmationDialog(
+                "Clear all activity events?",
+                isPresented: $showClearActivityConfirm,
+                titleVisibility: .visible
+            ) {
+                Button("Clear Activity", role: .destructive) {
+                    activityStore.clearAll()
                 }
             }
         }

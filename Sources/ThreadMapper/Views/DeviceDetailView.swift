@@ -8,6 +8,7 @@ struct DeviceDetailView: View {
     @Environment(DeviceNotesStore.self) private var notesStore
     @State private var noteText = ""
     @State private var isEditingNote = false
+    @State private var troubleshootProblem: TroubleshooterView.Problem? = nil
 
     private var stats: DeviceStats? { statsStore.stats(for: device.name) }
     private var surveyPoints: [SurveyPoint] { surveyVM.surveys(for: device.name) }
@@ -29,6 +30,9 @@ struct DeviceDetailView: View {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Done") { dismiss() }
                 }
+            }
+            .sheet(item: $troubleshootProblem) { problem in
+                TroubleshooterView(device: device, problem: problem)
             }
         }
     }
@@ -129,6 +133,30 @@ struct DeviceDetailView: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
+            }
+
+            // Troubleshooter entry point for offline or weak devices
+            let rssi = stats?.latestRSSI ?? device.rssi ?? -65
+            if rssi == -100 {
+                Button {
+                    troubleshootProblem = .offline
+                } label: {
+                    Label("Troubleshoot Offline Device", systemImage: "wrench.and.screwdriver")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
+                .padding(.top, 4)
+            } else if rssi < -80 {
+                Button {
+                    troubleshootProblem = .weakSignal
+                } label: {
+                    Label("Troubleshoot Weak Signal", systemImage: "wrench.and.screwdriver")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.orange)
+                .padding(.top, 4)
             }
         }
     }

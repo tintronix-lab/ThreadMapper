@@ -41,6 +41,7 @@ final class MeshViewModel {
     @ObservationIgnored private var knownDeviceNames: Set<String> = []
     @ObservationIgnored private var offlineDeviceNames: Set<String> = []
     @ObservationIgnored private var pendingOfflineTasks: [String: Task<Void, Never>] = [:]
+    @ObservationIgnored private var previousHealthScore: Int? = nil
 
     private var effectiveGracePeriod: TimeInterval {
         let stored = UserDefaults.standard.double(forKey: "offlineGracePeriod")
@@ -92,6 +93,12 @@ final class MeshViewModel {
                                 }
                                 NotificationService.shared.notifyTopologyChange(
                                     joined: Array(joined), left: Array(left))
+                                for name in joined.sorted() {
+                                    ActivityStore.shared.record(kind: .topologyJoined, deviceName: name, detail: "\(name) joined the Thread network")
+                                }
+                                for name in left.sorted() {
+                                    ActivityStore.shared.record(kind: .topologyLeft, deviceName: name, detail: "\(name) left the Thread network")
+                                }
                             }
                         }
                         self.knownDeviceNames = Set(latest.map(\.name))
@@ -106,12 +113,17 @@ final class MeshViewModel {
                             self.offlineDeviceNames.insert(device.name)
                             let name = device.name; let room = device.room
                             let gracePeriod = self.effectiveGracePeriod
+                        let isBR = device.isBorderRouter
                         let t = Task {
                                 try? await Task.sleep(for: .seconds(gracePeriod))
                                 guard !Task.isCancelled else { return }
                                 await MainActor.run {
                                     if self.offlineDeviceNames.contains(name) {
                                         NotificationService.shared.notifyDeviceOffline(name, room: room)
+                                        let kind: ActivityEvent.Kind = isBR ? .borderRouterOffline : .deviceOffline
+                                        let loc = room.map { " in \($0)" } ?? ""
+                                        ActivityStore.shared.record(kind: kind, deviceName: name, room: room,
+                                            detail: "\(name)\(loc) has been unreachable for over \(Int(gracePeriod / 60) > 0 ? "\(Int(gracePeriod / 60))m" : "\(Int(gracePeriod))s")")
                                     }
                                     self.pendingOfflineTasks[name] = nil
                                 }
@@ -122,6 +134,9 @@ final class MeshViewModel {
                             self.pendingOfflineTasks[device.name] = nil
                             self.offlineDeviceNames.remove(device.name)
                             NotificationService.shared.clearOfflineNotification(for: device.name)
+                            let loc = device.room.map { " in \($0)" } ?? ""
+                            ActivityStore.shared.record(kind: .deviceOnline, deviceName: device.name, room: device.room,
+                                detail: "\(device.name)\(loc) is back online")
                         }
                     }
 
@@ -153,6 +168,19 @@ final class MeshViewModel {
                         Dictionary(self.devices.map { ($0.name, $0.rssi != -100) }, uniquingKeysWith: { _, new in new })
                     )
                     HealthHistoryStore.shared.record(score: health.score, grade: health.grade)
+
+                    // Emit activity event when health score shifts by 15+ points
+                    if let prev = self.previousHealthScore {
+                        let delta = health.score - prev
+                        if delta <= -15 {
+                            ActivityStore.shared.record(kind: .healthDegraded,
+                                detail: "Network health dropped from \(prev) to \(health.score) — Grade \(health.grade)")
+                        } else if delta >= 15 {
+                            ActivityStore.shared.record(kind: .healthImproved,
+                                detail: "Network health improved from \(prev) to \(health.score) — Grade \(health.grade)")
+                        }
+                    }
+                    self.previousHealthScore = health.score
                 }
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
             }
