@@ -18,9 +18,11 @@ struct SurveyWalkView: View {
     var body: some View {
         NavigationStack {
             Form {
-                recordingSection
+                guidedSurveySection
+                roomCoverageSection
                 currentReadingSection
                 heatmapSection
+                freeWalkSection
                 weakLinksSection
             }
             .navigationTitle("Survey Walk")
@@ -40,17 +42,123 @@ struct SurveyWalkView: View {
     // MARK: - Sections
 
     @ViewBuilder
-    private var recordingSection: some View {
+    private var guidedSurveySection: some View {
+        Section {
+            Button {
+                showGuidedSurvey = true
+            } label: {
+                HStack(spacing: 14) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.accentColor.opacity(0.1))
+                            .frame(width: 44, height: 44)
+                        Image(systemName: "house.and.flag.fill")
+                            .font(.title3)
+                            .foregroundStyle(Color.accentColor)
+                    }
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Survey My Home")
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                        Text("Room-by-room guided walk with instant results")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.vertical, 4)
+            }
+            .buttonStyle(.plain)
+            .disabled(meshVM.rooms.isEmpty)
+        } header: {
+            HStack {
+                Text("Survey")
+                Spacer()
+                NavigationLink("Saved (\(viewModel.savedPointCount))") {
+                    SavedSurveyList()
+                }
+                .font(.caption)
+            }
+        } footer: {
+            if meshVM.rooms.isEmpty {
+                Text("No rooms found — scan for devices first.")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var roomCoverageSection: some View {
+        let stats = viewModel.roomStats()
+        if !stats.isEmpty {
+            Section {
+                ForEach(stats, id: \.room) { stat in
+                    roomCoverageBar(room: stat.room, avgRSSI: stat.avgRSSI, sampleCount: stat.sampleCount)
+                }
+            } header: {
+                HStack {
+                    Text("Room Coverage")
+                    Spacer()
+                    Text("\(stats.count) room\(stats.count == 1 ? "" : "s")")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func roomCoverageBar(room: String, avgRSSI: Double, sampleCount: Int) -> some View {
+        let rssiInt = Int(avgRSSI.rounded())
+        let color = rssiInt.rssiColor
+        let quality = rssiInt.rssiQualityLabel
+        let fraction = max(0.0, min(1.0, (avgRSSI + 100.0) / 50.0))
+        VStack(spacing: 6) {
+            HStack {
+                Image(systemName: TMStyle.roomIcon(room))
+                    .foregroundStyle(color)
+                    .imageScale(.small)
+                    .frame(width: 18)
+                Text(room)
+                    .font(.subheadline)
+                Spacer()
+                Text(quality)
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(color)
+                Text("· \(sampleCount) samples")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(color.opacity(0.12))
+                        .frame(height: 5)
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(color)
+                        .frame(width: geo.size.width * fraction, height: 5)
+                }
+            }
+            .frame(height: 5)
+            .animation(.easeOut(duration: 0.5), value: fraction)
+        }
+        .padding(.vertical, 4)
+    }
+
+    @ViewBuilder
+    private var freeWalkSection: some View {
         Section {
             Button {
                 viewModel.toggleRecording()
                 if !viewModel.isRecording { refreshHeatmap() }
             } label: {
                 Label(
-                    viewModel.isRecording ? "Stop Survey" : "Start Survey",
-                    systemImage: viewModel.isRecording ? "stop.circle.fill" : "record.circle"
+                    viewModel.isRecording ? "Stop Walk" : "Start Free Walk",
+                    systemImage: viewModel.isRecording ? "stop.circle.fill" : "figure.walk"
                 )
-                .foregroundStyle(viewModel.isRecording ? .red : .green)
+                .foregroundStyle(viewModel.isRecording ? .red : .secondary)
             }
 
             if viewModel.isRecording {
@@ -60,15 +168,9 @@ struct SurveyWalkView: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                     Spacer()
-                    if meshVM.devices.isEmpty {
-                        Text("No devices")
-                            .font(.caption2)
-                            .foregroundStyle(.orange)
-                    } else {
-                        Text("\(meshVM.devices.count) device\(meshVM.devices.count == 1 ? "" : "s")")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
+                    Text("\(meshVM.devices.count) device\(meshVM.devices.count == 1 ? "" : "s")")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
                 }
             }
 
@@ -79,20 +181,9 @@ struct SurveyWalkView: View {
             .foregroundStyle(.secondary)
             .disabled(viewModel.isRecording)
         } header: {
-            HStack {
-                Text("Survey")
-                Spacer()
-                if !meshVM.rooms.isEmpty {
-                    Button("Guided Walk") {
-                        showGuidedSurvey = true
-                    }
-                    .font(.caption)
-                }
-                NavigationLink("Saved (\(viewModel.savedPointCount))") {
-                    SavedSurveyList()
-                }
-                .font(.caption)
-            }
+            Text("Free Walk")
+        } footer: {
+            Text("Records GPS-tagged samples as you walk. Use Guided Survey above for room-based results.")
         }
     }
 
@@ -123,14 +214,14 @@ struct SurveyWalkView: View {
                             }
                         }
                         Spacer()
-                        if let rssi {
+                        if device.rssi != nil {
                             VStack(alignment: .trailing, spacing: 1) {
-                                Text("\(rssi) dBm")
-                                    .font(.caption2.monospacedDigit().weight(.medium))
-                                    .foregroundStyle(q.color)
                                 Text(q.label)
+                                    .font(.caption2.weight(.semibold))
+                                    .foregroundStyle(q.color)
+                                Text("response quality")
                                     .font(.system(size: 9))
-                                    .foregroundStyle(q.color.opacity(0.8))
+                                    .foregroundStyle(q.color.opacity(0.7))
                             }
                         } else {
                             Text("Measuring…")
@@ -254,7 +345,7 @@ struct SurveyWalkView: View {
                             Text(device.name)
                                 .font(.subheadline)
                                 .lineLimit(1)
-                            Text("\(device.rssi) dBm · \(q.label)")
+                            Text("\(q.label) signal")
                                 .font(.caption2)
                                 .foregroundStyle(q.color)
                         }
@@ -278,16 +369,13 @@ struct SurveyWalkView: View {
     private func weakSpotSummary(from cells: [SurveyHeatmapPresenter.Cell]) -> some View {
         let spots = SurveyHeatmapPresenter.weakSpots(from: cells)
         if !spots.isEmpty {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Weak spots: \(spots.count)")
-                    .font(.caption2.weight(.semibold))
+            HStack(spacing: 6) {
+                Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(.orange)
-                ForEach(Array(spots.enumerated()), id: \.offset) { _, cell in
-                    Text(String(format: "%.5f, %.5f  (score %.2f)",
-                                cell.coordinate.latitude, cell.coordinate.longitude, cell.score))
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
+                    .imageScale(.small)
+                Text("\(spots.count) weak spot\(spots.count == 1 ? "" : "s") detected — consider adding a Thread router")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
             }
         }
     }

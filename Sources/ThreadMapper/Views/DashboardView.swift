@@ -8,6 +8,11 @@ struct DashboardView: View {
     @Environment(HealthHistoryStore.self)  private var historyStore
     @State private var selectedDevice: ThreadDevice?
     @State private var selectedRoom: String? = nil
+    @State private var showWeeklyReport = false
+    @State private var showPaywall = false
+    @State private var showAchievements = false
+    @State private var achievementStore = AchievementStore.shared
+    @State private var bannerVisible = false
 
     // Computed once per poll tick in MeshViewModel — not per render.
     private var health: NetworkHealthScore { viewModel.health }
@@ -32,6 +37,8 @@ struct DashboardView: View {
                 if !health.tips.isEmpty {
                     tipsSection
                 }
+                resilienceSection
+                achievementsSection
                 trendSection
                 healthHistorySection
                 if !roomGroups.isEmpty {
@@ -56,9 +63,52 @@ struct DashboardView: View {
                     }
                     .disabled(viewModel.isScanning)
                 }
+                if let _ = WeeklyReportStore.shared.latestReport {
+                    ToolbarItem(placement: .secondaryAction) {
+                        Button {
+                            showWeeklyReport = true
+                        } label: {
+                            Label("Weekly Report", systemImage: "doc.text.fill")
+                        }
+                    }
+                }
             }
             .sheet(item: $selectedDevice) { device in
                 DeviceDetailView(device: device)
+            }
+            .sheet(isPresented: $showWeeklyReport) {
+                if let report = WeeklyReportStore.shared.latestReport {
+                    WeeklyReportView(report: report)
+                }
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView()
+            }
+            .sheet(isPresented: $showAchievements) {
+                NavigationStack { AchievementsView() }
+            }
+            .overlay(alignment: .top) {
+                if let unlocked = achievementStore.recentlyUnlocked, bannerVisible {
+                    AchievementBanner(achievement: unlocked) {
+                        withAnimation { bannerVisible = false }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                            achievementStore.clearRecentlyUnlocked()
+                        }
+                    }
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .padding(.top, 8)
+                    .zIndex(1)
+                }
+            }
+            .onChange(of: achievementStore.recentlyUnlocked) { _, unlocked in
+                guard unlocked != nil else { return }
+                withAnimation(.spring(response: 0.4)) { bannerVisible = true }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+                    withAnimation { bannerVisible = false }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                        achievementStore.clearRecentlyUnlocked()
+                    }
+                }
             }
             .onAppear {
                 if !viewModel.isScanning {
@@ -149,7 +199,27 @@ struct DashboardView: View {
             }
             .padding(.vertical, 8)
         } header: {
-            Text("Network Health")
+            HStack {
+                Text("Network Health")
+                Spacer()
+                let streak = HealthStreakStore.shared.currentStreak
+                if streak >= 2 {
+                    if ProStore.shared.isPro {
+                        Label("\(streak)-day streak", systemImage: "flame.fill")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.orange)
+                    } else {
+                        Button {
+                            showPaywall = true
+                        } label: {
+                            Label("Streak", systemImage: "lock.fill")
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
         }
     }
 
@@ -279,6 +349,94 @@ struct DashboardView: View {
         .padding(.vertical, 3)
     }
 
+    // MARK: - Resilience
+
+    private var borderRouterCount: Int { viewModel.devices.filter(\.isBorderRouter).count }
+    private var routerCount: Int { viewModel.devices.filter { $0.isRouter || $0.isBorderRouter }.count }
+
+    private var resilienceGrade: String {
+        switch (borderRouterCount, routerCount) {
+        case (2..., 4...): return "A"
+        case (2..., 2...): return "B"
+        case (1..., 3...): return "C"
+        case (1..., 1...): return "D"
+        default:           return "F"
+        }
+    }
+
+    private var resilienceColor: Color { TMStyle.gradeColor(resilienceGrade) }
+
+    private var resilienceSummary: String {
+        switch resilienceGrade {
+        case "A": return "Excellent redundancy — true mesh failover"
+        case "B": return "Good resilience — dual border routers"
+        case "C": return "Moderate — one border router, some routing"
+        case "D": return "Limited — single router, no failover path"
+        default:  return "No border router — Thread network at risk"
+        }
+    }
+
+    private var resilienceCriticalNames: [String] {
+        guard resilienceGrade == "D" || resilienceGrade == "F" else { return [] }
+        return viewModel.devices.filter(\.isBorderRouter).map(\.name).sorted()
+    }
+
+    @ViewBuilder
+    private var resilienceSection: some View {
+        if !viewModel.devices.isEmpty {
+            Section {
+                HStack(spacing: 16) {
+                    ZStack {
+                        Circle()
+                            .stroke(resilienceColor.opacity(0.12), lineWidth: 6)
+                        Text(resilienceGrade)
+                            .font(.system(size: 22, weight: .black, design: .rounded))
+                            .foregroundStyle(resilienceColor)
+                    }
+                    .frame(width: 56, height: 56)
+                    .shadow(color: resilienceColor.opacity(0.2), radius: 6, x: 0, y: 2)
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(resilienceSummary)
+                            .font(.subheadline)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        HStack(spacing: 12) {
+                            Label("\(borderRouterCount) Border Router\(borderRouterCount == 1 ? "" : "s")",
+                                  systemImage: "antenna.radiowaves.left.and.right")
+                            Label("\(routerCount) Total Router\(routerCount == 1 ? "" : "s")",
+                                  systemImage: "point.3.connected.trianglepath.dotted")
+                        }
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+
+                        if !resilienceCriticalNames.isEmpty {
+                            Text("Critical: \(resilienceCriticalNames.joined(separator: ", "))")
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(.red)
+                        }
+                    }
+                }
+                .padding(.vertical, 6)
+            } header: {
+                HStack {
+                    Text("Mesh Resilience")
+                    Spacer()
+                    if !ProStore.shared.isPro {
+                        Button {
+                            showPaywall = true
+                        } label: {
+                            Label("Pro", systemImage: "lock.fill")
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+    }
+
     // MARK: - Tips
 
     @ViewBuilder
@@ -303,6 +461,49 @@ struct DashboardView: View {
             Label("Recommendations", systemImage: "lightbulb.fill")
                 .foregroundStyle(.primary)
                 .symbolRenderingMode(.multicolor)
+        }
+    }
+
+    // MARK: - Achievements
+
+    @ViewBuilder
+    private var achievementsSection: some View {
+        let unlocked = achievementStore.unlockedCount
+        let total = achievementStore.achievements.count
+        if unlocked > 0 {
+            Section {
+                Button {
+                    showAchievements = true
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "trophy.fill")
+                            .font(.title3)
+                            .foregroundStyle(.yellow)
+                            .frame(width: 32)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Achievements")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.primary)
+                            Text("\(unlocked) of \(total) unlocked")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        // Mini badge row
+                        HStack(spacing: 4) {
+                            ForEach(achievementStore.achievements.filter(\.isUnlocked).prefix(3)) { a in
+                                Image(systemName: a.icon)
+                                    .font(.caption2)
+                                    .foregroundStyle(.yellow)
+                            }
+                        }
+                        Image(systemName: "chevron.right")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .buttonStyle(.plain)
+            }
         }
     }
 

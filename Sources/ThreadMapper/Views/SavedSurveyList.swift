@@ -74,13 +74,14 @@ struct SavedSurveyList: View {
                         Label(room, systemImage: TMStyle.roomIcon(room))
                             .font(.caption2)
                             .foregroundStyle(.secondary)
+                    } else {
+                        Label("GPS survey", systemImage: "location.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
                     }
-                    Text(String(format: "%.4f, %.4f", point.coordinate.latitude, point.coordinate.longitude))
-                        .font(.caption2)
-                        .foregroundStyle(point.room == nil ? .secondary : .tertiary)
                 }
                 HStack(spacing: 8) {
-                    Label(String(format: "%.1f dBm", point.meanRSSI), systemImage: "wifi")
+                    Label(Int(point.meanRSSI.rounded()).rssiQualityLabel, systemImage: "wifi")
                         .font(.caption2)
                         .foregroundStyle(Int(point.meanRSSI).rssiColor)
                     Text("· \(point.sampleCount) samples")

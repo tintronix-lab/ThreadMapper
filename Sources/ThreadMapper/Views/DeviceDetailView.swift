@@ -114,6 +114,19 @@ struct DeviceDetailView: View {
                 }
                 .padding(.vertical, 4)
 
+                // Percentile row (needs ≥ 5 readings for meaningful p95)
+                if s.readingCount >= 5 {
+                    Divider()
+                    HStack(spacing: 0) {
+                        percentileCell(value: s.p50, label: "Median", sublabel: "p50")
+                        Divider().frame(height: 30)
+                        percentileCell(value: s.p95, label: "Worst 10%", sublabel: "p95")
+                        Divider().frame(height: 30)
+                        jitterCell(jitter: s.jitter, label: s.jitterLabel)
+                    }
+                    .padding(.vertical, 4)
+                }
+
                 // Quality distribution bar
                 VStack(alignment: .leading, spacing: 4) {
                     SignalQualityBarView(buckets: s.qualityBuckets)
@@ -176,6 +189,36 @@ struct DeviceDetailView: View {
                 .padding(.top, 4)
             }
         }
+    }
+
+    private func percentileCell(value: Int, label: String, sublabel: String) -> some View {
+        VStack(spacing: 1) {
+            Text(value.rssiQualityLabel)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(value.rssiColor)
+            Text(sublabel)
+                .font(.system(size: 8))
+                .foregroundStyle(.secondary)
+            Text(label)
+                .font(.system(size: 8))
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func jitterCell(jitter: Int, label: String) -> some View {
+        VStack(spacing: 1) {
+            Text(label)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(jitter < 10 ? .green : jitter < 20 ? .orange : .red)
+            Text("\(jitter) pts spread")
+                .font(.system(size: 8))
+                .foregroundStyle(.secondary)
+            Text("Jitter")
+                .font(.system(size: 8))
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private func statCell(value: Int, label: String, color: Color) -> some View {

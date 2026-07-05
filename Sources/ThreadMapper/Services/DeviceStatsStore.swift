@@ -102,7 +102,7 @@ final class DeviceStatsStore {
     private func persist() {
         struct Payload: Codable { var entries: [String: [Reading]] }
         guard let data = try? JSONEncoder().encode(Payload(entries: readings)) else { return }
-        try? data.write(to: storeURL, options: .atomic)
+        try? data.write(to: storeURL, options: [.atomic, .completeFileProtection])
     }
 
     private func restore() {
@@ -181,6 +181,28 @@ struct DeviceStats {
         let good = readings.filter { $0.rssi > -65 }.count
         return readings.isEmpty ? 0 : Int(Double(good) / Double(readings.count) * 100)
     }
+
+    var p50: Int {
+        guard !readings.isEmpty else { return avgRSSI }
+        let sorted = readings.map(\.rssi).sorted()
+        return sorted[sorted.count / 2]
+    }
+
+    var p95: Int {
+        guard readings.count >= 5 else { return minRSSI }
+        let sorted = readings.map(\.rssi).sorted()
+        return sorted[min(sorted.count - 1, sorted.count * 95 / 100)]
+    }
+
+    var jitter: Int { p95 - p50 }
+
+    var jitterLabel: String {
+        switch jitter {
+        case ..<10:  return "Stable"
+        case 10..<20: return "Variable"
+        default:     return "Erratic"
+        }
+    }
 }
 
 // MARK: - Sparkline view
@@ -219,6 +241,23 @@ struct SignalSparklineView: View {
             let top = yPos(hi), bot = yPos(lo)
             ctx.fill(Path(CGRect(x: 0, y: top, width: size.width, height: bot - top)),
                      with: .color(color.opacity(0.07)))
+        }
+
+        // p50 / p95 reference lines
+        if readings.count >= 5 {
+            let sortedRSSIs = readings.map(\.rssi).sorted()
+            let p50 = sortedRSSIs[sortedRSSIs.count / 2]
+            let p95 = sortedRSSIs[min(sortedRSSIs.count - 1, sortedRSSIs.count * 95 / 100)]
+            for (value, label, color) in [(p50, "p50", Color.blue), (p95, "p95", Color.orange)] {
+                let yVal = yPos(value)
+                var ln = Path()
+                ln.move(to: CGPoint(x: 22, y: yVal))
+                ln.addLine(to: CGPoint(x: size.width, y: yVal))
+                ctx.stroke(ln, with: .color(color.opacity(0.55)),
+                           style: StrokeStyle(lineWidth: 1.0, dash: [4, 3]))
+                let txt = ctx.resolve(Text(label).font(.system(size: 7)).foregroundStyle(color.opacity(0.8)))
+                ctx.draw(txt, at: CGPoint(x: 10, y: yVal - 4))
+            }
         }
 
         // Threshold dashed lines

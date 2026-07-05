@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct GuidedSurveyView: View {
     @Environment(SurveyViewModel.self) private var surveyVM
@@ -13,6 +14,8 @@ struct GuidedSurveyView: View {
     @State private var sampleTask: Task<Void, Never>?
     @State private var elapsedSeconds = 0
     @State private var tickTask: Task<Void, Never>?
+    @State private var hapticEnabled = false
+    @State private var hapticTask: Task<Void, Never>?
 
     private var isDone: Bool { currentIndex >= rooms.count }
     private var currentRoom: String? { isDone ? nil : rooms[currentIndex] }
@@ -37,6 +40,18 @@ struct GuidedSurveyView: View {
                     Button("Cancel") {
                         stopRecording()
                         isPresented = false
+                    }
+                }
+                if isRecording {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button {
+                            hapticEnabled.toggle()
+                            if hapticEnabled { startHapticPulse() } else { hapticTask?.cancel() }
+                        } label: {
+                            Image(systemName: hapticEnabled ? "waveform.circle.fill" : "waveform.circle")
+                                .symbolEffect(.pulse, isActive: hapticEnabled)
+                        }
+                        .tint(hapticEnabled ? .accentColor : .secondary)
                     }
                 }
             }
@@ -133,6 +148,12 @@ struct GuidedSurveyView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
+                if !isRecording {
+                    Label("Tap the waveform button while recording to feel signal strength via haptics.", systemImage: "waveform.circle")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                        .multilineTextAlignment(.center)
+                }
             }
 
             // Live signal preview while recording
@@ -183,11 +204,12 @@ struct GuidedSurveyView: View {
     private var liveSignalRow: some View {
         HStack(spacing: 12) {
             ForEach(meshVM.devices.prefix(4)) { device in
-                if let rssi = device.rssi {
+                if device.rssi != nil {
+                    let rssi = device.rssi!
                     VStack(spacing: 2) {
-                        Text("\(rssi)")
-                            .font(.system(.caption, design: .monospaced).weight(.semibold))
-                            .foregroundStyle(rssi > -65 ? Color.green : rssi > -80 ? Color.orange : Color.red)
+                        Text(rssi.rssiQualityLabel)
+                            .font(.system(size: 9, weight: .semibold))
+                            .foregroundStyle(rssi.rssiColor)
                         Text(device.name)
                             .font(.system(size: 8))
                             .foregroundStyle(.secondary)
@@ -203,7 +225,13 @@ struct GuidedSurveyView: View {
 
     // MARK: - Completion card
 
+    @ViewBuilder
     private var completionCard: some View {
+        let stats = surveyVM.roomStats().filter { completedRooms.contains($0.room) }
+        let best  = stats.max(by: { $0.avgRSSI < $1.avgRSSI })
+        let worst = stats.min(by: { $0.avgRSSI < $1.avgRSSI })
+        let weakNames = surveyVM.weakDeviceNames(for: completedRooms)
+
         VStack(spacing: 24) {
             ZStack {
                 Circle()
@@ -214,18 +242,56 @@ struct GuidedSurveyView: View {
                     .foregroundStyle(.green)
             }
 
-            VStack(spacing: 8) {
-                Text("Survey Complete!")
+            VStack(spacing: 6) {
+                Text("Survey Complete")
                     .font(.title.weight(.bold))
-                Text("Surveyed \(completedRooms.count) of \(rooms.count) rooms. Results saved — open the Heatmap in the Survey tab to review coverage.")
+                Text("\(completedRooms.count) of \(rooms.count) room\(rooms.count == 1 ? "" : "s") surveyed")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
             }
 
-            Button {
-                isPresented = false
-            } label: {
+            if !stats.isEmpty {
+                VStack(spacing: 10) {
+                    if let best = best {
+                        resultRow(
+                            label: "Best coverage",
+                            room: best.room,
+                            rssi: best.avgRSSI,
+                            icon: "checkmark.seal.fill",
+                            tint: .green
+                        )
+                    }
+                    if let worst = worst, worst.room != best?.room {
+                        resultRow(
+                            label: worst.avgRSSI < -75 ? "Needs a router nearby" : "Weakest room",
+                            room: worst.room,
+                            rssi: worst.avgRSSI,
+                            icon: worst.avgRSSI < -75 ? "exclamationmark.triangle.fill" : "wifi.exclamationmark",
+                            tint: worst.avgRSSI < -75 ? .orange : .yellow
+                        )
+                    }
+                    if !weakNames.isEmpty {
+                        HStack(spacing: 10) {
+                            Image(systemName: "wifi.slash")
+                                .foregroundStyle(.red)
+                                .frame(width: 20)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("\(weakNames.count) weak device\(weakNames.count == 1 ? "" : "s") detected")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.primary)
+                                Text(weakNames.joined(separator: ", "))
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .padding(10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(.red.opacity(0.07), in: RoundedRectangle(cornerRadius: 10))
+                    }
+                }
+            }
+
+            Button { isPresented = false } label: {
                 Label("Done", systemImage: "checkmark")
                     .frame(maxWidth: .infinity)
             }
@@ -234,6 +300,32 @@ struct GuidedSurveyView: View {
         }
         .padding(24)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24))
+    }
+
+    @ViewBuilder
+    private func resultRow(label: String, room: String, rssi: Double, icon: String, tint: Color) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .foregroundStyle(tint)
+                .frame(width: 20)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                HStack(spacing: 6) {
+                    Image(systemName: TMStyle.roomIcon(room))
+                        .imageScale(.small)
+                    Text(room)
+                        .font(.subheadline.weight(.semibold))
+                }
+            }
+            Spacer()
+            Text(Int(rssi.rounded()).rssiQualityLabel)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(tint)
+        }
+        .padding(10)
+        .background(tint.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
     }
 
     // MARK: - Sampling
@@ -266,10 +358,40 @@ struct GuidedSurveyView: View {
     private func stopRecording(room: String? = nil) {
         sampleTask?.cancel(); sampleTask = nil
         tickTask?.cancel(); tickTask = nil
+        hapticTask?.cancel(); hapticTask = nil
+        hapticEnabled = false
         // Tag the saved session with the surveyed room — the reliable indoor
         // position signal (GPS is not, at room scale).
         if surveyVM.isRecording { surveyVM.toggleRecording(room: room) }
         isRecording = false
+        // Unlock survey achievements based on rooms completed so far + this one
+        let totalCompleted = completedRooms.count + (room != nil ? 1 : 0)
+        if totalCompleted >= 1 { AchievementStore.shared.unlock("firstSurvey") }
+        if totalCompleted >= 3 { AchievementStore.shared.unlock("surveyThreeRooms") }
+    }
+
+    // MARK: - Haptic Geiger Mode
+
+    private func startHapticPulse() {
+        hapticTask?.cancel()
+        hapticTask = Task {
+            while !Task.isCancelled {
+                let avgRSSI = meshVM.devices.compactMap(\.rssi).reduce(0, +) / max(1, meshVM.devices.compactMap(\.rssi).count)
+                let (interval, style): (Double, UIImpactFeedbackGenerator.FeedbackStyle) = {
+                    switch avgRSSI {
+                    case ..<(-85): return (3.0, .light)
+                    case ..<(-75): return (1.8, .light)
+                    case ..<(-65): return (1.0, .medium)
+                    case ..<(-55): return (0.5, .medium)
+                    default:       return (0.3, .heavy)
+                    }
+                }()
+                await MainActor.run {
+                    UIImpactFeedbackGenerator(style: style).impactOccurred()
+                }
+                try? await Task.sleep(for: .seconds(interval))
+            }
+        }
     }
 
     // MARK: - Helpers

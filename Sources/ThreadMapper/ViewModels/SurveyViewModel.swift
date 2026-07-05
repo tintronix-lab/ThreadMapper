@@ -152,6 +152,26 @@ final class SurveyViewModel {
 
     var locationStatusLabel: String { locationStatus }
 
+    /// Per-room signal quality aggregated from saved survey points that have a room tag.
+    /// Sorted best-first (highest avgRSSI).
+    func roomStats() -> [(room: String, avgRSSI: Double, sampleCount: Int)] {
+        let grouped = Dictionary(grouping: savedPoints.filter { $0.room != nil }) { $0.room! }
+        return grouped.map { room, points in
+            let avgRSSI = points.map(\.meanRSSI).reduce(0, +) / Double(points.count)
+            let totalSamples = points.map(\.sampleCount).reduce(0, +)
+            return (room: room, avgRSSI: avgRSSI, sampleCount: totalSamples)
+        }.sorted { $0.avgRSSI > $1.avgRSSI }
+    }
+
+    /// Unique weak-device names across saved points for the given rooms.
+    func weakDeviceNames(for rooms: Set<String>) -> [String] {
+        let relevant = savedPoints.filter { pt in
+            guard let room = pt.room else { return false }
+            return rooms.contains(room)
+        }
+        return Array(Set(relevant.flatMap(\.weakDeviceList))).sorted()
+    }
+
     // Convenience wrapper used by SurveyWalkView
     func signalQuality(for rssi: Int) -> (label: String, color: Color) {
         (rssi.rssiQualityLabel, rssi.rssiColor)
@@ -195,7 +215,7 @@ final class SurveyViewModel {
                 return dict
             }
             let data = try JSONSerialization.data(withJSONObject: payload, options: [])
-            try data.write(to: storeURL, options: [.atomic])
+            try data.write(to: storeURL, options: [.atomic, .completeFileProtection])
         } catch {
             print("Survey persist failed: \(error)")
         }

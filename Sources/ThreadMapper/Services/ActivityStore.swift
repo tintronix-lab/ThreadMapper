@@ -42,7 +42,7 @@ final class ActivityStore {
 
     private func persist() {
         guard let data = try? JSONEncoder().encode(events) else { return }
-        try? data.write(to: storeURL, options: .atomic)
+        try? data.write(to: storeURL, options: [.atomic, .completeFileProtection])
     }
 
     private func restore() {

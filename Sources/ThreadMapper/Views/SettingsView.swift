@@ -16,6 +16,9 @@ struct SettingsView: View {
     @State private var showClearStatsConfirm    = false
     @State private var showClearHistoryConfirm  = false
     @State private var showClearActivityConfirm = false
+    #if DEBUG
+    @State private var showPaywallPreview = false
+    #endif
 
     private let gracePeriodOptions: [(label: String, seconds: Double)] = [
         ("30 seconds",  30),
@@ -33,8 +36,14 @@ struct SettingsView: View {
                 dataSection
                 toolsSection
                 aboutSection
+                #if DEBUG
+                debugSection
+                #endif
             }
             .navigationTitle("Settings")
+            #if DEBUG
+            .sheet(isPresented: $showPaywallPreview) { PaywallView() }
+            #endif
         }
     }
 
@@ -160,6 +169,21 @@ struct SettingsView: View {
             }
         }
     }
+
+    #if DEBUG
+    @ViewBuilder
+    private var debugSection: some View {
+        Section {
+            Button("Preview Paywall") {
+                showPaywallPreview = true
+            }
+        } header: {
+            Text("Debug")
+        } footer: {
+            Text("Debug-only. Not visible in release builds.")
+        }
+    }
+    #endif
 
     @ViewBuilder
     private var aboutSection: some View {

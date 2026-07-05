@@ -293,4 +293,188 @@ Highest-impact improvement identified: **the 1 Hz `reloadAllTimelines()` battery
 
 **Remaining High issues:** H6 store identity migration to UUID (partially done for DeviceStatsStore/notifications — ActivityStore and SurveyViewModel still use device name as key).
 
-**Iteration 5 backlog (next highest impact):** App Intents/Siri integration ("What's my Thread health?" shortcut); ActivityStore + SurveyViewModel re-keying to UUID (completes H6); SwiftData migration to replace hand-rolled JSON stores; room-first survey flow as primary CTA (completes Sprint 2 roadmap).
+**Iteration 5 →** see below.
+
+## Phase 8 — Iteration 5 (implemented)
+
+1. **34–35 App Intents / Siri** — Two `AppIntent` structs in `Sources/ThreadMapper/Intents/NetworkHealthIntents.swift`:
+   - `GetNetworkHealthIntent` — "Check my Thread network in ThreadMapper" returns grade, score, and a human-readable summary via Siri dialog. Reads from `AppGroupStore.readSnapshot()` so it works without opening the app.
+   - `GetOfflineDevicesIntent` — "Which devices are offline in ThreadMapper" lists all offline device names from the snapshot, or confirms all devices are online.
+   - `ThreadMapperShortcuts: AppShortcutsProvider` registers three phrase variants per intent; `updateAppShortcutParameters()` called on app launch from `ThreadMapperApp.init()`.
+   - `WidgetSnapshot` extended with `offlineDeviceNames: [String]` and `summary: String`; `MeshViewModel` now writes the offline device name list and a composed summary on every poll tick.
+2. **8 Mesh Resilience Score** — `resilienceSection` added to `DashboardView` between Tips and Trend sections. Grades A–F based on border-router and total-router counts (A = 2+ BRs, 4+ routers; D = single router, no failover; F = no BR). Shows: 62px grade ring, descriptive summary, BR + router counts, and the names of the critical single-point-of-failure devices when grade is D or F.
+3. **51 Health Streaks** — `HealthStreakStore` (`@Observable`, singleton, JSON-persisted) tracks consecutive Grade-A days. `record(grade:)` is called once per calendar day regardless of poll frequency. `currentStreak`, `longestStreak`, and `totalADays` are persisted across launches. A flame badge ("N-day streak") appears in the "Network Health" section header when `currentStreak ≥ 2`.
+
+**Iteration 6 →** see below.
+
+## Phase 8 — Iteration 6 (implemented)
+
+1. **Room-first survey CTA** — `SurveyWalkView` restructured so "Survey My Home" (guided, room-by-room) is the prominent primary action with a large icon card and description. The GPS free-walk is moved into a clearly labeled "Free Walk" section below with a footer explaining it's the advanced/outdoor option. The header "Guided Walk" button removed — replaced by the card.
+2. **Room Coverage bars** — New `roomCoverageSection` in `SurveyWalkView` aggregates all saved survey points with a room tag via `SurveyViewModel.roomStats()`. Each room gets a horizontal quality bar (color-coded, sorted best-first) showing response quality and sample count. Appears as soon as at least one guided survey has been completed.
+3. **Rich completion card** — `GuidedSurveyView.completionCard` replaced with a results summary showing: best-coverage room, weakest room (with suggestion to add a router if signal < −75 dBm), and a list of weak devices detected across all completed rooms. Data sourced from `SurveyViewModel.roomStats(for: completedRooms)` and `weakDeviceNames(for: completedRooms)`.
+4. **Raw coordinates removed** — Lat/lng strings removed from `SurveyMapView.detailCard` (replaced with room label), `SurveyWalkView.weakSpotSummary` (replaced with count + advice), and `SavedSurveyList.surveyRow` (GPS surveys now labeled "GPS survey" with a location icon instead of coordinates).
+5. **Response Quality labels** — Remaining "dBm" instances in `SurveyWalkView.currentReadingSection` and `weakLinksSection` replaced with quality labels ("Good signal", "Fair", etc.) consistent with the Dashboard and mesh graph (completes H4 across the full app).
+
+**Iteration 7 →** see below.
+
+## Phase 8 — Iteration 7 (planned)
+
+Three features selected from the full roadmap — one per category. Chosen because each builds directly on existing infrastructure (no new services required) and collectively deepen the product's value proposition from three independent angles: data fidelity, passive insight delivery, and monetization.
+
+---
+
+### Feature A — Latency Percentiles: p50 / p95 per Device (Core #9)
+
+**What:** Replace the single "average RSSI" stat in `DeviceDetailView` with three signal-quality statistics: median (p50), worst-10th-percentile (p95), and jitter (p95 – p50 spread). A device with p50 = Good but p95 = Poor is intermittently flaky — the kind of diagnosis the current average hides completely.
+
+**Why now:** `DeviceStatsStore` already stores up to 200 timestamped `Reading(timestamp: Date, rssi: Int)` entries per device in memory. The percentile computation is a pure sort-and-index operation — zero new persistence, zero new services.
+
+**Technical plan:**
+
+1. **`DeviceStatsStore`** — add a computed method `percentiles(for deviceID: UUID) -> (p50: Int, p95: Int, jitter: Int)?`:
+   ```swift
+   func percentiles(for deviceID: UUID) -> (p50: Int, p95: Int, jitter: Int)? {
+       guard let readings = recentReadings[deviceID], readings.count >= 5 else { return nil }
+       let sorted = readings.map(\.rssi).sorted()
+       let p50 = sorted[sorted.count / 2]
+       let p95 = sorted[min(sorted.count - 1, sorted.count * 95 / 100)]
+       return (p50: p50, p95: p95, jitter: p95 - p50)
+   }
+   ```
+   The existing `recentReadings` dictionary (capped at 200 entries, already tracked) is the source — no schema change needed.
+
+2. **`DeviceDetailView`** — replace or augment the existing "RQ" stat cell with three new cells in the stats grid:
+   - "Median RQ" — p50 quality label + color (e.g. "Good")
+   - "Worst 10%" — p95 quality label (highlights intermittent drops)
+   - "Jitter" — p95 – p50 as a number; tinted orange/red if > 15 (indicates instability)
+   A `jitterLabel` helper: `jitter < 10 → "Stable"`, `10–20 → "Variable"`, `> 20 → "Erratic"`.
+
+3. **`SignalSparklineView`** — add two horizontal dashed reference lines at the p50 and p95 RSSI values (drawn with `Canvas` `stroke path` using `[3, 3]` dash pattern). These lines make the distribution visible on the sparkline without cluttering it. Label them with tiny "p50" / "p95" tags at the right edge.
+
+4. **`NetworkHealthScore`** — update the weak-device penalty: currently any device with avg RSSI < −75 is "weak". Change to: weak if p95 < −80 (i.e., at least 5% of readings are Poor), which is more accurate and forgiving of brief spikes.
+
+**Files:** `DeviceStatsStore.swift`, `DeviceDetailView.swift`, `SignalSparklineView.swift`, `NetworkHealthScore.swift`
+**Effort:** ~1 day
+
+---
+
+### Feature B — Auto-Generated Weekly Health Report (AI #14)
+
+**What:** Every 7 days, the app generates a plain-English summary of how the network performed that week and delivers it as a local notification with a "Read report" action that opens a `WeeklyReportView` sheet. No server, no ML — pure template generation from the data already in `HealthHistoryStore`, `ActivityStore`, and `DeviceStatsStore`.
+
+**Why now:** `HealthHistoryStore` has up to 288 entries (24h at 5-min intervals, rolling); `ActivityStore` has timestamped events including `deviceOffline`, `healthDegraded`, `healthImproved`; `DeviceStatsStore` has per-device `DeviceStats`. Generating a weekly report is a read operation on all three — no new data collection.
+
+**Technical plan:**
+
+1. **`WeeklyReportStore`** — `@Observable` singleton, JSON-persisted:
+   ```swift
+   struct WeeklyReport: Codable, Identifiable {
+       let id: UUID
+       let generatedAt: Date
+       let weekStart: Date
+       let avgScore: Int           // average health score over the week
+       let peakGrade: String       // best grade achieved
+       let offlineEventCount: Int  // total offline events
+       let mostProblematicDevice: String?  // device with most offline events
+       let improvementDelta: Int   // score(last day) - score(first day)
+       let streakDays: Int         // from HealthStreakStore
+       let body: String            // pre-rendered plain-English paragraph
+   }
+   ```
+   `generate() -> WeeklyReport` is called once per week (checked on app foreground):
+   - Filter `HealthHistoryStore.entries` to the last 7 days → compute avg score, peak grade
+   - Filter `ActivityStore.events` to `.deviceOffline` in last 7 days → count by device name → find max
+   - `HealthStreakStore.shared.currentStreak` for the streak line
+   - Template: *"Your Thread network averaged Grade [X] this week ([score]/100). [Device] was the most disruptive, going offline [N] times. [Streak line if ≥ 3 days: 'You're on a [N]-day Grade A streak — great work.'] [Improvement line: 'Performance improved by [delta] points since Monday.']"*
+   - Persist report to `weekly_report.json`; expose via `WeeklyReportStore.shared.latestReport`
+
+2. **Notification delivery** — in `NotificationService`, add `scheduleWeeklyReport()`: a `UNCalendarNotificationTrigger` firing every Sunday at 9 AM. On tap, open the app to the report sheet. Reschedule after each delivery.
+
+3. **`WeeklyReportView`** — full-page sheet (or `ContentUnavailableView`-based empty state):
+   - Header: grade badge (same ring as Dashboard, 72px), week date range, avg score
+   - Body text: the generated paragraph in `.body` style
+   - Stats row: offline events · streak · improvement delta
+   - "Share" button: `ShareLink` to share the report text as plain text or a simple PNG card (generated with `ImageRenderer`)
+
+4. **Entry point** — in `DashboardView`, add a "Weekly Report" button in the header toolbar when `WeeklyReportStore.shared.latestReport != nil` (bell + dot badge). Also accessible from `ActivityFeedView`.
+
+5. **`AppIntent` extension** — add `GetWeeklyReportIntent` to `NetworkHealthIntents.swift`: "What's my Thread report for this week in ThreadMapper?" — returns `latestReport?.body` or a fallback.
+
+**Files:** `WeeklyReportStore.swift` (new), `WeeklyReportView.swift` (new), `NotificationService.swift`, `DashboardView.swift`, `NetworkHealthIntents.swift`
+**Effort:** ~2–3 days
+
+---
+
+### Feature C — Pro Tier Paywall (Premium #47)
+
+**What:** StoreKit 2 subscription gate separating a free tier (core dashboard, 7-day history cap, single border-router monitoring) from a Pro tier (unlimited history, resilience score, health streaks, Siri shortcuts, weekly reports, room survey results, Watch complication when built). Paywall triggered contextually — not at launch — when a free user first encounters a Pro feature.
+
+**Why now:** The Pro-only features are already built. StoreKit 2 requires no server — receipt validation is on-device. Adding the gate now, before the App Store submission, locks in the revenue model before users expect everything for free.
+
+**Technical plan:**
+
+1. **`ProStore`** — `@Observable` singleton using StoreKit 2:
+   ```swift
+   @Observable final class ProStore {
+       static let shared = ProStore()
+       private(set) var isPro: Bool = false
+       private(set) var product: Product?
+       // Product IDs (configured in App Store Connect):
+       static let annualID = "com.tintronixlab.ThreadMapper.pro.annual"   // $4.99/yr
+       static let lifetimeID = "com.tintronixlab.ThreadMapper.pro.lifetime" // $14.99
+   }
+   ```
+   On init: verify existing entitlements via `Transaction.currentEntitlements`. Observe `Transaction.updates` for renewals/revocations. Persist a `isPro` flag to `UserDefaults(suiteName: AppGroupStore.groupID)` so the widget and intents can read it without launching the app.
+
+2. **`PaywallView`** — presented as a sheet from any Pro feature gate:
+   - Header: "ThreadMapper Pro" with the mesh icon
+   - Feature list: 5 bullet points with SF Symbol icons (history, resilience, Siri, weekly report, streaks)
+   - Pricing: two buttons — Annual (with "Most popular" badge) and Lifetime
+   - Footer: "Restore Purchases" link + legal disclaimer
+   - On purchase success: `ProStore.shared.isPro = true` → dismiss sheet → feature becomes available immediately
+
+3. **Free-tier limits** (enforced in the existing code with guard statements):
+   - `HealthHistoryStore.record`: cap at 7-day window for free users (currently 24h, extend to 7d free / unlimited Pro). Change `maxEntries = isPro ? 2016 : 288` (2016 = 7 days × 288 per day).
+   - `resilienceSection` in `DashboardView`: show a "Pro" lock chip if not Pro; tapping presents `PaywallView`
+   - `HealthStreakStore` display: show streak only for Pro; free users see "Upgrade to track streaks"
+   - Siri shortcuts: `openAppWhenRun = isPro` — free tier opens the app instead of answering in-place (still works, just less seamless)
+   - Weekly report: Pro-only feature; the notification and sheet are gated
+
+4. **Contextual paywall triggers** (the right moment, not intrusive):
+   - First time `resilienceSection` would show a non-trivial grade (C or below) → soft prompt: "Unlock Resilience Score with Pro"
+   - First guided survey completion → "Pro unlocks full room history and weekly reports" → `PaywallView`
+   - History chart truncated at 7 days → "See 30+ days of history with Pro" inline button
+
+5. **`@AppStorage("isPro")`** — as a secondary fast-path check in views. The authoritative check is `ProStore.shared.isPro` (StoreKit-verified), but `@AppStorage` provides synchronous read without waiting for `async` StoreKit calls during view rendering.
+
+6. **App Store Connect setup** (outside the codebase): create the two products, set up pricing, add entitlement to `PrivacyInfo.xcprivacy` (no new API access needed), add `StoreKit Testing` config file for local testing in Simulator.
+
+**Files:** `ProStore.swift` (new), `PaywallView.swift` (new), `DashboardView.swift`, `HealthHistoryStore.swift`, `HealthStreakStore.swift`, `NetworkHealthIntents.swift`
+**Effort:** ~3–4 days (not counting App Store Connect product setup)
+
+---
+
+**Secondary Iteration 7 items (carry from previous backlog):** Dynamic Type audit — replace all fixed `font(.system(size: N))` with semantic text styles (`.caption2`, `.footnote`) so accessibility text sizes work; VoiceOver graph navigation (H12) with an `accessibilityChildren` overlay on `MeshGraphView`'s `Canvas`; `.completeFileProtection` on all JSON store files (one `write(options: [.atomic, .completeFileProtection])` change per store).
+
+## Phase 8 — Iteration 7 (implemented)
+
+### Feature A — Latency Percentiles (Core #9)
+1. **`DeviceStats.p50 / p95 / jitter / jitterLabel`** — computed from the sorted readings array already stored in `DeviceStatsStore`. `p50` = median; `p95` = worst 5th percentile (min 5 readings required); `jitter` = spread in pts; `jitterLabel` = "Stable / Variable / Erratic" based on thresholds (< 10 / 10–20 / 20+).
+2. **`SignalSparklineView`** — draws two additional reference lines when ≥ 5 readings exist: a blue dashed p50 line labeled "p50" and an orange dashed p95 line labeled "p95", both at the left edge. These sit above the existing zone threshold lines so the user can instantly see typical vs worst-case signal positions.
+3. **`DeviceDetailView`** — a second stat row (Median · Worst 10% · Jitter) appears below the existing Live/Avg/Min/Max row once 5+ readings are collected. The quality label (Good/Fair/Poor/…) is the primary value in each cell rather than a raw number, consistent with the Response Quality rename (H4).
+
+### Feature B — Auto-Generated Weekly Health Report (AI #14)
+4. **`HealthHistoryStore`** extended from 24h (`maxEntries = 288`) to 7 days (`maxEntries = 2016`); restore cutoff updated to `-7 × 86400 s`. This gives the weekly report genuine trend data.
+5. **`WeeklyReportStore`** — `@Observable` singleton. `generateIfNeeded()` runs at each app foreground (gated: max once per 23 h). Aggregates: `HealthHistoryStore.entries` (avg score, peak grade), `ActivityStore.events` (offline event count, most disruptive device), `HealthStreakStore` (current streak, total A days). Renders a 2–4 sentence plain-English paragraph. Persists the latest report to `weekly_report.json`.
+6. **`WeeklyReportView`** — sheet with a grade ring header, the prose body on a card, and a three-stat row (avg score · offline events · streak/A-day count). `ShareLink` exports the body as text.
+7. **`DashboardView`** toolbar gains a "Weekly Report" secondary action (document icon) whenever `WeeklyReportStore.shared.latestReport != nil`.
+8. **`NotificationService.scheduleWeeklyReport()`** — schedules a repeating `UNCalendarNotificationTrigger` for Sunday at 9 AM, set up the first time a report is generated.
+9. **`ContentView`** — calls `WeeklyReportStore.shared.generateIfNeeded()` in the `.task` block on foreground.
+
+### Feature C — StoreKit 2 Pro Tier (Premium #47)
+10. **`ProStore`** — `@Observable` singleton with StoreKit 2. Verifies entitlements via `Transaction.currentEntitlements` on init; observes `Transaction.updates` for renewals/revocations. Persists `isPro` to `UserDefaults` (both standard and App Group) for fast synchronous reads. `DEBUG` builds are always Pro so development isn't gated. Products: `com.tintronixlab.ThreadMapper.pro.annual` + `.pro.lifetime` (requires App Store Connect product setup).
+11. **`PaywallView`** — full-page sheet listing 5 Pro features with icons, two product purchase buttons (annual highlighted as "Most Popular"), and a restore link. Handles empty product list gracefully (shows spinner while StoreKit loads).
+12. **`DashboardView` soft gates** — the "Network Health" streak badge shows a lock chip that presents `PaywallView` for non-Pro users; the "Mesh Resilience" section header shows a "Pro" lock badge. Content remains visible (trust-building), but the Pro CTA is clearly present.
+13. **`ContentView`** injects `ProStore.shared` into the SwiftUI environment.
+
+**Iteration 8 backlog:** Dynamic Type audit; VoiceOver graph navigation (H12); `.completeFileProtection` on all JSON stores; App Store Connect product setup for Pro tier; Spotlight indexing of devices (feature #57).

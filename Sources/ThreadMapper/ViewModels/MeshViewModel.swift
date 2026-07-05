@@ -180,12 +180,18 @@ final class MeshViewModel {
                             weakCount: devs.filter(\.isWeak).count
                         )
                     }.sorted { $0.name < $1.name }
+                    let offlineNames = self.devices.filter(\.isOffline).map(\.name).sorted()
+                    let snapshotSummary = offlineNames.isEmpty
+                        ? health.summary
+                        : "\(health.summary) — \(offlineNames.count) device\(offlineNames.count == 1 ? "" : "s") offline"
                     AppGroupStore.writeSnapshot(WidgetSnapshot(
                         grade: health.grade,
                         score: health.score,
+                        summary: snapshotSummary,
                         deviceCount: self.devices.count,
                         offlineCount: offlineCount,
                         weakCount: self.devices.filter(\.isWeak).count,
+                        offlineDeviceNames: offlineNames,
                         updatedAt: Date(),
                         rooms: roomSnaps
                     ))
@@ -193,6 +199,11 @@ final class MeshViewModel {
                         Dictionary(self.devices.map { ($0.name, !$0.isOffline) }, uniquingKeysWith: { _, new in new })
                     )
                     HealthHistoryStore.shared.record(score: health.score, grade: health.grade)
+                    HealthStreakStore.shared.record(grade: health.grade)
+                    if health.grade == "A" { AchievementStore.shared.unlock("firstGradeA") }
+                    let brCount = self.devices.filter(\.isBorderRouter).count
+                    let routerCount = self.devices.filter(\.isRouter).count
+                    if brCount >= 2 && routerCount >= 4 { AchievementStore.shared.unlock("resilienceA") }
 
                     // Emit activity event when health score shifts by 15+ points
                     if let prev = self.previousHealthScore {

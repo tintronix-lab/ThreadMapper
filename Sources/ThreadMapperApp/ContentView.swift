@@ -15,6 +15,7 @@ struct ContentView: View {
     @State private var notesStore = DeviceNotesStore.shared
     @State private var historyStore = HealthHistoryStore.shared
     @State private var activityStore = ActivityStore.shared
+    @State private var proStore = ProStore.shared
 
     var body: some View {
         if !hasSeenOnboarding {
@@ -31,9 +32,11 @@ struct ContentView: View {
                 .environment(notesStore)
                 .environment(historyStore)
                 .environment(activityStore)
+                .environment(proStore)
                 .task {
                     await NotificationService.shared.requestAuthorization()
                     BackgroundRefreshHandler.schedule()
+                    WeeklyReportStore.shared.generateIfNeeded()
                 }
                 .onChange(of: scenePhase) { _, phase in
                     // Pause the poll loop while backgrounded (BGTask covers

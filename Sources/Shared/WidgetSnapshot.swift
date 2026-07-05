@@ -3,9 +3,11 @@ import Foundation
 struct WidgetSnapshot: Codable {
     let grade: String
     let score: Int
+    let summary: String              // e.g. "Good — minor issues present"
     let deviceCount: Int
     let offlineCount: Int
     let weakCount: Int
+    let offlineDeviceNames: [String] // named list for Siri intent
     let updatedAt: Date
     let rooms: [RoomSnapshot]
 
@@ -17,16 +19,16 @@ struct WidgetSnapshot: Codable {
     }
 
     static let placeholder = WidgetSnapshot(
-        grade: "—", score: 0, deviceCount: 0, offlineCount: 0, weakCount: 0,
+        grade: "—", score: 0, summary: "No data", deviceCount: 0,
+        offlineCount: 0, weakCount: 0, offlineDeviceNames: [],
         updatedAt: Date(), rooms: []
     )
 
-    /// Hash of user-visible content, excluding `updatedAt`. Used to decide
-    /// whether a widget timeline reload is actually warranted.
     var contentHash: Int {
         var hasher = Hasher()
         hasher.combine(grade)
         hasher.combine(score)
+        hasher.combine(summary)
         hasher.combine(deviceCount)
         hasher.combine(offlineCount)
         hasher.combine(weakCount)

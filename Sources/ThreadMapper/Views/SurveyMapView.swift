@@ -85,11 +85,8 @@ struct SurveyMapView: View {
             }
 
             HStack(spacing: 14) {
-                Label(
-                    String(format: "%.1f dBm", point.meanRSSI),
-                    systemImage: "wifi"
-                )
-                .foregroundStyle(rssiColor(for: point.meanRSSI))
+                Label(Int(point.meanRSSI.rounded()).rssiQualityLabel, systemImage: "wifi")
+                    .foregroundStyle(rssiColor(for: point.meanRSSI))
 
                 Label("\(point.sampleCount) samples", systemImage: "waveform.path")
                     .foregroundStyle(.secondary)
@@ -103,10 +100,11 @@ struct SurveyMapView: View {
             }
             .font(.caption)
 
-            Text(String(format: "%.5f, %.5f",
-                        point.coordinate.latitude, point.coordinate.longitude))
-                .font(.caption2.monospacedDigit())
-                .foregroundStyle(.tertiary)
+            if let room = point.room {
+                Label(room, systemImage: TMStyle.roomIcon(room))
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
         }
         .padding()
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))

@@ -83,6 +83,22 @@ final class NotificationService {
         }
     }
 
+    func scheduleWeeklyReport() {
+        guard isAuthorized else { return }
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: ["weekly-report"])
+        let content = UNMutableNotificationContent()
+        content.title = "Your Weekly Thread Report"
+        content.body = "Tap to see how your network performed this week."
+        content.sound = .default
+        var dc = DateComponents()
+        dc.weekday = 1  // Sunday
+        dc.hour = 9
+        dc.minute = 0
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dc, repeats: true)
+        center.add(UNNotificationRequest(identifier: "weekly-report", content: content, trigger: trigger))
+    }
+
     private func schedule(_ content: UNMutableNotificationContent, id: String) {
         let request = UNNotificationRequest(identifier: id, content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request)
