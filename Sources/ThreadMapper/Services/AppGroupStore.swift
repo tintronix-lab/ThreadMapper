@@ -7,12 +7,26 @@ enum AppGroupStore {
     private static let snapshotKey = "networkSnapshot"
     private static let deviceStatesKey = "deviceStates"
 
+    // Widget reload throttling — WidgetKit has a strict daily reload budget,
+    // and the caller runs at ~1 Hz. Only reload when meaningful content
+    // changed, and never more than once per `minReloadInterval`.
+    private static var lastReloadAt: Date = .distantPast
+    private static var lastContentHash: Int?
+    private static let minReloadInterval: TimeInterval = 60
+
     // MARK: - Widget snapshot (written by main app, read by widget)
 
     static func writeSnapshot(_ snapshot: WidgetSnapshot) {
         guard let defaults = UserDefaults(suiteName: groupID),
               let data = try? JSONEncoder().encode(snapshot) else { return }
         defaults.set(data, forKey: snapshotKey)
+
+        let contentHash = snapshot.contentHash
+        let now = Date()
+        guard contentHash != lastContentHash,
+              now.timeIntervalSince(lastReloadAt) >= minReloadInterval else { return }
+        lastContentHash = contentHash
+        lastReloadAt = now
         WidgetCenter.shared.reloadAllTimelines()
     }
 

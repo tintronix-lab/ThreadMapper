@@ -12,9 +12,9 @@ public enum OnboardingPage: CaseIterable, Identifiable {
     }
     public var text: String {
         switch self {
-        case .welcome: "ThreadMapper maps Thread mesh coverage using SwiftUI, SwiftData, and HomeKit/Matter."
-        case .setup: "Turn on Bluetooth, ensure a Thread border router is nearby, and grant location access if needed."
-        case .survey: "Use Survey Walk to collect RSSI samples. The app generates coverage score and weak-spot hints."
+        case .welcome: "See every Thread device in your home, spot weak signal, and get alerted the moment something drops offline."
+        case .setup: "ThreadMapper uses HomeKit to find your devices. You'll need a Thread border router — a HomePod mini, HomePod, or Apple TV 4K — set up in the Home app."
+        case .survey: "Walk your home with the Survey tab to measure signal room by room. ThreadMapper builds a coverage picture and points out weak spots."
         }
     }
 }

@@ -9,6 +9,8 @@ struct DeviceDetailView: View {
     @State private var noteText = ""
     @State private var isEditingNote = false
     @State private var troubleshootProblem: TroubleshooterView.Problem? = nil
+    // Generated once on appear — generating in body wrote a temp file on every render.
+    @State private var exportURL: URL?
 
     private var stats: DeviceStats? { statsStore.stats(for: device.name) }
     private var surveyPoints: [SurveyPoint] { surveyVM.surveys(for: device.name) }
@@ -25,7 +27,10 @@ struct DeviceDetailView: View {
             }
             .navigationTitle(device.name)
             .navigationBarTitleDisplayMode(.inline)
-            .onAppear { noteText = notesStore.note(for: device.uniqueIdentifier.uuidString) }
+            .onAppear {
+                noteText = notesStore.note(for: device.uniqueIdentifier.uuidString)
+                exportURL = surveyVM.exportCSV(for: device.name)
+            }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Done") { dismiss() }
@@ -41,7 +46,18 @@ struct DeviceDetailView: View {
 
     @ViewBuilder
     private var signalSection: some View {
-        Section("Signal Intelligence") {
+        Section {
+            signalSectionContent
+        } header: {
+            Text("Signal Intelligence")
+        } footer: {
+            Text("Signal values are estimated from HomeKit response time — not measured radio RSSI.")
+        }
+    }
+
+    @ViewBuilder
+    private var signalSectionContent: some View {
+        Group {
             // Header row: icon + live RSSI + grade
             HStack(spacing: 12) {
                 Image(systemName: device.rssi.rssiSystemIcon)
@@ -313,7 +329,7 @@ struct DeviceDetailView: View {
                 DeviceSurveyHistory(deviceID: device.name)
             }
 
-            if let url = surveyVM.exportCSV(for: device.name) {
+            if let url = exportURL {
                 ShareLink("Export CSV for This Device", item: url)
             }
         }

@@ -12,6 +12,8 @@ struct SurveyWalkView: View {
     @State private var sampleTask: Task<Void, Never>?
     @State private var lastUpdateTime: Date?
     @State private var showGuidedSurvey = false
+    // Generated on refresh, not in body — generating in body wrote a temp file on every render.
+    @State private var exportURL: URL?
 
     var body: some View {
         NavigationStack {
@@ -179,6 +181,9 @@ struct SurveyWalkView: View {
     private var heatmapSection: some View {
         Section("Heatmap") {
             Toggle("Show Heatmap", isOn: $showHeatmap)
+                .onChange(of: showHeatmap) { _, isOn in
+                    if isOn { refreshHeatmap() }
+                }
 
             if showHeatmap {
                 if heatmapPoints.isEmpty {
@@ -263,7 +268,7 @@ struct SurveyWalkView: View {
 
     @ViewBuilder
     private var exportActions: some View {
-        if let url = viewModel.exportCSVURL() {
+        if let url = exportURL {
             ShareLink("Export CSV", item: url)
                 .font(.caption)
         }
@@ -311,6 +316,7 @@ struct SurveyWalkView: View {
     }
 
     private func refreshHeatmap() {
+        exportURL = viewModel.exportCSVURL()
         guard showHeatmap else { return }
         viewModel.loadRecentSamplePoints { points in
             heatmapPoints = SurveyHeatmapPresenter.present(

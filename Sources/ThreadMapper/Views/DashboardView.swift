@@ -9,9 +9,8 @@ struct DashboardView: View {
     @State private var selectedDevice: ThreadDevice?
     @State private var selectedRoom: String? = nil
 
-    private var health: NetworkHealthScore {
-        NetworkHealthScore.compute(devices: viewModel.devices)
-    }
+    // Computed once per poll tick in MeshViewModel — not per render.
+    private var health: NetworkHealthScore { viewModel.health }
 
     private var roomGroups: [(room: String, devices: [ThreadDevice])] {
         Dictionary(grouping: viewModel.devices) { $0.room ?? "Unknown" }
@@ -224,7 +223,7 @@ struct DashboardView: View {
             Section {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
-                        Text("Network Signal — Last 30 min")
+                        Text("Network Signal (estimated) — Last 30 min")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                         Spacer()
@@ -276,7 +275,7 @@ struct DashboardView: View {
             selectedRoom = selectedRoom == room ? nil : room
         } label: {
             HStack(spacing: 10) {
-                Image(systemName: roomIcon(room))
+                Image(systemName: TMStyle.roomIcon(room))
                     .foregroundStyle(selectedRoom == room ? Color.accentColor : Color.secondary)
                     .imageScale(.small)
                     .frame(width: 20)
@@ -302,7 +301,7 @@ struct DashboardView: View {
                 if let g = worstGrade {
                     Text(g)
                         .font(.system(size: 14, weight: .bold, design: .rounded))
-                        .foregroundStyle(gradeColor(g))
+                        .foregroundStyle(TMStyle.gradeColor(g))
                 }
 
                 Image(systemName: selectedRoom == room ? "chevron.down" : "chevron.right")
@@ -374,7 +373,7 @@ struct DashboardView: View {
                         if let latest = historyStore.entries.last {
                             Text("Now: \(latest.score)")
                                 .font(.caption2.monospacedDigit())
-                                .foregroundStyle(gradeColor(latest.grade))
+                                .foregroundStyle(TMStyle.gradeColor(latest.grade))
                         }
                     }
                     Chart(historyStore.entries) { entry in
@@ -447,28 +446,4 @@ struct DashboardView: View {
         return suggestions
     }
 
-    // MARK: - Helpers
-
-    private func roomIcon(_ room: String) -> String {
-        let l = room.lowercased()
-        if l.contains("kitchen")  { return "oven.fill" }
-        if l.contains("bedroom")  { return "bed.double.fill" }
-        if l.contains("living")   { return "sofa.fill" }
-        if l.contains("bath")     { return "shower.fill" }
-        if l.contains("garage")   { return "car.fill" }
-        if l.contains("office")   { return "desktopcomputer" }
-        if l.contains("garden") || l.contains("outdoor") { return "leaf.fill" }
-        if l.contains("hall")     { return "door.left.hand.open" }
-        return "house.fill"
-    }
-
-    private func gradeColor(_ grade: String) -> Color {
-        switch grade {
-        case "A": return .green
-        case "B": return .mint
-        case "C": return .yellow
-        case "D": return .orange
-        default:  return .red
-        }
-    }
 }

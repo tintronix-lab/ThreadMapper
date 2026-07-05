@@ -4,9 +4,9 @@ struct AppChecklistView: View {
     @Environment(MeshViewModel.self) private var meshVM
     @Environment(SurveyViewModel.self) private var surveyVM
 
+    // No inner NavigationStack — this view is pushed from Settings.
     var body: some View {
-        NavigationStack {
-            List {
+        List {
                 Section("Setup") {
                     checkRow(
                         label: "Thread Devices",
@@ -60,9 +60,8 @@ struct AppChecklistView: View {
                         }
                     }
                 }
-            }
-            .navigationTitle("Checklist")
         }
+        .navigationTitle("Checklist")
     }
 
     private var hasBorderRouter: Bool {

@@ -14,7 +14,8 @@ final class SurveyViewModel {
 
     @ObservationIgnored
     private let manager = SurveySessionManager()
-    @ObservationIgnored
+    // Observed (not @ObservationIgnored) so SavedSurveyList, section headers,
+    // and counts refresh when sessions are saved or deleted.
     private var savedPoints: [SurveyPoint] = [] {
         didSet { persist() }
     }
@@ -28,9 +29,9 @@ final class SurveyViewModel {
         restore()
     }
 
-    func toggleRecording() {
+    func toggleRecording(room: String? = nil) {
         if isRecording {
-            if let point = manager.endSession() {
+            if let point = manager.endSession(room: room) {
                 savedPoints.append(point)
             }
             isRecording = false
@@ -102,7 +103,7 @@ final class SurveyViewModel {
     }
 
     func exportCSV(for deviceID: String) -> URL? {
-        let points = savedPoints.filter { $0.weakDevices.contains(deviceID) }
+        let points = savedPoints.filter { $0.weakDeviceList.contains(deviceID) }
         guard !points.isEmpty else { return nil }
         let header = "timestamp,latitude,longitude,meanRSSI,weakDevices,sampleCount\n"
         let rows = points.map { point in
@@ -111,8 +112,10 @@ final class SurveyViewModel {
             return "\(ts),\(point.latitude),\(point.longitude),\(point.meanRSSI),\"\(weaks)\",\(point.sampleCount)"
         }.joined(separator: "\n")
         let content = header + rows
+        // Sanitize the device name — "/" or ":" in accessory names would break the path
+        let safeName = deviceID.components(separatedBy: .init(charactersIn: "/:\\?%*|\"<>")).joined(separator: "-")
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("threadmapper_survey_\(deviceID)_\(Date().timeIntervalSince1970).csv")
+            .appendingPathComponent("threadmapper_survey_\(safeName)_\(Date().timeIntervalSince1970).csv")
         try? content.write(to: url, atomically: true, encoding: .utf8)
         return url
     }
@@ -133,7 +136,7 @@ final class SurveyViewModel {
     }
 
     func focus(for deviceID: String) -> CLLocationCoordinate2D? {
-        savedPoints.filter { $0.weakDevices.contains(deviceID) }.last?.coordinate
+        savedPoints.filter { $0.weakDeviceList.contains(deviceID) }.last?.coordinate
     }
 
     func exportURLForCurrentSession() -> URL? { exportCSVURL() }
@@ -144,7 +147,7 @@ final class SurveyViewModel {
     }
 
     func surveys(for deviceID: String) -> [SurveyPoint] {
-        savedPoints.filter { $0.weakDevices.contains(deviceID) }
+        savedPoints.filter { $0.weakDeviceList.contains(deviceID) }
     }
 
     var locationStatusLabel: String { locationStatus }
@@ -179,17 +182,17 @@ final class SurveyViewModel {
     private func persist() {
         do {
             let payload: [[String: Any]] = savedPoints.map { point in
-                [
+                var dict: [String: Any] = [
                     "timestamp": Self.isoFormatter.string(from: point.timestamp),
                     "latitude": point.latitude,
                     "longitude": point.longitude,
                     "meanRSSI": point.meanRSSI,
                     // Store as [String] array so restore can cast with as? [String]
-                    "weakDevices": point.weakDevices.isEmpty
-                        ? [String]()
-                        : point.weakDevices.split(separator: ",").map(String.init),
+                    "weakDevices": point.weakDeviceList,
                     "sampleCount": point.sampleCount
                 ]
+                if let room = point.room { dict["room"] = room }
+                return dict
             }
             let data = try JSONSerialization.data(withJSONObject: payload, options: [])
             try data.write(to: storeURL, options: [.atomic])
@@ -224,7 +227,8 @@ final class SurveyViewModel {
                 meanRSSI: mean,
                 weakDevices: weakList,
                 sampleCount: count,
-                timestamp: ts
+                timestamp: ts,
+                room: dict["room"] as? String
             )
         }
     }

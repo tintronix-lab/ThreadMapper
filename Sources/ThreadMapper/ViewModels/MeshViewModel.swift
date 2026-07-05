@@ -13,6 +13,14 @@ final class MeshViewModel {
     var isScanning = false
     var scanError: String?
 
+    /// Latest health score, computed once per poll tick.
+    /// Views read this instead of recomputing in `body`.
+    private(set) var health = NetworkHealthScore.compute(devices: [])
+
+    /// Set from the scene phase — the poll loop idles while backgrounded
+    /// instead of burning CPU until the OS suspends the process.
+    @ObservationIgnored var isAppActive = true
+
     struct TopologyChange: Identifiable {
         let id = UUID()
         let timestamp: Date
@@ -53,6 +61,14 @@ final class MeshViewModel {
             while !Task.isCancelled {
                 guard let self else { break }
 
+                // Idle while backgrounded — nothing on screen, widget updates
+                // are throttled in AppGroupStore anyway.
+                let active = await MainActor.run { self.isAppActive }
+                guard active else {
+                    try? await Task.sleep(for: .seconds(2))
+                    continue
+                }
+
                 // Every 5 seconds: measure latency-based signal quality for all devices
                 self.pollTick += 1
                 if self.pollTick % 5 == 0 {
@@ -70,7 +86,13 @@ final class MeshViewModel {
                 await MainActor.run {
                     let latest = self.discovery.devices
                     let errorMsg = self.discovery.discoveryError?.userMessage
-                    if latest != self.devices {
+                    // Compare metadata signatures, not just `!=` —
+                    // ThreadDevice.== is identity-only (uniqueIdentifier), so
+                    // renames, room moves, and battery changes would
+                    // otherwise never reach the UI (review issue H2).
+                    let changed = latest.map(\.metadataSignature).sorted()
+                        != self.devices.map(\.metadataSignature).sorted()
+                    if changed {
                         // Preserve measured rssi values when HomeKit refreshes the list
                         let existingRSSI = Dictionary(uniqueKeysWithValues:
                             self.devices.compactMap { d in d.rssi.map { (d.uniqueIdentifier, $0) } })
@@ -146,6 +168,7 @@ final class MeshViewModel {
 
                     // Write snapshot to App Group for widget and BGTask
                     let health = NetworkHealthScore.compute(devices: self.devices)
+                    self.health = health
                     let roomGroups = Dictionary(grouping: self.devices) { $0.room ?? "Unknown" }
                     let roomSnaps = roomGroups.map { room, devs in
                         WidgetSnapshot.RoomSnapshot(

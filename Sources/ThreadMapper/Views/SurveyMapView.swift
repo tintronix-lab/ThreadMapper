@@ -120,8 +120,8 @@ struct SurveyMapView: View {
         HStack(spacing: 8) {
             ForEach([
                 ("≥ −50", Color.green),
-                ("−65", Color.yellow),
-                ("−80", Color.orange),
+                ("−50…−65", Color.mint),
+                ("−65…−80", Color.orange),
                 ("< −80", Color.red),
             ], id: \.0) { label, color in
                 HStack(spacing: 3) {
@@ -140,11 +140,10 @@ struct SurveyMapView: View {
 
     // MARK: - Helpers
 
+    // Uses the shared RSSI → color scale (SignalStrength.swift) so the map
+    // matches the Dashboard, device detail, and mesh graph.
     private func rssiColor(for rssi: Double) -> Color {
-        if rssi < -80 { return .red }
-        if rssi < -65 { return .orange }
-        if rssi < -50 { return .yellow }
-        return .green
+        Int(rssi.rounded()).rssiColor
     }
 
     private static func initialCamera(for points: [SurveyPoint]) -> MapCameraPosition {

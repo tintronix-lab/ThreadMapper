@@ -22,15 +22,14 @@ final class SurveySessionManager {
     }
 
     func recordSample(deviceID: String, rssi: Int, location: CLLocationCoordinate2D?) {
-        let finalLocation: CLLocationCoordinate2D
+        let finalLocation: CLLocationCoordinate2D?
         if let location {
             finalLocation = location
             lastKnownLocation = location
-        } else if let last = locationTracker.currentCoordinate ?? lastKnownLocation {
-            finalLocation = last
         } else {
-            // Apple Park as fallback — visible indicator that real location is unavailable
-            finalLocation = CLLocationCoordinate2D(latitude: 37.3346, longitude: -122.0090)
+            // No fabricated fallback coordinates — a sample without a fix
+            // stays location-less rather than poisoning the heatmap/exports.
+            finalLocation = locationTracker.currentCoordinate ?? lastKnownLocation
         }
         samples.append(SurveySample(deviceID: deviceID, rssi: rssi, location: finalLocation))
         currentMeanRSSI = samples.map { Double($0.rssi) }.reduce(0, +) / Double(samples.count)
@@ -45,22 +44,28 @@ final class SurveySessionManager {
         locationTracker.startTracking()
     }
 
-    func endSession() -> SurveyPoint? {
+    func endSession(room: String? = nil) -> SurveyPoint? {
         locationTracker.stopTracking()
         guard !samples.isEmpty else { return nil }
         let meanRSSI = samples.map { Double($0.rssi) }.reduce(0, +) / Double(samples.count)
         let weakIDs = samples.filter { $0.rssi < -80 }.map(\.deviceID)
-        let coord = samples.first?.location ?? CLLocationCoordinate2D(latitude: 0, longitude: 0)
-        let point = SurveyPoint(
+        defer {
+            samples.removeAll()
+            currentMeanRSSI = nil
+            currentWeakIDs = []
+        }
+        // First real fix wins; fall back to the last known location.
+        // If there was never a fix, discard rather than fabricate coordinates.
+        guard let coord = samples.compactMap(\.location).first ?? lastKnownLocation else {
+            return nil
+        }
+        return SurveyPoint(
             coordinate: coord,
             meanRSSI: meanRSSI,
             weakDevices: weakIDs,
-            sampleCount: samples.count
+            sampleCount: samples.count,
+            room: room
         )
-        samples.removeAll()
-        currentMeanRSSI = nil
-        currentWeakIDs = []
-        return point
     }
 }
 
@@ -73,7 +78,7 @@ struct SurveySession {
 struct SurveySample {
     let deviceID: String
     let rssi: Int
-    let location: CLLocationCoordinate2D
+    let location: CLLocationCoordinate2D?
 }
 
 // MARK: - LocationTracker (private NSObject wrapper for CLLocationManagerDelegate)
@@ -89,10 +94,12 @@ final class LocationTracker: NSObject {
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-        manager.requestWhenInUseAuthorization()
+        // Authorization is requested in startTracking() — contextually when a
+        // survey begins — not at app launch just because this object exists.
     }
 
     func startTracking() {
+        manager.requestWhenInUseAuthorization()
         manager.startUpdatingLocation()
     }
 

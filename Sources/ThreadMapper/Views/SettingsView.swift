@@ -26,6 +26,7 @@ struct SettingsView: View {
                 notificationsSection
                 alertsSection
                 dataSection
+                toolsSection
                 aboutSection
             }
             .navigationTitle("Settings")
@@ -33,6 +34,15 @@ struct SettingsView: View {
     }
 
     // MARK: - Sections
+
+    @ViewBuilder
+    private var toolsSection: some View {
+        Section("Tools") {
+            NavigationLink("Setup Checklist") {
+                AppChecklistView()
+            }
+        }
+    }
 
     @ViewBuilder
     private var notificationsSection: some View {

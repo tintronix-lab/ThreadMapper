@@ -36,6 +36,14 @@ final class ThreadDevice: Identifiable, Codable, Hashable, Equatable {
         self.room = room
     }
 
+    /// Signature of user-visible metadata. `==` is identity-only
+    /// (uniqueIdentifier), so the poll loop compares signatures to detect
+    /// renames, room moves, battery/role/channel changes that would
+    /// otherwise never propagate to the UI.
+    var metadataSignature: String {
+        "\(uniqueIdentifier)|\(name)|\(room ?? "")|\(batteryPercentage.map(String.init) ?? "")|\(isBorderRouter)|\(isRouter)|\(channel.map(String.init) ?? "")"
+    }
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(uniqueIdentifier)
     }

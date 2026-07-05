@@ -118,7 +118,7 @@ struct GuidedSurveyView: View {
                 Circle()
                     .fill(isRecording ? Color.red.opacity(0.1) : Color.accentColor.opacity(0.1))
                     .frame(width: 100, height: 100)
-                Image(systemName: roomIcon(room))
+                Image(systemName: TMStyle.roomIcon(room))
                     .font(.system(size: 44))
                     .foregroundStyle(isRecording ? .red : .accentColor)
                     .symbolEffect(.pulse, isActive: isRecording)
@@ -144,7 +144,7 @@ struct GuidedSurveyView: View {
             VStack(spacing: 12) {
                 if isRecording {
                     Button {
-                        stopRecording()
+                        stopRecording(room: room)
                         completedRooms.insert(room)
                         currentIndex += 1
                     } label: {
@@ -263,10 +263,12 @@ struct GuidedSurveyView: View {
         }
     }
 
-    private func stopRecording() {
+    private func stopRecording(room: String? = nil) {
         sampleTask?.cancel(); sampleTask = nil
         tickTask?.cancel(); tickTask = nil
-        if surveyVM.isRecording { surveyVM.toggleRecording() }
+        // Tag the saved session with the surveyed room — the reliable indoor
+        // position signal (GPS is not, at room scale).
+        if surveyVM.isRecording { surveyVM.toggleRecording(room: room) }
         isRecording = false
     }
 
@@ -274,18 +276,5 @@ struct GuidedSurveyView: View {
 
     private func formatTime(_ seconds: Int) -> String {
         String(format: "%d:%02d", seconds / 60, seconds % 60)
-    }
-
-    private func roomIcon(_ room: String) -> String {
-        let l = room.lowercased()
-        if l.contains("kitchen")  { return "oven.fill" }
-        if l.contains("bedroom")  { return "bed.double.fill" }
-        if l.contains("living")   { return "sofa.fill" }
-        if l.contains("bath")     { return "shower.fill" }
-        if l.contains("garage")   { return "car.fill" }
-        if l.contains("office")   { return "desktopcomputer" }
-        if l.contains("hall")     { return "door.left.hand.open" }
-        if l.contains("garden") || l.contains("outdoor") { return "leaf.fill" }
-        return "house.fill"
     }
 }

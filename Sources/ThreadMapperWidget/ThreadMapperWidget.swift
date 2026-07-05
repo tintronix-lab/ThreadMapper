@@ -80,27 +80,11 @@ struct ThreadMapperWidgetView: View {
 
 // MARK: - Helpers
 
-private func gradeColor(_ grade: String) -> Color {
-    switch grade {
-    case "A": return .green
-    case "B": return .mint
-    case "C": return .yellow
-    case "D": return .orange
-    default:  return .red
-    }
-}
+// Delegate to shared TMStyle (Sources/Shared) — single source of truth
+// for grade colors and room icons across app and widget.
+private func gradeColor(_ grade: String) -> Color { TMStyle.gradeColor(grade) }
 
-private func roomIcon(_ name: String) -> String {
-    let l = name.lowercased()
-    if l.contains("kitchen")  { return "oven.fill" }
-    if l.contains("bedroom")  { return "bed.double.fill" }
-    if l.contains("living")   { return "sofa.fill" }
-    if l.contains("bath")     { return "shower.fill" }
-    if l.contains("garage")   { return "car.fill" }
-    if l.contains("office")   { return "desktopcomputer" }
-    if l.contains("hall")     { return "door.left.hand.open" }
-    return "house.fill"
-}
+private func roomIcon(_ name: String) -> String { TMStyle.roomIcon(name) }
 
 // MARK: - Small widget
 

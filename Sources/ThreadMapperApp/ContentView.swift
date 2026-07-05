@@ -3,6 +3,7 @@ import Observation
 
 struct ContentView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    @Environment(\.scenePhase) private var scenePhase
     @State private var meshVM = MeshViewModel()
     @State private var surveyVM = SurveyViewModel()
     @State private var statsStore = DeviceStatsStore.shared
@@ -28,6 +29,11 @@ struct ContentView: View {
                 .task {
                     await NotificationService.shared.requestAuthorization()
                     BackgroundRefreshHandler.schedule()
+                }
+                .onChange(of: scenePhase) { _, phase in
+                    // Pause the poll loop while backgrounded (BGTask covers
+                    // offline detection); resume immediately on foreground.
+                    meshVM.isAppActive = (phase == .active)
                 }
         }
     }

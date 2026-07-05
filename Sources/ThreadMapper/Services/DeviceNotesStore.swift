@@ -12,6 +12,7 @@ final class DeviceNotesStore {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("device_notes.json")
     }()
+    @ObservationIgnored private var persistTask: Task<Void, Never>?
 
     private init() { restore() }
 
@@ -24,7 +25,17 @@ final class DeviceNotesStore {
         } else {
             notes[deviceID] = trimmed
         }
-        persist()
+        // Debounced — setNote fires on every keystroke of the notes field.
+        schedulePersist()
+    }
+
+    private func schedulePersist() {
+        persistTask?.cancel()
+        persistTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(1))
+            guard !Task.isCancelled else { return }
+            self?.persist()
+        }
     }
 
     private func persist() {
