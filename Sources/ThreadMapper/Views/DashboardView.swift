@@ -28,9 +28,7 @@ struct DashboardView: View {
             List {
                 topologyBanner
                 healthSection
-                if !health.issues.filter(\.isCritical).isEmpty || !health.issues.isEmpty {
-                    issuesSection
-                }
+                issuesSection
                 if !health.tips.isEmpty {
                     tipsSection
                 }
@@ -109,108 +107,202 @@ struct DashboardView: View {
     @ViewBuilder
     private var healthSection: some View {
         Section {
-            HStack(alignment: .center, spacing: 16) {
-                // Grade ring
-                ZStack {
-                    Circle()
-                        .stroke(health.color.opacity(0.2), lineWidth: 4)
-                        .frame(width: 76, height: 76)
-                    Circle()
-                        .trim(from: 0, to: CGFloat(health.score) / 100)
-                        .stroke(health.color, style: StrokeStyle(lineWidth: 4, lineCap: .round))
-                        .frame(width: 76, height: 76)
-                        .rotationEffect(.degrees(-90))
-                        .animation(.easeOut(duration: 0.6), value: health.score)
-                    VStack(spacing: 0) {
-                        Text(health.grade)
-                            .font(.system(size: 30, weight: .black, design: .rounded))
+            HStack(alignment: .center, spacing: 20) {
+                gradeRingView
+
+                VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(health.summary)
+                            .font(.subheadline.weight(.semibold))
+                            .lineLimit(2)
+                        Text("\(health.score) / 100 pts")
+                            .font(.caption.monospacedDigit())
                             .foregroundStyle(health.color)
-                        Text("\(health.score)")
-                            .font(.system(size: 10, weight: .semibold, design: .monospaced))
-                            .foregroundStyle(health.color.opacity(0.7))
                     }
-                }
 
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(health.summary)
-                        .font(.subheadline.weight(.semibold))
-                        .lineLimit(2)
-
-                    HStack(spacing: 8) {
-                        statChip("\(viewModel.devices.count)", "Devices", "cpu")
-                        statChip("\(viewModel.devices.filter(\.isBorderRouter).count)", "Routers", "antenna.radiowaves.left.and.right")
-                        let weak = viewModel.devices.filter(\.isWeak).count
-                        if weak > 0 {
-                            statChip("\(weak)", "Weak", "wifi.exclamationmark", color: .orange)
+                    // 2×2 stat grid
+                    let offline = viewModel.devices.filter(\.isOffline).count
+                    let weak    = viewModel.devices.filter(\.isWeak).count
+                    VStack(spacing: 6) {
+                        HStack(spacing: 6) {
+                            statCard(icon: "cpu.fill",
+                                     value: "\(viewModel.devices.count)",
+                                     label: "Devices",
+                                     tint: .accentColor)
+                            statCard(icon: "antenna.radiowaves.left.and.right",
+                                     value: "\(viewModel.devices.filter(\.isBorderRouter).count)",
+                                     label: "Routers",
+                                     tint: .indigo)
+                        }
+                        HStack(spacing: 6) {
+                            statCard(icon: offline > 0 ? "wifi.slash" : "wifi.circle.fill",
+                                     value: "\(offline)",
+                                     label: "Offline",
+                                     tint: offline > 0 ? .red : .green)
+                            statCard(icon: weak > 0 ? "wifi.exclamationmark" : "checkmark.circle.fill",
+                                     value: "\(weak)",
+                                     label: "Weak",
+                                     tint: weak > 0 ? .orange : .green)
                         }
                     }
                 }
-                Spacer(minLength: 0)
             }
-            .padding(.vertical, 4)
+            .padding(.vertical, 8)
         } header: {
             Text("Network Health")
         }
     }
 
     @ViewBuilder
-    private func statChip(_ value: String, _ label: String, _ icon: String, color: Color = .secondary) -> some View {
-        HStack(spacing: 3) {
-            Image(systemName: icon).imageScale(.small)
-            Text(value).fontWeight(.semibold)
-            Text(label)
+    private var gradeRingView: some View {
+        ZStack {
+            // Track ring
+            Circle()
+                .stroke(health.color.opacity(0.12), lineWidth: 8)
+
+            // Filled arc
+            Circle()
+                .trim(from: 0, to: CGFloat(health.score) / 100)
+                .stroke(health.color, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .animation(.spring(response: 0.8, dampingFraction: 0.75), value: health.score)
+
+            // Center label
+            VStack(spacing: 0) {
+                Text(health.grade)
+                    .font(.system(size: 36, weight: .black, design: .rounded))
+                    .foregroundStyle(health.color)
+                Text("\(health.score)")
+                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                    .foregroundStyle(health.color.opacity(0.7))
+            }
         }
-        .font(.caption2)
-        .foregroundStyle(color)
-        .padding(.horizontal, 7)
-        .padding(.vertical, 3)
-        .background(.quaternary, in: Capsule())
+        .frame(width: 92, height: 92)
+        .shadow(color: health.color.opacity(0.25), radius: 8, x: 0, y: 3)
+    }
+
+    @ViewBuilder
+    private func statCard(icon: String, value: String, label: String, tint: Color) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.caption2)
+                .foregroundStyle(tint)
+                .frame(width: 14)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(value)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.primary)
+                Text(label)
+                    .font(.system(size: 9))
+                    .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
+        .background(tint.opacity(0.08), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
     // MARK: - Issues
 
     @ViewBuilder
     private var issuesSection: some View {
-        Section("Issues") {
-            ForEach(health.issues) { issue in
-                HStack(spacing: 10) {
-                    Image(systemName: issue.icon)
-                        .foregroundStyle(issue.isCritical ? .red : .orange)
-                        .imageScale(.small)
-                        .frame(width: 18)
-                    Text(issue.message)
-                        .font(.subheadline)
-                    Spacer()
-                    if issue.isCritical {
-                        Text("Critical")
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(.red)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(.red.opacity(0.1), in: Capsule())
+        Section {
+            if health.issues.isEmpty {
+                HStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.green.opacity(0.12))
+                            .frame(width: 36, height: 36)
+                        Image(systemName: "checkmark.shield.fill")
+                            .foregroundStyle(.green)
+                            .imageScale(.medium)
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("All Clear")
+                            .font(.subheadline.weight(.semibold))
+                        Text("No network issues detected")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
-                .padding(.vertical, 2)
+                .padding(.vertical, 6)
+            } else {
+                ForEach(health.issues) { issue in
+                    issueRow(issue)
+                }
+            }
+        } header: {
+            HStack {
+                Text("Issues")
+                Spacer()
+                let critCount = health.issues.filter(\.isCritical).count
+                if critCount > 0 {
+                    Label("\(critCount) Critical", systemImage: "exclamationmark.circle.fill")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.red)
+                } else if !health.issues.isEmpty {
+                    Label("\(health.issues.count)", systemImage: "exclamationmark.triangle.fill")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.orange)
+                }
             }
         }
+    }
+
+    @ViewBuilder
+    private func issueRow(_ issue: NetworkHealthScore.Issue) -> some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(issue.isCritical ? Color.red.opacity(0.12) : Color.orange.opacity(0.12))
+                    .frame(width: 34, height: 34)
+                Image(systemName: issue.icon)
+                    .font(.caption)
+                    .foregroundStyle(issue.isCritical ? .red : .orange)
+            }
+
+            Text(issue.message)
+                .font(.subheadline)
+
+            Spacer()
+
+            if issue.isCritical {
+                Text("Critical")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(.red)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 3)
+                    .background(.red.opacity(0.1), in: Capsule())
+            }
+        }
+        .padding(.vertical, 3)
     }
 
     // MARK: - Tips
 
     @ViewBuilder
     private var tipsSection: some View {
-        Section("Recommendations") {
-            ForEach(Array(health.tips.enumerated()), id: \.offset) { _, tip in
-                HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: "lightbulb.fill")
-                        .foregroundStyle(.yellow)
-                        .imageScale(.small)
-                        .frame(width: 18)
+        Section {
+            ForEach(Array(health.tips.enumerated()), id: \.offset) { index, tip in
+                HStack(alignment: .top, spacing: 12) {
+                    Text("\(index + 1)")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 20, height: 20)
+                        .background(.blue.opacity(0.85), in: Circle())
+
                     Text(tip)
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
+                .padding(.vertical, 3)
             }
+        } header: {
+            Label("Recommendations", systemImage: "lightbulb.fill")
+                .foregroundStyle(.primary)
+                .symbolRenderingMode(.multicolor)
         }
     }
 
@@ -364,37 +456,51 @@ struct DashboardView: View {
     private var healthHistorySection: some View {
         if historyStore.entries.count >= 2 {
             Section {
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Text("Health Score — Last 24h")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                         Spacer()
                         if let latest = historyStore.entries.last {
-                            Text("Now: \(latest.score)")
-                                .font(.caption2.monospacedDigit())
-                                .foregroundStyle(TMStyle.gradeColor(latest.grade))
+                            HStack(spacing: 4) {
+                                Circle()
+                                    .fill(TMStyle.gradeColor(latest.grade))
+                                    .frame(width: 6, height: 6)
+                                Text("\(latest.score) / 100")
+                                    .font(.caption2.monospacedDigit())
+                                    .foregroundStyle(TMStyle.gradeColor(latest.grade))
+                            }
                         }
                     }
+
                     Chart(historyStore.entries) { entry in
                         LineMark(
                             x: .value("Time", entry.timestamp),
                             y: .value("Score", entry.score)
                         )
-                        .foregroundStyle(Color.accentColor)
+                        .foregroundStyle(health.color)
                         .interpolationMethod(.catmullRom)
+                        .lineStyle(StrokeStyle(lineWidth: 2))
+
                         AreaMark(
                             x: .value("Time", entry.timestamp),
                             y: .value("Score", entry.score)
                         )
-                        .foregroundStyle(Color.accentColor.opacity(0.1))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [health.color.opacity(0.22), health.color.opacity(0.0)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
                         .interpolationMethod(.catmullRom)
                     }
                     .chartYScale(domain: 0...100)
                     .chartXAxis(.hidden)
                     .chartYAxis {
-                        AxisMarks(values: [0, 50, 75, 100]) { value in
-                            AxisGridLine()
+                        AxisMarks(values: [0, 40, 60, 75, 90, 100]) { value in
+                            AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [3, 3]))
                             AxisValueLabel {
                                 if let v = value.as(Int.self) {
                                     Text("\(v)").font(.system(size: 7))
@@ -402,7 +508,7 @@ struct DashboardView: View {
                             }
                         }
                     }
-                    .frame(height: 64)
+                    .frame(height: 90)
                 }
                 .padding(.vertical, 4)
             }
