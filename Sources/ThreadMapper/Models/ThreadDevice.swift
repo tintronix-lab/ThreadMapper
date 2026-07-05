@@ -1,6 +1,12 @@
 import Foundation
 import Observation
 
+/// Explicit device reachability state — replaces the -100 / -92 Int sentinels.
+enum Reachability: Equatable {
+    case offline
+    case quality(Int) // latency-estimated: -55 (excellent) → -92 (marginal)
+}
+
 final class ThreadDevice: Identifiable, Codable, Hashable, Equatable {
     let id: UUID
     var name: String
@@ -34,6 +40,21 @@ final class ThreadDevice: Identifiable, Codable, Hashable, Equatable {
         self.rssi = rssi
         self.batteryPercentage = batteryPercentage
         self.room = room
+    }
+
+    /// Derived reachability state from the raw rssi field.
+    var reachability: Reachability? {
+        guard let rssi else { return nil }
+        return rssi == -100 ? .offline : .quality(rssi)
+    }
+
+    /// True when the device is confirmed unreachable (rssi sentinel -100).
+    var isOffline: Bool { rssi == -100 }
+
+    /// True when signal quality is poor but device is reachable.
+    var isWeak: Bool {
+        if case .quality(let q) = reachability { return q < -80 }
+        return false
     }
 
     /// Signature of user-visible metadata. `==` is identity-only

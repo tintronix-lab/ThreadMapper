@@ -16,24 +16,33 @@ final class DeviceStatsStore {
     private(set) var readings: [String: [Reading]] = [:]
 
     @ObservationIgnored private let maxReadings = 360  // 30 min at 5-second interval
-    @ObservationIgnored private let storeURL: URL = {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("device_stats.json")
-    }()
+    @ObservationIgnored private let storeURL: URL
     @ObservationIgnored private var persistTask: Task<Void, Never>?
 
-    private init() { restore() }
+    private init(storeURL: URL? = nil) {
+        self.storeURL = storeURL ?? FileManager.default
+            .urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("device_stats.json")
+        restore()
+    }
 
-    func record(deviceName: String, rssi: Int) {
-        var list = readings[deviceName, default: []]
+    /// Creates a fresh isolated store backed by a temp file. For tests only.
+    static func makeTestInstance() -> DeviceStatsStore {
+        DeviceStatsStore(storeURL: FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(UUID().uuidString)_stats.json"))
+    }
+
+    func record(deviceID: UUID, rssi: Int) {
+        let key = deviceID.uuidString
+        var list = readings[key, default: []]
         list.append(Reading(timestamp: Date(), rssi: rssi))
         if list.count > maxReadings { list.removeFirst(list.count - maxReadings) }
-        readings[deviceName] = list
+        readings[key] = list
         schedulePersist()
     }
 
-    func stats(for deviceName: String) -> DeviceStats? {
-        guard let list = readings[deviceName], !list.isEmpty else { return nil }
+    func stats(for deviceID: UUID) -> DeviceStats? {
+        guard let list = readings[deviceID.uuidString], !list.isEmpty else { return nil }
         let values = list.map(\.rssi)
         return DeviceStats(
             readings: list,
@@ -69,8 +78,13 @@ final class DeviceStatsStore {
         }.sorted { $0.timestamp < $1.timestamp }
     }
 
-    func clear(for deviceName: String) {
-        readings.removeValue(forKey: deviceName)
+    func clear(for deviceID: UUID) {
+        readings.removeValue(forKey: deviceID.uuidString)
+        persist()
+    }
+
+    func clearAll() {
+        readings = [:]
         persist()
     }
 

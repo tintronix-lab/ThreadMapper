@@ -3,8 +3,13 @@ import Observation
 
 struct ContentView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    @AppStorage("demoMode") private var demoMode = false
     @Environment(\.scenePhase) private var scenePhase
-    @State private var meshVM = MeshViewModel()
+    @State private var meshVM = MeshViewModel(
+        discovery: UserDefaults.standard.bool(forKey: "demoMode")
+            ? DemoDiscoveryService()
+            : MatterDiscoveryService.shared
+    )
     @State private var surveyVM = SurveyViewModel()
     @State private var statsStore = DeviceStatsStore.shared
     @State private var notesStore = DeviceNotesStore.shared

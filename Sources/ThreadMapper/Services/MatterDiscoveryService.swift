@@ -2,13 +2,13 @@ import Foundation
 import HomeKit
 import Observation
 
-enum LiveDiscoveryError: Error {
+enum DiscoveryError: Error {
     case homeKitNotAuthorized
     case homeManagerFailed(Error)
     case noThreadDevicesFound
 }
 
-extension LiveDiscoveryError {
+extension DiscoveryError {
     var userMessage: String {
         switch self {
         case .homeKitNotAuthorized:
@@ -21,19 +21,21 @@ extension LiveDiscoveryError {
     }
 }
 
-protocol LiveDiscoveryService: Observable {
-    var devices: [ThreadDevice] { get set }
-    var discoveryError: LiveDiscoveryError? { get set }
+/// Seam between the poll loop and any device source (HomeKit or Demo).
+protocol DiscoveryService: AnyObject {
+    var devices: [ThreadDevice] { get }
+    var discoveryError: DiscoveryError? { get }
     func startScanning() async throws
     func stopScanning()
+    func measureSignalQualities() async -> [UUID: Int]
 }
 
 @Observable
-final class MatterDiscoveryService {
+final class MatterDiscoveryService: DiscoveryService {
     static let shared = MatterDiscoveryService()
 
     var devices: [ThreadDevice] = []
-    var discoveryError: LiveDiscoveryError?
+    var discoveryError: DiscoveryError?
 
     @ObservationIgnored private let homeTracker = HomeTracker()
     @ObservationIgnored private var deviceIDCache: [String: UUID] = [:]

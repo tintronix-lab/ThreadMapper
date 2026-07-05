@@ -26,7 +26,7 @@ final class NotificationService {
         isAuthorized = settings.authorizationStatus == .authorized
     }
 
-    func notifyDeviceOffline(_ name: String, room: String?) {
+    func notifyDeviceOffline(_ name: String, room: String?, deviceID: UUID) {
         guard isAuthorized,
               UserDefaults.standard.object(forKey: "notifyOffline") as? Bool ?? true else { return }
         let content = UNMutableNotificationContent()
@@ -34,12 +34,13 @@ final class NotificationService {
         content.body = room != nil ? "\(name) (\(room!)) is unreachable" : "\(name) is unreachable"
         content.sound = .default
         content.categoryIdentifier = "DEVICE_OFFLINE"
-        schedule(content, id: "offline-\(name)")
+        schedule(content, id: "offline-\(deviceID.uuidString)")
     }
 
-    func clearOfflineNotification(for name: String) {
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["offline-\(name)"])
-        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ["offline-\(name)"])
+    func clearOfflineNotification(for deviceID: UUID) {
+        let id = "offline-\(deviceID.uuidString)"
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id])
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [id])
     }
 
     func notifyTopologyChange(joined: [String], left: [String]) {

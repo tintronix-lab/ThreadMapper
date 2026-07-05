@@ -37,7 +37,7 @@ struct DeviceListRow: View {
                         .font(.caption2.monospacedDigit())
                         .foregroundStyle(rssi.rssiColor)
                 }
-                if let stats = statsStore.stats(for: device.name) {
+                if let stats = statsStore.stats(for: device.uniqueIdentifier) {
                     Text(stats.healthGrade)
                         .font(.system(size: 11, weight: .bold, design: .rounded))
                         .foregroundStyle(stats.healthColor)

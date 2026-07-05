@@ -4,6 +4,7 @@ struct SettingsView: View {
     @AppStorage("notifyOffline")        private var notifyOffline = true
     @AppStorage("notifyTopology")       private var notifyTopology = true
     @AppStorage("offlineGracePeriod")   private var offlineGracePeriod = 60.0
+    @AppStorage("demoMode")             private var demoMode = false
 
     @Environment(DeviceStatsStore.self)   private var statsStore
     @Environment(HealthHistoryStore.self) private var historyStore
@@ -37,10 +38,20 @@ struct SettingsView: View {
 
     @ViewBuilder
     private var toolsSection: some View {
-        Section("Tools") {
+        Section {
             NavigationLink("Setup Checklist") {
                 AppChecklistView()
             }
+            Toggle(isOn: $demoMode) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Demo Mode")
+                    Text("Simulates a Thread network — no HomeKit required. Restart the app to apply.")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        } header: {
+            Text("Tools")
         }
     }
 
@@ -79,8 +90,7 @@ struct SettingsView: View {
                 titleVisibility: .visible
             ) {
                 Button("Clear All Signal Data", role: .destructive) {
-                    let keys = Array(statsStore.readings.keys)
-                    for key in keys { statsStore.clear(for: key) }
+                    statsStore.clearAll()
                 }
             }
 

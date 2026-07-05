@@ -12,7 +12,7 @@ struct DeviceDetailView: View {
     // Generated once on appear — generating in body wrote a temp file on every render.
     @State private var exportURL: URL?
 
-    private var stats: DeviceStats? { statsStore.stats(for: device.name) }
+    private var stats: DeviceStats? { statsStore.stats(for: device.uniqueIdentifier) }
     private var surveyPoints: [SurveyPoint] { surveyVM.surveys(for: device.name) }
 
     var body: some View {
@@ -137,7 +137,7 @@ struct DeviceDetailView: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                     Spacer()
-                    Button("Clear") { statsStore.clear(for: device.name) }
+                    Button("Clear") { statsStore.clear(for: device.uniqueIdentifier) }
                         .font(.caption2)
                         .foregroundStyle(.red.opacity(0.7))
                 }
@@ -153,7 +153,7 @@ struct DeviceDetailView: View {
 
             // Troubleshooter entry point for offline or weak devices
             let rssi = stats?.latestRSSI ?? device.rssi ?? -65
-            if rssi == -100 {
+            if device.isOffline {
                 Button {
                     troubleshootProblem = .offline
                 } label: {

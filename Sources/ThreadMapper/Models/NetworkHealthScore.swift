@@ -42,14 +42,14 @@ struct NetworkHealthScore {
         }
 
         // Offline devices
-        let offline = devices.filter { $0.rssi == -100 }
+        let offline = devices.filter(\.isOffline)
         if !offline.isEmpty {
             score -= min(30, offline.count * 12)
             issues.append(Issue(message: "\(offline.count) device\(offline.count == 1 ? "" : "s") offline", icon: "network.slash", isCritical: true))
         }
 
         // Weak signal
-        let weak = devices.filter { let r = $0.rssi ?? -65; return r < -80 && r > -100 }
+        let weak = devices.filter(\.isWeak)
         if !weak.isEmpty {
             score -= min(25, weak.count * 7)
             issues.append(Issue(message: "\(weak.count) device\(weak.count == 1 ? "" : "s") with weak signal", icon: "wifi.exclamationmark", isCritical: weak.count > 2))

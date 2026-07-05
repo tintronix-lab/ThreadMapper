@@ -43,12 +43,12 @@ final class MeshViewModel {
         nodes.count
     }
 
-    private let discovery = MatterDiscoveryService.shared
+    @ObservationIgnored private let discovery: any DiscoveryService
     @ObservationIgnored private var keepAliveTask: Task<Void, Error>?
     @ObservationIgnored private var pollTick = 0
     @ObservationIgnored private var knownDeviceNames: Set<String> = []
-    @ObservationIgnored private var offlineDeviceNames: Set<String> = []
-    @ObservationIgnored private var pendingOfflineTasks: [String: Task<Void, Never>] = [:]
+    @ObservationIgnored private var offlineDeviceIDs: Set<UUID> = []
+    @ObservationIgnored private var pendingOfflineTasks: [UUID: Task<Void, Never>] = [:]
     @ObservationIgnored private var previousHealthScore: Int? = nil
 
     private var effectiveGracePeriod: TimeInterval {
@@ -56,7 +56,8 @@ final class MeshViewModel {
         return stored > 0 ? stored : 60
     }
 
-    init() {
+    init(discovery: any DiscoveryService = MatterDiscoveryService.shared) {
+        self.discovery = discovery
         keepAliveTask = Task { [weak self] in
             while !Task.isCancelled {
                 guard let self else { break }
@@ -77,7 +78,7 @@ final class MeshViewModel {
                         for device in self.devices {
                             if let q = qualities[device.uniqueIdentifier] {
                                 device.rssi = q
-                                DeviceStatsStore.shared.record(deviceName: device.name, rssi: q)
+                                DeviceStatsStore.shared.record(deviceID: device.uniqueIdentifier, rssi: q)
                             }
                         }
                     }
@@ -130,40 +131,41 @@ final class MeshViewModel {
 
                     // Offline / online transitions (with grace period to avoid false positives)
                     for device in self.devices {
-                        let isOffline = device.rssi == -100
-                        if isOffline && !self.offlineDeviceNames.contains(device.name) {
-                            self.offlineDeviceNames.insert(device.name)
-                            let name = device.name; let room = device.room
+                        let uuid = device.uniqueIdentifier
+                        let name = device.name
+                        let room = device.room
+                        if device.isOffline && !self.offlineDeviceIDs.contains(uuid) {
+                            self.offlineDeviceIDs.insert(uuid)
                             let gracePeriod = self.effectiveGracePeriod
-                        let isBR = device.isBorderRouter
-                        let t = Task {
+                            let isBR = device.isBorderRouter
+                            let t = Task {
                                 try? await Task.sleep(for: .seconds(gracePeriod))
                                 guard !Task.isCancelled else { return }
                                 await MainActor.run {
-                                    if self.offlineDeviceNames.contains(name) {
-                                        NotificationService.shared.notifyDeviceOffline(name, room: room)
+                                    if self.offlineDeviceIDs.contains(uuid) {
+                                        NotificationService.shared.notifyDeviceOffline(name, room: room, deviceID: uuid)
                                         let kind: ActivityEvent.Kind = isBR ? .borderRouterOffline : .deviceOffline
                                         let loc = room.map { " in \($0)" } ?? ""
                                         ActivityStore.shared.record(kind: kind, deviceName: name, room: room,
                                             detail: "\(name)\(loc) has been unreachable for over \(Int(gracePeriod / 60) > 0 ? "\(Int(gracePeriod / 60))m" : "\(Int(gracePeriod))s")")
                                     }
-                                    self.pendingOfflineTasks[name] = nil
+                                    self.pendingOfflineTasks[uuid] = nil
                                 }
                             }
-                            self.pendingOfflineTasks[device.name] = t
-                        } else if !isOffline && self.offlineDeviceNames.contains(device.name) {
-                            self.pendingOfflineTasks[device.name]?.cancel()
-                            self.pendingOfflineTasks[device.name] = nil
-                            self.offlineDeviceNames.remove(device.name)
-                            NotificationService.shared.clearOfflineNotification(for: device.name)
-                            let loc = device.room.map { " in \($0)" } ?? ""
-                            ActivityStore.shared.record(kind: .deviceOnline, deviceName: device.name, room: device.room,
-                                detail: "\(device.name)\(loc) is back online")
+                            self.pendingOfflineTasks[uuid] = t
+                        } else if !device.isOffline && self.offlineDeviceIDs.contains(uuid) {
+                            self.pendingOfflineTasks[uuid]?.cancel()
+                            self.pendingOfflineTasks[uuid] = nil
+                            self.offlineDeviceIDs.remove(uuid)
+                            NotificationService.shared.clearOfflineNotification(for: uuid)
+                            let loc = room.map { " in \($0)" } ?? ""
+                            ActivityStore.shared.record(kind: .deviceOnline, deviceName: name, room: room,
+                                detail: "\(name)\(loc) is back online")
                         }
                     }
 
                     // Badge = number of confirmed offline devices
-                    let offlineCount = self.devices.filter { $0.rssi == -100 }.count
+                    let offlineCount = self.devices.filter(\.isOffline).count
                     NotificationService.shared.updateBadge(offlineCount)
 
                     // Write snapshot to App Group for widget and BGTask
@@ -174,8 +176,8 @@ final class MeshViewModel {
                         WidgetSnapshot.RoomSnapshot(
                             name: room,
                             deviceCount: devs.count,
-                            offlineCount: devs.filter { $0.rssi == -100 }.count,
-                            weakCount: devs.filter { let r = $0.rssi ?? -65; return r < -80 && r > -100 }.count
+                            offlineCount: devs.filter(\.isOffline).count,
+                            weakCount: devs.filter(\.isWeak).count
                         )
                     }.sorted { $0.name < $1.name }
                     AppGroupStore.writeSnapshot(WidgetSnapshot(
@@ -183,12 +185,12 @@ final class MeshViewModel {
                         score: health.score,
                         deviceCount: self.devices.count,
                         offlineCount: offlineCount,
-                        weakCount: self.devices.filter { let r = $0.rssi ?? -65; return r < -80 && r > -100 }.count,
+                        weakCount: self.devices.filter(\.isWeak).count,
                         updatedAt: Date(),
                         rooms: roomSnaps
                     ))
                     AppGroupStore.writeDeviceStates(
-                        Dictionary(self.devices.map { ($0.name, $0.rssi != -100) }, uniquingKeysWith: { _, new in new })
+                        Dictionary(self.devices.map { ($0.name, !$0.isOffline) }, uniquingKeysWith: { _, new in new })
                     )
                     HealthHistoryStore.shared.record(score: health.score, grade: health.grade)
 

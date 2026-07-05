@@ -139,7 +139,7 @@ struct DashboardView: View {
                     HStack(spacing: 8) {
                         statChip("\(viewModel.devices.count)", "Devices", "cpu")
                         statChip("\(viewModel.devices.filter(\.isBorderRouter).count)", "Routers", "antenna.radiowaves.left.and.right")
-                        let weak = viewModel.devices.filter { ($0.rssi ?? -65) < -80 }.count
+                        let weak = viewModel.devices.filter(\.isWeak).count
                         if weak > 0 {
                             statChip("\(weak)", "Weak", "wifi.exclamationmark", color: .orange)
                         }
@@ -266,9 +266,9 @@ struct DashboardView: View {
 
     @ViewBuilder
     private func roomRow(_ room: String, _ devices: [ThreadDevice]) -> some View {
-        let offline = devices.filter { $0.rssi == -100 }.count
-        let weak = devices.filter { let r = $0.rssi ?? -65; return r < -80 && r > -100 }.count
-        let grades = devices.compactMap { statsStore.stats(for: $0.name)?.healthGrade }
+        let offline = devices.filter(\.isOffline).count
+        let weak = devices.filter(\.isWeak).count
+        let grades = devices.compactMap { statsStore.stats(for: $0.uniqueIdentifier)?.healthGrade }
         let worstGrade = ["F", "D", "C", "B", "A"].first { grades.contains($0) }
 
         Button {
@@ -434,7 +434,7 @@ struct DashboardView: View {
     private func buildPlacementSuggestions() -> [String] {
         var suggestions: [String] = []
         for group in roomGroups {
-            let avgRSSIs = group.devices.compactMap { statsStore.stats(for: $0.name)?.avgRSSI }
+            let avgRSSIs = group.devices.compactMap { statsStore.stats(for: $0.uniqueIdentifier)?.avgRSSI }
             guard !avgRSSIs.isEmpty else { continue }
             let roomAvg = avgRSSIs.reduce(0, +) / avgRSSIs.count
             guard roomAvg < -75 else { continue }

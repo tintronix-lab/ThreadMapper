@@ -57,19 +57,23 @@ private final class ReachabilityChecker: NSObject, HMHomeManagerDelegate {
         var current: [String: Bool] = [:]
         var rooms: [String: String] = [:]
 
+        // Collect current state keyed by name (for AppGroupStore) and by UUID (for notifications)
+        var uuidByName: [String: UUID] = [:]
         for home in manager.homes {
             for acc in home.accessories {
                 current[acc.name] = acc.isReachable
+                uuidByName[acc.name] = acc.uniqueIdentifier
                 if let room = acc.room { rooms[acc.name] = room.name }
             }
         }
 
         for (name, reachable) in current {
+            guard let uuid = uuidByName[name] else { continue }
             let wasReachable = previous[name] ?? true
             if !reachable && wasReachable {
-                NotificationService.shared.notifyDeviceOffline(name, room: rooms[name])
+                NotificationService.shared.notifyDeviceOffline(name, room: rooms[name], deviceID: uuid)
             } else if reachable && !wasReachable {
-                NotificationService.shared.clearOfflineNotification(for: name)
+                NotificationService.shared.clearOfflineNotification(for: uuid)
             }
         }
 
