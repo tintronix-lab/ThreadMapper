@@ -69,12 +69,13 @@ struct DeviceDetailView: View {
                     Text(roleLabel)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
-                    Text("\(currentRSSI) dBm")
-                        .font(.title3.bold().monospacedDigit())
-                        .foregroundStyle(currentColor)
+                    // H4: quality label is the primary display — raw number is latency-estimated
                     Text(currentRSSI.rssiQualityLabel)
+                        .font(.title3.bold())
+                        .foregroundStyle(currentColor)
+                    Text("Response Quality · estimated")
                         .font(.caption2)
-                        .foregroundStyle(currentColor.opacity(0.8))
+                        .foregroundStyle(currentColor.opacity(0.7))
                 }
 
                 Spacer()
@@ -182,7 +183,7 @@ struct DeviceDetailView: View {
             Text("\(value)")
                 .font(.caption.weight(.semibold).monospacedDigit())
                 .foregroundStyle(color)
-            Text("dBm")
+            Text("RQ")   // Response Quality — latency-estimated, not radio dBm
                 .font(.system(size: 8))
                 .foregroundStyle(.secondary)
             Text(label)

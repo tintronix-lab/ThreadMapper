@@ -33,8 +33,9 @@ struct DeviceListRow: View {
             Spacer(minLength: 4)
             VStack(alignment: .trailing, spacing: 2) {
                 if let rssi = device.rssi {
-                    Text("\(rssi) dBm")
-                        .font(.caption2.monospacedDigit())
+                    // H4: show quality label — raw value is latency-estimated, not radio RSSI
+                    Text(rssi.rssiQualityLabel)
+                        .font(.caption2.weight(.medium))
                         .foregroundStyle(rssi.rssiColor)
                 }
                 if let stats = statsStore.stats(for: device.uniqueIdentifier) {
@@ -69,7 +70,7 @@ struct DeviceListRow: View {
 
     private var accessibilityDescription: String {
         var parts = [device.name, typeLabel]
-        if let rssi = device.rssi { parts.append("\(rssi.rssiQualityLabel) signal at \(rssi) dBm") }
+        if let rssi = device.rssi { parts.append("\(rssi.rssiQualityLabel) signal quality") }
         if let room = device.room { parts.append("in \(room)") }
         if let batt = device.batteryPercentage { parts.append("battery \(batt)%") }
         return parts.joined(separator: ", ")

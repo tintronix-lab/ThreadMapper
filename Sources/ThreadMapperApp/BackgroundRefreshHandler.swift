@@ -1,5 +1,8 @@
 import BackgroundTasks
 import HomeKit
+import OSLog
+
+private let logger = Logger(subsystem: "com.tintronixlab.ThreadMapper", category: "background")
 
 enum BackgroundRefreshHandler {
     static let taskID = "com.tintronixlab.ThreadMapper.bgrefresh"
@@ -13,7 +16,11 @@ enum BackgroundRefreshHandler {
     static func schedule() {
         let request = BGAppRefreshTaskRequest(identifier: taskID)
         request.earliestBeginDate = Date(timeIntervalSinceNow: 15 * 60)
-        try? BGTaskScheduler.shared.submit(request)
+        do {
+            try BGTaskScheduler.shared.submit(request)
+        } catch {
+            logger.error("BGTaskScheduler submit failed: \(error.localizedDescription)")
+        }
     }
 
     private static func handleRefresh(task: BGAppRefreshTask) {

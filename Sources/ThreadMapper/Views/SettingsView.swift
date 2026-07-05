@@ -5,6 +5,9 @@ struct SettingsView: View {
     @AppStorage("notifyTopology")       private var notifyTopology = true
     @AppStorage("offlineGracePeriod")   private var offlineGracePeriod = 60.0
     @AppStorage("demoMode")             private var demoMode = false
+    @AppStorage("quietHoursEnabled")    private var quietHoursEnabled = false
+    @AppStorage("quietHoursStart")      private var quietHoursStart = 22
+    @AppStorage("quietHoursEnd")        private var quietHoursEnd = 7
 
     @Environment(DeviceStatsStore.self)   private var statsStore
     @Environment(HealthHistoryStore.self) private var historyStore
@@ -25,6 +28,7 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 notificationsSection
+                quietHoursSection
                 alertsSection
                 dataSection
                 toolsSection
@@ -61,6 +65,41 @@ struct SettingsView: View {
             Toggle("Offline device alerts", isOn: $notifyOffline)
             Toggle("Network topology changes", isOn: $notifyTopology)
         }
+    }
+
+    @ViewBuilder
+    private var quietHoursSection: some View {
+        Section {
+            Toggle("Enable Quiet Hours", isOn: $quietHoursEnabled)
+            if quietHoursEnabled {
+                Picker("Start", selection: $quietHoursStart) {
+                    ForEach(0..<24, id: \.self) { hour in
+                        Text(hourLabel(hour)).tag(hour)
+                    }
+                }
+                Picker("End", selection: $quietHoursEnd) {
+                    ForEach(0..<24, id: \.self) { hour in
+                        Text(hourLabel(hour)).tag(hour)
+                    }
+                }
+            }
+        } header: {
+            Text("Quiet Hours")
+        } footer: {
+            if quietHoursEnabled {
+                let label = quietHoursStart <= quietHoursEnd
+                    ? "\(hourLabel(quietHoursStart)) – \(hourLabel(quietHoursEnd))"
+                    : "\(hourLabel(quietHoursStart)) – midnight – \(hourLabel(quietHoursEnd))"
+                Text("Notifications are suppressed \(label).")
+            } else {
+                Text("Suppress all alerts during a nightly window.")
+            }
+        }
+    }
+
+    private func hourLabel(_ hour: Int) -> String {
+        let d = Calendar.current.date(bySettingHour: hour, minute: 0, second: 0, of: Date()) ?? Date()
+        return d.formatted(.dateTime.hour(.defaultDigits(amPM: .abbreviated)))
     }
 
     @ViewBuilder

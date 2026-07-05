@@ -28,7 +28,8 @@ final class NotificationService {
 
     func notifyDeviceOffline(_ name: String, room: String?, deviceID: UUID) {
         guard isAuthorized,
-              UserDefaults.standard.object(forKey: "notifyOffline") as? Bool ?? true else { return }
+              UserDefaults.standard.object(forKey: "notifyOffline") as? Bool ?? true,
+              !isInQuietHours() else { return }
         let content = UNMutableNotificationContent()
         content.title = "Thread Device Offline"
         content.body = room != nil ? "\(name) (\(room!)) is unreachable" : "\(name) is unreachable"
@@ -45,7 +46,8 @@ final class NotificationService {
 
     func notifyTopologyChange(joined: [String], left: [String]) {
         guard isAuthorized, !joined.isEmpty || !left.isEmpty,
-              UserDefaults.standard.object(forKey: "notifyTopology") as? Bool ?? true else { return }
+              UserDefaults.standard.object(forKey: "notifyTopology") as? Bool ?? true,
+              !isInQuietHours() else { return }
         let content = UNMutableNotificationContent()
         content.title = "Thread Network Changed"
         var parts: [String] = []
@@ -60,6 +62,24 @@ final class NotificationService {
         guard isAuthorized else { return }
         Task {
             try? await UNUserNotificationCenter.current().setBadgeCount(count)
+        }
+    }
+
+    // MARK: - Quiet Hours
+
+    // Returns true if the current time falls within the user-configured quiet window.
+    // Stored as hours (0–23) in UserDefaults: "quietHoursEnabled", "quietHoursStart", "quietHoursEnd".
+    func isInQuietHours() -> Bool {
+        guard UserDefaults.standard.bool(forKey: "quietHoursEnabled") else { return false }
+        let startHour = UserDefaults.standard.integer(forKey: "quietHoursStart")
+        let endHour   = UserDefaults.standard.integer(forKey: "quietHoursEnd")
+        let cal = Calendar.current
+        let now = cal.component(.hour, from: Date())
+        if startHour <= endHour {
+            return now >= startHour && now < endHour
+        } else {
+            // Wraps midnight — e.g. 22:00–07:00
+            return now >= startHour || now < endHour
         }
     }
 

@@ -281,3 +281,16 @@ Highest-impact improvement identified: **the 1 Hz `reloadAllTimelines()` battery
 10. **H13** `.github/workflows/ci.yml` added: SwiftLint job + xcodegen + `xcodebuild test` on an iOS simulator. CHANGELOG 0.2.0 documents all of the above and corrects 0.1.0's inaccurate claims.
 
 **Iteration 3 backlog (next highest impact):** `Reachability` enum replacing the `-100`/`-92` sentinels; `DiscoveryService` protocol adoption + `DemoDiscoveryService` (unblocks demo mode, previews, and testing the poll loop); re-key `DeviceStatsStore`/`ActivityStore`/notifications by `uniqueIdentifier`.
+
+## Phase 8 — Iteration 4 (implemented)
+
+1. **H11** Graph hit-testing + pan speed fixed: `MeshGraphView` now stores `viewSize` from `GeometryReader` and uses it to invert the `scaleEffect` transform in `handleTap` — converting visual tap coordinates back to canvas layout space before distance testing. Drag gesture now divides translation by `scale` so pan speed is constant regardless of zoom level.
+2. **H5** Estimated topology label: the legend in `MeshGraphView` now shows "Estimated topology" (italic) so users understand the star layout is inferred, not real Thread parent/child data.
+3. **H4 (complete)** Response Quality rename across all views: `DeviceListRow` shows the quality label ("Good", "Fair"…) instead of raw `dBm` numbers; `DeviceDetailView` header now says "Response Quality · estimated" with the quality label as the primary metric and stat cells use "RQ" instead of "dBm"; `MeshGraphView` HUD shows "quality (est.)" instead of "X dBm".
+4. **M14** `PrivacyInfo.xcprivacy` created in `Sources/ThreadMapperApp/` — declares location (coarse, for survey), device inventory (other data types), UserDefaults API access (`CA92.1`), and file timestamp access (`C617.1`). Unblocks App Store submission.
+5. **28** Quiet hours: `NotificationService.isInQuietHours()` reads `quietHoursEnabled/Start/End` from `UserDefaults` and suppresses all notifications during the configured window (midnight-wrapping supported). Settings UI added as a dedicated "Quiet Hours" section with start/end time pickers that appear when the toggle is on.
+6. **M9** `BGTaskScheduler.submit` error no longer silently swallowed — failure is logged via `os.Logger` (category: `background`) so it appears in Console and Instruments.
+
+**Remaining High issues:** H6 store identity migration to UUID (partially done for DeviceStatsStore/notifications — ActivityStore and SurveyViewModel still use device name as key).
+
+**Iteration 5 backlog (next highest impact):** App Intents/Siri integration ("What's my Thread health?" shortcut); ActivityStore + SurveyViewModel re-keying to UUID (completes H6); SwiftData migration to replace hand-rolled JSON stores; room-first survey flow as primary CTA (completes Sprint 2 roadmap).
