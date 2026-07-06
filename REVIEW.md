@@ -510,3 +510,4 @@ All 7 persistence callsites updated from `.atomic` to `[.atomic, .completeFilePr
 5. Task is cancelled in `stopRecording()` and `hapticEnabled` resets to `false` so the next room starts clean.
 
 **Iteration 9 backlog:** Dynamic Type audit (replace `font(.system(size: N))` with `.caption2`/`.footnote` semantic styles); VoiceOver graph navigation (H12, `accessibilityChildren` overlay on Canvas); Spotlight indexing of devices (#57 — `CSSearchableItem` + `CSSearchableIndex`); App Store Connect Pro product setup; confetti animation on grade improvement (#53).
+no
