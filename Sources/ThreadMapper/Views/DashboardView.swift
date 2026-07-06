@@ -6,6 +6,8 @@ struct DashboardView: View {
     @Environment(MeshViewModel.self)       private var viewModel
     @Environment(DeviceStatsStore.self)    private var statsStore
     @Environment(HealthHistoryStore.self)  private var historyStore
+
+    @State private var navPath = NavigationPath()
     @State private var selectedDevice: ThreadDevice?
     @State private var selectedRoom: String? = nil
     @State private var showWeeklyReport = false
@@ -13,8 +15,9 @@ struct DashboardView: View {
     @State private var showAchievements = false
     @State private var achievementStore = AchievementStore.shared
     @State private var bannerVisible = false
+    @State private var roomCoverageExpanded = true
+    @State private var allDevicesExpanded = true
 
-    // Computed once per poll tick in MeshViewModel — not per render.
     private var health: NetworkHealthScore { viewModel.health }
 
     private var roomGroups: [(room: String, devices: [ThreadDevice])] {
@@ -29,26 +32,25 @@ struct DashboardView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navPath) {
             List {
                 topologyBanner
                 healthSection
                 issuesSection
-                if !health.tips.isEmpty {
-                    tipsSection
-                }
+                if !health.tips.isEmpty { tipsSection }
                 resilienceSection
                 achievementsSection
                 trendSection
                 healthHistorySection
-                if !roomGroups.isEmpty {
-                    roomCoverageSection
-                }
+                if !roomGroups.isEmpty { roomCoverageSection }
                 placementSection
                 deviceSection
             }
             .navigationTitle("Dashboard")
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(for: DeviceFilterSpec.self) { spec in
+                DeviceFilterView(spec: spec)
+            }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
@@ -63,27 +65,21 @@ struct DashboardView: View {
                     }
                     .disabled(viewModel.isScanning)
                 }
-                if let _ = WeeklyReportStore.shared.latestReport {
+                if WeeklyReportStore.shared.latestReport != nil {
                     ToolbarItem(placement: .secondaryAction) {
-                        Button {
-                            showWeeklyReport = true
-                        } label: {
+                        Button { showWeeklyReport = true } label: {
                             Label("Weekly Report", systemImage: "doc.text.fill")
                         }
                     }
                 }
             }
-            .sheet(item: $selectedDevice) { device in
-                DeviceDetailView(device: device)
-            }
+            .sheet(item: $selectedDevice) { device in DeviceDetailView(device: device) }
             .sheet(isPresented: $showWeeklyReport) {
                 if let report = WeeklyReportStore.shared.latestReport {
                     WeeklyReportView(report: report)
                 }
             }
-            .sheet(isPresented: $showPaywall) {
-                PaywallView()
-            }
+            .sheet(isPresented: $showPaywall) { PaywallView() }
             .sheet(isPresented: $showAchievements) {
                 NavigationStack { AchievementsView() }
             }
@@ -111,9 +107,7 @@ struct DashboardView: View {
                 }
             }
             .onAppear {
-                if !viewModel.isScanning {
-                    Task { await viewModel.startScan() }
-                }
+                if !viewModel.isScanning { Task { await viewModel.startScan() } }
             }
         }
     }
@@ -170,29 +164,39 @@ struct DashboardView: View {
                             .foregroundStyle(health.color)
                     }
 
-                    // 2×2 stat grid
-                    let offline = viewModel.devices.filter(\.isOffline).count
-                    let weak    = viewModel.devices.filter(\.isWeak).count
+                    let offline = viewModel.devices.filter(\.isOffline)
+                    let weak    = viewModel.devices.filter(\.isWeak)
+                    let routers = viewModel.devices.filter { $0.isRouter || $0.isBorderRouter }
+
                     VStack(spacing: 6) {
                         HStack(spacing: 6) {
-                            statCard(icon: "cpu.fill",
-                                     value: "\(viewModel.devices.count)",
-                                     label: "Devices",
-                                     tint: .accentColor)
-                            statCard(icon: "antenna.radiowaves.left.and.right",
-                                     value: "\(viewModel.devices.filter(\.isBorderRouter).count)",
-                                     label: "Routers",
-                                     tint: .indigo)
+                            tappableStatCard(
+                                icon: "cpu.fill", value: "\(viewModel.devices.count)",
+                                label: "Devices", tint: .accentColor,
+                                spec: DeviceFilterSpec(title: "All Devices", devices: viewModel.devices)
+                            )
+                            tappableStatCard(
+                                icon: "antenna.radiowaves.left.and.right",
+                                value: "\(routers.count)",
+                                label: "Routers", tint: .indigo,
+                                spec: DeviceFilterSpec(title: "Routers", devices: routers)
+                            )
                         }
                         HStack(spacing: 6) {
-                            statCard(icon: offline > 0 ? "wifi.slash" : "wifi.circle.fill",
-                                     value: "\(offline)",
-                                     label: "Offline",
-                                     tint: offline > 0 ? .red : .green)
-                            statCard(icon: weak > 0 ? "wifi.exclamationmark" : "checkmark.circle.fill",
-                                     value: "\(weak)",
-                                     label: "Weak",
-                                     tint: weak > 0 ? .orange : .green)
+                            tappableStatCard(
+                                icon: offline.count > 0 ? "wifi.slash" : "wifi.circle.fill",
+                                value: "\(offline.count)",
+                                label: "Offline",
+                                tint: offline.count > 0 ? .red : .green,
+                                spec: DeviceFilterSpec(title: "Offline Devices", devices: offline)
+                            )
+                            tappableStatCard(
+                                icon: weak.count > 0 ? "wifi.exclamationmark" : "checkmark.circle.fill",
+                                value: "\(weak.count)",
+                                label: "Weak",
+                                tint: weak.count > 0 ? .orange : .green,
+                                spec: DeviceFilterSpec(title: "Weak Signal Devices", devices: weak)
+                            )
                         }
                     }
                 }
@@ -209,9 +213,7 @@ struct DashboardView: View {
                             .font(.caption2.weight(.semibold))
                             .foregroundStyle(.orange)
                     } else {
-                        Button {
-                            showPaywall = true
-                        } label: {
+                        Button { showPaywall = true } label: {
                             Label("Streak", systemImage: "lock.fill")
                                 .font(.caption2.weight(.semibold))
                                 .foregroundStyle(.secondary)
@@ -226,18 +228,13 @@ struct DashboardView: View {
     @ViewBuilder
     private var gradeRingView: some View {
         ZStack {
-            // Track ring
             Circle()
                 .stroke(health.color.opacity(0.12), lineWidth: 8)
-
-            // Filled arc
             Circle()
                 .trim(from: 0, to: CGFloat(health.score) / 100)
                 .stroke(health.color, style: StrokeStyle(lineWidth: 8, lineCap: .round))
                 .rotationEffect(.degrees(-90))
                 .animation(.spring(response: 0.8, dampingFraction: 0.75), value: health.score)
-
-            // Center label
             VStack(spacing: 0) {
                 Text(health.grade)
                     .font(.system(size: 36, weight: .black, design: .rounded))
@@ -251,26 +248,32 @@ struct DashboardView: View {
         .shadow(color: health.color.opacity(0.25), radius: 8, x: 0, y: 3)
     }
 
+    /// Stat card backed by NavigationLink so it survives List row rebuilds and
+    /// doesn't compete with the row's own gesture recognizer.
     @ViewBuilder
-    private func statCard(icon: String, value: String, label: String, tint: Color) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.caption2)
-                .foregroundStyle(tint)
-                .frame(width: 14)
-            VStack(alignment: .leading, spacing: 0) {
-                Text(value)
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.primary)
-                Text(label)
-                    .font(.system(size: 9))
-                    .foregroundStyle(.secondary)
+    private func tappableStatCard(icon: String, value: String, label: String, tint: Color, spec: DeviceFilterSpec) -> some View {
+        NavigationLink(value: spec) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.caption2)
+                    .foregroundStyle(tint)
+                    .frame(width: 14)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(value)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.primary)
+                    Text(label)
+                        .font(.system(size: 9))
+                        .foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 0)
             }
-            Spacer(minLength: 0)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .background(tint.opacity(0.08), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .contentShape(Rectangle())
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 5)
-        .background(tint.opacity(0.08), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .buttonStyle(.plain)
     }
 
     // MARK: - Issues
@@ -322,6 +325,17 @@ struct DashboardView: View {
 
     @ViewBuilder
     private func issueRow(_ issue: NetworkHealthScore.Issue) -> some View {
+        if !issue.affectedDevices.isEmpty {
+            // NavigationLink is the correct primitive for full-row List navigation.
+            NavigationLink(value: DeviceFilterSpec(title: issue.message, devices: issue.affectedDevices)) {
+                issueRowContent(issue)
+            }
+        } else {
+            issueRowContent(issue)
+        }
+    }
+
+    private func issueRowContent(_ issue: NetworkHealthScore.Issue) -> some View {
         HStack(spacing: 12) {
             ZStack {
                 Circle()
@@ -331,12 +345,9 @@ struct DashboardView: View {
                     .font(.caption)
                     .foregroundStyle(issue.isCritical ? .red : .orange)
             }
-
             Text(issue.message)
                 .font(.subheadline)
-
             Spacer()
-
             if issue.isCritical {
                 Text("Critical")
                     .font(.system(size: 10, weight: .bold))
@@ -423,9 +434,7 @@ struct DashboardView: View {
                     Text("Mesh Resilience")
                     Spacer()
                     if !ProStore.shared.isPro {
-                        Button {
-                            showPaywall = true
-                        } label: {
+                        Button { showPaywall = true } label: {
                             Label("Pro", systemImage: "lock.fill")
                                 .font(.caption2.weight(.semibold))
                                 .foregroundStyle(.secondary)
@@ -449,7 +458,6 @@ struct DashboardView: View {
                         .foregroundStyle(.white)
                         .frame(width: 20, height: 20)
                         .background(.blue.opacity(0.85), in: Circle())
-
                     Text(tip)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -472,9 +480,7 @@ struct DashboardView: View {
         let total = achievementStore.achievements.count
         if unlocked > 0 {
             Section {
-                Button {
-                    showAchievements = true
-                } label: {
+                Button { showAchievements = true } label: {
                     HStack(spacing: 12) {
                         Image(systemName: "trophy.fill")
                             .font(.title3)
@@ -489,7 +495,6 @@ struct DashboardView: View {
                                 .foregroundStyle(.secondary)
                         }
                         Spacer()
-                        // Mini badge row
                         HStack(spacing: 4) {
                             ForEach(achievementStore.achievements.filter(\.isUnlocked).prefix(3)) { a in
                                 Image(systemName: a.icon)
@@ -537,17 +542,30 @@ struct DashboardView: View {
         }
     }
 
-    // MARK: - Room Coverage
+    // MARK: - Room Coverage (collapsible)
 
     @ViewBuilder
     private var roomCoverageSection: some View {
         Section {
-            ForEach(roomGroups, id: \.room) { group in
-                roomRow(group.room, group.devices)
+            if roomCoverageExpanded {
+                ForEach(roomGroups, id: \.room) { group in
+                    roomRow(group.room, group.devices)
+                }
             }
         } header: {
             HStack {
-                Text("Room Coverage")
+                Button {
+                    withAnimation(.easeInOut(duration: 0.25)) { roomCoverageExpanded.toggle() }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text("Room Coverage")
+                        Image(systemName: "chevron.down")
+                            .font(.caption2.weight(.semibold))
+                            .rotationEffect(.degrees(roomCoverageExpanded ? 0 : -90))
+                            .animation(.easeInOut(duration: 0.25), value: roomCoverageExpanded)
+                    }
+                }
+                .buttonStyle(.plain)
                 Spacer()
                 if selectedRoom != nil {
                     Button("Show All") { selectedRoom = nil }
@@ -580,12 +598,8 @@ struct DashboardView: View {
                     HStack(spacing: 6) {
                         Text("\(devices.count) device\(devices.count == 1 ? "" : "s")")
                             .font(.caption2).foregroundStyle(.secondary)
-                        if weak > 0 {
-                            Text("· \(weak) weak").font(.caption2).foregroundStyle(.orange)
-                        }
-                        if offline > 0 {
-                            Text("· \(offline) offline").font(.caption2).foregroundStyle(.red)
-                        }
+                        if weak > 0 { Text("· \(weak) weak").font(.caption2).foregroundStyle(.orange) }
+                        if offline > 0 { Text("· \(offline) offline").font(.caption2).foregroundStyle(.red) }
                     }
                 }
 
@@ -606,42 +620,55 @@ struct DashboardView: View {
         .padding(.vertical, 2)
     }
 
-    // MARK: - Device List
+    // MARK: - Device List (collapsible)
 
     @ViewBuilder
     private var deviceSection: some View {
         Section {
-            if filteredDevices.isEmpty {
-                if viewModel.isScanning {
-                    HStack {
-                        Spacer()
-                        VStack(spacing: 8) {
-                            ProgressView()
-                            Text("Contacting HomeKit…")
-                                .foregroundStyle(.secondary)
-                                .font(.subheadline)
+            if allDevicesExpanded {
+                if filteredDevices.isEmpty {
+                    if viewModel.isScanning {
+                        HStack {
+                            Spacer()
+                            VStack(spacing: 8) {
+                                ProgressView()
+                                Text("Contacting HomeKit…")
+                                    .foregroundStyle(.secondary)
+                                    .font(.subheadline)
+                            }
+                            .padding()
+                            Spacer()
                         }
-                        .padding()
-                        Spacer()
+                    } else {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Label("No Thread devices found", systemImage: "network.slash")
+                                .font(.subheadline).foregroundStyle(.secondary)
+                            Text("Open the Home app and add your Thread border router and accessories, then tap Rescan.")
+                                .font(.caption).foregroundStyle(.tertiary)
+                        }
+                        .padding(.vertical, 6)
                     }
                 } else {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Label("No Thread devices found", systemImage: "network.slash")
-                            .font(.subheadline).foregroundStyle(.secondary)
-                        Text("Open the Home app and add your Thread border router and accessories, then tap Rescan.")
-                            .font(.caption).foregroundStyle(.tertiary)
+                    ForEach(filteredDevices) { device in
+                        DeviceListRow(device: device)
+                            .onTapGesture { selectedDevice = device }
                     }
-                    .padding(.vertical, 6)
-                }
-            } else {
-                ForEach(filteredDevices) { device in
-                    DeviceListRow(device: device)
-                        .onTapGesture { selectedDevice = device }
                 }
             }
         } header: {
             HStack {
-                Text(selectedRoom ?? "All Devices")
+                Button {
+                    withAnimation(.easeInOut(duration: 0.25)) { allDevicesExpanded.toggle() }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(selectedRoom ?? "All Devices")
+                        Image(systemName: "chevron.down")
+                            .font(.caption2.weight(.semibold))
+                            .rotationEffect(.degrees(allDevicesExpanded ? 0 : -90))
+                            .animation(.easeInOut(duration: 0.25), value: allDevicesExpanded)
+                    }
+                }
+                .buttonStyle(.plain)
                 Spacer()
                 if selectedRoom != nil {
                     Button("Clear Filter") { selectedRoom = nil }
@@ -752,5 +779,4 @@ struct DashboardView: View {
         }
         return suggestions
     }
-
 }

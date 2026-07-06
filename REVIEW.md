@@ -478,3 +478,35 @@ Three features selected from the full roadmap — one per category. Chosen becau
 13. **`ContentView`** injects `ProStore.shared` into the SwiftUI environment.
 
 **Iteration 8 backlog:** Dynamic Type audit; VoiceOver graph navigation (H12); `.completeFileProtection` on all JSON stores; App Store Connect product setup for Pro tier; Spotlight indexing of devices (feature #57).
+
+## Phase 8 — Iteration 8 (implemented)
+
+### Feature A — `.completeFileProtection` on All JSON Stores (M14)
+All 7 persistence callsites updated from `.atomic` to `[.atomic, .completeFileProtection]`:
+`ActivityStore`, `HealthHistoryStore`, `DeviceNotesStore`, `HealthStreakStore`, `WeeklyReportStore`, `DeviceStatsStore`, and `SurveyViewModel`. Files are now encrypted at rest and inaccessible while the device is locked — required for App Store privacy compliance and prevents data exfiltration if the device is accessed while locked.
+
+### Feature B — Achievements System (#52)
+1. **`AchievementStore`** — `@Observable` singleton with 6 achievements: "First Steps" (first room survey), "Coverage Champion" (3+ rooms), "Grade A Network" (first Grade A), "Streak Starter" (3-day streak), "Streak Master" (7-day streak), "Resilient Home" (2+ border routers + 4+ routers). Persisted to `achievements.json` with `.completeFileProtection`. Merge strategy on restore handles new achievements added in future app updates without losing existing unlock state.
+2. **`AchievementsView`** — List showing all achievements, locked items at 45% opacity, unlock date shown below unlocked items. Presented as a sheet from the Dashboard.
+3. **`AchievementBanner`** — Spring-animated slide-in banner at the top of Dashboard that auto-dismisses after 4 seconds when an achievement is unlocked. Dismiss button for manual close.
+4. **Dashboard `achievementsSection`** — Appears between Resilience and Trend sections once at least one achievement is unlocked. Shows trophy icon, unlocked count, and up to 3 badge icons inline. Taps into `AchievementsView` sheet.
+5. **Trigger wiring**:
+   - `streak3` / `streak7` → `HealthStreakStore.record()` after updating `currentStreak`
+   - `firstGradeA` → `MeshViewModel` poll loop when `health.grade == "A"`
+   - `resilienceA` → `MeshViewModel` when `brCount >= 2 && routerCount >= 4`
+   - `firstSurvey` / `surveyThreeRooms` → `GuidedSurveyView.stopRecording(room:)` based on `completedRooms.count`
+
+### Feature C — Haptic Geiger-Counter Survey Mode (#69)
+1. **Haptic toggle** — Waveform toolbar button appears in `GuidedSurveyView` while recording is active. Icon uses `.pulse` symbol effect when enabled to signal it's live.
+2. **Variable-interval haptic loop** — `startHapticPulse()` runs a `Task` that reads the average RSSI across all discovered devices and maps it to a `UIImpactFeedbackGenerator` pulse:
+   - avgRSSI > −55 (Excellent): 0.3 s · heavy impact
+   - avgRSSI > −65 (Good): 0.5 s · medium impact
+   - avgRSSI > −75 (Fair): 1.0 s · medium impact
+   - avgRSSI > −85 (Poor): 1.8 s · light impact
+   - else (Very Poor): 3.0 s · light impact
+   Better signal = faster, stronger pulses — analogous to a Geiger counter picking up more signal as you walk toward coverage.
+3. **Live signal row** — Updated to show quality labels ("Good", "Fair", "Poor") instead of raw RQ numbers, consistent with the rest of the app.
+4. **Haptic hint** — Instructional caption shown below the room description before recording starts so users know the feature exists.
+5. Task is cancelled in `stopRecording()` and `hapticEnabled` resets to `false` so the next room starts clean.
+
+**Iteration 9 backlog:** Dynamic Type audit (replace `font(.system(size: N))` with `.caption2`/`.footnote` semantic styles); VoiceOver graph navigation (H12, `accessibilityChildren` overlay on Canvas); Spotlight indexing of devices (#57 — `CSSearchableItem` + `CSSearchableIndex`); App Store Connect Pro product setup; confetti animation on grade improvement (#53).

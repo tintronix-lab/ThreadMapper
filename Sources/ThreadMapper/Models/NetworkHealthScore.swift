@@ -9,10 +9,12 @@ struct NetworkHealthScore {
     let tips: [String]
 
     struct Issue: Identifiable {
-        let id = UUID()
+        // Stable ID derived from content so ForEach doesn't recreate rows on every poll tick.
+        var id: String { "\(icon)|\(message)" }
         let message: String
         let icon: String
         let isCritical: Bool
+        let affectedDevices: [ThreadDevice]
     }
 
     static func compute(devices: [ThreadDevice]) -> NetworkHealthScore {
@@ -20,7 +22,7 @@ struct NetworkHealthScore {
             return NetworkHealthScore(
                 score: 0, grade: "F", color: .red,
                 summary: "No devices found",
-                issues: [Issue(message: "No Thread devices detected", icon: "antenna.radiowaves.left.and.right.slash", isCritical: true)],
+                issues: [Issue(message: "No Thread devices detected", icon: "antenna.radiowaves.left.and.right.slash", isCritical: true, affectedDevices: [])],
                 tips: ["Open the Home app and add a Thread border router", "Ensure HomeKit access is granted in Settings"]
             )
         }
@@ -33,11 +35,11 @@ struct NetworkHealthScore {
         let borderRouters = devices.filter { $0.isBorderRouter }
         if borderRouters.isEmpty {
             score -= 40
-            issues.append(Issue(message: "No border router detected", icon: "antenna.radiowaves.left.and.right.slash", isCritical: true))
+            issues.append(Issue(message: "No border router detected", icon: "antenna.radiowaves.left.and.right.slash", isCritical: true, affectedDevices: []))
             tips.append("Add a HomePod mini or Apple TV as a Thread border router")
         } else if borderRouters.count == 1 {
             score -= 15
-            issues.append(Issue(message: "Single border router — no redundancy", icon: "exclamationmark.triangle.fill", isCritical: false))
+            issues.append(Issue(message: "Single border router — no redundancy", icon: "exclamationmark.triangle.fill", isCritical: false, affectedDevices: borderRouters))
             tips.append("Add a second border router for resilience against outages")
         }
 
@@ -45,14 +47,14 @@ struct NetworkHealthScore {
         let offline = devices.filter(\.isOffline)
         if !offline.isEmpty {
             score -= min(30, offline.count * 12)
-            issues.append(Issue(message: "\(offline.count) device\(offline.count == 1 ? "" : "s") offline", icon: "network.slash", isCritical: true))
+            issues.append(Issue(message: "\(offline.count) device\(offline.count == 1 ? "" : "s") offline", icon: "network.slash", isCritical: true, affectedDevices: offline))
         }
 
         // Weak signal
         let weak = devices.filter(\.isWeak)
         if !weak.isEmpty {
             score -= min(25, weak.count * 7)
-            issues.append(Issue(message: "\(weak.count) device\(weak.count == 1 ? "" : "s") with weak signal", icon: "wifi.exclamationmark", isCritical: weak.count > 2))
+            issues.append(Issue(message: "\(weak.count) device\(weak.count == 1 ? "" : "s") with weak signal", icon: "wifi.exclamationmark", isCritical: weak.count > 2, affectedDevices: weak))
             if weak.count > 1 { tips.append("Add a Thread router between weak devices and the border router") }
         }
 
@@ -60,7 +62,7 @@ struct NetworkHealthScore {
         let lowBatt = devices.filter { ($0.batteryPercentage ?? 100) < 15 }
         if !lowBatt.isEmpty {
             score -= 5
-            issues.append(Issue(message: "\(lowBatt.count) device\(lowBatt.count == 1 ? "" : "s") battery < 15%", icon: "battery.25", isCritical: false))
+            issues.append(Issue(message: "\(lowBatt.count) device\(lowBatt.count == 1 ? "" : "s") battery < 15%", icon: "battery.25", isCritical: false, affectedDevices: lowBatt))
             tips.append("Replace or charge batteries in low-power devices")
         }
 
@@ -71,11 +73,16 @@ struct NetworkHealthScore {
         let conflicting = usedChannels.intersection(wifiOverlapChannels)
         if !conflicting.isEmpty {
             let chList = conflicting.sorted().map { "CH\($0)" }.joined(separator: ", ")
+            let channelDevices = devices.filter { device in
+                guard let ch = device.channel else { return false }
+                return conflicting.contains(ch)
+            }
             score -= 5
             issues.append(Issue(
                 message: "Thread channel overlaps 2.4 GHz WiFi (\(chList))",
                 icon: "wifi.router.fill",
-                isCritical: false
+                isCritical: false,
+                affectedDevices: channelDevices
             ))
             tips.append("Switch to Thread channels 15, 20, or 25 to reduce WiFi interference")
         }
