@@ -43,7 +43,14 @@ final class MeshViewModel {
         nodes.filter { $0.deviceID != nil }.count
     }
 
+    /// Real Thread network facts (channel, PAN ID, name) when a diagnostics
+    /// provider supplies them — empty for HomeKit-only setups (Feature #2).
+    var threadNetworks: [ThreadNetworkInfo] = []
+
     @ObservationIgnored private let discovery: any DiscoveryService
+    @ObservationIgnored private let diagnosticsProvider: any DiagnosticsProvider
+    /// Latest real per-node routing, applied by the topology builder when present.
+    @ObservationIgnored private var latestDiagnostics: [UUID: ThreadNodeDiagnostics] = [:]
     @ObservationIgnored private var keepAliveTask: Task<Void, Error>?
     @ObservationIgnored private var pollTick = 0
     @ObservationIgnored private var knownDeviceNames: Set<String> = []
@@ -56,8 +63,10 @@ final class MeshViewModel {
         return stored > 0 ? stored : 60
     }
 
-    init(discovery: any DiscoveryService = MatterDiscoveryService.shared) {
+    init(discovery: any DiscoveryService = MatterDiscoveryService.shared,
+         diagnostics: any DiagnosticsProvider = ThreadCredentialsService()) {
         self.discovery = discovery
+        self.diagnosticsProvider = diagnostics
         keepAliveTask = Task { [weak self] in
             while !Task.isCancelled {
                 guard let self else { break }
@@ -237,6 +246,7 @@ final class MeshViewModel {
         } catch {
             await MainActor.run { scanError = error.localizedDescription }
         }
+        await refreshDiagnostics()
         await MainActor.run { isScanning = false }
     }
 
@@ -244,8 +254,20 @@ final class MeshViewModel {
         discovery.stopScanning()
     }
 
+    /// Pull real Thread data from the provider (network facts + per-node routing).
+    /// No-op in effect for HomeKit-only setups (empty results → inferred mesh).
+    func refreshDiagnostics() async {
+        let diags = await diagnosticsProvider.nodeDiagnostics()
+        let networks = await diagnosticsProvider.threadNetworks()
+        await MainActor.run {
+            self.latestDiagnostics = diags
+            self.threadNetworks = networks
+            self.applyFilters()   // rebuild the graph with any real routing applied
+        }
+    }
+
     private func rebuildGraph() {
-        let graph = MeshTopologyBuilder.buildGraph(from: devices)
+        let graph = MeshTopologyBuilder.buildGraph(from: devices, diagnostics: latestDiagnostics)
         nodes = graph.0
         links = graph.1
     }
@@ -274,7 +296,7 @@ final class MeshViewModel {
             if let channel = selectedChannel, device.channel != channel { return false }
             return true
         }
-        let graph = MeshTopologyBuilder.buildGraph(from: subset)
+        let graph = MeshTopologyBuilder.buildGraph(from: subset, diagnostics: latestDiagnostics)
         nodes = graph.0
         links = graph.1
     }
