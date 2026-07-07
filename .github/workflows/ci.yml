@@ -21,6 +21,12 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
+      # XcodeGen (Homebrew) emits an Xcode 16 project format (objectVersion 77);
+      # the runner's default Xcode 15.4 cannot open it, so select Xcode 16.
+      - name: Select Xcode 16
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate Xcode project
@@ -29,9 +35,24 @@ jobs:
       # iOS-only), so tests run via xcodebuild against a simulator.
       - name: Test
         run: |
+          # Pick the first available iPhone simulator rather than hardcoding a
+          # name/OS — device names drift per Xcode (e.g. iPhone 15 only exists on
+          # iOS 17 runtimes, iPhone 16 on iOS 18), which breaks a pinned name.
+          DEVICE_ID=$(xcrun simctl list devices available --json | python3 -c "
+          import json, sys
+          runtimes = json.load(sys.stdin)['devices']
+          for runtime, devices in runtimes.items():
+              if 'iOS' not in runtime:
+                  continue
+              for device in devices:
+                  if device.get('isAvailable') and device['name'].startswith('iPhone'):
+                      print(device['udid']); sys.exit(0)
+          sys.exit('No available iPhone simulator found')
+          ")
+          echo "Using simulator: $DEVICE_ID"
           xcodebuild test \
             -project ThreadMapper.xcodeproj \
             -scheme ThreadMapper \
-            -destination 'platform=iOS Simulator,name=iPhone 15' \
+            -destination "platform=iOS Simulator,id=$DEVICE_ID" \
             -skipPackagePluginValidation \
             CODE_SIGNING_ALLOWED=NO
