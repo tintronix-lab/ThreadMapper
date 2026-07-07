@@ -71,6 +71,28 @@ final class ThreadDiagnosticsTests: XCTestCase {
         XCTAssertEqual(kind(.unknown), .endDevice)
     }
 
+    // OTBR-native path: parent/child edges derived from RLOC16 structure.
+    func testOTBRNodesBuildRealParentEdgesFromRLOC() {
+        let nodes: [(rloc16: UInt16, ext: String?)] = [
+            (0x0000, "aa"), (0x0400, "bb"), (0x0401, "cc"),
+        ]
+        let (mesh, links) = MeshTopologyBuilder.buildGraph(fromOTBRNodes: nodes,
+                                                           borderRouterRloc: 0x0000,
+                                                           networkName: "MyThread")
+        XCTAssertNotNil(mesh.first { $0.kind == .gateway })
+        XCTAssertEqual(mesh.first { $0.kind == .borderRouter }?.tier, 1)
+
+        let router = mesh.first { $0.id == MeshTopologyBuilder.otbrNodeID(0x0400) }
+        XCTAssertEqual(router?.kind, .router)
+
+        let child = mesh.first { $0.id == MeshTopologyBuilder.otbrNodeID(0x0401) }
+        XCTAssertEqual(child?.kind, .endDevice)
+        // 0x0401 & 0xFC00 == 0x0400 → the child's real parent router.
+        XCTAssertEqual(child?.parentID, MeshTopologyBuilder.otbrNodeID(0x0400))
+        // gateway→BR backbone + BR→router + router→child
+        XCTAssertEqual(links.count, 3)
+    }
+
     func testNoDiagnosticsProviderYieldsNothing() async {
         let provider = NoDiagnosticsProvider()
         let nets = await provider.threadNetworks()

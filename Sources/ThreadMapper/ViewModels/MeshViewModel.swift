@@ -47,10 +47,16 @@ final class MeshViewModel {
     /// provider supplies them — empty for HomeKit-only setups (Feature #2).
     var threadNetworks: [ThreadNetworkInfo] = []
 
+    /// Whether the mesh graph is the source's real routing table or inferred.
+    enum TopologySource { case estimated, liveOTBR }
+    private(set) var topologySource: TopologySource = .estimated
+
     @ObservationIgnored private let discovery: any DiscoveryService
     @ObservationIgnored private let diagnosticsProvider: any DiagnosticsProvider
     /// Latest real per-node routing, applied by the topology builder when present.
     @ObservationIgnored private var latestDiagnostics: [UUID: ThreadNodeDiagnostics] = [:]
+    /// A complete real graph from an OTBR; when set it replaces the inferred one.
+    @ObservationIgnored private var latestRealTopology: ([MeshNode], [MeshLink])?
     @ObservationIgnored private var keepAliveTask: Task<Void, Error>?
     @ObservationIgnored private var pollTick = 0
     @ObservationIgnored private var knownDeviceNames: Set<String> = []
@@ -259,9 +265,12 @@ final class MeshViewModel {
     func refreshDiagnostics() async {
         let diags = await diagnosticsProvider.nodeDiagnostics()
         let networks = await diagnosticsProvider.threadNetworks()
+        let realTopology = await diagnosticsProvider.realTopology()
         await MainActor.run {
             self.latestDiagnostics = diags
             self.threadNetworks = networks
+            self.latestRealTopology = realTopology
+            self.topologySource = realTopology != nil ? .liveOTBR : .estimated
             self.applyFilters()   // rebuild the graph with any real routing applied
         }
     }
@@ -291,6 +300,13 @@ final class MeshViewModel {
     }
 
     private func applyFilters() {
+        // A live OTBR routing table replaces the inferred graph outright (its
+        // nodes aren't HomeKit devices, so room/channel filters don't apply).
+        if let real = latestRealTopology {
+            nodes = real.0
+            links = real.1
+            return
+        }
         let subset = devices.filter { device in
             if let room = selectedRoom, device.room != room { return false }
             if let channel = selectedChannel, device.channel != channel { return false }

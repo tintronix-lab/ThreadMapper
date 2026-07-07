@@ -183,4 +183,71 @@ struct MeshTopologyBuilder {
 
         return (nodes, links)
     }
+
+    // MARK: - OTBR-native path (Feature #2, Phase 3b)
+
+    /// Deterministic node UUID for an RLOC16 so selection/layout stay stable
+    /// across refreshes (distinct from `gatewayID`).
+    static func otbrNodeID(_ rloc16: UInt16) -> UUID {
+        UUID(uuidString: String(format: "0B000000-0000-0000-0000-%012X", Int(rloc16)))
+            ?? UUID()
+    }
+
+    /// Build the mesh straight from an OTBR's routing table. A Thread RLOC16
+    /// encodes its parent — `parent = rloc16 & 0xFC00`, and a node is a router
+    /// when `rloc16 & 0x03FF == 0` — so child→parent edges are *real*, not
+    /// inferred. Router↔router interconnect is approximated as a star under the
+    /// queried border router (the Route table would refine it; see Phase 3b notes).
+    static func buildGraph(fromOTBRNodes nodes: [(rloc16: UInt16, ext: String?)],
+                           borderRouterRloc: UInt16,
+                           networkName: String?) -> ([MeshNode], [MeshLink]) {
+        guard !nodes.isEmpty else { return ([], []) }
+
+        var meshNodes: [MeshNode] = [
+            MeshNode(id: gatewayID, name: networkName ?? "Internet", kind: .gateway,
+                     deviceID: nil, tier: 0),
+        ]
+        var links: [MeshLink] = []
+        let rlocs = Set(nodes.map(\.rloc16))
+
+        func isRouter(_ r: UInt16) -> Bool { (r & 0x03FF) == 0 }
+        func label(_ kind: MeshNodeKind, _ r: UInt16) -> String {
+            let hex = String(format: "0x%04X", Int(r))
+            switch kind {
+            case .borderRouter: return "Border Router \(hex)"
+            case .router:       return "Router \(hex)"
+            default:            return "Device \(hex)"
+            }
+        }
+
+        for node in nodes {
+            let r = node.rloc16
+            let isBR = r == borderRouterRloc
+            let router = isRouter(r)
+            let kind: MeshNodeKind = isBR ? .borderRouter : (router ? .router : .endDevice)
+            let tier = isBR ? 1 : (router ? 2 : 3)
+
+            let parentID: UUID?
+            if isBR {
+                parentID = gatewayID
+            } else if router {
+                parentID = otbrNodeID(borderRouterRloc)          // approx: routers under BR
+            } else {
+                let parentRloc = r & 0xFC00                        // real parent from RLOC
+                parentID = otbrNodeID(rlocs.contains(parentRloc) ? parentRloc : borderRouterRloc)
+            }
+
+            meshNodes.append(MeshNode(id: otbrNodeID(r), name: label(kind, r), kind: kind,
+                                      deviceID: nil, tier: tier, parentID: parentID))
+
+            if isBR {
+                links.append(MeshLink(sourceID: gatewayID, targetID: otbrNodeID(r),
+                                      linkQuality: 4, kind: .backbone))
+            } else if let parentID {
+                links.append(MeshLink(sourceID: parentID, targetID: otbrNodeID(r),
+                                      linkQuality: 3, kind: .mesh))
+            }
+        }
+        return (meshNodes, links)
+    }
 }

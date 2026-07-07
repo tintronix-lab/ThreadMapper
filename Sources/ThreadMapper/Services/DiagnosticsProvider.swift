@@ -13,6 +13,16 @@ protocol DiagnosticsProvider: AnyObject {
 
     /// Real per-node routing keyed by `ThreadDevice.id`, when available.
     func nodeDiagnostics() async -> [UUID: ThreadNodeDiagnostics]
+
+    /// A complete, real mesh graph built from the source's own routing table
+    /// (e.g. an OTBR's `/diagnostics`) — nodes and edges independent of HomeKit.
+    /// `nil` means "no live topology; use the inferred HomeKit graph."
+    func realTopology() async -> ([MeshNode], [MeshLink])?
+}
+
+extension DiagnosticsProvider {
+    // Most providers have no live routing table; opt in by overriding.
+    func realTopology() async -> ([MeshNode], [MeshLink])? { nil }
 }
 
 /// Default provider used until a real source is wired up: yields nothing, so the

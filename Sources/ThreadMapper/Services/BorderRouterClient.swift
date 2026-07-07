@@ -45,9 +45,37 @@ final class BorderRouterClient: DiagnosticsProvider {
         )]
     }
 
-    /// Real routing table parsing is Phase 3b (needs `POST /diagnostics` + OTBR↔
-    /// HomeKit device correlation, verified on hardware).
+    /// Per-device diagnostics keyed by HomeKit `ThreadDevice.id` stay empty —
+    /// OTBR nodes have no HomeKit identifier to correlate on. The OTBR's own view
+    /// is surfaced via `realTopology()` instead.
     func nodeDiagnostics() async -> [UUID: ThreadNodeDiagnostics] { [:] }
+
+    /// The border router's real routing table → a mesh graph. Parent/child edges
+    /// are derived from Thread RLOC16 structure (exact); router interconnect is
+    /// approximated. Returns nil (→ inferred graph) if the OTBR is unreachable or
+    /// reports nothing.
+    ///
+    /// NOTE: the `/diagnostics` request body (TLV type list) and response shape
+    /// need on-hardware verification; parsing fails soft to nil if they differ.
+    func realTopology() async -> ([MeshNode], [MeshLink])? {
+        // Diagnostic TLV types: Address16 (0), Route64 (5), Child Table (16).
+        let body = Data("[0,5,16]".utf8)
+        guard let diags = try? await decode([OTBRDiagnostic].self, path: "diagnostics",
+                                            method: "POST", body: body),
+              !diags.isEmpty else { return nil }
+
+        let node = try? await decode(OTBRNode.self, path: "node")
+        let brRloc = UInt16(truncatingIfNeeded: node?.rloc16 ?? 0)
+        let otbrNodes: [(rloc16: UInt16, ext: String?)] = diags.compactMap { diag in
+            guard let rloc = diag.rloc16 else { return nil }
+            return (rloc, diag.extAddress)
+        }
+        guard !otbrNodes.isEmpty else { return nil }
+
+        return MeshTopologyBuilder.buildGraph(fromOTBRNodes: otbrNodes,
+                                              borderRouterRloc: brRloc,
+                                              networkName: node?.networkName)
+    }
 
     /// Lightweight reachability check for the Settings "Test connection" button.
     func testConnection() async -> Bool {
@@ -56,15 +84,21 @@ final class BorderRouterClient: DiagnosticsProvider {
 
     // MARK: - HTTP
 
-    private func request(path: String) -> URLRequest {
+    private func request(path: String, method: String = "GET", body: Data? = nil) -> URLRequest {
         var req = URLRequest(url: baseURL.appendingPathComponent(path))
         req.timeoutInterval = 4
+        req.httpMethod = method
         req.setValue("application/json", forHTTPHeaderField: "Accept")
+        if let body {
+            req.httpBody = body
+            req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
         return req
     }
 
-    private func decode<T: Decodable>(_ type: T.Type, path: String) async throws -> T {
-        let data = try await fetch(request(path: path))
+    private func decode<T: Decodable>(_ type: T.Type, path: String,
+                                      method: String = "GET", body: Data? = nil) async throws -> T {
+        let data = try await fetch(request(path: path, method: method, body: body))
         return try JSONDecoder().decode(T.self, from: data)
     }
 }
@@ -96,5 +130,30 @@ struct OTBRActiveDataset: Decodable {
         case channel = "Channel"
         case panId = "PanId"
         case extPanId = "ExtPanId"
+    }
+}
+
+/// One node's network-diagnostics entry. RLOC16 may arrive as an int or a hex
+/// string depending on OTBR version, so it's decoded flexibly.
+struct OTBRDiagnostic: Decodable {
+    let extAddress: String?
+    let rloc16: UInt16?
+
+    enum CodingKeys: String, CodingKey {
+        case extAddress = "ExtAddress"
+        case rloc16 = "Rloc16"
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        extAddress = try? c.decode(String.self, forKey: .extAddress)
+        if let intValue = try? c.decode(Int.self, forKey: .rloc16) {
+            rloc16 = UInt16(truncatingIfNeeded: intValue)
+        } else if let str = try? c.decode(String.self, forKey: .rloc16),
+                  let parsed = UInt16(str.replacingOccurrences(of: "0x", with: ""), radix: 16) {
+            rloc16 = parsed
+        } else {
+            rloc16 = nil
+        }
     }
 }

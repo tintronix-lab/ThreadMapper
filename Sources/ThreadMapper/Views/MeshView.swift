@@ -19,6 +19,7 @@ struct MeshView: View {
             nodes: viewModel.nodes,
             links: viewModel.links,
             devices: viewModel.devices,
+            isLive: viewModel.topologySource == .liveOTBR,
             onSelectNode: { node in
                 if let deviceID = node.deviceID,
                    let device = viewModel.devices.first(where: { $0.id == deviceID }) {

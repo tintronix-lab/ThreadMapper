@@ -704,3 +704,27 @@ an OTBR's REST API.
 tables) into `ThreadNodeDiagnostics`, and correlate OTBR nodes (ext-address) to
 HomeKit accessories so the real routing table drives the graph. `nodeDiagnostics()`
 is stubbed empty until then.
+
+### Phase 3b — real OTBR routing table drives the graph (landed, needs hardware verification)
+When a border router is connected, the Mesh tab now renders the **OTBR's own
+routing table** instead of the inferred graph:
+- `BorderRouterClient.realTopology()` fetches `POST /diagnostics` (+ `/node` for
+  the border-router RLOC and network name) and builds a real graph.
+- Parent/child edges are **exact**, derived from Thread RLOC16 structure —
+  `parent = rloc16 & 0xFC00`, router when `rloc16 & 0x03FF == 0` — via
+  `MeshTopologyBuilder.buildGraph(fromOTBRNodes:borderRouterRloc:networkName:)`.
+  Router↔router interconnect is approximated as a star under the BR (the Route64
+  table would refine it — future work).
+- `DiagnosticsProvider.realTopology()` added (default nil); `MeshViewModel`
+  tracks `topologySource` (`.estimated` / `.liveOTBR`) and swaps the graph when a
+  live table is present.
+- **Phase 4 (partial):** the Mesh legend shows "Live routing · Border Router"
+  (green) vs the "Estimated paths" note, so users always know the data source.
+- Tests: RLOC-derived parent edges, `realTopology()` from fixture `/diagnostics`,
+  nil when unreachable.
+
+**On-hardware verification still required:** the `/diagnostics` request body (TLV
+type list) and response field shapes (`Rloc16` int vs hex string, etc.) are coded
+from the ot-br-posix spec but not yet confirmed against a live OTBR; parsing fails
+soft to the inferred graph if they differ. Router-interconnect refinement (Route64)
+and OTBR↔HomeKit name correlation remain follow-ups.
