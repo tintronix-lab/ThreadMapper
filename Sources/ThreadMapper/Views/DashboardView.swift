@@ -173,13 +173,13 @@ struct DashboardView: View {
                             tappableStatCard(
                                 icon: "cpu.fill", value: "\(viewModel.devices.count)",
                                 label: "Devices", tint: .accentColor,
-                                spec: DeviceFilterSpec(title: "All Devices", devices: viewModel.devices)
+                                spec: DeviceFilterSpec(title: "All Devices", category: .all)
                             )
                             tappableStatCard(
                                 icon: "antenna.radiowaves.left.and.right",
                                 value: "\(routers.count)",
                                 label: "Routers", tint: .indigo,
-                                spec: DeviceFilterSpec(title: "Routers", devices: routers)
+                                spec: DeviceFilterSpec(title: "Routers", category: .routers)
                             )
                         }
                         HStack(spacing: 6) {
@@ -188,14 +188,14 @@ struct DashboardView: View {
                                 value: "\(offline.count)",
                                 label: "Offline",
                                 tint: offline.count > 0 ? .red : .green,
-                                spec: DeviceFilterSpec(title: "Offline Devices", devices: offline)
+                                spec: DeviceFilterSpec(title: "Offline Devices", category: .offline)
                             )
                             tappableStatCard(
                                 icon: weak.count > 0 ? "wifi.exclamationmark" : "checkmark.circle.fill",
                                 value: "\(weak.count)",
                                 label: "Weak",
                                 tint: weak.count > 0 ? .orange : .green,
-                                spec: DeviceFilterSpec(title: "Weak Signal Devices", devices: weak)
+                                spec: DeviceFilterSpec(title: "Weak Signal Devices", category: .weak)
                             )
                         }
                     }
@@ -332,7 +332,10 @@ struct DashboardView: View {
             // Button + navPath rather than an in-row NavigationLink, so it plays
             // nicely with the other tappable rows in the List (fixes D2).
             Button {
-                navPath.append(DeviceFilterSpec(title: issue.message, devices: issue.affectedDevices))
+                navPath.append(DeviceFilterSpec(
+                    title: issue.message,
+                    category: .ids(issue.affectedDevices.map(\.uniqueIdentifier))
+                ))
             } label: {
                 issueRowContent(issue, actionable: true)
             }

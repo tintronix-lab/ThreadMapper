@@ -1,6 +1,8 @@
 import SwiftUI
 
-struct NetworkHealthScore {
+// Equatable so the view model can skip reassigning `health` (and re-rendering the
+// whole Dashboard) when a poll tick produces an identical score (fixes D4).
+struct NetworkHealthScore: Equatable {
     let score: Int        // 0–100
     let grade: String     // A B C D F
     let color: Color
@@ -8,7 +10,7 @@ struct NetworkHealthScore {
     let issues: [Issue]
     let tips: [String]
 
-    struct Issue: Identifiable {
+    struct Issue: Identifiable, Equatable {
         // Stable ID derived from content so ForEach doesn't recreate rows on every poll tick.
         var id: String { "\(icon)|\(message)" }
         let message: String
