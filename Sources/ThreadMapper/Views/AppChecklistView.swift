@@ -69,7 +69,7 @@ struct AppChecklistView: View {
     }
 
     private var routerCount: Int {
-        meshVM.devices.filter { $0.isRouter || $0.isBorderRouter }.count
+        meshVM.devices.filter(\.isRoutingCapable).count
     }
 
     private var weakCount: Int {

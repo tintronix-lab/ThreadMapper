@@ -18,6 +18,12 @@ struct DashboardView: View {
     @State private var roomCoverageExpanded = true
     @State private var allDevicesExpanded = true
 
+    // Fixed hero font sizes backed by @ScaledMetric so they honor Dynamic Type
+    // (identical at the default text size, scale up at accessibility sizes) — D8.
+    @ScaledMetric(relativeTo: .largeTitle) private var gradeLetterSize: CGFloat = 36
+    @ScaledMetric(relativeTo: .caption2) private var gradeScoreSize: CGFloat = 11
+    @ScaledMetric(relativeTo: .caption2) private var statLabelSize: CGFloat = 9
+
     private var health: NetworkHealthScore { viewModel.health }
 
     private var roomGroups: [(room: String, devices: [ThreadDevice])] {
@@ -166,7 +172,7 @@ struct DashboardView: View {
 
                     let offline = viewModel.devices.filter(\.isOffline)
                     let weak    = viewModel.devices.filter(\.isWeak)
-                    let routers = viewModel.devices.filter { $0.isRouter || $0.isBorderRouter }
+                    let routers = viewModel.devices.filter(\.isRoutingCapable)
 
                     VStack(spacing: 6) {
                         HStack(spacing: 6) {
@@ -237,10 +243,12 @@ struct DashboardView: View {
                 .animation(.spring(response: 0.8, dampingFraction: 0.75), value: health.score)
             VStack(spacing: 0) {
                 Text(health.grade)
-                    .font(.system(size: 36, weight: .black, design: .rounded))
+                    .font(.system(size: gradeLetterSize, weight: .black, design: .rounded))
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
                     .foregroundStyle(health.color)
                 Text("\(health.score)")
-                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                    .font(.system(size: gradeScoreSize, weight: .bold, design: .monospaced))
                     .foregroundStyle(health.color.opacity(0.7))
             }
         }
@@ -266,7 +274,7 @@ struct DashboardView: View {
                         .font(.caption.weight(.bold))
                         .foregroundStyle(.primary)
                     Text(label)
-                        .font(.system(size: 9))
+                        .font(.system(size: statLabelSize))
                         .foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 0)
@@ -382,7 +390,7 @@ struct DashboardView: View {
     // MARK: - Resilience
 
     private var borderRouterCount: Int { viewModel.devices.filter(\.isBorderRouter).count }
-    private var routerCount: Int { viewModel.devices.filter { $0.isRouter || $0.isBorderRouter }.count }
+    private var routerCount: Int { viewModel.devices.filter(\.isRoutingCapable).count }
 
     private var resilienceGrade: String {
         switch (borderRouterCount, routerCount) {
