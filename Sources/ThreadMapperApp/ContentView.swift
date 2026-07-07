@@ -8,8 +8,19 @@ struct ContentView: View {
     @State private var meshVM = MeshViewModel(
         discovery: UserDefaults.standard.bool(forKey: "demoMode")
             ? DemoDiscoveryService()
-            : MatterDiscoveryService.shared
+            : MatterDiscoveryService.shared,
+        diagnostics: ContentView.makeDiagnosticsProvider()
     )
+
+    /// Prefer a configured OpenThread Border Router (real data) over the
+    /// entitlement-gated ThreadNetwork read; both stay dormant if unavailable.
+    static func makeDiagnosticsProvider() -> any DiagnosticsProvider {
+        if let raw = UserDefaults.standard.string(forKey: "borderRouterURL"),
+           !raw.isEmpty, let url = URL(string: raw) {
+            return BorderRouterClient(baseURL: url)
+        }
+        return ThreadCredentialsService()
+    }
     @State private var surveyVM = SurveyViewModel()
     @State private var statsStore = DeviceStatsStore.shared
     @State private var notesStore = DeviceNotesStore.shared

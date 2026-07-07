@@ -686,3 +686,21 @@ Inert seam so Phases 1–2 drop in without refactoring — no live behavior chan
 **Next step to activate:** wire `MeshViewModel` to call a `DiagnosticsProvider` and
 pass results to `buildGraph(from:diagnostics:)`; provision the Thread credentials
 entitlement; then Phase 3 OTBR for the real routing table.
+
+### Phase 3a — OpenThread Border Router connection (landed)
+The one path to real Thread data that doesn't need Apple's entitlement: connect
+an OTBR's REST API.
+- `BorderRouterClient` (a `DiagnosticsProvider`) with an injectable fetcher —
+  reads `/node` + `/node/dataset/active` → real `ThreadNetworkInfo` (network name,
+  channel, PAN ID, ext PAN ID). Flows into the Mesh `threadNetworkBar`.
+- Settings → "Border Router (advanced)": endpoint URL + "Test Connection".
+  `ContentView` prefers a configured OTBR over the entitlement-gated
+  `ThreadCredentialsService`; both stay dormant if unavailable (no behavior
+  change by default). `NSLocalNetworkUsageDescription` added for LAN access.
+- Tests: `/node` + dataset JSON parsing → `ThreadNetworkInfo`, unreachable →
+  empty, connection check, diagnostics empty (Phase 3b).
+
+**Phase 3b (next, needs hardware):** parse `POST /diagnostics` (child/route
+tables) into `ThreadNodeDiagnostics`, and correlate OTBR nodes (ext-address) to
+HomeKit accessories so the real routing table drives the graph. `nodeDiagnostics()`
+is stubbed empty until then.

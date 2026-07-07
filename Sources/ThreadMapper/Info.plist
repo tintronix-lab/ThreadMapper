@@ -22,6 +22,8 @@
 	<string>ThreadMapper uses your location during survey walks to tag signal strength readings on a map.</string>
 	<key>NSHomeKitUsageDescription</key>
 	<string>ThreadMapper uses HomeKit to discover Thread mesh network devices in your home.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>ThreadMapper connects to your OpenThread Border Router on the local network to read real Thread network details.</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>com.tintronixlab.ThreadMapper.bgrefresh</string>

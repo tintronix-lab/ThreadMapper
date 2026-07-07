@@ -8,6 +8,10 @@ struct SettingsView: View {
     @AppStorage("quietHoursEnabled")    private var quietHoursEnabled = false
     @AppStorage("quietHoursStart")      private var quietHoursStart = 22
     @AppStorage("quietHoursEnd")        private var quietHoursEnd = 7
+    @AppStorage("borderRouterURL")      private var borderRouterURL = ""
+
+    @State private var brTesting = false
+    @State private var brTestResult: Bool?
 
     @Environment(DeviceStatsStore.self)   private var statsStore
     @Environment(HealthHistoryStore.self) private var historyStore
@@ -33,6 +37,7 @@ struct SettingsView: View {
                 notificationsSection
                 quietHoursSection
                 alertsSection
+                borderRouterSection
                 dataSection
                 toolsSection
                 aboutSection
@@ -124,6 +129,46 @@ struct SettingsView: View {
         } footer: {
             Text("How long a device must be unreachable before an offline alert fires.")
         }
+    }
+
+    @ViewBuilder
+    private var borderRouterSection: some View {
+        Section {
+            TextField("http://192.168.1.50:8081", text: $borderRouterURL)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .keyboardType(.URL)
+                .onChange(of: borderRouterURL) { _, _ in brTestResult = nil }
+            if !borderRouterURL.isEmpty {
+                Button {
+                    Task { await testBorderRouter() }
+                } label: {
+                    HStack {
+                        Text("Test Connection")
+                        Spacer()
+                        if brTesting {
+                            ProgressView()
+                        } else if let ok = brTestResult {
+                            Image(systemName: ok ? "checkmark.circle.fill" : "xmark.circle.fill")
+                                .foregroundStyle(ok ? .green : .red)
+                        }
+                    }
+                }
+                .disabled(brTesting)
+            }
+        } header: {
+            Text("Border Router (advanced)")
+        } footer: {
+            Text("Connect an OpenThread Border Router's REST API to read real Thread network facts (channel, PAN ID). Restart the app to apply. Apple/Google border routers don't expose this; OTBR-based ones (e.g. Home Assistant) do.")
+        }
+    }
+
+    private func testBorderRouter() async {
+        guard let url = URL(string: borderRouterURL) else { brTestResult = false; return }
+        brTesting = true
+        let ok = await BorderRouterClient(baseURL: url).testConnection()
+        brTesting = false
+        brTestResult = ok
     }
 
     @ViewBuilder
