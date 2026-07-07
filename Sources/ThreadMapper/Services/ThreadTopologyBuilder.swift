@@ -189,8 +189,8 @@ struct MeshTopologyBuilder {
     /// Deterministic node UUID for an RLOC16 so selection/layout stay stable
     /// across refreshes (distinct from `gatewayID`).
     static func otbrNodeID(_ rloc16: UInt16) -> UUID {
-        UUID(uuidString: String(format: "0B000000-0000-0000-0000-%012X", Int(rloc16)))
-            ?? UUID()
+        let hex = String(format: "%04X", rloc16)   // 4 hex digits (rloc16 ≤ 0xFFFF)
+        return UUID(uuidString: "0B000000-0000-0000-0000-00000000\(hex)") ?? UUID()
     }
 
     /// Build the mesh straight from an OTBR's routing table. A Thread RLOC16
