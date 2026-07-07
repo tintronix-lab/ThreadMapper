@@ -40,6 +40,9 @@ struct MeshView: View {
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
                 filterBar
+                if !viewModel.threadNetworks.isEmpty {
+                    threadNetworkBar
+                }
                 if let error = viewModel.scanError {
                     errorBanner(message: error)
                 }
@@ -127,6 +130,41 @@ struct MeshView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
+        .background(.ultraThinMaterial)
+    }
+
+    // MARK: - Real Thread network facts (Feature #2, Phase 1)
+
+    @ViewBuilder
+    private var threadNetworkBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(viewModel.threadNetworks) { net in
+                    HStack(spacing: 5) {
+                        Image(systemName: "point.3.filled.connected.trianglepath.dotted")
+                            .font(.system(size: 9))
+                            .foregroundStyle(.green)
+                        Text(net.networkName)
+                            .font(.caption2.weight(.semibold))
+                        if let ch = net.channel {
+                            Text("· CH \(ch)")
+                                .font(.caption2.monospacedDigit())
+                                .foregroundStyle(.secondary)
+                        }
+                        if let pan = net.panID {
+                            Text("· PAN \(pan)")
+                                .font(.caption2.monospacedDigit())
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(.green.opacity(0.12), in: Capsule())
+                }
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+        }
         .background(.ultraThinMaterial)
     }
 

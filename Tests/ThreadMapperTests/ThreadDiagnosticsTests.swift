@@ -78,4 +78,28 @@ final class ThreadDiagnosticsTests: XCTestCase {
         XCTAssertTrue(nets.isEmpty)
         XCTAssertTrue(nodes.isEmpty)
     }
+
+    func testProviderPopulatesThreadNetworksOnViewModel() async {
+        let fake = FakeDiagnosticsProvider(
+            networks: [ThreadNetworkInfo(networkName: "MyThread", channel: 20,
+                                         panID: "0x1234", extendedPANID: nil, borderAgentID: nil)],
+            diagnostics: [:]
+        )
+        let vm = MeshViewModel(discovery: DemoDiscoveryService(), diagnostics: fake)
+        await vm.refreshDiagnostics()
+        let net = await MainActor.run { vm.threadNetworks.first }
+        XCTAssertEqual(net?.networkName, "MyThread")
+        XCTAssertEqual(net?.channel, 20)
+    }
+}
+
+private final class FakeDiagnosticsProvider: DiagnosticsProvider {
+    let networks: [ThreadNetworkInfo]
+    let diagnostics: [UUID: ThreadNodeDiagnostics]
+    init(networks: [ThreadNetworkInfo], diagnostics: [UUID: ThreadNodeDiagnostics]) {
+        self.networks = networks
+        self.diagnostics = diagnostics
+    }
+    func threadNetworks() async -> [ThreadNetworkInfo] { networks }
+    func nodeDiagnostics() async -> [UUID: ThreadNodeDiagnostics] { diagnostics }
 }
