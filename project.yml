@@ -38,6 +38,8 @@ targets:
         embed: true
     scheme:
       shared: true
+      testTargets:
+        - ThreadMapperTests
 
   ThreadMapperWidget:
     type: app-extension

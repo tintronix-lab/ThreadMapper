@@ -15,6 +15,39 @@ opt_in_rules:
   - no_grouping_extension
   - sorted_imports
 
+# Pre-existing style patterns in this codebase that should surface as warnings,
+# never CI-failing errors. (Refactoring them — renames, tuple→struct, file
+# splits — is tracked separately; this keeps CI actionable in the meantime.)
+#
+# identifier_name: idiomatic short-scope loop/closure vars (`q`, `d`, `p`, …)
+# plus the haversine helper's math symbols (`R`, `Δφ`, `Δλ`).
+identifier_name:
+  min_length:
+    warning: 1
+    error: 1
+  excluded:
+    - R
+    - Δφ
+    - Δλ
+# large_tuple: 3-member tuples (e.g. RSSI zone stripes, graph node/link tuples).
+large_tuple:
+  warning: 3
+  error: 6
+# type_body_length: a few large view/store structs (DeviceStats, sparkline).
+type_body_length:
+  warning: 400
+  error: 800
+# force_cast: present in a couple of HomeKit bridging spots; keep as a warning.
+force_cast: warning
+# cyclomatic_complexity / function_body_length: a few large builders and the
+# ThreadDevice initializer — surface as warnings, don't fail CI.
+cyclomatic_complexity:
+  warning: 15
+  error: 40
+function_body_length:
+  warning: 60
+  error: 200
+
 included:
   - Sources
   - Tests
