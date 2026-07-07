@@ -677,8 +677,10 @@ struct DashboardView: View {
                     }
                 } else {
                     ForEach(filteredDevices) { device in
-                        DeviceListRow(device: device)
-                            .onTapGesture { selectedDevice = device }
+                        Button { selectedDevice = device } label: {
+                            DeviceListRow(device: device)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
             }

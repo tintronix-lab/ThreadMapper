@@ -27,6 +27,7 @@ struct MeshGraphView: View {
                     hud
                         .padding(.horizontal, 12)
                         .padding(.top, 8)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                         .transition(.opacity.combined(with: .move(edge: .top)))
                         .zIndex(10)
                 }
@@ -286,9 +287,13 @@ extension MeshGraphView {
         let scaleY = (size.height - padding * 2) / graphHeight
         let fitScale = min(scaleX, scaleY, 2.0)
         scale = fitScale
+        // Offset positions the graph center at the screen center.
+        // The canvas translates by `offset` (canvas space), then .scaleEffect(fitScale)
+        // anchors at the view center. Correct formula: screen_center - graph_center.
+        // (Do NOT multiply by fitScale — that composes incorrectly with .scaleEffect.)
         offset = CGSize(
-            width:  size.width  / 2 - ((minX + maxX) / 2) * fitScale,
-            height: size.height / 2 - ((minY + maxY) / 2) * fitScale
+            width:  size.width  / 2 - (minX + maxX) / 2,
+            height: size.height / 2 - (minY + maxY) / 2
         )
         lastDragOffset = offset
     }

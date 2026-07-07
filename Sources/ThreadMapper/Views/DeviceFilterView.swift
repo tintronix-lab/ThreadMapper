@@ -54,9 +54,10 @@ struct DeviceFilterView: View {
             } else {
                 List {
                     ForEach(devices) { device in
-                        DeviceListRow(device: device)
-                            .contentShape(Rectangle())
-                            .onTapGesture { selectedDevice = device }
+                        Button { selectedDevice = device } label: {
+                            DeviceListRow(device: device)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
             }

@@ -18,21 +18,48 @@ struct MeshTopologyBuilder {
     static func buildGraph(from devices: [ThreadDevice]) -> ([MeshNode], [MeshLink]) {
         guard !devices.isEmpty else { return ([], []) }
 
-        // Trust explicit router roles when any are present (demo / future Matter
-        // diagnostics); otherwise infer routing from power source: mains-powered
-        // accessories (no battery reported) relay, battery devices sleep.
         let hasExplicitRoles = devices.contains { !$0.isBorderRouter && $0.isRouter }
+
+        let borderRouters = devices.filter { $0.isBorderRouter }
+        let candidates = devices.filter { !$0.isBorderRouter }
+
+        // When explicit roles are available, trust them.
+        // Otherwise use a room-aware heuristic: elect ONE primary router per room
+        // (strongest signal wins), leaving the rest as end devices. Unroomed
+        // mains-powered devices each get their own router slot up to a cap so the
+        // graph doesn't collapse into a flat star when rooms aren't assigned.
+        let routerIDs: Set<UUID>
+        if hasExplicitRoles {
+            routerIDs = Set(candidates.filter(\.isRouter).map(\.id))
+        } else {
+            var ids = Set<UUID>()
+            var seenRooms = Set<String>()
+            // Sorted best-signal-first so same-room tie-breaks favour the strongest device.
+            let mainsPowered = candidates
+                .filter { $0.batteryPercentage == nil }
+                .sorted { ($0.rssi ?? -100) > ($1.rssi ?? -100) }
+            var unroomedCount = 0
+            for d in mainsPowered {
+                if let room = d.room {
+                    if !seenRooms.contains(room) { ids.insert(d.id); seenRooms.insert(room) }
+                } else {
+                    // Cap unroomed routers so a flat list doesn't become a flat star.
+                    if unroomedCount < max(1, borderRouters.count * 2) {
+                        ids.insert(d.id); unroomedCount += 1
+                    }
+                }
+            }
+            routerIDs = ids
+        }
 
         func classify(_ d: ThreadDevice) -> (kind: MeshNodeKind, battery: Bool) {
             if d.isBorderRouter { return (.borderRouter, false) }
-            let isRouter = hasExplicitRoles ? d.isRouter : (d.batteryPercentage == nil)
-            if isRouter { return (.router, false) }
+            if routerIDs.contains(d.id) { return (.router, false) }
             return (.endDevice, d.batteryPercentage != nil || d.isSleepyEndDevice)
         }
 
-        let borderRouters = devices.filter { $0.isBorderRouter }
-        let routers = devices.filter { !$0.isBorderRouter && classify($0).kind == .router }
-        let endDevices = devices.filter { !$0.isBorderRouter && classify($0).kind == .endDevice }
+        let routers = candidates.filter { routerIDs.contains($0.id) }
+        let endDevices = candidates.filter { !routerIDs.contains($0.id) }
 
         // Strength proxy: higher rssi (closer to 0) ⇒ more central / better parent.
         func strength(_ d: ThreadDevice) -> Int { d.rssi ?? -100 }
