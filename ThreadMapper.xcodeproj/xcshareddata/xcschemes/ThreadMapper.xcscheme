@@ -39,6 +39,17 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "94A3352F573C9B28FD8B8570"
+               BuildableName = "ThreadMapperTests.xctest"
+               BlueprintName = "ThreadMapperTests"
+               ReferencedContainer = "container:ThreadMapper.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>
