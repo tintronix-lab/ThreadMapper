@@ -561,3 +561,51 @@ All 7 persistence callsites updated from `.atomic` to `[.atomic, .completeFilePr
 8. **D8** — hero fonts now honor Dynamic Type: the grade letter (36), grade sub-score (11), and stat-tile label (9) fixed sizes are backed by `@ScaledMetric` (relative to `.largeTitle` / `.caption2`), so they render identically at the default text size but scale at accessibility sizes. The grade letter gains `minimumScaleFactor(0.5)` + `lineLimit(1)` so it shrinks to fit the fixed 92 pt ring instead of clipping. *(Scoped to the hero, as the finding was; a full-file Dynamic Type audit — the many other `.system(size:)` call sites — remains a separate pass best done with a simulator to catch layout regressions.)*
 
 **Iteration 9 fully closed** (D1–D8). Remaining follow-ups are the larger refactors noted in passing: make `ThreadDevice` observable/value-type (removes the D3 rssi-staleness residual), the full Dynamic Type audit, and the real code cleanups behind the lint rules PR #2 relaxed to warnings (short-name renames, tuple→struct, file/type splits).
+
+## Phase 8 — Iteration 10 (Mesh tab: real inferred topology — closes H5)
+
+The Mesh tab previously drew a **fake star** — every non-BR device wired to the
+*first* border router, no paths, `parentNodeID` never used (review issue **H5**).
+HomeKit doesn't expose the Thread routing table (the live `MatterDiscoveryService`
+can only tell a border router from "everything else"), so a *real* graph must be
+inferred — but honestly, and structured like an actual Thread/Matter mesh.
+
+**`MeshTopologyBuilder` rewrite** — a tiered, parent-assigned mesh:
+`gateway (Wi-Fi / Internet) → border routers → mesh routers → end devices`.
+- **Role inference:** trust explicit `isRouter` when any device reports it (demo /
+  future Matter diagnostics); otherwise infer from power source — a mains device
+  (no battery reported) relays, a battery device is a leaf.
+- **Parent assignment:** a leaf prefers a **same-room mesh router** (a genuine hop
+  through another Matter device) over a distant border router, then any router,
+  then the strongest border router; routers attach to their best border router.
+- **Forward-compatible:** an explicit `parentNodeID` that resolves to a router/BR
+  is honored first, so real Thread diagnostics can later drop straight in.
+- A synthetic `gateway` node (no backing device) gives every path a visible
+  top — the Wi-Fi/internet uplink border routers reach through.
+
+**`GraphLayout.hierarchical`** — a layered top-down layout keyed on `MeshNode.tier`
+with children ordered under their parent's x, so multi-hop paths read clearly
+(replaces the random force-directed layout for this view).
+
+**`MeshGraphView`** — distinct glyphs per kind (gateway square w/ Wi-Fi, filled
+border router, ringed "relay" router, dot device, green-ringed battery device);
+backbone links dashed (IP uplink) vs solid mesh hops colored by quality. Selecting
+a node **highlights its route to the internet** and the HUD spells it out — e.g.
+*"Kitchen Sensor → Kitchen Plug (relay) → HomePod (border router) → Internet · via
+1 relay"* — directly answering "does this device hop through another Matter
+device?". Legend + an "Estimated paths — HomeKit doesn't report Thread routing"
+note keep it honest.
+
+**Models:** `MeshNode` gains `tier`, `parentID`, `isBattery`; `MeshNodeKind` gains
+`.gateway`; `MeshLink` gains `kind` (`.backbone` / `.mesh`). All additive with
+defaults (no persisted-schema break). `MeshViewModel.visibleDeviceCount` now
+excludes the synthetic gateway.
+
+**Tests:** `ThreadTopologyBuilderTests` rewritten for the tiered output —
+gateway/backbone creation, the same-room multi-hop relay case, explicit-parent
+honoring, the no-border-router orphan case, and mains-device router inference.
+
+**Not built/run here** (Linux, no Xcode); CI compiles + runs the tests. The graph
+visuals want an on-device look — parent inference is a heuristic, clearly labeled
+estimated. **Next:** real Thread Network Diagnostics via the Matter framework
+(feature #2) would replace inference with the actual routing table.

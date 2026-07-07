@@ -40,7 +40,7 @@ final class MeshViewModel {
     }
 
     var visibleDeviceCount: Int {
-        nodes.count
+        nodes.filter { $0.deviceID != nil }.count
     }
 
     @ObservationIgnored private let discovery: any DiscoveryService
