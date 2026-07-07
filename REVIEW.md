@@ -552,4 +552,60 @@ All 7 persistence callsites updated from `.atomic` to `[.atomic, .completeFilePr
 4. **D3** — `DeviceFilterSpec` no longer captures a `[ThreadDevice]` snapshot; it carries a `Category` (`.all / .routers / .offline / .weak / .ids([UUID])`). `DeviceFilterView` now reads `@Environment(MeshViewModel.self)` and re-resolves the list on every render, so a drilled-in "Offline Devices" screen tracks the live poll loop and drops devices that recover or leave the network instead of showing a frozen set. *(Residual: `ThreadDevice` is still a non-`@Observable` class, so an rssi-only change that doesn't reassign `viewModel.devices` won't force a re-render — folded into the separate "make `ThreadDevice` observable / value-type" cleanup, not this batch.)*
 5. **D4** — `NetworkHealthScore` and its `Issue` are now `Equatable`, and the poll loop assigns `self.health` only when the value actually changes (`if health != self.health { … }`). Identical ticks no longer invalidate every Dashboard observer, so the `List` stops re-evaluating ~once per second and the grade-ring spring animation only fires on a real score change.
 
-**Not built/run here** (Linux, no Xcode — see H13); verify on a simulator that the four tiles and each actionable issue row push the correct *live* filtered list and that the Dashboard no longer visibly churns between ticks. **Still open:** D6 (router-count definition), D7 (`Issue.id` collision), D8 (fixed hero fonts / Dynamic Type).
+**Not built/run here** (Linux, no Xcode — see H13); verify on a simulator that the four tiles and each actionable issue row push the correct *live* filtered list and that the Dashboard no longer visibly churns between ticks.
+
+### Iteration 9 (implemented — batch 3)
+
+6. **D6** — one definition of "router": `ThreadDevice.isRoutingCapable` (`isRouter || isBorderRouter`) is now the single source of truth, used by the Dashboard hero + Resilience grade, the `resilienceA` achievement gate (previously `filter(\.isRouter)`, which excluded border routers and could disagree with the on-screen grade), `MeshViewModel.routerDensity`/`warnings`, `DeviceFilterView`'s `.routers` category, `AppChecklistView`, and `SignalExtrapolator`.
+7. **D7** — *resolved as by-design (no code change).* `Issue.id` is intentionally content-derived (`"\(icon)|\(message)"`): it must stay deterministic so `ForEach` identity is stable across poll ticks and the D4 `Equatable` conformance doesn't reassign `health` every tick. A random `UUID()` would reintroduce exactly the churn D4 removed. Issue messages are unique per issue type, so there is no real collision. Comment left in place documenting the intent.
+8. **D8** — hero fonts now honor Dynamic Type: the grade letter (36), grade sub-score (11), and stat-tile label (9) fixed sizes are backed by `@ScaledMetric` (relative to `.largeTitle` / `.caption2`), so they render identically at the default text size but scale at accessibility sizes. The grade letter gains `minimumScaleFactor(0.5)` + `lineLimit(1)` so it shrinks to fit the fixed 92 pt ring instead of clipping. *(Scoped to the hero, as the finding was; a full-file Dynamic Type audit — the many other `.system(size:)` call sites — remains a separate pass best done with a simulator to catch layout regressions.)*
+
+**Iteration 9 fully closed** (D1–D8). Remaining follow-ups are the larger refactors noted in passing: make `ThreadDevice` observable/value-type (removes the D3 rssi-staleness residual), the full Dynamic Type audit, and the real code cleanups behind the lint rules PR #2 relaxed to warnings (short-name renames, tuple→struct, file/type splits).
+
+## Phase 8 — Iteration 10 (Mesh tab: real inferred topology — closes H5)
+
+The Mesh tab previously drew a **fake star** — every non-BR device wired to the
+*first* border router, no paths, `parentNodeID` never used (review issue **H5**).
+HomeKit doesn't expose the Thread routing table (the live `MatterDiscoveryService`
+can only tell a border router from "everything else"), so a *real* graph must be
+inferred — but honestly, and structured like an actual Thread/Matter mesh.
+
+**`MeshTopologyBuilder` rewrite** — a tiered, parent-assigned mesh:
+`gateway (Wi-Fi / Internet) → border routers → mesh routers → end devices`.
+- **Role inference:** trust explicit `isRouter` when any device reports it (demo /
+  future Matter diagnostics); otherwise infer from power source — a mains device
+  (no battery reported) relays, a battery device is a leaf.
+- **Parent assignment:** a leaf prefers a **same-room mesh router** (a genuine hop
+  through another Matter device) over a distant border router, then any router,
+  then the strongest border router; routers attach to their best border router.
+- **Forward-compatible:** an explicit `parentNodeID` that resolves to a router/BR
+  is honored first, so real Thread diagnostics can later drop straight in.
+- A synthetic `gateway` node (no backing device) gives every path a visible
+  top — the Wi-Fi/internet uplink border routers reach through.
+
+**`GraphLayout.hierarchical`** — a layered top-down layout keyed on `MeshNode.tier`
+with children ordered under their parent's x, so multi-hop paths read clearly
+(replaces the random force-directed layout for this view).
+
+**`MeshGraphView`** — distinct glyphs per kind (gateway square w/ Wi-Fi, filled
+border router, ringed "relay" router, dot device, green-ringed battery device);
+backbone links dashed (IP uplink) vs solid mesh hops colored by quality. Selecting
+a node **highlights its route to the internet** and the HUD spells it out — e.g.
+*"Kitchen Sensor → Kitchen Plug (relay) → HomePod (border router) → Internet · via
+1 relay"* — directly answering "does this device hop through another Matter
+device?". Legend + an "Estimated paths — HomeKit doesn't report Thread routing"
+note keep it honest.
+
+**Models:** `MeshNode` gains `tier`, `parentID`, `isBattery`; `MeshNodeKind` gains
+`.gateway`; `MeshLink` gains `kind` (`.backbone` / `.mesh`). All additive with
+defaults (no persisted-schema break). `MeshViewModel.visibleDeviceCount` now
+excludes the synthetic gateway.
+
+**Tests:** `ThreadTopologyBuilderTests` rewritten for the tiered output —
+gateway/backbone creation, the same-room multi-hop relay case, explicit-parent
+honoring, the no-border-router orphan case, and mains-device router inference.
+
+**Not built/run here** (Linux, no Xcode); CI compiles + runs the tests. The graph
+visuals want an on-device look — parent inference is a heuristic, clearly labeled
+estimated. **Next:** real Thread Network Diagnostics via the Matter framework
+(feature #2) would replace inference with the actual routing table.

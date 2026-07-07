@@ -40,7 +40,7 @@ final class MeshViewModel {
     }
 
     var visibleDeviceCount: Int {
-        nodes.count
+        nodes.filter { $0.deviceID != nil }.count
     }
 
     @ObservationIgnored private let discovery: any DiscoveryService
@@ -204,7 +204,7 @@ final class MeshViewModel {
                     HealthStreakStore.shared.record(grade: health.grade)
                     if health.grade == "A" { AchievementStore.shared.unlock("firstGradeA") }
                     let brCount = self.devices.filter(\.isBorderRouter).count
-                    let routerCount = self.devices.filter(\.isRouter).count
+                    let routerCount = self.devices.filter(\.isRoutingCapable).count
                     if brCount >= 2 && routerCount >= 4 { AchievementStore.shared.unlock("resilienceA") }
 
                     // Emit activity event when health score shifts by 15+ points
@@ -252,12 +252,12 @@ final class MeshViewModel {
 
     func routerDensity(for room: String? = nil) -> Int {
         let subset = room == nil ? devices : devices.filter { $0.room == room }
-        return subset.filter { $0.isRouter || $0.isBorderRouter }.count
+        return subset.filter(\.isRoutingCapable).count
     }
 
     func warnings() -> [String] {
         var msgs: [String] = []
-        let routers = devices.filter { $0.isRouter || $0.isBorderRouter }
+        let routers = devices.filter(\.isRoutingCapable)
         if routers.isEmpty {
             msgs.append("No Thread border router detected.")
         }

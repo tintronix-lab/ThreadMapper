@@ -2,40 +2,78 @@ import XCTest
 @testable import ThreadMapper
 
 final class ThreadTopologyBuilderTests: XCTestCase {
-    func testBuildGraph_withBorderRouter_createsLinks() throws {
-        let br = ThreadDevice(
-            id: UUID(), name: "BR", manufacturer: "Test", productName: "Bridge", deviceType: "Bridge",
-            uniqueIdentifier: UUID(), isBorderRouter: true, isRouter: true, isSleepyEndDevice: false
+
+    private func dev(_ name: String, br: Bool = false, router: Bool = false,
+                     battery: Int? = nil, room: String? = nil, rssi: Int? = -60,
+                     parent: String? = nil) -> ThreadDevice {
+        ThreadDevice(
+            id: UUID(), name: name, manufacturer: "T", productName: name, deviceType: "X",
+            uniqueIdentifier: UUID(), isBorderRouter: br, isRouter: router,
+            isSleepyEndDevice: !br && !router, parentNodeID: parent,
+            channel: 15, rssi: rssi, batteryPercentage: battery, room: room
         )
-        let end = ThreadDevice(
-            id: UUID(), name: "End", manufacturer: "Test", productName: "End", deviceType: "Sensor",
-            uniqueIdentifier: UUID(), isBorderRouter: false, isRouter: false, isSleepyEndDevice: true,
-            parentNodeID: br.id.uuidString, rssi: -75
-        )
-        let (nodes, links) = MeshTopologyBuilder.buildGraph(from: [br, end])
-        XCTAssertEqual(nodes.count, 2)
-        XCTAssertEqual(links.count, 1)
-        XCTAssertEqual(nodes.first(where: { $0.name == "BR" })?.kind, .borderRouter)
     }
 
-    func testBuildGraph_noBorderRouter_returnsNodesOnly() throws {
-        let dev = ThreadDevice(
-            id: UUID(), name: "Orphan", manufacturer: "Test", productName: "Unknown", deviceType: "Unknown",
-            uniqueIdentifier: UUID(), isBorderRouter: false, isRouter: false, isSleepyEndDevice: true
-        )
-        let (nodes, links) = MeshTopologyBuilder.buildGraph(from: [dev])
+    func testBorderRouterCreatesGatewayAndBackbone() throws {
+        let br = dev("BR", br: true, router: true)
+        let end = dev("Sensor", battery: 80, room: "Bedroom")
+        let (nodes, links) = MeshTopologyBuilder.buildGraph(from: [br, end])
+
+        // gateway + BR + end
+        XCTAssertEqual(nodes.count, 3)
+        XCTAssertNotNil(nodes.first { $0.kind == .gateway })
+        XCTAssertEqual(nodes.first { $0.name == "BR" }?.kind, .borderRouter)
+
+        // backbone gateway→BR and mesh BR→end
+        XCTAssertEqual(links.count, 2)
+        XCTAssertEqual(links.first { $0.kind == .backbone }?.targetID, br.id)
+        // No router present, so the end device attaches straight to the BR.
+        XCTAssertEqual(nodes.first { $0.name == "Sensor" }?.parentID, br.id)
+    }
+
+    func testEndDeviceHopsThroughSameRoomRouter() throws {
+        // The core feature: a leaf routes through another Matter device (a router)
+        // in its room rather than straight to a border router in another room.
+        let br = dev("HomePod", br: true, router: true, room: "Living Room", rssi: -55)
+        let router = dev("Kitchen Plug", router: true, room: "Kitchen", rssi: -63)
+        let sensor = dev("Kitchen Sensor", battery: 70, room: "Kitchen", rssi: -78)
+        let (nodes, links) = MeshTopologyBuilder.buildGraph(from: [br, router, sensor])
+
+        let sensorNode = nodes.first { $0.name == "Kitchen Sensor" }
+        XCTAssertEqual(sensorNode?.parentID, router.id, "sensor should relay through the same-room router")
+        XCTAssertEqual(sensorNode?.tier, 3)
+        XCTAssertEqual(nodes.first { $0.name == "Kitchen Plug" }?.parentID, br.id)
+        // gateway→BR, BR→router, router→sensor
+        XCTAssertEqual(links.count, 3)
+    }
+
+    func testExplicitParentNodeIDIsHonored() throws {
+        let br = dev("BR", br: true, router: true)
+        let sensor = dev("Sensor", battery: 60, room: "Attic", parent: nil)
+        // Point the sensor's parent explicitly at the BR.
+        let sensorWithParent = dev("Sensor2", battery: 60, room: "Attic", parent: br.id.uuidString)
+        let (nodes, _) = MeshTopologyBuilder.buildGraph(from: [br, sensor, sensorWithParent])
+        XCTAssertEqual(nodes.first { $0.name == "Sensor2" }?.parentID, br.id)
+    }
+
+    func testNoBorderRouterNoGatewayNoLinks() throws {
+        let orphan = dev("Orphan", battery: 50)
+        let (nodes, links) = MeshTopologyBuilder.buildGraph(from: [orphan])
         XCTAssertEqual(nodes.count, 1)
+        XCTAssertNil(nodes.first { $0.kind == .gateway })
         XCTAssertTrue(links.isEmpty)
         XCTAssertEqual(nodes.first?.kind, .endDevice)
     }
 
-    func testBuildGraph_borderRouterIsClassified() throws {
-        let br = ThreadDevice(
-            id: UUID(), name: "BR", manufacturer: "Test", productName: "Bridge", deviceType: "Bridge",
-            uniqueIdentifier: UUID(), isBorderRouter: true, isRouter: false, isSleepyEndDevice: false
-        )
-        let (nodes, _) = MeshTopologyBuilder.buildGraph(from: [br])
-        XCTAssertEqual(nodes.count, 1)
-        XCTAssertEqual(nodes.first?.kind, .borderRouter)
+    func testMainsDeviceInferredAsRouterWithoutExplicitRoles() throws {
+        // No device is explicitly a router → infer from power: no battery ⇒ relay.
+        let br = dev("BR", br: true)                       // BR (isRouter false here)
+        let bulb = dev("Bulb", battery: nil, room: "Den")  // mains, no battery ⇒ router
+        let sensor = dev("Sensor", battery: 40, room: "Den") // battery ⇒ end device
+        let (nodes, _) = MeshTopologyBuilder.buildGraph(from: [br, bulb, sensor])
+        XCTAssertEqual(nodes.first { $0.name == "Bulb" }?.kind, .router)
+        XCTAssertEqual(nodes.first { $0.name == "Sensor" }?.kind, .endDevice)
+        // Sensor relays through the inferred same-room router.
+        XCTAssertEqual(nodes.first { $0.name == "Sensor" }?.parentID, bulb.id)
     }
 }

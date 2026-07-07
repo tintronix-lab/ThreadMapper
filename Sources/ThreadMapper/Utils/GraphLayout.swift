@@ -1,6 +1,45 @@
 import Foundation
 
 struct GraphLayout {
+
+    /// Layered top-down layout keyed on `MeshNode.tier`: gateway at top, then
+    /// border routers, mesh routers, and leaf devices in rows. Within a row,
+    /// nodes are ordered by their parent's x so children sit under their parent —
+    /// which is what makes multi-hop paths legible.
+    static func hierarchical(nodes: [MeshNode], size: CGSize) -> [UUID: CGPoint] {
+        guard !nodes.isEmpty, size.width > 1, size.height > 1 else { return [:] }
+        let w = size.width, h = size.height
+        let marginX = min(48, w * 0.12)
+        let marginTop = min(56, h * 0.12)
+        let marginBottom = min(48, h * 0.12)
+
+        let tiers = Set(nodes.map(\.tier)).sorted()
+        var tierY: [Int: CGFloat] = [:]
+        for (i, t) in tiers.enumerated() {
+            let frac = tiers.count == 1 ? 0.5 : CGFloat(i) / CGFloat(tiers.count - 1)
+            tierY[t] = marginTop + frac * (h - marginTop - marginBottom)
+        }
+
+        var positions: [UUID: CGPoint] = [:]
+        for t in tiers {
+            let ordered = nodes.filter { $0.tier == t }.sorted { a, b in
+                let ax = a.parentID.flatMap { positions[$0]?.x } ?? w / 2
+                let bx = b.parentID.flatMap { positions[$0]?.x } ?? w / 2
+                if ax != bx { return ax < bx }
+                return a.name < b.name
+            }
+            let n = ordered.count
+            let y = tierY[t] ?? h / 2
+            for (i, node) in ordered.enumerated() {
+                let x: CGFloat = n == 1
+                    ? w / 2
+                    : marginX + CGFloat(i) / CGFloat(n - 1) * (w - 2 * marginX)
+                positions[node.id] = CGPoint(x: x, y: y)
+            }
+        }
+        return positions
+    }
+
     static func fruchtermanReingold(
         nodes: [MeshNode],
         links: [MeshLink],

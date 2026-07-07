@@ -22,7 +22,7 @@ struct DeviceFilterSpec: Hashable {
     func resolve(from devices: [ThreadDevice]) -> [ThreadDevice] {
         switch category {
         case .all:     return devices
-        case .routers: return devices.filter { $0.isRouter || $0.isBorderRouter }
+        case .routers: return devices.filter(\.isRoutingCapable)
         case .offline: return devices.filter(\.isOffline)
         case .weak:    return devices.filter(\.isWeak)
         case .ids(let ids):

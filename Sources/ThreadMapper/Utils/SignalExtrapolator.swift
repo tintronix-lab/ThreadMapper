@@ -3,7 +3,7 @@ import Foundation
 struct SignalExtrapolator {
     static func coverageScore(for devices: [ThreadDevice]) -> Double {
         guard !devices.isEmpty else { return 0.0 }
-        let routers = devices.filter { $0.isRouter || $0.isBorderRouter }
+        let routers = devices.filter(\.isRoutingCapable)
         let routerRatio = Double(routers.count) / Double(devices.count)
 
         let avgRSSI = devices.compactMap { $0.rssi }
@@ -16,7 +16,7 @@ struct SignalExtrapolator {
 
     static func recommendations(for devices: [ThreadDevice]) -> [String] {
         var recs: [String] = []
-        let routers = devices.filter { $0.isRouter || $0.isBorderRouter }
+        let routers = devices.filter(\.isRoutingCapable)
         if routers.isEmpty { recs.append("Add at least one Thread border router.") }
         if devices.count > 3 && routers.count == 1 {
             recs.append("Add a second router to improve mesh redundancy.")
