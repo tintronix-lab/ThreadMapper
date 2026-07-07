@@ -609,3 +609,80 @@ honoring, the no-border-router orphan case, and mains-device router inference.
 visuals want an on-device look — parent inference is a heuristic, clearly labeled
 estimated. **Next:** real Thread Network Diagnostics via the Matter framework
 (feature #2) would replace inference with the actual routing table.
+
+## Feature #2 — Matter Thread Network Diagnostics (planned)
+
+Goal: replace the Mesh tab's *inferred* topology (Iteration 10) with the **real**
+Thread routing table where possible.
+
+### Platform reality (the constraint that shapes everything)
+A third-party iOS app **cannot read the Thread routing table of HomeKit-commissioned
+devices**:
+- **HomeKit** exposes no Thread routing — `HMAccessory` has no parent/child, RLOC,
+  role, or neighbor data. (Hence `MatterDiscoveryService` guessing `isBridge → BR`.)
+- **Matter / `MatterSupport`** on iOS is for *commissioning*, not reading clusters;
+  there is no public API to read the Thread Network **Diagnostics cluster** from
+  HomeKit-owned devices.
+- Reading that cluster needs a **Matter controller/admin on the fabric**, which
+  Apple keeps in the daemon and does not expose to apps.
+
+So "real routing" splits into what's obtainable vs not:
+- ✅ **Network facts** (channel, PAN ID, ext PAN ID, network name, border-agent id)
+  via the **`ThreadNetwork`** framework (`THClient`) — needs the
+  `com.apple.developer.thread-network-credentials` entitlement (Apple-gated).
+- ✅ **True routing table** only via an **OpenThread Border Router (OTBR) REST**
+  endpoint (`/diagnostics`, `/node`) the user connects — Apple/Google BRs don't
+  expose it; OTBR (e.g. HA SkyConnect / Home Assistant Yellow) does.
+- ❌ **In-app per-node routing for HomeKit devices** — not available.
+
+### Phased plan
+- **Phase 0 — Spike (~1 wk):** confirm exact `ThreadNetwork`/`THCredentials` API +
+  entitlement path; verify no HMAccessory/Matter route to per-node routing;
+  correlate a Thread network → HomeKit accessories. Gate the rest on findings.
+- **Phase 1 — Real network facts:** add entitlement; `ThreadCredentialsService`
+  reads active credentials → real **channel/PAN/network name**. Immediate wins:
+  accurate channel-conflict detection, real channel in Mesh HUD, true
+  border-router/network count feeding the Resilience score.
+- **Phase 2 — Diagnostics seam + real builder path:** `ThreadNodeDiagnostics`
+  (role, RLOC16, parent RLOC, neighbor table w/ link margin) + `DiagnosticsProvider`;
+  `MeshTopologyBuilder.buildGraph(from:diagnostics:)` builds edges/roles/quality
+  from the real table, falling back to inference per-device. Wire `MeshViewModel`
+  to pass a provider's diagnostics through.
+- **Phase 3 — OTBR integration (stretch, ~1–2 wk):** `BorderRouterClient` connects
+  to a user-provided OTBR REST endpoint, parses `/diagnostics`, maps RLOC→devices,
+  feeds Phase 2. The one path to a genuine routing table.
+- **Phase 4 — UI + honesty:** data-source badge in the Mesh legend
+  ("Live routing · OTBR" vs "Estimated · HomeKit"); node HUD shows real
+  role/RLOC/link-margin when present; Settings source picker; privacy-manifest /
+  usage-string updates.
+- **Phase 5 — Testing:** builder tests with real neighbor-table fixtures; credential
+  parsing behind a fake `THClient`; keep `ThreadNetwork`/OTBR behind protocols so
+  CI (no simulator Thread stack) stays green.
+
+### Risks
+Entitlement approval (Apple-gated); no in-app real topology for HomeKit devices
+(true routing only via OTBR/companion); App Review scrutiny + privacy-manifest
+additions; multi-fabric/multi-admin edge cases.
+
+### Scope
+**MVP = Phases 0–2 + 4** (real channel/PAN, clean diagnostics seam, honest
+labeling) ≈ 3–4 wk. **Phase 3 (OTBR)** is the high-value stretch that actually
+delivers a real routing table.
+
+### Phase 0 scaffold (landed)
+Inert seam so Phases 1–2 drop in without refactoring — no live behavior change:
+- `ThreadNodeDiagnostics` (role → `meshKind`, `linkQuality` from real link margin)
+  and `ThreadNetworkInfo` models.
+- `DiagnosticsProvider` protocol + `NoDiagnosticsProvider` default (yields nothing
+  → mesh stays inferred).
+- `ThreadCredentialsService`: `ThreadNetwork` read scaffolded behind the
+  `THREAD_CREDENTIALS` build flag (off in CI) so the unverified `THClient` mapping
+  never risks a build break; returns nothing until the entitlement is provisioned.
+- `MeshTopologyBuilder.buildGraph(from:diagnostics:)` — real-data path (parent
+  edges from RLOC, roles, link quality) with inference fallback.
+- Tests: real parent-edge construction, empty-diagnostics fallback, link-quality
+  from margin, role→kind mapping, no-op provider.
+
+**Next step to activate:** wire `MeshViewModel` to call a `DiagnosticsProvider` and
+pass results to `buildGraph(from:diagnostics:)`; provision the Thread credentials
+entitlement; then Phase 3 OTBR for the real routing table.

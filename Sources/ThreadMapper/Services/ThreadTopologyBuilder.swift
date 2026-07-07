@@ -126,4 +126,61 @@ struct MeshTopologyBuilder {
         }
         return borderRouters.max { strength($0) < strength($1) }
     }
+
+    // MARK: - Real-data path (Feature #2)
+
+    /// Build the mesh from *actual* Thread diagnostics (roles + parent RLOCs)
+    /// when a `DiagnosticsProvider` supplies them. Devices lacking a diagnostics
+    /// entry attach to a border router as a fallback; empty diagnostics defers
+    /// entirely to the inference path above, so callers can pass through safely.
+    static func buildGraph(from devices: [ThreadDevice],
+                           diagnostics: [UUID: ThreadNodeDiagnostics]) -> ([MeshNode], [MeshLink]) {
+        guard !devices.isEmpty, !diagnostics.isEmpty else { return buildGraph(from: devices) }
+
+        // RLOC16 → deviceID, to resolve parent RLOCs back to real nodes.
+        var deviceByRloc: [UInt16: UUID] = [:]
+        for d in devices { if let r = diagnostics[d.id]?.rloc16 { deviceByRloc[r] = d.id } }
+
+        let borderRouters = devices.filter { $0.isBorderRouter }
+        var nodes: [MeshNode] = []
+        var links: [MeshLink] = []
+
+        if !borderRouters.isEmpty {
+            nodes.append(MeshNode(id: gatewayID, name: "Internet", kind: .gateway,
+                                  deviceID: nil, tier: 0))
+        }
+
+        for d in devices {
+            let diag = diagnostics[d.id]
+            let kind: MeshNodeKind = d.isBorderRouter ? .borderRouter : (diag?.meshKind ?? .endDevice)
+            let tier = kind == .borderRouter ? 1 : (kind == .router ? 2 : 3)
+            let battery = diag?.isBattery ?? (d.batteryPercentage != nil)
+
+            var parentID: UUID?
+            if d.isBorderRouter {
+                parentID = borderRouters.isEmpty ? nil : gatewayID
+            } else if let pr = diag?.parentRloc16, let pid = deviceByRloc[pr], pid != d.id {
+                parentID = pid                       // real parent from the routing table
+            } else {
+                parentID = borderRouters.first?.id   // fallback for a node without diagnostics
+            }
+
+            nodes.append(MeshNode(id: d.id, name: d.name, kind: kind, deviceID: d.id,
+                                  room: d.room, channel: d.channel, tier: tier,
+                                  parentID: parentID, isBattery: battery))
+
+            if d.isBorderRouter {
+                if !borderRouters.isEmpty {
+                    links.append(MeshLink(sourceID: gatewayID, targetID: d.id,
+                                          linkQuality: 4, kind: .backbone))
+                }
+            } else if let pid = parentID {
+                let quality = diag?.linkQuality ?? (d.rssi?.rssiLinkQuality ?? 2)
+                links.append(MeshLink(sourceID: pid, targetID: d.id,
+                                      linkQuality: quality, kind: .mesh))
+            }
+        }
+
+        return (nodes, links)
+    }
 }
