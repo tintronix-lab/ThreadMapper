@@ -540,3 +540,11 @@ All 7 persistence callsites updated from `.atomic` to `[.atomic, .completeFilePr
 6. **D7 / D8 — hardening & a11y.** Give `Issue` a `UUID` identity (or hash more fields) and swap the fixed hero font sizes for semantic text styles as part of the pending Dynamic Type audit.
 
 **Suggested PR grouping:** ship **D1–D2** (and the trivial **D5**) as the "dashboard fix" PR the user is waiting on; fold **D3–D4** into a follow-up "dashboard correctness/perf" PR; sweep **D6–D8** with the Iteration 9 a11y backlog.
+
+### Iteration 9 (implemented — batch 1)
+
+1. **D1** — Hero stat tiles (`tappableStatCard`) converted from in-row `NavigationLink`s to `Button`s that append the `DeviceFilterSpec` to `navPath`. Buttons have no one-per-`List`-row restriction, so all four tiles in the shared hero row are now independently tappable.
+2. **D2** — Issue rows converted the same way (`Button` + `navPath.append`), and `issueRowContent` now takes an `actionable` flag: only rows with `affectedDevices` show a trailing chevron, so the tap affordance matches behaviour. The single `navigationDestination(for: DeviceFilterSpec.self)` still backs both.
+3. **D5** — Dashboard "Response Quality" rename completed: the trend header now reads "Response Quality (estimated)" with a quality label (`rssiQualityLabel`) + `rssiColor` instead of "`N dBm avg`"; placement suggestions surface the quality label instead of raw `dBm`.
+
+**Not built/run here** (Linux, no Xcode — see H13); verify on a simulator that the four tiles and each actionable issue row push the correct filtered list. **Still open:** D3 (stale drill-in snapshots), D4 (1 Hz re-render / `Equatable`), D6–D8.

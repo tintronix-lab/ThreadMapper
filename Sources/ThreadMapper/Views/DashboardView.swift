@@ -248,11 +248,14 @@ struct DashboardView: View {
         .shadow(color: health.color.opacity(0.25), radius: 8, x: 0, y: 3)
     }
 
-    /// Stat card backed by NavigationLink so it survives List row rebuilds and
-    /// doesn't compete with the row's own gesture recognizer.
+    /// Stat card backed by a Button that pushes onto `navPath`. Buttons — unlike
+    /// NavigationLinks — have no one-per-List-row restriction, so all four tiles
+    /// in the shared hero row stay independently tappable (fixes D1).
     @ViewBuilder
     private func tappableStatCard(icon: String, value: String, label: String, tint: Color, spec: DeviceFilterSpec) -> some View {
-        NavigationLink(value: spec) {
+        Button {
+            navPath.append(spec)
+        } label: {
             HStack(spacing: 6) {
                 Image(systemName: icon)
                     .font(.caption2)
@@ -326,16 +329,20 @@ struct DashboardView: View {
     @ViewBuilder
     private func issueRow(_ issue: NetworkHealthScore.Issue) -> some View {
         if !issue.affectedDevices.isEmpty {
-            // NavigationLink is the correct primitive for full-row List navigation.
-            NavigationLink(value: DeviceFilterSpec(title: issue.message, devices: issue.affectedDevices)) {
-                issueRowContent(issue)
+            // Button + navPath rather than an in-row NavigationLink, so it plays
+            // nicely with the other tappable rows in the List (fixes D2).
+            Button {
+                navPath.append(DeviceFilterSpec(title: issue.message, devices: issue.affectedDevices))
+            } label: {
+                issueRowContent(issue, actionable: true)
             }
+            .buttonStyle(.plain)
         } else {
-            issueRowContent(issue)
+            issueRowContent(issue, actionable: false)
         }
     }
 
-    private func issueRowContent(_ issue: NetworkHealthScore.Issue) -> some View {
+    private func issueRowContent(_ issue: NetworkHealthScore.Issue, actionable: Bool) -> some View {
         HStack(spacing: 12) {
             ZStack {
                 Circle()
@@ -347,6 +354,7 @@ struct DashboardView: View {
             }
             Text(issue.message)
                 .font(.subheadline)
+                .foregroundStyle(.primary)
             Spacer()
             if issue.isCritical {
                 Text("Critical")
@@ -356,7 +364,15 @@ struct DashboardView: View {
                     .padding(.vertical, 3)
                     .background(.red.opacity(0.1), in: Capsule())
             }
+            // Only actionable rows advertise navigation, so the affordance
+            // matches behaviour (fixes D2's inconsistent tap targets).
+            if actionable {
+                Image(systemName: "chevron.right")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
         }
+        .contentShape(Rectangle())
         .padding(.vertical, 3)
     }
 
@@ -521,14 +537,14 @@ struct DashboardView: View {
             Section {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
-                        Text("Network Signal (estimated) — Last 30 min")
+                        Text("Response Quality (estimated) — Last 30 min")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                         Spacer()
                         if let last = buckets.last {
-                            Text("\(last.avgRSSI) dBm avg")
-                                .font(.caption2.monospacedDigit())
-                                .foregroundStyle(last.avgRSSI > -65 ? .green : last.avgRSSI > -80 ? .orange : .red)
+                            Text(last.avgRSSI.rssiQualityLabel)
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(last.avgRSSI.rssiColor)
                         }
                     }
                     let readings = buckets.map {
@@ -774,7 +790,7 @@ struct DashboardView: View {
             guard roomAvg < -75 else { continue }
             let quality = roomAvg < -85 ? "very weak" : "weak"
             suggestions.append(
-                "Signal in \(group.room) is \(quality) (avg \(roomAvg) dBm) — consider adding a Thread router nearby"
+                "Response quality in \(group.room) is \(quality) (\(roomAvg.rssiQualityLabel)) — consider adding a Thread router nearby"
             )
         }
         return suggestions
