@@ -510,4 +510,46 @@ All 7 persistence callsites updated from `.atomic` to `[.atomic, .completeFilePr
 5. Task is cancelled in `stopRecording()` and `hapticEnabled` resets to `false` so the next room starts clean.
 
 **Iteration 9 backlog:** Dynamic Type audit (replace `font(.system(size: N))` with `.caption2`/`.footnote` semantic styles); VoiceOver graph navigation (H12, `accessibilityChildren` overlay on Canvas); Spotlight indexing of devices (#57 — `CSSearchableItem` + `CSSearchableIndex`); App Store Connect Pro product setup; confetti animation on grade improvement (#53).
-no
+
+## Phase 8 — Iteration 9 (review: Dashboard / Network Health regression)
+
+**Trigger:** After the last PR (`906cc3b "fixes"`), the Dashboard's **Network Health** section behaves incorrectly — tiles feel unresponsive and parts of the section are inconsistent/stale. That PR reworked the hero stat grid and the issue rows from plain cards into `NavigationLink`s driving a new `DeviceFilterView`, added collapsible Room Coverage / Devices sections, and gave `NetworkHealthScore.Issue` an `affectedDevices` payload. This review isolates what regressed and lays out the fix plan.
+
+> **Verification note:** this environment is Linux with no Xcode/Simulator, and the package imports `HomeKit`/`UIKit` (see H13), so the app cannot be built or run here. Findings below are from static review of the landed diff; each fix should be confirmed on a simulator before merge.
+
+### Findings (Dashboard / Network Health)
+
+| # | Sev | Location | Finding |
+|---|-----|----------|---------|
+| D1 | **High** | `DashboardView.healthSection` + `tappableStatCard` (`DashboardView.swift:171–201`, `254–277`) | The four hero tiles (Devices / Routers / Offline / Weak) are **four `NavigationLink`s packed into a single `List` row**, alongside the grade ring. Multiple `NavigationLink`s in one `List` cell is unreliable on iOS: their tap regions overlap inside the shared row, so taps can miss, activate the wrong destination, or fail to register — the most likely cause of "the Network Health tiles don't do anything." |
+| D2 | **High** | `issueRow` / `issueRowContent` (`DashboardView.swift:326–361`) | Issue rows share the same multi-`NavigationLink`-in-`List` fragility. Worse, the row is tappable **only when `affectedDevices` is non-empty**, so "No border router detected" (empty `affectedDevices`) is silently non-interactive while its neighbours navigate — inconsistent affordance with no visible cue which rows are actionable. |
+| D3 | **Med** | `DeviceFilterSpec` (`DeviceFilterView.swift:4–7`) + hero counts | Drill-in lists capture a **frozen `[ThreadDevice]` snapshot** at push time. `ThreadDevice` is a plain (non-`@Observable`) class and `DeviceFilterView` observes nothing, so as the 1 Hz poll loop flips offline/weak/rssi the pushed "Offline Devices" list neither re-orders nor drops recovered devices — it disagrees with the live hero count until you pop and re-enter. |
+| D4 | **Med** | `MeshViewModel.health` (`MeshViewModel.swift:172–173`), `NetworkHealthScore` (not `Equatable`) | `self.health` is **reassigned every poll tick** even when nothing changed, and `NetworkHealthScore` has no `Equatable` conformance, so Observation cannot elide the update — the entire Dashboard `List` re-evaluates ~once per second, which also re-arms the grade-ring spring animation and causes visible churn/jank in the section. |
+| D5 | **Med** | `trendSection` (`DashboardView.swift:524–531`), `placementSection` / `buildPlacementSuggestions` (`DashboardView.swift:768–781`) | The "Response Quality" rename (H4), which iterations 4/6 record as **complete "across the full app,"** is not complete on the Dashboard: the trend header still prints `"\(avgRSSI) dBm avg"` and placement copy still says `"avg \(roomAvg) dBm"`. Raw pseudo-dBm is exactly the data-honesty problem H4 set out to remove. |
+| D6 | **Low–Med** | `DashboardView.routerCount` (`:366`) vs `MeshViewModel` achievement gate (`:204–206`) | "Router" is counted two ways: the on-screen Resilience grade uses `isRouter || isBorderRouter`, but the `resilienceA` achievement uses `devices.filter(\.isRouter)` (excludes border routers). The Resilience card and the "Resilient Home" badge can therefore disagree for the same network. |
+| D7 | **Low** | `NetworkHealthScore.Issue.id` (`NetworkHealthScore.swift:13`) | `id` is content-derived (`"\(icon)|\(message)"`). Stable today, but two issues sharing icon+message would collide and break `ForEach` identity — fragile keying for a list that changes every tick. |
+| D8 | **Low** | `tappableStatCard` label (`:266`), grade sub-number (`:243`) | Fixed `font(.system(size: 9))` / `size: 11` in the hero defeat Dynamic Type (already on the standing a11y backlog; re-flagged because it lives in this section). |
+
+### Fix plan (ordered)
+
+1. **D1 + D2 — make the tiles and issue rows navigate reliably.** Replace the in-row `NavigationLink`s with plain `Button`s that append to the existing `navPath` (`Button { navPath.append(spec) } label: { … }`), keeping the single `navigationDestination(for: DeviceFilterSpec.self)`. `Button`s have no one-per-`List`-row restriction, so all four tiles and every issue row become independently tappable. Render a trailing chevron only on rows that actually navigate (issues with `affectedDevices`), so the affordance matches behaviour. *(Highest impact — this is the "not working" report.)*
+2. **D3 — live drill-in lists.** Change `DeviceFilterSpec` to carry a lightweight category (an enum: `.all / .routers / .offline / .weak / .issue(id)`) instead of a captured array; have `DeviceFilterView` read `@Environment(MeshViewModel.self)` and recompute the filtered set on each render so the pushed screen tracks the live network.
+3. **D4 — stop the 1 Hz churn.** Make `NetworkHealthScore` (and its `Issue`) `Equatable`, then assign in the poll loop only on change: `if newHealth != health { health = newHealth }`. Removes the per-second full-`List` re-evaluation and the spurious ring re-animation.
+4. **D5 — finish the Response Quality rename on the Dashboard.** Route the trend "avg" and placement-suggestion copy through the shared `SignalStrength`/`TMStyle` quality label + color scale instead of printing `dBm`. Closes H4 for real and matches every other screen.
+5. **D6 — one definition of "router."** Extract a single helper (e.g. `TMStyle`/`MeshViewModel.routerCount(includingBorderRouters:)`) and use it for both the Resilience grade and the achievement gate.
+6. **D7 / D8 — hardening & a11y.** Give `Issue` a `UUID` identity (or hash more fields) and swap the fixed hero font sizes for semantic text styles as part of the pending Dynamic Type audit.
+
+**Suggested PR grouping:** ship **D1–D2** (and the trivial **D5**) as the "dashboard fix" PR the user is waiting on; fold **D3–D4** into a follow-up "dashboard correctness/perf" PR; sweep **D6–D8** with the Iteration 9 a11y backlog.
+
+### Iteration 9 (implemented — batch 1)
+
+1. **D1** — Hero stat tiles (`tappableStatCard`) converted from in-row `NavigationLink`s to `Button`s that append the `DeviceFilterSpec` to `navPath`. Buttons have no one-per-`List`-row restriction, so all four tiles in the shared hero row are now independently tappable.
+2. **D2** — Issue rows converted the same way (`Button` + `navPath.append`), and `issueRowContent` now takes an `actionable` flag: only rows with `affectedDevices` show a trailing chevron, so the tap affordance matches behaviour. The single `navigationDestination(for: DeviceFilterSpec.self)` still backs both.
+3. **D5** — Dashboard "Response Quality" rename completed: the trend header now reads "Response Quality (estimated)" with a quality label (`rssiQualityLabel`) + `rssiColor` instead of "`N dBm avg`"; placement suggestions surface the quality label instead of raw `dBm`.
+
+### Iteration 9 (implemented — batch 2)
+
+4. **D3** — `DeviceFilterSpec` no longer captures a `[ThreadDevice]` snapshot; it carries a `Category` (`.all / .routers / .offline / .weak / .ids([UUID])`). `DeviceFilterView` now reads `@Environment(MeshViewModel.self)` and re-resolves the list on every render, so a drilled-in "Offline Devices" screen tracks the live poll loop and drops devices that recover or leave the network instead of showing a frozen set. *(Residual: `ThreadDevice` is still a non-`@Observable` class, so an rssi-only change that doesn't reassign `viewModel.devices` won't force a re-render — folded into the separate "make `ThreadDevice` observable / value-type" cleanup, not this batch.)*
+5. **D4** — `NetworkHealthScore` and its `Issue` are now `Equatable`, and the poll loop assigns `self.health` only when the value actually changes (`if health != self.health { … }`). Identical ticks no longer invalidate every Dashboard observer, so the `List` stops re-evaluating ~once per second and the grade-ring spring animation only fires on a real score change.
+
+**Not built/run here** (Linux, no Xcode — see H13); verify on a simulator that the four tiles and each actionable issue row push the correct *live* filtered list and that the Dashboard no longer visibly churns between ticks. **Still open:** D6 (router-count definition), D7 (`Issue.id` collision), D8 (fixed hero fonts / Dynamic Type).

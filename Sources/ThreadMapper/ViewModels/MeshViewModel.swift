@@ -170,7 +170,9 @@ final class MeshViewModel {
 
                     // Write snapshot to App Group for widget and BGTask
                     let health = NetworkHealthScore.compute(devices: self.devices)
-                    self.health = health
+                    // Assign only on change — NetworkHealthScore is Equatable, so an
+                    // identical tick no longer invalidates every Dashboard observer (D4).
+                    if health != self.health { self.health = health }
                     let roomGroups = Dictionary(grouping: self.devices) { $0.room ?? "Unknown" }
                     let roomSnaps = roomGroups.map { room, devs in
                         WidgetSnapshot.RoomSnapshot(
