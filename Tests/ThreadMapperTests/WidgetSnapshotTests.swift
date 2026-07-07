@@ -8,13 +8,16 @@ struct WidgetSnapshotTests {
     private func makeSnapshot(
         grade: String = "A",
         score: Int = 95,
+        summary: String = "OK",
         deviceCount: Int = 8,
         offlineCount: Int = 0,
         weakCount: Int = 0,
+        offlineDeviceNames: [String] = [],
         rooms: [WidgetSnapshot.RoomSnapshot] = []
     ) -> WidgetSnapshot {
-        WidgetSnapshot(grade: grade, score: score, deviceCount: deviceCount,
+        WidgetSnapshot(grade: grade, score: score, summary: summary, deviceCount: deviceCount,
                        offlineCount: offlineCount, weakCount: weakCount,
+                       offlineDeviceNames: offlineDeviceNames,
                        updatedAt: Date(), rooms: rooms)
     }
 
@@ -80,10 +83,12 @@ struct WidgetSnapshotTests {
 
     @Test("contentHash is unchanged when only updatedAt changes")
     func contentHashIgnoresUpdatedAt() {
-        let base = WidgetSnapshot(grade: "A", score: 95, deviceCount: 8,
-                                  offlineCount: 0, weakCount: 0, updatedAt: Date(timeIntervalSinceReferenceDate: 0), rooms: [])
-        let later = WidgetSnapshot(grade: "A", score: 95, deviceCount: 8,
-                                   offlineCount: 0, weakCount: 0, updatedAt: Date(timeIntervalSinceReferenceDate: 3600), rooms: [])
+        let base = WidgetSnapshot(grade: "A", score: 95, summary: "OK", deviceCount: 8,
+                                  offlineCount: 0, weakCount: 0, offlineDeviceNames: [],
+                                  updatedAt: Date(timeIntervalSinceReferenceDate: 0), rooms: [])
+        let later = WidgetSnapshot(grade: "A", score: 95, summary: "OK", deviceCount: 8,
+                                   offlineCount: 0, weakCount: 0, offlineDeviceNames: [],
+                                   updatedAt: Date(timeIntervalSinceReferenceDate: 3600), rooms: [])
         #expect(base.contentHash == later.contentHash)
     }
 
