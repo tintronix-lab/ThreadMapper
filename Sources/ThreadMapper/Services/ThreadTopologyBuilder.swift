@@ -55,7 +55,7 @@ struct MeshTopologyBuilder {
         func classify(_ d: ThreadDevice) -> (kind: MeshNodeKind, battery: Bool) {
             if d.isBorderRouter { return (.borderRouter, false) }
             if routerIDs.contains(d.id) { return (.router, false) }
-            return (.endDevice, d.batteryPercentage != nil || d.isSleepyEndDevice)
+            return (.endDevice, d.batteryPercentage != nil)
         }
 
         let routers = candidates.filter { routerIDs.contains($0.id) }

@@ -23,6 +23,12 @@ struct GraphLayout {
         var positions: [UUID: CGPoint] = [:]
         for t in tiers {
             let ordered = nodes.filter { $0.tier == t }.sorted { a, b in
+                // Primary: room alphabetically — same-room nodes cluster horizontally.
+                // Nil room (unassigned) sorts last so it doesn't break zone boundaries.
+                let aRoom = a.room ?? "\u{FFFF}"
+                let bRoom = b.room ?? "\u{FFFF}"
+                if aRoom != bRoom { return aRoom < bRoom }
+                // Secondary: parent x-position keeps children under their parent.
                 let ax = a.parentID.flatMap { positions[$0]?.x } ?? w / 2
                 let bx = b.parentID.flatMap { positions[$0]?.x } ?? w / 2
                 if ax != bx { return ax < bx }

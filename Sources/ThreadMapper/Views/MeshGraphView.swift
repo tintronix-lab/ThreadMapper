@@ -9,12 +9,16 @@ struct MeshGraphView: View {
 
     @State private var layout: [UUID: CGPoint] = [:]
     @State private var selectedNodeID: UUID?
+    // pan is in screen/view space; zoom is applied around view center.
     @State private var scale: CGFloat = 1.0
-    @State private var offset: CGSize = .zero
-    @State private var lastDragOffset: CGSize = .zero
-    @State private var viewSize: CGSize = .zero   // needed to invert scaleEffect in hit-testing
+    @State private var baseScale: CGFloat = 1.0   // accumulated zoom between gestures
+    @State private var pan: CGSize = .zero
+    @State private var lastPan: CGSize = .zero
+    @State private var isDragging = false
 
-    private var nodesByID: [UUID: MeshNode] { Dictionary(nodes.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a }) }
+    private var nodesByID: [UUID: MeshNode] {
+        Dictionary(nodes.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
+    }
 
     var body: some View {
         GeometryReader { geo in
@@ -23,57 +27,70 @@ struct MeshGraphView: View {
                 Color(UIColor.systemGroupedBackground)
                     .ignoresSafeArea()
 
+                // Canvas handles all transforms internally (no scaleEffect).
+                // This avoids Canvas clipping content before the visual scale is applied.
+                Canvas { ctx, _ in
+                    drawRoomZones(ctx: &ctx, size: size)
+                    drawLinks(ctx: &ctx, size: size)
+                    drawNodes(ctx: &ctx, size: size)
+                }
+                // Single DragGesture handles both pan (move >= 8pt) and tap (move < 8pt).
+                .gesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { value in
+                            let d = hypot(value.translation.width, value.translation.height)
+                            if d >= 8 || isDragging {
+                                isDragging = true
+                                pan = CGSize(
+                                    width:  lastPan.width  + value.translation.width,
+                                    height: lastPan.height + value.translation.height
+                                )
+                            }
+                        }
+                        .onEnded { value in
+                            let d = hypot(value.translation.width, value.translation.height)
+                            if !isDragging || d < 8 {
+                                handleTap(at: value.startLocation, in: size)
+                            } else {
+                                lastPan = CGSize(
+                                    width:  lastPan.width  + value.translation.width,
+                                    height: lastPan.height + value.translation.height
+                                )
+                            }
+                            isDragging = false
+                        }
+                )
+                // Pinch-to-zoom, accumulating scale correctly across multiple gestures.
+                .simultaneousGesture(
+                    MagnificationGesture()
+                        .onChanged { value in
+                            scale = max(0.4, min(4.0, baseScale * value))
+                        }
+                        .onEnded { value in
+                            let clamped = max(0.4, min(4.0, baseScale * value))
+                            baseScale = clamped
+                            scale = clamped
+                            if clamped < 0.9 || clamped > 2.6 {
+                                withAnimation(.spring(.bouncy)) {
+                                    scale = min(max(clamped, 0.9), 2.6)
+                                    baseScale = scale
+                                }
+                            }
+                        }
+                )
+                .overlay(alignment: .center) {
+                    if nodes.isEmpty { emptyState }
+                }
+
+                // HUD: allowsHitTesting(false) so it never intercepts taps on the canvas.
                 if let hud = makeSelectedHUD() {
                     hud
                         .padding(.horizontal, 12)
                         .padding(.top, 8)
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                        .allowsHitTesting(false)
                         .transition(.opacity.combined(with: .move(edge: .top)))
                         .zIndex(10)
-                }
-
-                Canvas { ctx, _ in
-                    ctx.translateBy(x: offset.width, y: offset.height)
-                    drawLinks(ctx: &ctx)
-                    drawNodes(ctx: &ctx)
-                }
-                .scaleEffect(scale)
-                // Divide translation by scale so pan speed is constant at any zoom level.
-                .gesture(
-                    DragGesture(minimumDistance: 8)
-                        .onChanged { value in
-                            offset = CGSize(
-                                width:  value.translation.width  / scale + lastDragOffset.width,
-                                height: value.translation.height / scale + lastDragOffset.height
-                            )
-                        }
-                        .onEnded { value in
-                            lastDragOffset = CGSize(
-                                width:  value.translation.width  / scale + lastDragOffset.width,
-                                height: value.translation.height / scale + lastDragOffset.height
-                            )
-                        }
-                )
-                .gesture(
-                    MagnificationGesture()
-                        .onChanged { value in scale = max(0.4, min(4.0, value)) }
-                        .onEnded { _ in
-                            if scale < 0.9 || scale > 2.6 {
-                                withAnimation(.spring(.bouncy)) {
-                                    scale = min(max(scale, 0.9), 2.6)
-                                }
-                            }
-                        }
-                )
-                // SpatialTapGesture (iOS 17+) gives location in visual (post-scaleEffect) space.
-                .simultaneousGesture(
-                    SpatialTapGesture()
-                        .onEnded { value in
-                            handleTap(at: value.location)
-                        }
-                )
-                .overlay(alignment: .center) {
-                    if nodes.isEmpty { emptyState }
                 }
 
                 HStack(alignment: .bottom) {
@@ -84,17 +101,13 @@ struct MeshGraphView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
             }
             .onAppear {
-                viewSize = size
-                if !nodes.isEmpty {
-                    applyLayout(size: size)
-                }
+                if !nodes.isEmpty { applyLayout(size: size) }
             }
             .onChange(of: nodes) { _, _ in
                 guard !nodes.isEmpty else { return }
                 applyLayout(size: size)
             }
             .onChange(of: size) { _, newSize in
-                viewSize = newSize
                 guard !nodes.isEmpty, layout.isEmpty else { return }
                 applyLayout(size: newSize)
             }
@@ -117,7 +130,7 @@ struct MeshGraphView: View {
         .padding(16)
     }
 
-    // MARK: - Selection HUD (device details + inferred route to the internet)
+    // MARK: - Selection HUD
 
     private func makeSelectedHUD() -> AnyView? {
         guard let selectedNodeID, let node = nodesByID[selectedNodeID] else { return nil }
@@ -140,7 +153,6 @@ struct MeshGraphView: View {
                 if let device {
                     HStack(spacing: 12) {
                         if let rssi = device.rssi {
-                            // H4: quality label, not raw dBm (values are latency-estimated)
                             Label("\(rssi.rssiQualityLabel) (est.)", systemImage: rssi.rssiSystemIcon)
                                 .foregroundStyle(rssi.rssiColor)
                         } else {
@@ -158,7 +170,6 @@ struct MeshGraphView: View {
                     .foregroundStyle(.secondary)
                 }
 
-                // The whole point of the tab: show the inferred upstream route.
                 if let route = routeDescription(from: node) {
                     Label(route, systemImage: "point.topleft.down.to.point.bottomright.curvepath")
                         .font(.system(size: 10))
@@ -173,8 +184,6 @@ struct MeshGraphView: View {
         )
     }
 
-    /// Human-readable route from a node up to the internet, naming each hop and
-    /// flagging when it relays through another Matter device.
     private func routeDescription(from node: MeshNode) -> String? {
         let path = pathToRoot(from: node.id)
         guard path.count > 1 else {
@@ -193,7 +202,6 @@ struct MeshGraphView: View {
         return "Route: " + names.joined(separator: " → ") + via
     }
 
-    /// Node chain from `id` up through parents to the gateway (bounded).
     private func pathToRoot(from id: UUID) -> [MeshNode] {
         var result: [MeshNode] = []
         var current: UUID? = id
@@ -265,8 +273,9 @@ struct MeshGraphView: View {
     }
 }
 
-// MARK: - Layout
+// MARK: - Layout & Transform
 extension MeshGraphView {
+
     private func applyLayout(size: CGSize) {
         guard !nodes.isEmpty, size.width > 80, size.height > 80 else { return }
         layout = GraphLayout.hierarchical(nodes: nodes, size: size)
@@ -285,51 +294,63 @@ extension MeshGraphView {
         let padding: CGFloat = 48
         let scaleX = (size.width  - padding * 2) / graphWidth
         let scaleY = (size.height - padding * 2) / graphHeight
-        let fitScale = min(scaleX, scaleY, 2.0)
-        scale = fitScale
-        // Offset positions the graph center at the screen center.
-        // The canvas translates by `offset` (canvas space), then .scaleEffect(fitScale)
-        // anchors at the view center. Correct formula: screen_center - graph_center.
-        // (Do NOT multiply by fitScale — that composes incorrectly with .scaleEffect.)
-        offset = CGSize(
-            width:  size.width  / 2 - (minX + maxX) / 2,
-            height: size.height / 2 - (minY + maxY) / 2
+        let newScale = min(scaleX, scaleY, 2.0)
+
+        scale     = newScale
+        baseScale = newScale
+
+        // Move the graph center to the view center.
+        // screenPos(p) = viewCenter + (p - viewCenter)*scale + pan
+        // For screenPos(graphCenter) == viewCenter:  pan = -(graphCenter - viewCenter)*scale
+        let cx = size.width / 2, cy = size.height / 2
+        let gcx = (minX + maxX) / 2, gcy = (minY + maxY) / 2
+        pan = CGSize(
+            width:  -(gcx - cx) * newScale,
+            height: -(gcy - cy) * newScale
         )
-        lastDragOffset = offset
+        lastPan = pan
     }
 
     private func nodeRadius(_ kind: MeshNodeKind) -> CGFloat {
         switch kind {
-        case .gateway:      return 15
-        case .borderRouter: return 13
-        case .router:       return 10
-        case .endDevice:    return 8
+        case .gateway:      return 17
+        case .borderRouter: return 15
+        case .router:       return 12
+        case .endDevice:    return 10
         }
     }
 
-    // H11: SpatialTapGesture reports location in visual (post-scaleEffect) space.
-    // scaleEffect anchors at the view's center, so we must invert that transform
-    // to get the canvas-space coordinate for hit testing.
-    private func handleTap(at location: CGPoint) {
-        guard viewSize.width > 0, viewSize.height > 0 else { return }
-        let cx = viewSize.width  / 2
-        let cy = viewSize.height / 2
-        let canvasX = (location.x - cx) / scale + cx - offset.width
-        let canvasY = (location.y - cy) / scale + cy - offset.height
+    /// Layout-space → screen/canvas space.
+    private func screenPos(_ p: CGPoint, in size: CGSize) -> CGPoint {
+        let cx = size.width / 2, cy = size.height / 2
+        return CGPoint(
+            x: cx + (p.x - cx) * scale + pan.width,
+            y: cy + (p.y - cy) * scale + pan.height
+        )
+    }
 
+    /// Screen/canvas space → layout space (inverse of screenPos).
+    private func toLayout(_ screen: CGPoint, in size: CGSize) -> CGPoint {
+        let cx = size.width / 2, cy = size.height / 2
+        return CGPoint(
+            x: cx + (screen.x - pan.width - cx) / scale,
+            y: cy + (screen.y - pan.height - cy) / scale
+        )
+    }
+
+    private func handleTap(at location: CGPoint, in size: CGSize) {
+        let lp = toLayout(location, in: size)
+        // Hit radius in layout space: keep ~28pt visual contact area at any zoom level.
+        let extraTap: CGFloat = max(14, 28 / scale)
         if let hit = nodes.first(where: { node in
             guard let pos = layout[node.id] else { return false }
-            return distance(CGPoint(x: canvasX, y: canvasY), pos) <= nodeRadius(node.kind) + 10
+            return distance(lp, pos) <= nodeRadius(node.kind) + extraTap
         }) {
-            withAnimation(.easeInOut(duration: 0.15)) {
-                selectedNodeID = hit.id
-            }
+            withAnimation(.easeInOut(duration: 0.15)) { selectedNodeID = hit.id }
             onSelectNode(hit)
             onSelectDevice(devices.first { $0.id == hit.deviceID })
         } else {
-            withAnimation(.easeInOut(duration: 0.15)) {
-                selectedNodeID = nil
-            }
+            withAnimation(.easeInOut(duration: 0.15)) { selectedNodeID = nil }
             onSelectDevice(nil)
         }
     }
@@ -337,12 +358,65 @@ extension MeshGraphView {
 
 // MARK: - Drawing
 extension MeshGraphView {
-    private func drawLinks(ctx: inout GraphicsContext) {
+
+    /// Draws a labeled, colored background zone for each room, behind links and nodes.
+    private func drawRoomZones(ctx: inout GraphicsContext, size: CGSize) {
+        let hPad: CGFloat  = 20   // horizontal padding around the room's nodes
+        let vPad: CGFloat  = 18   // bottom / sides padding
+        let topPad: CGFloat = 28  // extra top padding to fit the room label above top nodes
+
+        let roomGroups = Dictionary(
+            grouping: nodes.filter { $0.room != nil },
+            by: { $0.room! }
+        )
+
+        for (room, roomNodes) in roomGroups {
+            let layoutPositions = roomNodes.compactMap { layout[$0.id] }
+            guard !layoutPositions.isEmpty else { continue }
+
+            let sps = layoutPositions.map { screenPos($0, in: size) }
+            let minX = sps.map(\.x).min()! - hPad
+            let maxX = sps.map(\.x).max()! + hPad
+            let minY = sps.map(\.y).min()! - topPad
+            let maxY = sps.map(\.y).max()! + vPad
+
+            guard maxX > minX, maxY > minY else { continue }
+
+            let rect = CGRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
+            let zoneColor = roomZoneColor(for: room)
+
+            ctx.fill(Path(roundedRect: rect, cornerRadius: 14, style: .continuous),
+                     with: .color(zoneColor.opacity(0.07)))
+            ctx.stroke(Path(roundedRect: rect, cornerRadius: 14, style: .continuous),
+                       with: .color(zoneColor.opacity(0.3)), lineWidth: 1)
+
+            // Room name + device count label centred at the top of the zone.
+            let count = roomNodes.count
+            let labelText = "\(room)  \(count) device\(count == 1 ? "" : "s")"
+            let label = ctx.resolve(
+                Text(labelText)
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(zoneColor.opacity(0.75))
+            )
+            ctx.draw(label, at: CGPoint(x: (minX + maxX) / 2, y: minY + 11))
+        }
+    }
+
+    /// Deterministic per-room colour derived from the room name, spread across 12 hues.
+    private func roomZoneColor(for room: String) -> Color {
+        let bucket = abs(room.unicodeScalars.reduce(0) { $0 &+ Int($1.value) }) % 12
+        let hue = Double(bucket) / 12.0
+        return Color(hue: hue, saturation: 0.55, brightness: 0.72)
+    }
+
+    private func drawLinks(ctx: inout GraphicsContext, size: CGSize) {
         let highlight = highlightedNodeIDs
         let hasSelection = !highlight.isEmpty
         for link in links {
-            guard let sourcePos = layout[link.sourceID],
-                  let targetPos = layout[link.targetID] else { continue }
+            guard let srcLayout = layout[link.sourceID],
+                  let dstLayout = layout[link.targetID] else { continue }
+            let sourcePos = screenPos(srcLayout, in: size)
+            let targetPos = screenPos(dstLayout, in: size)
             let onPath = highlight.contains(link.sourceID) && highlight.contains(link.targetID)
 
             var path = Path()
@@ -359,11 +433,12 @@ extension MeshGraphView {
         }
     }
 
-    private func drawNodes(ctx: inout GraphicsContext) {
+    private func drawNodes(ctx: inout GraphicsContext, size: CGSize) {
         let highlight = highlightedNodeIDs
         let hasSelection = !highlight.isEmpty
         for node in nodes {
-            guard let pos = layout[node.id] else { continue }
+            guard let layoutP = layout[node.id] else { continue }
+            let pos = screenPos(layoutP, in: size)
             let device = devices.first { $0.id == node.deviceID }
             let isSelected = node.id == selectedNodeID
             let dimmed = hasSelection && !highlight.contains(node.id)
@@ -372,9 +447,10 @@ extension MeshGraphView {
 
             switch node.kind {
             case .gateway:
-                // Rounded square with a Wi-Fi glyph.
-                let rect = CGRect(x: pos.x - radius, y: pos.y - radius, width: radius * 2, height: radius * 2)
-                ctx.fill(Path(roundedRect: rect, cornerRadius: 5), with: .color(Color(UIColor.systemGray)))
+                let rect = CGRect(x: pos.x - radius, y: pos.y - radius,
+                                  width: radius * 2, height: radius * 2)
+                ctx.fill(Path(roundedRect: rect, cornerRadius: 5),
+                         with: .color(Color(UIColor.systemGray)))
                 let icon = ctx.resolve(Text("\(Image(systemName: "wifi"))")
                     .foregroundStyle(.white)
                     .font(.system(size: radius)))
@@ -382,37 +458,37 @@ extension MeshGraphView {
 
             case .borderRouter:
                 ctx.fill(circle(pos, radius), with: .color(fill))
-                ctx.stroke(circle(pos, radius - 4), with: .color(.white.opacity(dimmed ? 0.3 : 0.9)), lineWidth: 1.5)
+                ctx.stroke(circle(pos, radius - 4),
+                           with: .color(.white.opacity(dimmed ? 0.3 : 0.9)), lineWidth: 1.5)
 
             case .router:
-                // Ring style signals "relay".
                 ctx.fill(circle(pos, radius), with: .color(fill.opacity(dimmed ? 0.15 : 0.25)))
                 ctx.stroke(circle(pos, radius), with: .color(fill), lineWidth: 2.5)
 
             case .endDevice:
                 if node.isBattery {
                     ctx.fill(circle(pos, radius - 2), with: .color(fill))
-                    ctx.stroke(circle(pos, radius), with: .color(.green.opacity(dimmed ? 0.3 : 0.9)), lineWidth: 1.5)
+                    ctx.stroke(circle(pos, radius),
+                               with: .color(.green.opacity(dimmed ? 0.3 : 0.9)), lineWidth: 1.5)
                 } else {
                     ctx.fill(circle(pos, radius), with: .color(fill))
                 }
             }
 
-            // Selection ring
             if isSelected {
                 ctx.stroke(circle(pos, radius + 3), with: .color(.accentColor), lineWidth: 2)
             }
 
-            // Weak-signal ring
             if let rssi = device?.rssi, rssi < -80, !dimmed {
-                ctx.stroke(circle(pos, radius + 5), with: .color(.red.opacity(0.55)), lineWidth: 1.5)
+                ctx.stroke(circle(pos, radius + 5),
+                           with: .color(.red.opacity(0.55)), lineWidth: 1.5)
             }
 
-            // Label
-            let label = ctx.resolve(Text(node.name)
-                .foregroundStyle(Color(UIColor.label).opacity(dimmed ? 0.4 : 1))
-                .font(.system(size: 9)))
-            ctx.draw(label, at: CGPoint(x: pos.x, y: pos.y - radius - 7))
+            let displayName = node.name.count > 14 ? String(node.name.prefix(13)) + "…" : node.name
+            let label = ctx.resolve(Text(displayName)
+                .foregroundStyle(Color(UIColor.label).opacity(dimmed ? 0.35 : 1))
+                .font(.system(size: 10, weight: isSelected ? .semibold : .regular)))
+            ctx.draw(label, at: CGPoint(x: pos.x, y: pos.y - radius - 8))
         }
     }
 

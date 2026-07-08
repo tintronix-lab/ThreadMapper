@@ -83,7 +83,7 @@ final class MatterDiscoveryService: DiscoveryService {
                     uniqueIdentifier: accessory.uniqueIdentifier,
                     isBorderRouter: isBridge,
                     isRouter: isBridge,
-                    isSleepyEndDevice: !isBridge,
+                    isSleepyEndDevice: batteryLevel(for: accessory) != nil,
                     parentNodeID: nil,
                     channel: nil,
                     rssi: accessory.isReachable ? nil : -100,
