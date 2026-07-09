@@ -9,13 +9,18 @@ struct MeshView: View {
         Binding(get: { viewModel.selectedDevice }, set: { viewModel.selectedDevice = $0 })
     }
 
+    private var devicesByID: [UUID: ThreadDevice] {
+        Dictionary(viewModel.devices.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
+    }
+
     // Border routers sorted best-signal-first for the backbone strip.
     private var borderRouters: [MeshNode] {
-        viewModel.nodes
+        let devMap = devicesByID
+        return viewModel.nodes
             .filter { $0.kind == .borderRouter }
             .sorted { nodeA, nodeB in
-                let rssiA = viewModel.devices.first { $0.id == nodeA.deviceID }?.rssi ?? -100
-                let rssiB = viewModel.devices.first { $0.id == nodeB.deviceID }?.rssi ?? -100
+                let rssiA = nodeA.deviceID.flatMap { devMap[$0] }?.rssi ?? -100
+                let rssiB = nodeB.deviceID.flatMap { devMap[$0] }?.rssi ?? -100
                 return rssiA > rssiB
             }
     }
@@ -149,9 +154,10 @@ struct MeshView: View {
             .padding(.horizontal, 16)
 
             ScrollView(.horizontal, showsIndicators: false) {
+                let devMap = devicesByID
                 HStack(spacing: 10) {
                     ForEach(borderRouters) { node in
-                        let device = viewModel.devices.first { $0.id == node.deviceID }
+                        let device = node.deviceID.flatMap { devMap[$0] }
                         borderRouterCard(node: node, device: device)
                     }
                 }
@@ -232,9 +238,10 @@ struct MeshView: View {
             .padding(.bottom, 8)
 
             // Device rows card
+            let devMap = devicesByID
             VStack(spacing: 0) {
                 ForEach(Array(nodes.enumerated()), id: \.element.id) { index, node in
-                    let device = viewModel.devices.first { $0.id == node.deviceID }
+                    let device = node.deviceID.flatMap { devMap[$0] }
                     deviceRow(node: node, device: device)
 
                     if index < nodes.count - 1 {

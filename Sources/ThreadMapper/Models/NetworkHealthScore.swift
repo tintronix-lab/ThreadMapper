@@ -64,7 +64,7 @@ struct NetworkHealthScore: Equatable {
         let lowBatt = devices.filter { ($0.batteryPercentage ?? 100) < 15 }
         if !lowBatt.isEmpty {
             score -= 5
-            issues.append(Issue(message: "\(lowBatt.count) device\(lowBatt.count == 1 ? "" : "s") battery < 15%", icon: "battery.25", isCritical: false, affectedDevices: lowBatt))
+            issues.append(Issue(message: "\(lowBatt.count) device\(lowBatt.count == 1 ? "" : "s") battery < 15%", icon: "battery.25percent", isCritical: false, affectedDevices: lowBatt))
             tips.append("Replace or charge batteries in low-power devices")
         }
 

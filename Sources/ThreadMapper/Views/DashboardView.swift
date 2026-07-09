@@ -93,7 +93,8 @@ struct DashboardView: View {
                 if let unlocked = achievementStore.recentlyUnlocked, bannerVisible {
                     AchievementBanner(achievement: unlocked) {
                         withAnimation { bannerVisible = false }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                        Task {
+                            try? await Task.sleep(for: .seconds(0.4))
                             achievementStore.clearRecentlyUnlocked()
                         }
                     }
@@ -105,11 +106,11 @@ struct DashboardView: View {
             .onChange(of: achievementStore.recentlyUnlocked) { _, unlocked in
                 guard unlocked != nil else { return }
                 withAnimation(.spring(response: 0.4)) { bannerVisible = true }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+                Task {
+                    try? await Task.sleep(for: .seconds(4))
                     withAnimation { bannerVisible = false }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                        achievementStore.clearRecentlyUnlocked()
-                    }
+                    try? await Task.sleep(for: .seconds(0.4))
+                    achievementStore.clearRecentlyUnlocked()
                 }
             }
             .onAppear {

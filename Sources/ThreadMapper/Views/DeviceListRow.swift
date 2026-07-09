@@ -23,7 +23,7 @@ struct DeviceListRow: View {
                             .lineLimit(1)
                     }
                     if let batt = device.batteryPercentage {
-                        Label("\(batt)%", systemImage: batt > 20 ? "battery.75" : "battery.25")
+                        Label("\(batt)%", systemImage: batt > 20 ? "battery.75percent" : "battery.25percent")
                             .font(.caption2)
                             .foregroundStyle(batt > 20 ? Color.secondary : Color.red)
                             .labelStyle(.titleAndIcon)

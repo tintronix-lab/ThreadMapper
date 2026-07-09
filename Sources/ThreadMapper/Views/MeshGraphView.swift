@@ -27,6 +27,10 @@ struct MeshGraphView: View {
         Dictionary(nodes.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
     }
 
+    private var devicesByID: [UUID: ThreadDevice] {
+        Dictionary(devices.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
+    }
+
     var body: some View {
         ZStack {
             Color(UIColor.systemGroupedBackground)
@@ -44,8 +48,9 @@ struct MeshGraphView: View {
             // canvas is opaque to the accessibility engine.
             .accessibilityLabel("Mesh network map")
             .accessibilityChildren {
+                let devMap = devicesByID
                 ForEach(nodes) { node in
-                    let device = devices.first { $0.id == node.deviceID }
+                    let device = node.deviceID.flatMap { devMap[$0] }
                     Button {
                         withAnimation(.easeInOut(duration: 0.15)) { selectedNodeID = node.id }
                         onSelectNode(node)
@@ -106,15 +111,13 @@ struct MeshGraphView: View {
             }
 
             // HUD: allowsHitTesting(false) so it never intercepts taps on the canvas.
-            if let hud = makeSelectedHUD() {
-                hud
-                    .padding(.horizontal, 12)
-                    .padding(.top, 8)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                    .allowsHitTesting(false)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-                    .zIndex(10)
-            }
+            selectedHUD
+                .padding(.horizontal, 12)
+                .padding(.top, 8)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .allowsHitTesting(false)
+                .animation(.easeInOut(duration: 0.15), value: selectedNodeID)
+                .zIndex(10)
 
             HStack(alignment: .bottom) {
                 legendView.padding(10)
@@ -176,10 +179,9 @@ struct MeshGraphView: View {
 
     // MARK: - Selection HUD
 
-    private func makeSelectedHUD() -> AnyView? {
-        guard let selectedNodeID, let node = nodesByID[selectedNodeID] else { return nil }
-        let device = devices.first { $0.id == node.deviceID }
-        return AnyView(
+    @ViewBuilder private var selectedHUD: some View {
+        if let selectedNodeID, let node = nodesByID[selectedNodeID] {
+            let device = node.deviceID.flatMap { devicesByID[$0] }
             VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 8) {
                     Circle()
@@ -225,7 +227,8 @@ struct MeshGraphView: View {
             .padding(.vertical, 8)
             .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-        )
+            .transition(.opacity.combined(with: .move(edge: .top)))
+        }
     }
 
     private func routeDescription(from node: MeshNode) -> String? {
@@ -392,7 +395,7 @@ extension MeshGraphView {
         }) {
             withAnimation(.easeInOut(duration: 0.15)) { selectedNodeID = hit.id }
             onSelectNode(hit)
-            onSelectDevice(devices.first { $0.id == hit.deviceID })
+            onSelectDevice(hit.deviceID.flatMap { devicesByID[$0] })
         } else {
             withAnimation(.easeInOut(duration: 0.15)) { selectedNodeID = nil }
             onSelectDevice(nil)
@@ -406,9 +409,15 @@ extension MeshGraphView {
     private func drawRoomZones(ctx: inout GraphicsContext, size: CGSize) {
         guard size.width > 0, size.height > 0, !roomBounds.isEmpty else { return }
 
+        // Pre-count non-gateway devices per room once instead of O(n) per room per frame.
+        var roomDeviceCount: [String: Int] = [:]
+        for node in nodes where node.kind != .gateway {
+            let key = node.room ?? "Unassigned"
+            roomDeviceCount[key, default: 0] += 1
+        }
+
         for (room, cellRect) in roomBounds {
             // Transform layout-space room rectangle into screen space.
-            // screenPos scales each corner around the view centre, so width = cellRect.width * scale.
             let tl = screenPos(cellRect.origin, in: size)
             let br = screenPos(CGPoint(x: cellRect.maxX, y: cellRect.maxY), in: size)
             let screenRect = CGRect(x: tl.x, y: tl.y, width: br.x - tl.x, height: br.y - tl.y)
@@ -420,10 +429,7 @@ extension MeshGraphView {
             ctx.fill(path, with: .color(zoneColor.opacity(0.10)))
             ctx.stroke(path, with: .color(zoneColor.opacity(0.50)), lineWidth: 1)
 
-            // Room label always visible — it lives in the header band at the top of each card
-            let deviceCount = nodes.filter {
-                $0.room == room || (room == "Unassigned" && $0.room == nil)
-            }.filter { $0.kind != .gateway }.count
+            let deviceCount = roomDeviceCount[room] ?? 0
             let labelText = "\(room)  ·  \(deviceCount) device\(deviceCount == 1 ? "" : "s")"
             let label = ctx.resolve(
                 Text(labelText)
@@ -500,10 +506,11 @@ extension MeshGraphView {
         guard size.width > 0, size.height > 0 else { return }
         let highlight = highlightedNodeIDs
         let hasSelection = !highlight.isEmpty
+        let devMap = devicesByID
         for node in nodes {
             guard let layoutP = layout[node.id] else { continue }
             let pos = screenPos(layoutP, in: size)
-            let device = devices.first { $0.id == node.deviceID }
+            let device = node.deviceID.flatMap { devMap[$0] }
             let isSelected = node.id == selectedNodeID
             let dimmed = hasSelection && !highlight.contains(node.id)
             let radius = nodeRadius(node.kind) + (isSelected ? 2 : 0)
