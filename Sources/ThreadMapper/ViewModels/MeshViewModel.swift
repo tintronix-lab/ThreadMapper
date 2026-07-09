@@ -3,9 +3,7 @@ import Observation
 
 @Observable
 final class MeshViewModel {
-    var devices: [ThreadDevice] = [] {
-        didSet { applyFilters() }
-    }
+    var devices: [ThreadDevice] = []
     var nodes: [MeshNode] = []
     var links: [MeshLink] = []
     var selectedDevice: ThreadDevice?
@@ -48,7 +46,7 @@ final class MeshViewModel {
     var threadNetworks: [ThreadNetworkInfo] = []
 
     @ObservationIgnored private let discovery: any DiscoveryService
-    @ObservationIgnored private let diagnosticsProvider: any DiagnosticsProvider
+    @ObservationIgnored private(set) var diagnosticsProvider: any DiagnosticsProvider
     /// Latest real per-node routing, applied by the topology builder when present.
     @ObservationIgnored private var latestDiagnostics: [UUID: ThreadNodeDiagnostics] = [:]
     @ObservationIgnored private var keepAliveTask: Task<Void, Error>?
@@ -96,46 +94,68 @@ final class MeshViewModel {
                 await MainActor.run {
                     let latest = self.discovery.devices
                     let errorMsg = self.discovery.discoveryError?.userMessage
-                    // Compare metadata signatures, not just `!=` —
-                    // ThreadDevice.== is identity-only (uniqueIdentifier), so
-                    // renames, room moves, and battery changes would
-                    // otherwise never reach the UI (review issue H2).
-                    let changed = latest.map(\.metadataSignature).sorted()
-                        != self.devices.map(\.metadataSignature).sorted()
-                    if changed {
-                        // Preserve measured rssi values when HomeKit refreshes the list
-                        let existingRSSI = Dictionary(uniqueKeysWithValues:
-                            self.devices.compactMap { d in d.rssi.map { (d.uniqueIdentifier, $0) } })
-                        for device in latest {
-                            device.rssi = existingRSSI[device.uniqueIdentifier] ?? device.rssi
-                        }
 
-                        // Topology change detection (skip on first population)
-                        if !self.knownDeviceNames.isEmpty {
-                            let currentNames = Set(latest.map(\.name))
-                            let joined = currentNames.subtracting(self.knownDeviceNames)
-                            let left   = self.knownDeviceNames.subtracting(currentNames)
-                            if !joined.isEmpty || !left.isEmpty {
-                                let change = TopologyChange(timestamp: Date(),
-                                                            joined: Array(joined).sorted(),
-                                                            left: Array(left).sorted())
-                                self.recentTopologyChanges.insert(change, at: 0)
-                                if self.recentTopologyChanges.count > 20 {
-                                    self.recentTopologyChanges = Array(self.recentTopologyChanges.prefix(20))
-                                }
-                                NotificationService.shared.notifyTopologyChange(
-                                    joined: Array(joined), left: Array(left))
-                                for name in joined.sorted() {
-                                    ActivityStore.shared.record(kind: .topologyJoined, deviceName: name, detail: "\(name) joined the Thread network")
-                                }
-                                for name in left.sorted() {
-                                    ActivityStore.shared.record(kind: .topologyLeft, deviceName: name, detail: "\(name) left the Thread network")
-                                }
-                            }
-                        }
-                        self.knownDeviceNames = Set(latest.map(\.name))
-                        self.devices = latest
+                    // Merge HomeKit updates into existing @Observable device objects
+                    // in-place so SwiftUI views that observe individual device properties
+                    // re-render without a full array replacement. The metadataSignature
+                    // workaround is no longer needed — @Observable tracks each property.
+                    let latestByUID = Dictionary(uniqueKeysWithValues: latest.map { ($0.uniqueIdentifier, $0) })
+                    let existingByUID = Dictionary(uniqueKeysWithValues: self.devices.map { ($0.uniqueIdentifier, $0) })
+                    var graphNeedsRebuild = false
+
+                    // Update properties of existing devices
+                    for device in self.devices {
+                        guard let updated = latestByUID[device.uniqueIdentifier] else { continue }
+                        if device.name != updated.name { device.name = updated.name; graphNeedsRebuild = true }
+                        if device.room != updated.room { device.room = updated.room; graphNeedsRebuild = true }
+                        if device.channel != updated.channel { device.channel = updated.channel; graphNeedsRebuild = true }
+                        if device.isBorderRouter != updated.isBorderRouter { device.isBorderRouter = updated.isBorderRouter; graphNeedsRebuild = true }
+                        if device.isRouter != updated.isRouter { device.isRouter = updated.isRouter; graphNeedsRebuild = true }
+                        if device.isSleepyEndDevice != updated.isSleepyEndDevice { device.isSleepyEndDevice = updated.isSleepyEndDevice }
+                        if device.batteryPercentage != updated.batteryPercentage { device.batteryPercentage = updated.batteryPercentage }
+                        // rssi is intentionally NOT updated here — we measure it ourselves
+                        // via measureSignalQualities() and don't want HomeKit to overwrite it.
                     }
+
+                    // Add newly discovered devices
+                    let newDevices = latest.filter { existingByUID[$0.uniqueIdentifier] == nil }
+                    if !newDevices.isEmpty {
+                        self.devices.append(contentsOf: newDevices)
+                        graphNeedsRebuild = true
+                    }
+
+                    // Remove devices that disappeared from HomeKit
+                    let prevCount = self.devices.count
+                    self.devices.removeAll { latestByUID[$0.uniqueIdentifier] == nil }
+                    if self.devices.count != prevCount { graphNeedsRebuild = true }
+
+                    // Topology change events (join / leave)
+                    let currentNames = Set(self.devices.map(\.name))
+                    if !self.knownDeviceNames.isEmpty {
+                        let joined = currentNames.subtracting(self.knownDeviceNames)
+                        let left   = self.knownDeviceNames.subtracting(currentNames)
+                        if !joined.isEmpty || !left.isEmpty {
+                            let change = TopologyChange(timestamp: Date(),
+                                                        joined: Array(joined).sorted(),
+                                                        left: Array(left).sorted())
+                            self.recentTopologyChanges.insert(change, at: 0)
+                            if self.recentTopologyChanges.count > 20 {
+                                self.recentTopologyChanges = Array(self.recentTopologyChanges.prefix(20))
+                            }
+                            NotificationService.shared.notifyTopologyChange(
+                                joined: Array(joined), left: Array(left))
+                            for name in joined.sorted() {
+                                ActivityStore.shared.record(kind: .topologyJoined, deviceName: name, detail: "\(name) joined the Thread network")
+                            }
+                            for name in left.sorted() {
+                                ActivityStore.shared.record(kind: .topologyLeft, deviceName: name, detail: "\(name) left the Thread network")
+                            }
+                            graphNeedsRebuild = true
+                        }
+                    }
+                    self.knownDeviceNames = currentNames
+
+                    if graphNeedsRebuild { self.applyFilters() }
                     self.scanError = errorMsg
 
                     // Offline / online transitions (with grace period to avoid false positives)
@@ -254,10 +274,19 @@ final class MeshViewModel {
         discovery.stopScanning()
     }
 
+    /// Swap the diagnostics provider at runtime (e.g. when the user updates the
+    /// border router URL in Settings). Immediately re-fetches diagnostics so the
+    /// mesh reflects the new source without requiring an app restart.
+    func updateDiagnosticsProvider(_ provider: any DiagnosticsProvider) {
+        diagnosticsProvider = provider
+        Task { await refreshDiagnostics() }
+    }
+
     /// Pull real Thread data from the provider (network facts + per-node routing).
     /// No-op in effect for HomeKit-only setups (empty results → inferred mesh).
     func refreshDiagnostics() async {
-        let diags = await diagnosticsProvider.nodeDiagnostics()
+        let currentDevices = await MainActor.run { self.devices }
+        let diags = await diagnosticsProvider.nodeDiagnostics(for: currentDevices)
         let networks = await diagnosticsProvider.threadNetworks()
         await MainActor.run {
             self.latestDiagnostics = diags

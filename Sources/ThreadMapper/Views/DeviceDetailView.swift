@@ -8,6 +8,7 @@ struct DeviceDetailView: View {
     @Environment(DeviceNotesStore.self) private var notesStore
     @State private var noteText = ""
     @State private var isEditingNote = false
+    @Environment(DeviceOverrideStore.self) private var overrideStore
     @State private var troubleshootProblem: TroubleshooterView.Problem? = nil
     // Generated once on appear — generating in body wrote a temp file on every render.
     @State private var exportURL: URL?
@@ -22,6 +23,7 @@ struct DeviceDetailView: View {
                 networkSection
                 deviceSection
                 if device.batteryPercentage != nil { batterySection }
+                if device.isBorderRouter { threadClassificationSection }
                 surveySection
                 notesSection
             }
@@ -333,6 +335,34 @@ struct DeviceDetailView: View {
                     .frame(height: 8)
                 }
                 .padding(.vertical, 4)
+            }
+        }
+    }
+
+    // MARK: - Thread Classification Override
+
+    @ViewBuilder
+    private var threadClassificationSection: some View {
+        let isExcluded = overrideStore.isNonThread(device.id)
+        Section {
+            Toggle(isOn: Binding(
+                get: { !isExcluded },
+                set: { overrideStore.setNonThread(device.id, !$0) }
+            )) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Include in Thread mesh")
+                    Text("Disable if this bridge uses Zigbee, Z-Wave, or another non-Thread protocol. HomeKit classifies all bridges as border routers regardless of radio type.")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .tint(.blue)
+        } header: {
+            Text("Thread Classification")
+        } footer: {
+            if isExcluded {
+                Text("This device is hidden from the mesh map and topology. It still appears in lists and the dashboard.")
+                    .foregroundStyle(.orange)
             }
         }
     }

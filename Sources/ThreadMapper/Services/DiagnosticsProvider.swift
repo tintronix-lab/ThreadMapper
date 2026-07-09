@@ -12,12 +12,14 @@ protocol DiagnosticsProvider: AnyObject {
     func threadNetworks() async -> [ThreadNetworkInfo]
 
     /// Real per-node routing keyed by `ThreadDevice.id`, when available.
-    func nodeDiagnostics() async -> [UUID: ThreadNodeDiagnostics]
+    /// Receives the current HomeKit device list so providers can correlate
+    /// Thread addresses (RLOC16 / ext-address) to known devices.
+    func nodeDiagnostics(for devices: [ThreadDevice]) async -> [UUID: ThreadNodeDiagnostics]
 }
 
 /// Default provider used until a real source is wired up: yields nothing, so the
 /// mesh stays inferred. Keeps call sites simple (no optionals) before Feature #2.
 final class NoDiagnosticsProvider: DiagnosticsProvider {
     func threadNetworks() async -> [ThreadNetworkInfo] { [] }
-    func nodeDiagnostics() async -> [UUID: ThreadNodeDiagnostics] { [:] }
+    func nodeDiagnostics(for devices: [ThreadDevice]) async -> [UUID: ThreadNodeDiagnostics] { [:] }
 }

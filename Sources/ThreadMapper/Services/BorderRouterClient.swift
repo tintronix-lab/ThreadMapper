@@ -45,9 +45,79 @@ final class BorderRouterClient: DiagnosticsProvider {
         )]
     }
 
-    /// Real routing table parsing is Phase 3b (needs `POST /diagnostics` + OTBR↔
-    /// HomeKit device correlation, verified on hardware).
-    func nodeDiagnostics() async -> [UUID: ThreadNodeDiagnostics] { [:] }
+    /// Phase 3b: parse `/neighbors` to get real link-quality data for nodes
+    /// directly attached to this border router.
+    ///
+    /// **Correlation strategy**: OTBR nodes are identified by RLOC16 + ext-address,
+    /// while HomeKit devices use opaque UUIDs. Without a shared key (HomeKit doesn't
+    /// expose Thread addresses), exact matching is not possible. This implementation
+    /// uses a best-effort heuristic:
+    ///   • The OTBR itself → matched to the HomeKit border router with the strongest
+    ///     signal (most likely to be the same physical device).
+    ///   • Neighbors with `IsChild = true` → matched to HomeKit end devices in the
+    ///     same room as the matched border router, ordered by signal strength.
+    ///   • Unmatched nodes → skipped (inference path still applies for those).
+    ///
+    /// Real matching requires on-hardware verification with a known mapping
+    /// (e.g., user labels the OTBR or a future Thread Diagnostics cluster read).
+    func nodeDiagnostics(for devices: [ThreadDevice]) async -> [UUID: ThreadNodeDiagnostics] {
+        guard let neighbors = try? await decode([OTBRNeighbor].self, path: "neighbors"),
+              !neighbors.isEmpty else { return [:] }
+
+        var result: [UUID: ThreadNodeDiagnostics] = [:]
+
+        // Match the OTBR border router itself: pick the HomeKit border router with
+        // the strongest estimated signal (best proxy without explicit configuration).
+        let borderRouters = devices.filter { $0.isBorderRouter }
+        guard let anchorBR = borderRouters.max(by: { ($0.rssi ?? -100) < ($1.rssi ?? -100) }) else {
+            return [:]
+        }
+
+        // Build the OTBR's own diagnostics entry from its `/node` response.
+        let otbrNode = try? await decode(OTBRNode.self, path: "node")
+        let otbrRloc = otbrNode?.rloc16.map { UInt16($0 & 0xFFFF) }
+        result[anchorBR.id] = ThreadNodeDiagnostics(
+            deviceID: anchorBR.id,
+            role: .leader,
+            rloc16: otbrRloc,
+            neighbors: neighbors.map {
+                ThreadNodeDiagnostics.Neighbor(
+                    rloc16: UInt16($0.rloc16 & 0xFFFF),
+                    linkMarginDB: $0.linkMarginDB,
+                    averageRSSI: $0.rssi,
+                    isChild: $0.isChild
+                )
+            }
+        )
+
+        // Match child neighbors to HomeKit end devices in the anchor border router's room.
+        // Sorted weakest-first so we assign the best match to the most likely candidate.
+        let childNeighbors = neighbors.filter(\.isChild)
+            .sorted { ($0.rssi ?? -100) > ($1.rssi ?? -100) }
+
+        let brRoom = anchorBR.room
+        let candidateDevices = devices
+            .filter { !$0.isBorderRouter && $0.room == brRoom }
+            .sorted { ($0.rssi ?? -100) > ($1.rssi ?? -100) }
+
+        for (neighbor, device) in zip(childNeighbors, candidateDevices) {
+            result[device.id] = ThreadNodeDiagnostics(
+                deviceID: device.id,
+                role: device.isSleepyEndDevice ? .sleepyEndDevice : .child,
+                rloc16: UInt16(neighbor.rloc16 & 0xFFFF),
+                parentRloc16: otbrRloc,
+                extAddress: neighbor.extAddress,
+                neighbors: [ThreadNodeDiagnostics.Neighbor(
+                    rloc16: otbrRloc ?? 0,
+                    linkMarginDB: neighbor.linkMarginDB,
+                    averageRSSI: neighbor.rssi,
+                    isChild: false
+                )]
+            )
+        }
+
+        return result
+    }
 
     /// Lightweight reachability check for the Settings "Test connection" button.
     func testConnection() async -> Bool {
@@ -96,5 +166,23 @@ struct OTBRActiveDataset: Decodable {
         case channel = "Channel"
         case panId = "PanId"
         case extPanId = "ExtPanId"
+    }
+}
+
+struct OTBRNeighbor: Decodable {
+    let extAddress: String?
+    let rloc16: Int
+    let isChild: Bool
+    let rssi: Int?
+    let linkMarginDB: Int?
+    let rxOnWhenIdle: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case extAddress    = "ExtAddress"
+        case rloc16        = "Rloc16"
+        case isChild       = "IsChild"
+        case rssi          = "Rssi"
+        case linkMarginDB  = "LinkQualityIn"
+        case rxOnWhenIdle  = "RxOnWhenIdle"
     }
 }

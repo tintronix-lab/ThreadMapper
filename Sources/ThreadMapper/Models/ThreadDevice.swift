@@ -7,6 +7,7 @@ enum Reachability: Equatable {
     case quality(Int) // latency-estimated: -55 (excellent) → -92 (marginal)
 }
 
+@Observable
 final class ThreadDevice: Identifiable, Codable, Hashable, Equatable {
     let id: UUID
     var name: String
@@ -60,14 +61,6 @@ final class ThreadDevice: Identifiable, Codable, Hashable, Equatable {
     /// A border router is also a router. Single source of truth for "counts as a
     /// router" so the Resilience grade and the resilience achievement agree (D6).
     var isRoutingCapable: Bool { isRouter || isBorderRouter }
-
-    /// Signature of user-visible metadata. `==` is identity-only
-    /// (uniqueIdentifier), so the poll loop compares signatures to detect
-    /// renames, room moves, battery/role/channel changes that would
-    /// otherwise never propagate to the UI.
-    var metadataSignature: String {
-        "\(uniqueIdentifier)|\(name)|\(room ?? "")|\(batteryPercentage.map(String.init) ?? "")|\(isBorderRouter)|\(isRouter)|\(channel.map(String.init) ?? "")"
-    }
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(uniqueIdentifier)

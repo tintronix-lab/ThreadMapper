@@ -20,7 +20,7 @@ import ThreadNetwork
 final class ThreadCredentialsService: DiagnosticsProvider {
 
     /// HomeKit/ThreadNetwork give no per-node routing — always empty here.
-    func nodeDiagnostics() async -> [UUID: ThreadNodeDiagnostics] { [:] }
+    func nodeDiagnostics(for devices: [ThreadDevice]) async -> [UUID: ThreadNodeDiagnostics] { [:] }
 
     func threadNetworks() async -> [ThreadNetworkInfo] {
         #if THREAD_CREDENTIALS && canImport(ThreadNetwork)

@@ -21,12 +21,14 @@ struct ContentView: View {
         }
         return ThreadCredentialsService()
     }
+    @AppStorage("borderRouterURL") private var borderRouterURL = ""
     @State private var surveyVM = SurveyViewModel()
     @State private var statsStore = DeviceStatsStore.shared
     @State private var notesStore = DeviceNotesStore.shared
     @State private var historyStore = HealthHistoryStore.shared
     @State private var activityStore = ActivityStore.shared
     @State private var proStore = ProStore.shared
+    @State private var deviceOverrideStore = DeviceOverrideStore.shared
 
     var body: some View {
         if !hasSeenOnboarding {
@@ -44,6 +46,7 @@ struct ContentView: View {
                 .environment(historyStore)
                 .environment(activityStore)
                 .environment(proStore)
+                .environment(deviceOverrideStore)
                 .task {
                     await NotificationService.shared.requestAuthorization()
                     BackgroundRefreshHandler.schedule()
@@ -53,6 +56,10 @@ struct ContentView: View {
                     // Pause the poll loop while backgrounded (BGTask covers
                     // offline detection); resume immediately on foreground.
                     meshVM.isAppActive = (phase == .active)
+                }
+                .onChange(of: borderRouterURL) { _, _ in
+                    // Apply the new border router URL immediately — no restart needed.
+                    meshVM.updateDiagnosticsProvider(ContentView.makeDiagnosticsProvider())
                 }
         }
     }

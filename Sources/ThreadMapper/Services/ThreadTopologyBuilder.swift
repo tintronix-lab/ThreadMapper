@@ -16,6 +16,9 @@ struct MeshTopologyBuilder {
     static let gatewayID = UUID(uuidString: "60000000-0000-0000-0000-0000000000FF")!
 
     static func buildGraph(from devices: [ThreadDevice]) -> ([MeshNode], [MeshLink]) {
+        // Strip devices the user has marked as non-Thread (e.g. Zigbee/Z-Wave bridges
+        // that HomeKit incorrectly classifies as border routers).
+        let devices = devices.filter { !DeviceOverrideStore.shared.isNonThread($0.id) }
         guard !devices.isEmpty else { return ([], []) }
 
         let hasExplicitRoles = devices.contains { !$0.isBorderRouter && $0.isRouter }
@@ -162,6 +165,7 @@ struct MeshTopologyBuilder {
     /// entirely to the inference path above, so callers can pass through safely.
     static func buildGraph(from devices: [ThreadDevice],
                            diagnostics: [UUID: ThreadNodeDiagnostics]) -> ([MeshNode], [MeshLink]) {
+        let devices = devices.filter { !DeviceOverrideStore.shared.isNonThread($0.id) }
         guard !devices.isEmpty, !diagnostics.isEmpty else { return buildGraph(from: devices) }
 
         // RLOC16 → deviceID, to resolve parent RLOCs back to real nodes.

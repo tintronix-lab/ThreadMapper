@@ -9,9 +9,9 @@ struct GraphLayout {
     static func hierarchical(nodes: [MeshNode], size: CGSize) -> [UUID: CGPoint] {
         guard !nodes.isEmpty, size.width > 1, size.height > 1 else { return [:] }
         let w = size.width, h = size.height
-        let marginX = min(48, w * 0.12)
-        let marginTop = min(56, h * 0.12)
-        let marginBottom = min(48, h * 0.12)
+        let marginX = min(24, w * 0.06)
+        let marginTop = min(36, h * 0.08)
+        let marginBottom = min(24, h * 0.06)
 
         let tiers = Set(nodes.map(\.tier)).sorted()
         var tierY: [Int: CGFloat] = [:]
@@ -46,77 +46,98 @@ struct GraphLayout {
         return positions
     }
 
-    static func fruchtermanReingold(
-        nodes: [MeshNode],
-        links: [MeshLink],
-        size: CGSize,
-        iterations: Int = 300
-    ) -> [UUID: CGPoint] {
-        guard !nodes.isEmpty, size.width > 1, size.height > 1 else { return [:] }
+    /// Lays nodes out as room cards — each room gets an explicit, non-overlapping
+    /// rectangle sized to hold all its devices. The gateway sits above the grid.
+    /// Returns node positions AND the bounding CGRect for each room (both in
+    /// layout/canvas space so the Canvas can transform them with pan + scale).
+    static func byRoom(nodes: [MeshNode], size: CGSize) -> ([UUID: CGPoint], [String: CGRect]) {
+        guard !nodes.isEmpty, size.width > 80, size.height > 80 else { return ([:], [:]) }
+        let w = size.width, h = size.height
 
-        let safeW = max(size.width, 100)
-        let safeH = max(size.height, 100)
-        let margin: CGFloat = min(40, safeW * 0.2, safeH * 0.2)
+        let outerPad: CGFloat = 14   // canvas edge margin
+        let cellGap:  CGFloat = 10   // gap between room cards
+        let headerH:  CGFloat = 24   // room-name label bar height
+        let innerPad: CGFloat = 10   // padding inside each card around the node grid
 
         var positions: [UUID: CGPoint] = [:]
-        for node in nodes {
-            positions[node.id] = CGPoint(
-                x: CGFloat.random(in: margin...(safeW - margin)),
-                y: CGFloat.random(in: margin...(safeH - margin))
-            )
+        var roomBounds: [String: CGRect] = [:]
+
+        // Gateway floats at top-centre, above the room grid
+        let gatewayNodes = nodes.filter { $0.kind == .gateway }
+        let gwAreaH: CGFloat = gatewayNodes.isEmpty ? 0 : 50
+        for gw in gatewayNodes {
+            positions[gw.id] = CGPoint(x: w / 2, y: outerPad + gwAreaH / 2)
         }
 
-        let area = safeW * safeH
-        let k = sqrt(area / CGFloat(nodes.count))
-        var temp: CGFloat = 0.1
-        let cooling: CGFloat = 0.995
-
-        for _ in 0..<iterations {
-            var displacements: [UUID: CGPoint] = [:]
-
-            for node in nodes {
-                guard let s = positions[node.id] else { continue }
-                var fx: CGFloat = 0; var fy: CGFloat = 0
-                for other in nodes where other.id != node.id {
-                    guard let o = positions[other.id] else { continue }
-                    let dx = s.x - o.x; let dy = s.y - o.y
-                    let dist = max(sqrt(dx*dx + dy*dy), 0.1)
-                    let f = (k*k)/dist
-                    fx += (dx/dist)*f
-                    fy += (dy/dist)*f
-                }
-                displacements[node.id] = CGPoint(x: fx, y: fy)
+        // Group non-gateway nodes by room (nil room → "Unassigned", sorted last)
+        let nonGateway = nodes.filter { $0.kind != .gateway }
+        let grouped = Dictionary(grouping: nonGateway) { $0.room ?? "Unassigned" }
+        let rooms = grouped.sorted { a, b in
+            switch (a.key == "Unassigned", b.key == "Unassigned") {
+            case (true, _): return false
+            case (_, true): return true
+            default:        return a.key < b.key
             }
-
-            for link in links {
-                guard let a = positions[link.sourceID], let b = positions[link.targetID] else { continue }
-                let dx = a.x - b.x; let dy = a.y - b.y
-                let dist = max(sqrt(dx*dx + dy*dy), 0.1)
-                let force = (dist*dist)/k
-                let dirX = dx/dist; let dirY = dy/dist
-
-                displacements[link.sourceID, default: .zero].x -= dirX*force*0.5
-                displacements[link.sourceID, default: .zero].y -= dirY*force*0.5
-                displacements[link.targetID, default: .zero].x += dirX*force*0.5
-                displacements[link.targetID, default: .zero].y += dirY*force*0.5
-            }
-
-            for node in nodes {
-                guard let pos = positions[node.id], let disp = displacements[node.id] else { continue }
-                let mag = sqrt(disp.x*disp.x + disp.y*disp.y)
-                if mag > 0 {
-                    let limitedX = (disp.x/mag)*min(mag, temp)
-                    let limitedY = (disp.y/mag)*min(mag, temp)
-                    var newPos = CGPoint(x: pos.x + limitedX, y: pos.y + limitedY)
-                    newPos.x = max(margin, min(safeW - margin, newPos.x))
-                    newPos.y = max(margin, min(safeH - margin, newPos.y))
-                    positions[node.id] = newPos
-                }
-            }
-
-            temp *= cooling
         }
 
-        return positions
+        let roomCount = rooms.count
+        guard roomCount > 0 else { return (positions, roomBounds) }
+
+        // Choose column count — never more than 3
+        let cols     = roomCount == 1 ? 1 : roomCount <= 4 ? 2 : 3
+        let gridRows = Int(ceil(Double(roomCount) / Double(cols)))
+
+        let gridY0 = outerPad + gwAreaH + (gwAreaH > 0 ? cellGap : 0)
+        let gridW  = w - outerPad * 2
+        let gridH  = h - gridY0 - outerPad
+        let cellW  = (gridW - cellGap * CGFloat(cols     - 1)) / CGFloat(cols)
+        let cellH  = (gridH - cellGap * CGFloat(gridRows - 1)) / CGFloat(gridRows)
+
+        for (idx, (room, roomNodes)) in rooms.enumerated() {
+            let col   = idx % cols
+            let row   = idx / cols
+            let cellX = outerPad + CGFloat(col) * (cellW + cellGap)
+            let cellY = gridY0   + CGFloat(row) * (cellH + cellGap)
+
+            roomBounds[room] = CGRect(x: cellX, y: cellY, width: cellW, height: cellH)
+
+            // Sort within room: border routers first, then relays, then end devices
+            let sorted = roomNodes.sorted { roomRoleOrder($0.kind) < roomRoleOrder($1.kind) }
+            let count  = sorted.count
+
+            let availW = cellW - innerPad * 2
+            let availH = cellH - headerH - innerPad * 2
+
+            // Expand column count so all nodes fit in ≤ desiredMaxRows rows
+            let idealSpacing: CGFloat = 34
+            let rawCols        = max(1, Int(availW / idealSpacing))
+            let desiredMaxRows = max(1, Int(availH / idealSpacing))
+            let nodeColumns    = min(count,
+                                    max(rawCols, Int(ceil(Double(count) / Double(desiredMaxRows)))))
+            let spacingX = availW / CGFloat(nodeColumns)
+            let nodeRows = Int(ceil(Double(count) / Double(nodeColumns)))
+            let spacingY = nodeRows > 1 ? availH / CGFloat(nodeRows) : availH
+
+            for (i, node) in sorted.enumerated() {
+                let nr = i / nodeColumns
+                let nc = i % nodeColumns
+                // Centre the last (possibly partial) row
+                let nodesInRow = (nr == nodeRows - 1) ? count - nr * nodeColumns : nodeColumns
+                let rowInset   = (availW - CGFloat(nodesInRow) * spacingX) / 2
+                let x = cellX + innerPad + rowInset + CGFloat(nc) * spacingX + spacingX / 2
+                let y = cellY + headerH  + innerPad + CGFloat(nr) * spacingY  + spacingY  / 2
+                positions[node.id] = CGPoint(x: x, y: y)
+            }
+        }
+
+        return (positions, roomBounds)
     }
+
+    private static func roomRoleOrder(_ kind: MeshNodeKind) -> Int {
+        switch kind {
+        case .gateway: return 0; case .borderRouter: return 1
+        case .router:  return 2; case .endDevice:    return 3
+        }
+    }
+
 }

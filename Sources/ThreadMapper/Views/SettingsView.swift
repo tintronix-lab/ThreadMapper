@@ -159,7 +159,7 @@ struct SettingsView: View {
         } header: {
             Text("Border Router (advanced)")
         } footer: {
-            Text("Connect an OpenThread Border Router's REST API to read real Thread network facts (channel, PAN ID). Restart the app to apply. Apple/Google border routers don't expose this; OTBR-based ones (e.g. Home Assistant) do.")
+            Text("Connect an OpenThread Border Router's REST API to read real Thread network facts (channel, PAN ID) and improve link quality readings. Changes apply immediately. Apple/Google border routers don't expose this; OTBR-based ones (e.g. Home Assistant) do.")
         }
     }
 
