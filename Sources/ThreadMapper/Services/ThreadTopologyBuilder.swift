@@ -70,9 +70,11 @@ struct MeshTopologyBuilder {
         // Honor a real parent when one is reported (future Matter Thread
         // diagnostics could populate `parentNodeID`); only accept a router/BR.
         let routableIDs = Set((borderRouters + routers).map(\.id))
+        let deviceByIDString = Dictionary(devices.map { ($0.id.uuidString, $0) },
+                                          uniquingKeysWith: { a, _ in a })
         func explicitParent(for d: ThreadDevice) -> ThreadDevice? {
             guard let raw = d.parentNodeID,
-                  let match = devices.first(where: { $0.id.uuidString == raw }),
+                  let match = deviceByIDString[raw],
                   routableIDs.contains(match.id) else { return nil }
             return match
         }

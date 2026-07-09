@@ -48,7 +48,7 @@ final class MeshViewModel {
     @ObservationIgnored private let discovery: any DiscoveryService
     @ObservationIgnored private(set) var diagnosticsProvider: any DiagnosticsProvider
     /// Latest real per-node routing, applied by the topology builder when present.
-    @ObservationIgnored private var latestDiagnostics: [UUID: ThreadNodeDiagnostics] = [:]
+    @ObservationIgnored private(set) var latestDiagnostics: [UUID: ThreadNodeDiagnostics] = [:]
     @ObservationIgnored private var keepAliveTask: Task<Void, Error>?
     @ObservationIgnored private var pollTick = 0
     @ObservationIgnored private var knownDeviceNames: Set<String> = []
@@ -139,9 +139,14 @@ final class MeshViewModel {
                                                         joined: Array(joined).sorted(),
                                                         left: Array(left).sorted())
                             self.recentTopologyChanges.insert(change, at: 0)
-                            if self.recentTopologyChanges.count > 20 {
-                                self.recentTopologyChanges = Array(self.recentTopologyChanges.prefix(20))
-                            }
+                            // Keep at most 20 entries; prune any older than 5 minutes so
+                            // the topology banner never shows stale events.
+                            let cutoff = Date().addingTimeInterval(-300)
+                            self.recentTopologyChanges = Array(
+                                self.recentTopologyChanges
+                                    .filter { $0.timestamp > cutoff }
+                                    .prefix(20)
+                            )
                             NotificationService.shared.notifyTopologyChange(
                                 joined: Array(joined), left: Array(left))
                             for name in joined.sorted() {
@@ -193,8 +198,30 @@ final class MeshViewModel {
                         }
                     }
 
-                    // Badge = number of confirmed offline devices
-                    let offlineCount = self.devices.filter(\.isOffline).count
+                    // Single pass — compute all per-device aggregates at once instead of
+                    // six separate filter/map passes (offlineCount, weakCount, roomGroups,
+                    // offlineNames, deviceStates, brCount/routerCount).
+                    var offlineCount = 0, weakCount = 0, brCount = 0, routerCount = 0
+                    var offlineNames: [String] = []
+                    var deviceStates: [String: Bool] = [:]
+                    var roomBuckets: [String: (count: Int, offline: Int, weak: Int)] = [:]
+                    for d in self.devices {
+                        let isOff  = d.isOffline
+                        let isWeak = d.isWeak
+                        let room   = d.room ?? "Unknown"
+                        if isOff  { offlineCount += 1; offlineNames.append(d.name) }
+                        if isWeak { weakCount += 1 }
+                        if d.isBorderRouter    { brCount += 1 }
+                        if d.isRoutingCapable  { routerCount += 1 }
+                        deviceStates[d.name] = !isOff
+                        var b = roomBuckets[room, default: (0, 0, 0)]
+                        b.count += 1
+                        if isOff  { b.offline += 1 }
+                        if isWeak { b.weak += 1 }
+                        roomBuckets[room] = b
+                    }
+                    offlineNames.sort()
+
                     NotificationService.shared.updateBadge(offlineCount)
 
                     // Write snapshot to App Group for widget and BGTask
@@ -202,16 +229,12 @@ final class MeshViewModel {
                     // Assign only on change — NetworkHealthScore is Equatable, so an
                     // identical tick no longer invalidates every Dashboard observer (D4).
                     if health != self.health { self.health = health }
-                    let roomGroups = Dictionary(grouping: self.devices) { $0.room ?? "Unknown" }
-                    let roomSnaps = roomGroups.map { room, devs in
-                        WidgetSnapshot.RoomSnapshot(
-                            name: room,
-                            deviceCount: devs.count,
-                            offlineCount: devs.filter(\.isOffline).count,
-                            weakCount: devs.filter(\.isWeak).count
-                        )
-                    }.sorted { $0.name < $1.name }
-                    let offlineNames = self.devices.filter(\.isOffline).map(\.name).sorted()
+                    let roomSnaps = roomBuckets
+                        .map { room, b in
+                            WidgetSnapshot.RoomSnapshot(name: room, deviceCount: b.count,
+                                                        offlineCount: b.offline, weakCount: b.weak)
+                        }
+                        .sorted { $0.name < $1.name }
                     let snapshotSummary = offlineNames.isEmpty
                         ? health.summary
                         : "\(health.summary) — \(offlineNames.count) device\(offlineNames.count == 1 ? "" : "s") offline"
@@ -221,19 +244,15 @@ final class MeshViewModel {
                         summary: snapshotSummary,
                         deviceCount: self.devices.count,
                         offlineCount: offlineCount,
-                        weakCount: self.devices.filter(\.isWeak).count,
+                        weakCount: weakCount,
                         offlineDeviceNames: offlineNames,
                         updatedAt: Date(),
                         rooms: roomSnaps
                     ))
-                    AppGroupStore.writeDeviceStates(
-                        Dictionary(self.devices.map { ($0.name, !$0.isOffline) }, uniquingKeysWith: { _, new in new })
-                    )
+                    AppGroupStore.writeDeviceStates(deviceStates)
                     HealthHistoryStore.shared.record(score: health.score, grade: health.grade)
                     HealthStreakStore.shared.record(grade: health.grade)
                     if health.grade == "A" { AchievementStore.shared.unlock("firstGradeA") }
-                    let brCount = self.devices.filter(\.isBorderRouter).count
-                    let routerCount = self.devices.filter(\.isRoutingCapable).count
                     if brCount >= 2 && routerCount >= 4 { AchievementStore.shared.unlock("resilienceA") }
 
                     // Emit activity event when health score shifts by 15+ points

@@ -162,36 +162,45 @@ struct DeviceStats {
     }
 
     var qualityBuckets: [QualityBucket] {
+        guard !readings.isEmpty else { return [] }
         let total = Double(readings.count)
-        guard total > 0 else { return [] }
-        let tiers: [(String, Color, (Int) -> Bool)] = [
-            ("Excellent", .green,  { $0 > -50 }),
-            ("Good",      .mint,   { $0 > -65 && $0 <= -50 }),
-            ("Fair",      .orange, { $0 > -80 && $0 <= -65 }),
-            ("Weak",      .red,    { $0 <= -80 }),
-        ]
-        return tiers.map { label, color, pred in
-            let count = readings.filter { pred($0.rssi) }.count
-            return QualityBucket(label: label, color: color, fraction: Double(count) / total)
+        var excellent = 0, good = 0, fair = 0, weak = 0
+        for r in readings {
+            if      r.rssi > -50 { excellent += 1 }
+            else if r.rssi > -65 { good += 1 }
+            else if r.rssi > -80 { fair += 1 }
+            else                  { weak += 1 }
         }
+        return [
+            QualityBucket(label: "Excellent", color: .green,  fraction: Double(excellent) / total),
+            QualityBucket(label: "Good",      color: .mint,   fraction: Double(good) / total),
+            QualityBucket(label: "Fair",      color: .orange, fraction: Double(fair) / total),
+            QualityBucket(label: "Weak",      color: .red,    fraction: Double(weak) / total),
+        ]
     }
 
-    // % of readings at Good or better
+    // % of readings at Good or better — derived from qualityBuckets to avoid a fourth pass.
     var stabilityPct: Int {
-        let good = readings.filter { $0.rssi > -65 }.count
-        return readings.isEmpty ? 0 : Int(Double(good) / Double(readings.count) * 100)
+        guard !readings.isEmpty else { return 0 }
+        let buckets = qualityBuckets
+        let goodFrac = (buckets.first { $0.label == "Excellent" }?.fraction ?? 0)
+                     + (buckets.first { $0.label == "Good" }?.fraction ?? 0)
+        return Int(goodFrac * 100)
     }
+
+    // Sort once; reuse for both p50 and p95.
+    private var sortedRSSIs: [Int] { readings.map(\.rssi).sorted() }
 
     var p50: Int {
         guard !readings.isEmpty else { return avgRSSI }
-        let sorted = readings.map(\.rssi).sorted()
-        return sorted[sorted.count / 2]
+        let s = sortedRSSIs
+        return s[s.count / 2]
     }
 
     var p95: Int {
         guard readings.count >= 5 else { return minRSSI }
-        let sorted = readings.map(\.rssi).sorted()
-        return sorted[min(sorted.count - 1, sorted.count * 95 / 100)]
+        let s = sortedRSSIs
+        return s[min(s.count - 1, s.count * 95 / 100)]
     }
 
     var jitter: Int { p95 - p50 }

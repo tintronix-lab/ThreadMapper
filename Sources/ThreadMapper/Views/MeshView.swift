@@ -56,7 +56,8 @@ struct MeshView: View {
         }
         .sheet(isPresented: $showingMap) {
             // Always show the complete topology — not the room/channel-filtered view.
-            MeshMapSheet(devices: viewModel.devices)
+            MeshMapSheet(devices: viewModel.devices,
+                         diagnostics: viewModel.latestDiagnostics)
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             topBar
@@ -643,6 +644,7 @@ private extension ShapeStyle where Self == Color {
 /// opens DeviceDetailView within the same sheet context.
 private struct MeshMapSheet: View {
     let devices: [ThreadDevice]
+    let diagnostics: [UUID: ThreadNodeDiagnostics]
 
     @Environment(\.dismiss) private var dismiss
     @State private var selectedDevice: ThreadDevice?
@@ -656,16 +658,12 @@ private struct MeshMapSheet: View {
                 links: graphLinks,
                 devices: devices,
                 onSelectNode: { _ in },
+                // Called by the HUD "Details →" button — not on every tap.
                 onSelectDevice: { device in selectedDevice = device }
             )
             .navigationTitle("Mesh Map")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Text("Pinch to zoom · drag to pan · tap a node")
-                        .font(.system(size: 10))
-                        .foregroundStyle(.secondary)
-                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
                         .fontWeight(.semibold)
@@ -679,7 +677,7 @@ private struct MeshMapSheet: View {
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         .task {
-            let (n, l) = MeshTopologyBuilder.buildGraph(from: devices, diagnostics: [:])
+            let (n, l) = MeshTopologyBuilder.buildGraph(from: devices, diagnostics: diagnostics)
             graphNodes = n
             graphLinks = l
         }

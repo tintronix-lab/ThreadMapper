@@ -15,6 +15,7 @@ struct DashboardView: View {
     @State private var showAchievements = false
     @State private var achievementStore = AchievementStore.shared
     @State private var bannerVisible = false
+    @State private var bannerDismissTask: Task<Void, Never>?
     @State private var roomCoverageExpanded = true
     @State private var allDevicesExpanded = true
 
@@ -92,8 +93,9 @@ struct DashboardView: View {
             .overlay(alignment: .top) {
                 if let unlocked = achievementStore.recentlyUnlocked, bannerVisible {
                     AchievementBanner(achievement: unlocked) {
-                        withAnimation { bannerVisible = false }
-                        Task {
+                        bannerDismissTask?.cancel()
+                        bannerDismissTask = Task {
+                            withAnimation { bannerVisible = false }
                             try? await Task.sleep(for: .seconds(0.4))
                             achievementStore.clearRecentlyUnlocked()
                         }
@@ -105,11 +107,14 @@ struct DashboardView: View {
             }
             .onChange(of: achievementStore.recentlyUnlocked) { _, unlocked in
                 guard unlocked != nil else { return }
+                bannerDismissTask?.cancel()
                 withAnimation(.spring(response: 0.4)) { bannerVisible = true }
-                Task {
+                bannerDismissTask = Task {
                     try? await Task.sleep(for: .seconds(4))
+                    guard !Task.isCancelled else { return }
                     withAnimation { bannerVisible = false }
                     try? await Task.sleep(for: .seconds(0.4))
+                    guard !Task.isCancelled else { return }
                     achievementStore.clearRecentlyUnlocked()
                 }
             }
@@ -390,67 +395,83 @@ struct DashboardView: View {
 
     // MARK: - Resilience
 
-    private var borderRouterCount: Int { viewModel.devices.filter(\.isBorderRouter).count }
-    private var routerCount: Int { viewModel.devices.filter(\.isRoutingCapable).count }
-
-    private var resilienceGrade: String {
-        switch (borderRouterCount, routerCount) {
-        case (2..., 4...): return "A"
-        case (2..., 2...): return "B"
-        case (1..., 3...): return "C"
-        case (1..., 1...): return "D"
-        default:           return "F"
-        }
+    private struct ResilienceInfo {
+        let borderRouterCount: Int
+        let routerCount: Int
+        let grade: String
+        let summary: String
+        let color: Color
+        let criticalNames: [String]
     }
 
-    private var resilienceColor: Color { TMStyle.gradeColor(resilienceGrade) }
-
-    private var resilienceSummary: String {
-        switch resilienceGrade {
-        case "A": return "Excellent redundancy — true mesh failover"
-        case "B": return "Good resilience — dual border routers"
-        case "C": return "Moderate — one border router, some routing"
-        case "D": return "Limited — single router, no failover path"
-        default:  return "No border router — Thread network at risk"
+    // Single pass over devices — avoids three separate filter scans per render.
+    private var resilience: ResilienceInfo {
+        var brCount = 0
+        var routerCount = 0
+        var brNames: [String] = []
+        for device in viewModel.devices {
+            if device.isBorderRouter { brCount += 1; brNames.append(device.name) }
+            if device.isRoutingCapable { routerCount += 1 }
         }
-    }
-
-    private var resilienceCriticalNames: [String] {
-        guard resilienceGrade == "D" || resilienceGrade == "F" else { return [] }
-        return viewModel.devices.filter(\.isBorderRouter).map(\.name).sorted()
+        let grade: String
+        switch (brCount, routerCount) {
+        case (2..., 4...): grade = "A"
+        case (2..., 2...): grade = "B"
+        case (1..., 3...): grade = "C"
+        case (1..., 1...): grade = "D"
+        default:           grade = "F"
+        }
+        let summary: String
+        switch grade {
+        case "A": summary = "Excellent redundancy — true mesh failover"
+        case "B": summary = "Good resilience — dual border routers"
+        case "C": summary = "Moderate — one border router, some routing"
+        case "D": summary = "Limited — single router, no failover path"
+        default:  summary = "No border router — Thread network at risk"
+        }
+        let criticalNames = (grade == "D" || grade == "F") ? brNames.sorted() : []
+        return ResilienceInfo(
+            borderRouterCount: brCount,
+            routerCount: routerCount,
+            grade: grade,
+            summary: summary,
+            color: TMStyle.gradeColor(grade),
+            criticalNames: criticalNames
+        )
     }
 
     @ViewBuilder
     private var resilienceSection: some View {
         if !viewModel.devices.isEmpty {
+            let r = resilience
             Section {
                 HStack(spacing: 16) {
                     ZStack {
                         Circle()
-                            .stroke(resilienceColor.opacity(0.12), lineWidth: 6)
-                        Text(resilienceGrade)
+                            .stroke(r.color.opacity(0.12), lineWidth: 6)
+                        Text(r.grade)
                             .font(.system(size: 22, weight: .black, design: .rounded))
-                            .foregroundStyle(resilienceColor)
+                            .foregroundStyle(r.color)
                     }
                     .frame(width: 56, height: 56)
-                    .shadow(color: resilienceColor.opacity(0.2), radius: 6, x: 0, y: 2)
+                    .shadow(color: r.color.opacity(0.2), radius: 6, x: 0, y: 2)
 
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(resilienceSummary)
+                        Text(r.summary)
                             .font(.subheadline)
                             .fixedSize(horizontal: false, vertical: true)
 
                         HStack(spacing: 12) {
-                            Label("\(borderRouterCount) Border Router\(borderRouterCount == 1 ? "" : "s")",
+                            Label("\(r.borderRouterCount) Border Router\(r.borderRouterCount == 1 ? "" : "s")",
                                   systemImage: "antenna.radiowaves.left.and.right")
-                            Label("\(routerCount) Total Router\(routerCount == 1 ? "" : "s")",
+                            Label("\(r.routerCount) Total Router\(r.routerCount == 1 ? "" : "s")",
                                   systemImage: "point.3.connected.trianglepath.dotted")
                         }
                         .font(.caption2)
                         .foregroundStyle(.secondary)
 
-                        if !resilienceCriticalNames.isEmpty {
-                            Text("Critical: \(resilienceCriticalNames.joined(separator: ", "))")
+                        if !r.criticalNames.isEmpty {
+                            Text("Critical: \(r.criticalNames.joined(separator: ", "))")
                                 .font(.caption2.weight(.semibold))
                                 .foregroundStyle(.red)
                         }

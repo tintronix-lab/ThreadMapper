@@ -311,7 +311,7 @@ struct DeviceDetailView: View {
             if let batt = device.batteryPercentage {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
-                        Image(systemName: batt > 50 ? "battery.75percent" : batt > 20 ? "battery.25percent" : "battery.0percent")
+                        Image(systemName: batt > 75 ? "battery.100percent" : batt > 50 ? "battery.75percent" : batt > 25 ? "battery.50percent" : batt > 10 ? "battery.25percent" : "battery.0percent")
                             .foregroundStyle(batt < 20 ? .red : .secondary)
                             .imageScale(.small)
                         Text("\(batt)%")

@@ -33,8 +33,27 @@ struct NetworkHealthScore: Equatable {
         var issues: [Issue] = []
         var tips: [String] = []
 
+        // Single pass — collect all per-device buckets at once instead of 5 separate filters.
+        var borderRouters: [ThreadDevice] = []
+        var offline: [ThreadDevice] = []
+        var weak: [ThreadDevice] = []
+        var lowBatt: [ThreadDevice] = []
+        var channelDevices: [ThreadDevice] = []
+        let wifiOverlapChannels: Set<Int> = [11, 12, 13, 14, 17, 18, 19, 22, 23, 24]
+        var usedChannels = Set<Int>()
+
+        for d in devices {
+            if d.isBorderRouter { borderRouters.append(d) }
+            if d.isOffline { offline.append(d) }
+            if d.isWeak { weak.append(d) }
+            if (d.batteryPercentage ?? 100) < 15 { lowBatt.append(d) }
+            if let ch = d.channel {
+                usedChannels.insert(ch)
+                if wifiOverlapChannels.contains(ch) { channelDevices.append(d) }
+            }
+        }
+
         // Border router redundancy
-        let borderRouters = devices.filter { $0.isBorderRouter }
         if borderRouters.isEmpty {
             score -= 40
             issues.append(Issue(message: "No border router detected", icon: "antenna.radiowaves.left.and.right.slash", isCritical: true, affectedDevices: []))
@@ -46,14 +65,12 @@ struct NetworkHealthScore: Equatable {
         }
 
         // Offline devices
-        let offline = devices.filter(\.isOffline)
         if !offline.isEmpty {
             score -= min(30, offline.count * 12)
             issues.append(Issue(message: "\(offline.count) device\(offline.count == 1 ? "" : "s") offline", icon: "network.slash", isCritical: true, affectedDevices: offline))
         }
 
         // Weak signal
-        let weak = devices.filter(\.isWeak)
         if !weak.isEmpty {
             score -= min(25, weak.count * 7)
             issues.append(Issue(message: "\(weak.count) device\(weak.count == 1 ? "" : "s") with weak signal", icon: "wifi.exclamationmark", isCritical: weak.count > 2, affectedDevices: weak))
@@ -61,7 +78,6 @@ struct NetworkHealthScore: Equatable {
         }
 
         // Low battery
-        let lowBatt = devices.filter { ($0.batteryPercentage ?? 100) < 15 }
         if !lowBatt.isEmpty {
             score -= 5
             issues.append(Issue(message: "\(lowBatt.count) device\(lowBatt.count == 1 ? "" : "s") battery < 15%", icon: "battery.25percent", isCritical: false, affectedDevices: lowBatt))
@@ -70,15 +86,9 @@ struct NetworkHealthScore: Equatable {
 
         // Channel interference — Thread channels that overlap 2.4 GHz WiFi channels 1, 6, or 11
         // WiFi ch 1 ≈ Thread ch 11-14, WiFi ch 6 ≈ Thread ch 17-19, WiFi ch 11 ≈ Thread ch 22-24
-        let usedChannels = Set(devices.compactMap(\.channel))
-        let wifiOverlapChannels: Set<Int> = [11, 12, 13, 14, 17, 18, 19, 22, 23, 24]
         let conflicting = usedChannels.intersection(wifiOverlapChannels)
         if !conflicting.isEmpty {
             let chList = conflicting.sorted().map { "CH\($0)" }.joined(separator: ", ")
-            let channelDevices = devices.filter { device in
-                guard let ch = device.channel else { return false }
-                return conflicting.contains(ch)
-            }
             score -= 5
             issues.append(Issue(
                 message: "Thread channel overlaps 2.4 GHz WiFi (\(chList))",

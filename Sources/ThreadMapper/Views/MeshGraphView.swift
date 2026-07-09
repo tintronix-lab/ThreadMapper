@@ -110,14 +110,16 @@ struct MeshGraphView: View {
                 if nodes.isEmpty { emptyState }
             }
 
-            // HUD: allowsHitTesting(false) so it never intercepts taps on the canvas.
-            selectedHUD
-                .padding(.horizontal, 12)
-                .padding(.top, 8)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .allowsHitTesting(false)
-                .animation(.easeInOut(duration: 0.15), value: selectedNodeID)
-                .zIndex(10)
+            // HUD pinned to top. Only the card itself consumes taps; the spacer
+            // below is transparent so canvas gestures reach through it.
+            VStack(spacing: 0) {
+                selectedHUD
+                    .padding(.horizontal, 12)
+                    .padding(.top, 8)
+                Spacer(minLength: 0)
+            }
+            .animation(.easeInOut(duration: 0.15), value: selectedNodeID)
+            .zIndex(10)
 
             HStack(alignment: .bottom) {
                 legendView.padding(10)
@@ -127,9 +129,9 @@ struct MeshGraphView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
             .allowsHitTesting(true)
 
-            // Hint fades away once the user zooms in enough to see labels
-            if scale < 1.2, !nodes.isEmpty {
-                Text("Pinch to zoom — labels appear at 1.2×")
+            // Hint: only visible when end-device labels are hidden (scale < 0.7).
+            if scale < 0.7, !nodes.isEmpty {
+                Text("Pinch to zoom for device names")
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, 10)
@@ -194,6 +196,11 @@ struct MeshGraphView: View {
                     Text(node.kind.rawValue)
                         .font(.system(size: 10))
                         .foregroundStyle(.secondary)
+                    if let d = device {
+                        Button("Details →") { onSelectDevice(d) }
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(Color.accentColor)
+                    }
                 }
 
                 if let device {
@@ -344,7 +351,8 @@ extension MeshGraphView {
         let padding: CGFloat = 36
         let scaleX = (size.width  - padding * 2) / graphWidth
         let scaleY = (size.height - padding * 2) / graphHeight
-        let newScale = min(scaleX, scaleY, 2.0)
+        // Cap at 1.5 so small networks don't over-zoom; floor at 0.35 so large ones still fit.
+        let newScale = max(0.35, min(scaleX, scaleY, 1.5))
 
         scale     = newScale
         baseScale = newScale
@@ -360,10 +368,10 @@ extension MeshGraphView {
 
     private func nodeRadius(_ kind: MeshNodeKind) -> CGFloat {
         switch kind {
-        case .gateway:      return 13
-        case .borderRouter: return 11
-        case .router:       return 9
-        case .endDevice:    return 7
+        case .gateway:      return 15
+        case .borderRouter: return 13
+        case .router:       return 11
+        case .endDevice:    return 9
         }
     }
 
@@ -395,10 +403,10 @@ extension MeshGraphView {
         }) {
             withAnimation(.easeInOut(duration: 0.15)) { selectedNodeID = hit.id }
             onSelectNode(hit)
-            onSelectDevice(hit.deviceID.flatMap { devicesByID[$0] })
+            // onSelectDevice is not called here — use the HUD "Details →" button instead,
+            // so tapping a node shows info first without immediately navigating away.
         } else {
             withAnimation(.easeInOut(duration: 0.15)) { selectedNodeID = nil }
-            onSelectDevice(nil)
         }
     }
 }
@@ -555,9 +563,13 @@ extension MeshGraphView {
                            with: .color(.red.opacity(0.55)), lineWidth: 1)
             }
 
-            // Labels visible only when zoomed in enough that they don't crowd each other.
-            // At overview scale (<1.2×) the hint overlay tells users to pinch to zoom.
-            let showLabel = scale >= 1.2 || isSelected || (hasSelection && highlight.contains(node.id))
+            // Border routers and routers always show their name — they're the landmarks that
+            // make the map readable. End-device labels appear when zoomed past 0.7×.
+            let showLabel = scale >= 0.7
+                || isSelected
+                || (hasSelection && highlight.contains(node.id))
+                || node.kind == .borderRouter
+                || node.kind == .router
             if showLabel {
                 let maxChars: Int
                 if isSelected        { maxChars = 18 }
