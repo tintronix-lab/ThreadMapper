@@ -10,7 +10,7 @@ jobs:
     name: SwiftLint
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install SwiftLint
         run: brew install swiftlint
       - name: Lint
@@ -20,7 +20,7 @@ jobs:
     name: Build & Test (iOS Simulator)
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # XcodeGen (Homebrew) emits an Xcode 16 project format (objectVersion 77);
       # the runner's default Xcode 15.4 cannot open it, so select Xcode 16.
       - name: Select Xcode 16
