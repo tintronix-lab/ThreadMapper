@@ -62,6 +62,52 @@ final class ThreadDevice: Identifiable, Codable, Hashable, Equatable {
     /// router" so the Resilience grade and the resilience achievement agree (D6).
     var isRoutingCapable: Bool { isRouter || isBorderRouter }
 
+    // MARK: - Codable
+    // Custom implementation required: @Observable rewrites stored vars into
+    // macro-generated backing storage that the synthesizer cannot reconcile with Codable.
+
+    private enum CodingKeys: String, CodingKey {
+        case id, name, manufacturer, productName, deviceType, uniqueIdentifier
+        case isBorderRouter, isRouter, isSleepyEndDevice, parentNodeID
+        case channel, rssi, batteryPercentage, room
+    }
+
+    required init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id                = try c.decode(UUID.self,   forKey: .id)
+        name              = try c.decode(String.self, forKey: .name)
+        manufacturer      = try c.decode(String.self, forKey: .manufacturer)
+        productName       = try c.decode(String.self, forKey: .productName)
+        deviceType        = try c.decode(String.self, forKey: .deviceType)
+        uniqueIdentifier  = try c.decode(UUID.self,   forKey: .uniqueIdentifier)
+        isBorderRouter    = try c.decode(Bool.self,   forKey: .isBorderRouter)
+        isRouter          = try c.decode(Bool.self,   forKey: .isRouter)
+        isSleepyEndDevice = try c.decode(Bool.self,   forKey: .isSleepyEndDevice)
+        parentNodeID      = try c.decodeIfPresent(String.self, forKey: .parentNodeID)
+        channel           = try c.decodeIfPresent(Int.self,    forKey: .channel)
+        rssi              = try c.decodeIfPresent(Int.self,    forKey: .rssi)
+        batteryPercentage = try c.decodeIfPresent(Int.self,    forKey: .batteryPercentage)
+        room              = try c.decodeIfPresent(String.self, forKey: .room)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id,                forKey: .id)
+        try c.encode(name,              forKey: .name)
+        try c.encode(manufacturer,      forKey: .manufacturer)
+        try c.encode(productName,       forKey: .productName)
+        try c.encode(deviceType,        forKey: .deviceType)
+        try c.encode(uniqueIdentifier,  forKey: .uniqueIdentifier)
+        try c.encode(isBorderRouter,    forKey: .isBorderRouter)
+        try c.encode(isRouter,          forKey: .isRouter)
+        try c.encode(isSleepyEndDevice, forKey: .isSleepyEndDevice)
+        try c.encodeIfPresent(parentNodeID,      forKey: .parentNodeID)
+        try c.encodeIfPresent(channel,           forKey: .channel)
+        try c.encodeIfPresent(rssi,              forKey: .rssi)
+        try c.encodeIfPresent(batteryPercentage, forKey: .batteryPercentage)
+        try c.encodeIfPresent(room,              forKey: .room)
+    }
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(uniqueIdentifier)
     }
