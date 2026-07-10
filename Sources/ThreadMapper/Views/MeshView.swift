@@ -657,6 +657,7 @@ private struct MeshMapSheet: View {
                 nodes: graphNodes,
                 links: graphLinks,
                 devices: devices,
+                isLive: !diagnostics.isEmpty,
                 onSelectNode: { _ in },
                 // Called by the HUD "Details →" button — not on every tap.
                 onSelectDevice: { device in selectedDevice = device }

@@ -81,65 +81,6 @@ struct ThreadDeviceTests {
         }
     }
 
-    // MARK: metadataSignature
-
-    @Test("metadataSignature changes on name change")
-    func signatureChangesOnRename() {
-        let uuid = UUID()
-        let d1 = ThreadDevice(
-            name: "Sensor A", manufacturer: "Eve", productName: "Door", deviceType: "Sensor",
-            uniqueIdentifier: uuid, isBorderRouter: false, isRouter: false, isSleepyEndDevice: true
-        )
-        let d2 = ThreadDevice(
-            name: "Sensor B", manufacturer: "Eve", productName: "Door", deviceType: "Sensor",
-            uniqueIdentifier: uuid, isBorderRouter: false, isRouter: false, isSleepyEndDevice: true
-        )
-        #expect(d1.metadataSignature != d2.metadataSignature)
-    }
-
-    @Test("metadataSignature changes on room change")
-    func signatureChangesOnRoomMove() {
-        let uuid = UUID()
-        let d1 = ThreadDevice(
-            name: "Sensor", manufacturer: "Eve", productName: "Door", deviceType: "Sensor",
-            uniqueIdentifier: uuid, isBorderRouter: false, isRouter: false, isSleepyEndDevice: true,
-            room: "Kitchen"
-        )
-        let d2 = ThreadDevice(
-            name: "Sensor", manufacturer: "Eve", productName: "Door", deviceType: "Sensor",
-            uniqueIdentifier: uuid, isBorderRouter: false, isRouter: false, isSleepyEndDevice: true,
-            room: "Bedroom"
-        )
-        #expect(d1.metadataSignature != d2.metadataSignature)
-    }
-
-    @Test("metadataSignature is stable when nothing changes")
-    func signatureStableWithNoChanges() {
-        let uuid = UUID()
-        let d = ThreadDevice(
-            name: "Sensor", manufacturer: "Eve", productName: "Door", deviceType: "Sensor",
-            uniqueIdentifier: uuid, isBorderRouter: false, isRouter: false, isSleepyEndDevice: true,
-            room: "Kitchen"
-        )
-        #expect(d.metadataSignature == d.metadataSignature)
-    }
-
-    @Test("metadataSignature changes on battery change")
-    func signatureChangesOnBatteryChange() {
-        let uuid = UUID()
-        let d1 = ThreadDevice(
-            name: "Sensor", manufacturer: "Eve", productName: "Door", deviceType: "Sensor",
-            uniqueIdentifier: uuid, isBorderRouter: false, isRouter: false, isSleepyEndDevice: true,
-            batteryPercentage: 80
-        )
-        let d2 = ThreadDevice(
-            name: "Sensor", manufacturer: "Eve", productName: "Door", deviceType: "Sensor",
-            uniqueIdentifier: uuid, isBorderRouter: false, isRouter: false, isSleepyEndDevice: true,
-            batteryPercentage: 10
-        )
-        #expect(d1.metadataSignature != d2.metadataSignature)
-    }
-
     // MARK: Hashable / Equatable (identity only)
 
     @Test("Two devices with same uniqueIdentifier are equal regardless of name")

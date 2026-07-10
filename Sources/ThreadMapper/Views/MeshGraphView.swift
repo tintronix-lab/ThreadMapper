@@ -4,6 +4,7 @@ struct MeshGraphView: View {
     let nodes: [MeshNode]
     let links: [MeshLink]
     let devices: [ThreadDevice]
+    var isLive: Bool = false   // real per-node routing (from a border router) is driving the graph
     let onSelectNode: (MeshNode) -> Void
     let onSelectDevice: (ThreadDevice?) -> Void
 
@@ -283,11 +284,18 @@ struct MeshGraphView: View {
             legendItem(dotColor: .green, ring: false, label: "Device")
             legendItem(dotColor: .green, ring: false, battery: true, label: "Battery device")
             Divider().padding(.vertical, 1)
-            Text("Estimated paths — HomeKit\ndoesn't report Thread routing")
-                .font(.system(size: 8))
-                .foregroundStyle(.tertiary)
-                .italic()
-                .fixedSize(horizontal: false, vertical: true)
+            if isLive {
+                Label("Live routing · Border Router", systemImage: "checkmark.seal.fill")
+                    .font(.system(size: 8, weight: .semibold))
+                    .foregroundStyle(.green)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                Text("Estimated paths — HomeKit\ndoesn't report Thread routing")
+                    .font(.system(size: 8))
+                    .foregroundStyle(.tertiary)
+                    .italic()
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .padding(7)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
