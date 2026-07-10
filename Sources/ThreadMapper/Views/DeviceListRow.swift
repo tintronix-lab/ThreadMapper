@@ -57,8 +57,8 @@ struct DeviceListRow: View {
 
     @ViewBuilder
     private var signalIcon: some View {
-        Image(systemName: device.rssi.rssiSystemIcon)
-            .foregroundStyle(device.rssi.rssiColor)
+        Image(systemName: device.isOffline ? "wifi.slash" : device.rssi.rssiSystemIcon)
+            .foregroundStyle(device.isOffline ? Color.red : device.rssi.rssiColor)
             .imageScale(.small)
     }
 

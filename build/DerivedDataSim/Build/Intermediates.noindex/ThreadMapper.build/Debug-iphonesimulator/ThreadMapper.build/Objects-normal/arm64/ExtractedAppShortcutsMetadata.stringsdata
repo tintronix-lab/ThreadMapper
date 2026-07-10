@@ -1,0 +1,58 @@
+{
+  "source" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/Sources\/ThreadMapper\/Intents\/NetworkHealthIntents.swift",
+  "tables" : {
+    "AppShortcuts" : [
+      {
+        "key" : "Check my Thread network in ${applicationName}",
+        "values" : [
+          "Check my Thread network in ${applicationName}",
+          "What's my network health in ${applicationName}",
+          "Network health in ${applicationName}"
+        ],
+        "appShortcutMetadata" : [
+          {
+            "index" : 0,
+            "actionIdentifier" : "GetNetworkHealthIntent",
+            "parameterTypes" : {
+
+            },
+            "parameterDisplayRepresentations" : {
+
+            },
+            "title" : "Check Thread Network Health"
+          }
+        ],
+        "location" : {
+          "startingColumn" : 0,
+          "startingLine" : 53
+        }
+      },
+      {
+        "key" : "Which devices are offline in ${applicationName}",
+        "values" : [
+          "Which devices are offline in ${applicationName}",
+          "Show offline devices in ${applicationName}",
+          "Are any devices offline in ${applicationName}"
+        ],
+        "appShortcutMetadata" : [
+          {
+            "index" : 1,
+            "actionIdentifier" : "GetOfflineDevicesIntent",
+            "parameterTypes" : {
+
+            },
+            "parameterDisplayRepresentations" : {
+
+            },
+            "title" : "Show Offline Thread Devices"
+          }
+        ],
+        "location" : {
+          "startingColumn" : 0,
+          "startingLine" : 53
+        }
+      }
+    ]
+  },
+  "version" : 2
+}
