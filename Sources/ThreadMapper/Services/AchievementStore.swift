@@ -16,10 +16,7 @@ import Observation
     private(set) var achievements: [Achievement]
     private(set) var recentlyUnlocked: Achievement?
 
-    @ObservationIgnored private let storeURL: URL = {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("achievements.json")
-    }()
+    @ObservationIgnored private let storeURL: URL
 
     static let catalog: [Achievement] = [
         Achievement(id: "firstSurvey",      title: "First Steps",        description: "Complete your first room survey.", icon: "figure.walk"),
@@ -30,9 +27,20 @@ import Observation
         Achievement(id: "resilienceA",      title: "Resilient Home",     description: "Achieve an A resilience score.", icon: "shield.checkmark.fill"),
     ]
 
-    private init() {
+    /// `storeURL` is injectable so tests can use a throwaway file; the shared
+    /// instance persists to Documents.
+    init(storeURL: URL? = nil) {
+        self.storeURL = storeURL ?? FileManager.default
+            .urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("achievements.json")
         achievements = Self.catalog
         restore()
+    }
+
+    /// Creates a fresh isolated store backed by a temp file. For tests only.
+    static func makeTestInstance() -> AchievementStore {
+        AchievementStore(storeURL: FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(UUID().uuidString)_achievements.json"))
     }
 
     func unlock(_ id: String) {
