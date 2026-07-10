@@ -46,8 +46,8 @@ final class BorderRouterClientTests: XCTestCase {
         XCTAssertTrue(networks.isEmpty)
     }
 
-    func testNodeDiagnosticsIsEmptyUntilPhase3b() async {
-        let diags = await client(node: nodeJSON, dataset: datasetJSON).nodeDiagnostics()
+    func testNodeDiagnosticsEmptyWithoutDevicesToCorrelate() async {
+        let diags = await client(node: nodeJSON, dataset: datasetJSON).nodeDiagnostics(for: [])
         XCTAssertTrue(diags.isEmpty)
     }
 

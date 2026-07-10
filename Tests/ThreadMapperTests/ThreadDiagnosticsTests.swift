@@ -74,7 +74,7 @@ final class ThreadDiagnosticsTests: XCTestCase {
     func testNoDiagnosticsProviderYieldsNothing() async {
         let provider = NoDiagnosticsProvider()
         let nets = await provider.threadNetworks()
-        let nodes = await provider.nodeDiagnostics()
+        let nodes = await provider.nodeDiagnostics(for: [])
         XCTAssertTrue(nets.isEmpty)
         XCTAssertTrue(nodes.isEmpty)
     }
@@ -101,5 +101,5 @@ private final class FakeDiagnosticsProvider: DiagnosticsProvider {
         self.diagnostics = diagnostics
     }
     func threadNetworks() async -> [ThreadNetworkInfo] { networks }
-    func nodeDiagnostics() async -> [UUID: ThreadNodeDiagnostics] { diagnostics }
+    func nodeDiagnostics(for devices: [ThreadDevice]) async -> [UUID: ThreadNodeDiagnostics] { diagnostics }
 }
