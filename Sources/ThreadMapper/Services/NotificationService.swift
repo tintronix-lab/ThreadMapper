@@ -73,14 +73,17 @@ final class NotificationService {
         guard UserDefaults.standard.bool(forKey: "quietHoursEnabled") else { return false }
         let startHour = UserDefaults.standard.integer(forKey: "quietHoursStart")
         let endHour   = UserDefaults.standard.integer(forKey: "quietHoursEnd")
-        let cal = Calendar.current
-        let now = cal.component(.hour, from: Date())
-        if startHour <= endHour {
-            return now >= startHour && now < endHour
-        } else {
-            // Wraps midnight — e.g. 22:00–07:00
-            return now >= startHour || now < endHour
+        let now = Calendar.current.component(.hour, from: Date())
+        return Self.isInQuietHours(hour: now, start: startHour, end: endHour)
+    }
+
+    /// Pure window check: start inclusive, end exclusive; a start > end window
+    /// wraps midnight (e.g. 22–7). Extracted so the wrap logic is unit-testable.
+    static func isInQuietHours(hour: Int, start: Int, end: Int) -> Bool {
+        if start <= end {
+            return hour >= start && hour < end
         }
+        return hour >= start || hour < end   // wraps midnight
     }
 
     func scheduleWeeklyReport() {
