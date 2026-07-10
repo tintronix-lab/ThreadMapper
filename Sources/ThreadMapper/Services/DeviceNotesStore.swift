@@ -7,14 +7,23 @@ final class DeviceNotesStore {
 
     private(set) var notes: [String: String] = [:]
 
-    @ObservationIgnored
-    private let storeURL: URL = {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("device_notes.json")
-    }()
+    @ObservationIgnored private let storeURL: URL
     @ObservationIgnored private var persistTask: Task<Void, Never>?
 
-    private init() { restore() }
+    /// `storeURL` is injectable so tests can use a throwaway file; the shared
+    /// instance persists to Documents.
+    init(storeURL: URL? = nil) {
+        self.storeURL = storeURL ?? FileManager.default
+            .urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("device_notes.json")
+        restore()
+    }
+
+    /// Creates a fresh isolated store backed by a temp file. For tests only.
+    static func makeTestInstance() -> DeviceNotesStore {
+        DeviceNotesStore(storeURL: FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(UUID().uuidString)_device_notes.json"))
+    }
 
     func note(for deviceID: String) -> String { notes[deviceID] ?? "" }
 
