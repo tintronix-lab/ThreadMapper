@@ -8,13 +8,23 @@ final class ActivityStore {
     private(set) var events: [ActivityEvent] = []
 
     @ObservationIgnored private let maxEvents = 500
-    @ObservationIgnored private let storeURL: URL = {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("activity_events.json")
-    }()
+    @ObservationIgnored private let storeURL: URL
     @ObservationIgnored private var persistTask: Task<Void, Never>?
 
-    private init() { restore() }
+    /// `storeURL` is injectable so tests can use a throwaway file; the shared
+    /// instance persists to Documents.
+    init(storeURL: URL? = nil) {
+        self.storeURL = storeURL ?? FileManager.default
+            .urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("activity_events.json")
+        restore()
+    }
+
+    /// Creates a fresh isolated store backed by a temp file. For tests only.
+    static func makeTestInstance() -> ActivityStore {
+        ActivityStore(storeURL: FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(UUID().uuidString)_activity_events.json"))
+    }
 
     func record(kind: ActivityEvent.Kind, deviceName: String? = nil, room: String? = nil, detail: String) {
         let event = ActivityEvent(id: UUID(), timestamp: Date(), kind: kind,
