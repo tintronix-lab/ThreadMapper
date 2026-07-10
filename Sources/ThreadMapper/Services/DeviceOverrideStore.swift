@@ -11,13 +11,17 @@ final class DeviceOverrideStore {
     static let shared = DeviceOverrideStore()
 
     private let key = "nonThreadDeviceIDs"
+    @ObservationIgnored private let defaults: UserDefaults
 
     private(set) var nonThreadIDs: Set<UUID> {
         didSet { persist() }
     }
 
-    private init() {
-        let stored = UserDefaults.standard.stringArray(forKey: "nonThreadDeviceIDs") ?? []
+    /// `defaults` is injectable so tests can use an isolated suite; the shared
+    /// instance uses `.standard`.
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        let stored = defaults.stringArray(forKey: key) ?? []
         nonThreadIDs = Set(stored.compactMap(UUID.init))
     }
 
@@ -34,9 +38,6 @@ final class DeviceOverrideStore {
     }
 
     private func persist() {
-        UserDefaults.standard.set(
-            Array(nonThreadIDs.map(\.uuidString)),
-            forKey: key
-        )
+        defaults.set(Array(nonThreadIDs.map(\.uuidString)), forKey: key)
     }
 }
