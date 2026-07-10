@@ -74,8 +74,8 @@ final class WeeklyReportStore {
         } else if streak.totalADays > 0 {
             sentences.append("You've reached Grade A on \(streak.totalADays) day\(streak.totalADays == 1 ? "" : "s") total.")
         }
-        if historyEntries.count >= 2 {
-            let delta = historyEntries.last!.score - historyEntries.first!.score
+        if let first = historyEntries.first, let last = historyEntries.last, historyEntries.count >= 2 {
+            let delta = last.score - first.score
             if delta >= 10 { sentences.append("Performance improved \(delta) pts since the start of the window.") }
             else if delta <= -10 { sentences.append("Performance dropped \(abs(delta)) pts — check the Issues tab.") }
         }

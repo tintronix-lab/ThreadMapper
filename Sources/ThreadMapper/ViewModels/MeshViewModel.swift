@@ -51,7 +51,12 @@ final class MeshViewModel {
     @ObservationIgnored private(set) var latestDiagnostics: [UUID: ThreadNodeDiagnostics] = [:]
     @ObservationIgnored private var keepAliveTask: Task<Void, Error>?
     @ObservationIgnored private var pollTick = 0
-    @ObservationIgnored private var knownDeviceNames: Set<String> = []
+    /// Topology membership tracked by stable identity, not name — a rename must
+    /// not read as a leave+join, and duplicate names must not collide.
+    @ObservationIgnored private var knownDeviceIDs: Set<UUID> = []
+    /// Last-seen display name per device ID, so a device that has *left* (and is
+    /// gone from `devices`) can still be named in the banner / notification.
+    @ObservationIgnored private var knownDeviceNamesByID: [UUID: String] = [:]
     @ObservationIgnored private var offlineDeviceIDs: Set<UUID> = []
     @ObservationIgnored private var pendingOfflineTasks: [UUID: Task<Void, Never>] = [:]
     @ObservationIgnored private var previousHealthScore: Int? = nil
@@ -129,15 +134,25 @@ final class MeshViewModel {
                     self.devices.removeAll { latestByUID[$0.uniqueIdentifier] == nil }
                     if self.devices.count != prevCount { graphNeedsRebuild = true }
 
-                    // Topology change events (join / leave)
-                    let currentNames = Set(self.devices.map(\.name))
-                    if !self.knownDeviceNames.isEmpty {
-                        let joined = currentNames.subtracting(self.knownDeviceNames)
-                        let left   = self.knownDeviceNames.subtracting(currentNames)
-                        if !joined.isEmpty || !left.isEmpty {
+                    // Topology change events (join / leave), keyed by stable
+                    // identity so a rename is not mistaken for a device leaving
+                    // and a differently-named device arriving.
+                    let currentIDs = Set(self.devices.map(\.uniqueIdentifier))
+                    let currentNamesByID = Dictionary(
+                        self.devices.map { ($0.uniqueIdentifier, $0.name) },
+                        uniquingKeysWith: { first, _ in first }
+                    )
+                    if !self.knownDeviceIDs.isEmpty {
+                        let joinedIDs = currentIDs.subtracting(self.knownDeviceIDs)
+                        let leftIDs   = self.knownDeviceIDs.subtracting(currentIDs)
+                        // Resolve display names: joined devices are present now;
+                        // left devices are gone, so fall back to their last-seen name.
+                        let joined = joinedIDs.compactMap { currentNamesByID[$0] }.sorted()
+                        let left   = leftIDs.compactMap { self.knownDeviceNamesByID[$0] }.sorted()
+                        if !joinedIDs.isEmpty || !leftIDs.isEmpty {
                             let change = TopologyChange(timestamp: Date(),
-                                                        joined: Array(joined).sorted(),
-                                                        left: Array(left).sorted())
+                                                        joined: joined,
+                                                        left: left)
                             self.recentTopologyChanges.insert(change, at: 0)
                             // Keep at most 20 entries; prune any older than 5 minutes so
                             // the topology banner never shows stale events.
@@ -148,17 +163,18 @@ final class MeshViewModel {
                                     .prefix(20)
                             )
                             NotificationService.shared.notifyTopologyChange(
-                                joined: Array(joined), left: Array(left))
-                            for name in joined.sorted() {
+                                joined: joined, left: left)
+                            for name in joined {
                                 ActivityStore.shared.record(kind: .topologyJoined, deviceName: name, detail: "\(name) joined the Thread network")
                             }
-                            for name in left.sorted() {
+                            for name in left {
                                 ActivityStore.shared.record(kind: .topologyLeft, deviceName: name, detail: "\(name) left the Thread network")
                             }
                             graphNeedsRebuild = true
                         }
                     }
-                    self.knownDeviceNames = currentNames
+                    self.knownDeviceIDs = currentIDs
+                    self.knownDeviceNamesByID = currentNamesByID
 
                     if graphNeedsRebuild { self.applyFilters() }
                     self.scanError = errorMsg
@@ -203,6 +219,8 @@ final class MeshViewModel {
                     // offlineNames, deviceStates, brCount/routerCount).
                     var offlineCount = 0, weakCount = 0, brCount = 0, routerCount = 0
                     var offlineNames: [String] = []
+                    // Keyed by device identity (uuidString), not name: duplicate
+                    // names must not collide and a rename must not orphan state.
                     var deviceStates: [String: Bool] = [:]
                     var roomBuckets: [String: (count: Int, offline: Int, weak: Int)] = [:]
                     for d in self.devices {
@@ -213,7 +231,7 @@ final class MeshViewModel {
                         if isWeak { weakCount += 1 }
                         if d.isBorderRouter    { brCount += 1 }
                         if d.isRoutingCapable  { routerCount += 1 }
-                        deviceStates[d.name] = !isOff
+                        deviceStates[d.uniqueIdentifier.uuidString] = !isOff
                         var b = roomBuckets[room, default: (0, 0, 0)]
                         b.count += 1
                         if isOff  { b.offline += 1 }
@@ -312,12 +330,6 @@ final class MeshViewModel {
             self.threadNetworks = networks
             self.applyFilters()   // rebuild the graph with any real routing applied
         }
-    }
-
-    private func rebuildGraph() {
-        let graph = MeshTopologyBuilder.buildGraph(from: devices, diagnostics: latestDiagnostics)
-        nodes = graph.0
-        links = graph.1
     }
 
     func routerDensity(for room: String? = nil) -> Int {

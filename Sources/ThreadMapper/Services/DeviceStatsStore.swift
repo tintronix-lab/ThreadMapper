@@ -44,10 +44,11 @@ final class DeviceStatsStore {
     func stats(for deviceID: UUID) -> DeviceStats? {
         guard let list = readings[deviceID.uuidString], !list.isEmpty else { return nil }
         let values = list.map(\.rssi)
+        guard let minRSSI = values.min(), let maxRSSI = values.max() else { return nil }
         return DeviceStats(
             readings: list,
-            minRSSI: values.min()!,
-            maxRSSI: values.max()!,
+            minRSSI: minRSSI,
+            maxRSSI: maxRSSI,
             avgRSSI: values.reduce(0, +) / values.count
         )
     }

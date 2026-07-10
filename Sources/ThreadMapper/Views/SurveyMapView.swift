@@ -145,13 +145,14 @@ struct SurveyMapView: View {
     }
 
     private static func initialCamera(for points: [SurveyPoint]) -> MapCameraPosition {
-        guard !points.isEmpty else { return .automatic }
         let lats = points.map(\.latitude)
         let lngs = points.map(\.longitude)
-        let centerLat = (lats.min()! + lats.max()!) / 2
-        let centerLng = (lngs.min()! + lngs.max()!) / 2
-        let spanLat = max((lats.max()! - lats.min()!) * 2.0, 0.004)
-        let spanLng = max((lngs.max()! - lngs.min()!) * 2.0, 0.004)
+        guard let minLat = lats.min(), let maxLat = lats.max(),
+              let minLng = lngs.min(), let maxLng = lngs.max() else { return .automatic }
+        let centerLat = (minLat + maxLat) / 2
+        let centerLng = (minLng + maxLng) / 2
+        let spanLat = max((maxLat - minLat) * 2.0, 0.004)
+        let spanLng = max((maxLng - minLng) * 2.0, 0.004)
         return .region(MKCoordinateRegion(
             center: CLLocationCoordinate2D(latitude: centerLat, longitude: centerLng),
             span: MKCoordinateSpan(latitudeDelta: spanLat, longitudeDelta: spanLng)

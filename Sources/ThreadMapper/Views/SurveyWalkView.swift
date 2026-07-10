@@ -445,8 +445,8 @@ struct HeatmapCanvas: View {
         var lats = cells.map { $0.coordinate.latitude }
         var lngs = cells.map { $0.coordinate.longitude }
         if let f = focus { lats.append(f.latitude); lngs.append(f.longitude) }
-        let minLat = lats.min()!, maxLat = lats.max()!
-        let minLng = lngs.min()!, maxLng = lngs.max()!
+        guard let minLat = lats.min(), let maxLat = lats.max(),
+              let minLng = lngs.min(), let maxLng = lngs.max() else { return nil }
         return (minLat, minLng, max(maxLat - minLat, 1e-9), max(maxLng - minLng, 1e-9))
     }
 

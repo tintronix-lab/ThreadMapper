@@ -5,7 +5,10 @@ enum AppGroupStore {
     static let groupID = "group.com.tintronixlab.ThreadMapper"
 
     private static let snapshotKey = "networkSnapshot"
-    private static let deviceStatesKey = "deviceStates"
+    // v2: keyed by device uniqueIdentifier (uuidString), not name. The renamed
+    // key ensures a legacy name-keyed blob is ignored rather than misread as
+    // device-state (which would otherwise fire spurious offline notifications).
+    private static let deviceStatesKey = "deviceStatesByID"
 
     // Widget reload throttling — WidgetKit has a strict daily reload budget,
     // and the caller runs at ~1 Hz. Only reload when meaningful content

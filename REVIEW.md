@@ -704,3 +704,59 @@ an OTBR's REST API.
 tables) into `ThreadNodeDiagnostics`, and correlate OTBR nodes (ext-address) to
 HomeKit accessories so the real routing table drives the graph. `nodeDiagnostics()`
 is stubbed empty until then.
+
+---
+
+## Phase 8 — Iteration 11 (2026-07-09: safe-fix pass + forward work plan)
+
+Re-scanned the tree against the original review. Confirmed the top-severity
+items (widget reload storm, H2 metadata propagation, idle backoff, helper
+duplication, D4 health churn) are already resolved in-tree. Ran a low-risk,
+behavior-preserving pass and captured the remaining backlog in `WORKPLAN.md`.
+
+**Shipped (no behavior change; each clears an opt-in lint warning or dead code):**
+- Removed dead `rebuildGraph()` in `MeshViewModel` (`applyFilters()` is the live path).
+- `BackgroundRefreshHandler`: `task as!` → `guard let` (completes the task on type mismatch instead of trapping).
+- `DeviceStatsStore.stats`: `values.min()!/.max()!` → guarded bindings.
+- `WeeklyReportStore`: `historyEntries.last!/.first!` → `if let` (guard already ensured count ≥ 2).
+- `SurveyWalkView.bounds` / `SurveyMapView.initialCamera`: `min()!/max()!` → guarded bindings.
+
+**Deferred to `WORKPLAN.md` (need Xcode build to verify):** name-keyed identity
+→ `uniqueIdentifier` (P1), decompose the `MeshViewModel` init poll loop (P2),
+split 400+ line views (P2), reduce singletons for DI/testability (P2), gate the
+1 Hz main-actor work (P3), off-main graph layout (P3), concurrency/`Sendable`
+audit + persistence consolidation (P4), Dynamic Type + contextual permissions (P5).
+
+**Validation caveat:** prepared without a Swift toolchain — validated by static
+analysis and guard-invariant reasoning. Run `make ci` before committing.
+
+---
+
+## Phase 8 — Iteration 12 (2026-07-09: P1 identity keying — name → uniqueIdentifier)
+
+Closed the top backlog item from `WORKPLAN.md`: device identity was keyed by
+mutable `name` in two places, so duplicate names collided and a rename read as a
+membership change. Both are now keyed by `ThreadDevice.uniqueIdentifier`.
+
+**Topology join/leave (`MeshViewModel`):** replaced `knownDeviceNames: Set<String>`
+with `knownDeviceIDs: Set<UUID>` plus a `knownDeviceNamesByID: [UUID: String]`
+last-seen-name map. Join/leave is diffed on IDs; display names are resolved from
+current devices (joined) or the retained name map (left, since those devices are
+already gone). Banner text, notifications, and activity events are unchanged in
+shape — a rename no longer emits a spurious leave+join.
+
+**Device-state map (`MeshViewModel` + `BackgroundRefreshHandler`):** the App Group
+`deviceStates` dictionary is now keyed by `uniqueIdentifier.uuidString` in both the
+foreground poll loop and the background handler, which diff it to fire offline/online
+notifications. Storage key bumped `deviceStates` → `deviceStatesByID` so a legacy
+name-keyed blob is ignored rather than misread (which could have fired false
+offline alerts on first launch after update).
+
+**Blast radius checked:** only `BackgroundRefreshHandler` reads `deviceStates`
+(widget reads the snapshot, not this map); no tests touch these internals;
+`notifyDeviceOffline(_:room:deviceID:)` call site matches. Behind a single-home
+setup the observable behavior is identical; the win shows up with duplicate names,
+renames, and (later) multi-home.
+
+**Still open (P1 remainder):** namespace persisted keys by `HMHome.uniqueIdentifier`
+before promoting multi-home. Verify with `make ci` before committing.

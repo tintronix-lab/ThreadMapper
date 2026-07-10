@@ -9,7 +9,12 @@ enum BackgroundRefreshHandler {
 
     static func register() {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: taskID, using: .main) { task in
-            handleRefresh(task: task as! BGAppRefreshTask)
+            guard let refreshTask = task as? BGAppRefreshTask else {
+                logger.error("Unexpected task type for \(taskID, privacy: .public); marking complete")
+                task.setTaskCompleted(success: false)
+                return
+            }
+            handleRefresh(task: refreshTask)
         }
     }
 
@@ -60,25 +65,29 @@ private final class ReachabilityChecker: NSObject, HMHomeManagerDelegate {
     func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {}
 
     private func checkAndNotify() async {
+        // State is keyed by device uniqueIdentifier (uuidString), matching the
+        // foreground poll loop — duplicate names never collide and a rename never
+        // reads as a device going offline.
         let previous = AppGroupStore.readDeviceStates()
         var current: [String: Bool] = [:]
+        var names: [String: String] = [:]
         var rooms: [String: String] = [:]
 
-        // Collect current state keyed by name (for AppGroupStore) and by UUID (for notifications)
-        var uuidByName: [String: UUID] = [:]
         for home in manager.homes {
             for acc in home.accessories {
-                current[acc.name] = acc.isReachable
-                uuidByName[acc.name] = acc.uniqueIdentifier
-                if let room = acc.room { rooms[acc.name] = room.name }
+                let key = acc.uniqueIdentifier.uuidString
+                current[key] = acc.isReachable
+                names[key] = acc.name
+                if let room = acc.room { rooms[key] = room.name }
             }
         }
 
-        for (name, reachable) in current {
-            guard let uuid = uuidByName[name] else { continue }
-            let wasReachable = previous[name] ?? true
+        for (key, reachable) in current {
+            guard let uuid = UUID(uuidString: key) else { continue }
+            let name = names[key] ?? "Device"
+            let wasReachable = previous[key] ?? true
             if !reachable && wasReachable {
-                NotificationService.shared.notifyDeviceOffline(name, room: rooms[name], deviceID: uuid)
+                NotificationService.shared.notifyDeviceOffline(name, room: rooms[key], deviceID: uuid)
             } else if reachable && !wasReachable {
                 NotificationService.shared.clearOfflineNotification(for: uuid)
             }
