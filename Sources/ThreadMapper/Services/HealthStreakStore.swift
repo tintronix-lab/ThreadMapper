@@ -17,17 +17,28 @@ final class HealthStreakStore {
     }
 
     @ObservationIgnored private var lastRecordedDate: Date?
-    @ObservationIgnored private let storeURL: URL = {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    @ObservationIgnored private let storeURL: URL
+
+    /// `storeURL` is injectable so tests can use a throwaway file; the shared
+    /// instance persists to Documents.
+    init(storeURL: URL? = nil) {
+        self.storeURL = storeURL ?? FileManager.default
+            .urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("health_streaks.json")
-    }()
+        restore()
+    }
 
-    private init() { restore() }
+    /// Creates a fresh isolated store backed by a temp file. For tests only.
+    static func makeTestInstance() -> HealthStreakStore {
+        HealthStreakStore(storeURL: FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(UUID().uuidString)_streaks.json"))
+    }
 
-    /// Records the network grade for today. Safe to call on every poll tick — only
-    /// records once per calendar day and ignores subsequent calls.
-    func record(grade: String) {
-        let today = Calendar.current.startOfDay(for: Date())
+    /// Records the network grade for the given day (default today). Safe to call
+    /// on every poll tick — records once per calendar day and ignores subsequent
+    /// same-day calls. `date` is injectable for deterministic tests.
+    func record(grade: String, on date: Date = Date()) {
+        let today = Calendar.current.startOfDay(for: date)
         if let last = lastRecordedDate, Calendar.current.isDate(last, inSameDayAs: today) { return }
 
         if grade == "A" {
