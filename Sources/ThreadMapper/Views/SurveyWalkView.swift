@@ -220,7 +220,7 @@ struct SurveyWalkView: View {
                                     .font(.caption2.weight(.semibold))
                                     .foregroundStyle(q.color)
                                 Text("response quality")
-                                    .font(.system(size: 9))
+                                    .font(.caption2)
                                     .foregroundStyle(q.color.opacity(0.7))
                             }
                         } else {

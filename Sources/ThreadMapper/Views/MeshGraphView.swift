@@ -169,7 +169,7 @@ struct MeshGraphView: View {
     @ViewBuilder private var emptyState: some View {
         VStack(spacing: 6) {
             Image(systemName: "network.slash")
-                .font(.system(size: 26))
+                .font(.title2)
                 .foregroundStyle(.secondary)
             Text("No Thread devices")
                 .font(.subheadline)
