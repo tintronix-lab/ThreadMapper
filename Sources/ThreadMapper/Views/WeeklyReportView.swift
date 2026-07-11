@@ -38,7 +38,7 @@ struct WeeklyReportView: View {
                     .fill(gradeColor.opacity(0.12))
                     .frame(width: 80, height: 80)
                 Text(report.peakGrade)
-                    .font(.system(size: 44, weight: .black, design: .rounded))
+                    .font(.system(.largeTitle, design: .rounded, weight: .black))
                     .foregroundStyle(gradeColor)
             }
 

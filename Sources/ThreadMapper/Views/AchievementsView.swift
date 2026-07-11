@@ -24,7 +24,7 @@ struct AchievementsView: View {
                         .foregroundStyle(.secondary)
                     if let date = achievement.unlockedAt {
                         Text(date.formatted(.dateTime.day().month().year()))
-                            .font(.system(size: 9))
+                            .font(.caption2)
                             .foregroundStyle(.tertiary)
                     }
                 }
