@@ -347,7 +347,7 @@ struct DashboardView: View {
             Spacer()
             if issue.isCritical {
                 Text("Critical")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.caption.weight(.bold))
                     .foregroundStyle(.red)
                     .padding(.horizontal, 7)
                     .padding(.vertical, 3)
@@ -535,7 +535,7 @@ struct DashboardView: View {
 
                 if let g = worstGrade {
                     Text(g)
-                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .font(.system(.callout, design: .rounded, weight: .bold))
                         .foregroundStyle(TMStyle.gradeColor(g))
                 }
 
@@ -798,7 +798,7 @@ private struct DashboardResilienceSection: View {
                     Circle()
                         .stroke(r.color.opacity(0.12), lineWidth: 6)
                     Text(r.grade)
-                        .font(.system(size: 22, weight: .black, design: .rounded))
+                        .font(.system(.title2, design: .rounded, weight: .black))
                         .foregroundStyle(r.color)
                 }
                 .frame(width: 56, height: 56)

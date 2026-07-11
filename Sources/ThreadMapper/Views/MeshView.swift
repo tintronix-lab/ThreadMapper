@@ -128,10 +128,10 @@ struct MeshView: View {
     private func statCell(value: String, label: String, color: Color) -> some View {
         VStack(spacing: 2) {
             Text(value)
-                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .font(.system(.title3, design: .rounded, weight: .bold))
                 .foregroundStyle(color)
             Text(label)
-                .font(.system(size: 10))
+                .font(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
@@ -248,7 +248,7 @@ struct MeshView: View {
     @ViewBuilder private var emptyPlaceholder: some View {
         VStack(spacing: 8) {
             Image(systemName: "network.slash")
-                .font(.system(size: 32))
+                .font(.largeTitle)
                 .foregroundStyle(.secondary)
                 .padding(.bottom, 4)
             Text("No Thread devices found")
@@ -384,7 +384,7 @@ struct MeshView: View {
                 ForEach(viewModel.threadNetworks) { net in
                     HStack(spacing: 5) {
                         Image(systemName: "point.3.filled.connected.trianglepath.dotted")
-                            .font(.system(size: 9))
+                            .font(.caption2)
                             .foregroundStyle(.green)
                         Text(net.networkName)
                             .font(.caption2.weight(.semibold))
@@ -485,7 +485,7 @@ private struct BorderRouterCardView: View {
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     Image(systemName: "antenna.radiowaves.left.and.right")
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.blue)
                     Spacer()
                     if let rssi = device?.rssi {
@@ -493,7 +493,7 @@ private struct BorderRouterCardView: View {
                     }
                 }
                 Text(node.name)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.footnote.weight(.semibold))
                     .lineLimit(2)
                     .foregroundStyle(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -509,7 +509,7 @@ private struct BorderRouterCardView: View {
                             .foregroundStyle(.blue)
                     }
                 }
-                .font(.system(size: 9, weight: .medium))
+                .font(.caption2.weight(.medium))
                 .foregroundStyle(.secondary)
             }
             .padding(12)
@@ -560,7 +560,7 @@ private struct MeshDeviceRowView: View {
 
     private func badgeCapsule(_ label: String, color: Color) -> some View {
         Text(label)
-            .font(.system(size: 9, weight: .semibold))
+            .font(.caption2.weight(.semibold))
             .foregroundStyle(color)
             .padding(.horizontal, 5).padding(.vertical, 2)
             .background(color.opacity(0.1), in: Capsule())
@@ -584,14 +584,14 @@ private struct MeshDeviceRowView: View {
                         .fill(roleColor(node.kind).opacity(0.12))
                         .frame(width: 38, height: 38)
                     Image(systemName: roleIcon(node.kind))
-                        .font(.system(size: 15, weight: .medium))
+                        .font(.subheadline.weight(.medium))
                         .foregroundStyle(roleColor(node.kind))
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
                         Text(node.name)
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.subheadline.weight(.medium))
                             .lineLimit(1)
                             .foregroundStyle(device?.isOffline == true ? .secondary : .primary)
                         roleBadge(node.kind)
@@ -600,21 +600,21 @@ private struct MeshDeviceRowView: View {
                         if let rssi = device?.rssi {
                             SignalBarsView(rssi: rssi, size: .small)
                             Text(rssi.rssiQualityLabel)
-                                .font(.system(size: 11))
+                                .font(.caption2)
                                 .foregroundStyle(rssi.rssiColor)
                         } else if device?.isOffline == true {
                             Label("Offline", systemImage: "wifi.slash")
-                                .font(.system(size: 11))
+                                .font(.caption2)
                                 .foregroundStyle(.red)
                         } else {
                             Text("No signal data")
-                                .font(.system(size: 11))
+                                .font(.caption2)
                                 .foregroundStyle(.tertiary)
                         }
                         if let ch = device?.channel {
                             Text("·").foregroundStyle(.tertiary)
                             Text("CH \(ch)")
-                                .font(.system(size: 11))
+                                .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -626,15 +626,15 @@ private struct MeshDeviceRowView: View {
                     if let pct = device?.batteryPercentage {
                         HStack(spacing: 3) {
                             Image(systemName: batteryIcon(pct))
-                                .font(.system(size: 12))
+                                .font(.caption)
                                 .foregroundStyle(pct < 20 ? .red : .secondary)
                             Text("\(pct)%")
-                                .font(.system(size: 11))
+                                .font(.caption2)
                                 .foregroundStyle(pct < 20 ? .red : .secondary)
                         }
                     }
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.caption2.weight(.semibold))
                         .foregroundStyle(.tertiaryLabel)
                 }
             }

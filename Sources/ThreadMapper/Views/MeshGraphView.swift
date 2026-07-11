@@ -23,6 +23,8 @@ struct MeshGraphView: View {
     // Tracked via onGeometryChange — reliable inside NavigationStack/sheet contexts
     // where onAppear may fire before the final size is settled.
     @State private var viewSize: CGSize = .zero
+    // Gating hash: skip layout re-solve when node membership/rooms/size are unchanged.
+    @State private var layoutHash: Int? = nil
 
     private var nodesByID: [UUID: MeshNode] {
         Dictionary(nodes.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
@@ -133,7 +135,7 @@ struct MeshGraphView: View {
             // Hint: only visible when end-device labels are hidden (scale < 0.7).
             if scale < 0.7, !nodes.isEmpty {
                 Text("Pinch to zoom for device names")
-                    .font(.system(size: 10))
+                    .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
@@ -195,11 +197,11 @@ struct MeshGraphView: View {
                         .lineLimit(1)
                     Spacer()
                     Text(node.kind.rawValue)
-                        .font(.system(size: 10))
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                     if let d = device {
                         Button("Details →") { onSelectDevice(d) }
-                            .font(.system(size: 10, weight: .semibold))
+                            .font(.caption.weight(.semibold))
                             .foregroundStyle(Color.accentColor)
                     }
                 }
@@ -220,13 +222,13 @@ struct MeshGraphView: View {
                             Label("CH \(ch)", systemImage: "wave.3.right")
                         }
                     }
-                    .font(.system(size: 10))
+                    .font(.caption)
                     .foregroundStyle(.secondary)
                 }
 
                 if let route = routeDescription(from: node) {
                     Label(route, systemImage: "point.topleft.down.to.point.bottomright.curvepath")
-                        .font(.system(size: 10))
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                 }
@@ -286,12 +288,12 @@ struct MeshGraphView: View {
             Divider().padding(.vertical, 1)
             if isLive {
                 Label("Live routing · Border Router", systemImage: "checkmark.seal.fill")
-                    .font(.system(size: 8, weight: .semibold))
+                    .font(.caption2.weight(.semibold))
                     .foregroundStyle(.green)
                     .fixedSize(horizontal: false, vertical: true)
             } else {
                 Text("Estimated paths — HomeKit\ndoesn't report Thread routing")
-                    .font(.system(size: 8))
+                    .font(.caption2)
                     .foregroundStyle(.tertiary)
                     .italic()
                     .fixedSize(horizontal: false, vertical: true)
@@ -304,7 +306,7 @@ struct MeshGraphView: View {
     private var fitResetButton: some View {
         Button { fitToView(size: viewSize) } label: {
             Image(systemName: "arrow.up.left.and.arrow.down.right")
-                .font(.system(size: 10))
+                .font(.caption)
                 .padding(6)
                 .background(.ultraThinMaterial, in: Circle())
         }
@@ -318,7 +320,7 @@ struct MeshGraphView: View {
         HStack(spacing: 4) {
             ZStack {
                 if let symbol {
-                    Image(systemName: symbol).font(.system(size: 8)).foregroundStyle(color)
+                    Image(systemName: symbol).font(.caption2).foregroundStyle(color)
                 } else if let dotColor {
                     if battery {
                         Circle().stroke(Color.green, lineWidth: 1.5).frame(width: 8, height: 8)
@@ -330,7 +332,7 @@ struct MeshGraphView: View {
                 }
             }
             .frame(width: 10)
-            Text(label).font(.system(size: 10)).foregroundStyle(.secondary)
+            Text(label).font(.caption).foregroundStyle(.secondary)
         }
     }
 }
@@ -338,8 +340,23 @@ struct MeshGraphView: View {
 // MARK: - Layout & Transform
 extension MeshGraphView {
 
+    private func layoutMembershipHash(nodes: [MeshNode], size: CGSize) -> Int {
+        var hasher = Hasher()
+        for node in nodes.sorted(by: { $0.id < $1.id }) {
+            hasher.combine(node.id)
+            hasher.combine(node.room)
+            hasher.combine(node.kind.rawValue)
+        }
+        hasher.combine(Int(size.width))
+        hasher.combine(Int(size.height))
+        return hasher.finalize()
+    }
+
     private func applyLayout(size: CGSize) {
         guard !nodes.isEmpty, size.width > 80, size.height > 80 else { return }
+        let newHash = layoutMembershipHash(nodes: nodes, size: size)
+        guard newHash != layoutHash else { return }
+        layoutHash = newHash
         let (newLayout, newRoomBounds) = GraphLayout.byRoom(nodes: nodes, size: size)
         layout     = newLayout
         roomBounds = newRoomBounds
