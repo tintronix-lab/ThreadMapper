@@ -46,7 +46,7 @@ struct PaywallView: View {
                     .fill(Color.accentColor.opacity(0.12))
                     .frame(width: 80, height: 80)
                 Image(systemName: "network")
-                    .font(.system(size: 38))
+                    .font(.largeTitle)
                     .foregroundStyle(Color.accentColor)
             }
             VStack(spacing: 6) {
@@ -140,7 +140,7 @@ struct PaywallView: View {
                             .font(.subheadline.weight(.semibold))
                         if isAnnual {
                             Text("Most Popular")
-                                .font(.system(size: 9, weight: .bold))
+                                .font(.caption2.weight(.bold))
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
                                 .background(.orange.opacity(0.15), in: Capsule())
