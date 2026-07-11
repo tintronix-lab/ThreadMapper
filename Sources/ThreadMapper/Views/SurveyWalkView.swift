@@ -331,7 +331,7 @@ struct SurveyWalkView: View {
         let ordered = viewModel.weakDevices.sorted { $0.name < $1.name }
         Section("Weak Links") {
             if ordered.isEmpty {
-                Text("None — threshold RSSI < −80 dBm")
+                Text("None — threshold response quality < −80")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
