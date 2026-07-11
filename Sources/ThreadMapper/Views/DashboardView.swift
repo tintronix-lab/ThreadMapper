@@ -19,10 +19,6 @@ struct DashboardView: View {
     @State private var roomCoverageExpanded = true
     @State private var allDevicesExpanded = true
 
-    // Fixed hero font sizes backed by @ScaledMetric so they honor Dynamic Type
-    // (identical at the default text size, scale up at accessibility sizes) — D8.
-    @ScaledMetric(relativeTo: .largeTitle) private var gradeLetterSize: CGFloat = 36
-    @ScaledMetric(relativeTo: .caption2) private var gradeScoreSize: CGFloat = 11
     @ScaledMetric(relativeTo: .caption2) private var statLabelSize: CGFloat = 9
 
     private var health: NetworkHealthScore { viewModel.health }
@@ -164,7 +160,7 @@ struct DashboardView: View {
     private var healthSection: some View {
         Section {
             HStack(alignment: .center, spacing: 20) {
-                gradeRingView
+                GradeRingView(health: health)
 
                 VStack(alignment: .leading, spacing: 10) {
                     VStack(alignment: .leading, spacing: 2) {
@@ -237,30 +233,6 @@ struct DashboardView: View {
         }
     }
 
-    @ViewBuilder
-    private var gradeRingView: some View {
-        ZStack {
-            Circle()
-                .stroke(health.color.opacity(0.12), lineWidth: 8)
-            Circle()
-                .trim(from: 0, to: CGFloat(health.score) / 100)
-                .stroke(health.color, style: StrokeStyle(lineWidth: 8, lineCap: .round))
-                .rotationEffect(.degrees(-90))
-                .animation(.spring(response: 0.8, dampingFraction: 0.75), value: health.score)
-            VStack(spacing: 0) {
-                Text(health.grade)
-                    .font(.system(size: gradeLetterSize, weight: .black, design: .rounded))
-                    .minimumScaleFactor(0.5)
-                    .lineLimit(1)
-                    .foregroundStyle(health.color)
-                Text("\(health.score)")
-                    .font(.system(size: gradeScoreSize, weight: .bold, design: .monospaced))
-                    .foregroundStyle(health.color.opacity(0.7))
-            }
-        }
-        .frame(width: 92, height: 92)
-        .shadow(color: health.color.opacity(0.25), radius: 8, x: 0, y: 3)
-    }
 
     /// Stat card backed by a Button that pushes onto `navPath`. Buttons — unlike
     /// NavigationLinks — have no one-per-List-row restriction, so all four tiles
@@ -395,103 +367,10 @@ struct DashboardView: View {
 
     // MARK: - Resilience
 
-    private struct ResilienceInfo {
-        let borderRouterCount: Int
-        let routerCount: Int
-        let grade: String
-        let summary: String
-        let color: Color
-        let criticalNames: [String]
-    }
-
-    // Single pass over devices — avoids three separate filter scans per render.
-    private var resilience: ResilienceInfo {
-        var brCount = 0
-        var routerCount = 0
-        var brNames: [String] = []
-        for device in viewModel.devices {
-            if device.isBorderRouter { brCount += 1; brNames.append(device.name) }
-            if device.isRoutingCapable { routerCount += 1 }
-        }
-        let grade: String
-        switch (brCount, routerCount) {
-        case (2..., 4...): grade = "A"
-        case (2..., 2...): grade = "B"
-        case (1..., 3...): grade = "C"
-        case (1..., 1...): grade = "D"
-        default:           grade = "F"
-        }
-        let summary: String
-        switch grade {
-        case "A": summary = "Excellent redundancy — true mesh failover"
-        case "B": summary = "Good resilience — dual border routers"
-        case "C": summary = "Moderate — one border router, some routing"
-        case "D": summary = "Limited — single router, no failover path"
-        default:  summary = "No border router — Thread network at risk"
-        }
-        let criticalNames = (grade == "D" || grade == "F") ? brNames.sorted() : []
-        return ResilienceInfo(
-            borderRouterCount: brCount,
-            routerCount: routerCount,
-            grade: grade,
-            summary: summary,
-            color: TMStyle.gradeColor(grade),
-            criticalNames: criticalNames
-        )
-    }
-
     @ViewBuilder
     private var resilienceSection: some View {
         if !viewModel.devices.isEmpty {
-            let r = resilience
-            Section {
-                HStack(spacing: 16) {
-                    ZStack {
-                        Circle()
-                            .stroke(r.color.opacity(0.12), lineWidth: 6)
-                        Text(r.grade)
-                            .font(.system(size: 22, weight: .black, design: .rounded))
-                            .foregroundStyle(r.color)
-                    }
-                    .frame(width: 56, height: 56)
-                    .shadow(color: r.color.opacity(0.2), radius: 6, x: 0, y: 2)
-
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(r.summary)
-                            .font(.subheadline)
-                            .fixedSize(horizontal: false, vertical: true)
-
-                        HStack(spacing: 12) {
-                            Label("\(r.borderRouterCount) Border Router\(r.borderRouterCount == 1 ? "" : "s")",
-                                  systemImage: "antenna.radiowaves.left.and.right")
-                            Label("\(r.routerCount) Total Router\(r.routerCount == 1 ? "" : "s")",
-                                  systemImage: "point.3.connected.trianglepath.dotted")
-                        }
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-
-                        if !r.criticalNames.isEmpty {
-                            Text("Critical: \(r.criticalNames.joined(separator: ", "))")
-                                .font(.caption2.weight(.semibold))
-                                .foregroundStyle(.red)
-                        }
-                    }
-                }
-                .padding(.vertical, 6)
-            } header: {
-                HStack {
-                    Text("Mesh Resilience")
-                    Spacer()
-                    if !ProStore.shared.isPro {
-                        Button { showPaywall = true } label: {
-                            Label("Pro", systemImage: "lock.fill")
-                                .font(.caption2.weight(.semibold))
-                                .foregroundStyle(.secondary)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
+            DashboardResilienceSection(devices: viewModel.devices, showPaywall: $showPaywall)
         }
     }
 
@@ -829,5 +708,135 @@ struct DashboardView: View {
             )
         }
         return suggestions
+    }
+}
+
+// MARK: - Private subviews
+
+/// Animated grade ring that isolates Dynamic Type metrics from the parent view,
+/// preventing DashboardView from re-rendering when only scale changes.
+private struct GradeRingView: View {
+    let health: NetworkHealthScore
+    @ScaledMetric(relativeTo: .largeTitle) private var gradeLetterSize: CGFloat = 36
+    @ScaledMetric(relativeTo: .caption2)  private var gradeScoreSize: CGFloat = 11
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(health.color.opacity(0.12), lineWidth: 8)
+            Circle()
+                .trim(from: 0, to: CGFloat(health.score) / 100)
+                .stroke(health.color, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .animation(.spring(response: 0.8, dampingFraction: 0.75), value: health.score)
+            VStack(spacing: 0) {
+                Text(health.grade)
+                    .font(.system(size: gradeLetterSize, weight: .black, design: .rounded))
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+                    .foregroundStyle(health.color)
+                Text("\(health.score)")
+                    .font(.system(size: gradeScoreSize, weight: .bold, design: .monospaced))
+                    .foregroundStyle(health.color.opacity(0.7))
+            }
+        }
+        .frame(width: 92, height: 92)
+        .shadow(color: health.color.opacity(0.25), radius: 8, x: 0, y: 3)
+    }
+}
+
+/// Resilience section with its own single-pass device aggregation, isolated so
+/// it only re-renders when `devices` or the paywall binding changes.
+private struct DashboardResilienceSection: View {
+    let devices: [ThreadDevice]
+    @Binding var showPaywall: Bool
+
+    private struct ResilienceInfo {
+        let borderRouterCount: Int
+        let routerCount: Int
+        let grade: String
+        let summary: String
+        let color: Color
+        let criticalNames: [String]
+    }
+
+    private var resilience: ResilienceInfo {
+        var brCount = 0, routerCount = 0
+        var brNames: [String] = []
+        for device in devices {
+            if device.isBorderRouter { brCount += 1; brNames.append(device.name) }
+            if device.isRoutingCapable { routerCount += 1 }
+        }
+        let grade: String
+        switch (brCount, routerCount) {
+        case (2..., 4...): grade = "A"
+        case (2..., 2...): grade = "B"
+        case (1..., 3...): grade = "C"
+        case (1..., 1...): grade = "D"
+        default:           grade = "F"
+        }
+        let summary: String
+        switch grade {
+        case "A": summary = "Excellent redundancy — true mesh failover"
+        case "B": summary = "Good resilience — dual border routers"
+        case "C": summary = "Moderate — one border router, some routing"
+        case "D": summary = "Limited — single router, no failover path"
+        default:  summary = "No border router — Thread network at risk"
+        }
+        return ResilienceInfo(
+            borderRouterCount: brCount, routerCount: routerCount,
+            grade: grade, summary: summary, color: TMStyle.gradeColor(grade),
+            criticalNames: (grade == "D" || grade == "F") ? brNames.sorted() : []
+        )
+    }
+
+    var body: some View {
+        let r = resilience
+        Section {
+            HStack(spacing: 16) {
+                ZStack {
+                    Circle()
+                        .stroke(r.color.opacity(0.12), lineWidth: 6)
+                    Text(r.grade)
+                        .font(.system(size: 22, weight: .black, design: .rounded))
+                        .foregroundStyle(r.color)
+                }
+                .frame(width: 56, height: 56)
+                .shadow(color: r.color.opacity(0.2), radius: 6, x: 0, y: 2)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(r.summary)
+                        .font(.subheadline)
+                        .fixedSize(horizontal: false, vertical: true)
+                    HStack(spacing: 12) {
+                        Label("\(r.borderRouterCount) Border Router\(r.borderRouterCount == 1 ? "" : "s")",
+                              systemImage: "antenna.radiowaves.left.and.right")
+                        Label("\(r.routerCount) Total Router\(r.routerCount == 1 ? "" : "s")",
+                              systemImage: "point.3.connected.trianglepath.dotted")
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    if !r.criticalNames.isEmpty {
+                        Text("Critical: \(r.criticalNames.joined(separator: ", "))")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.red)
+                    }
+                }
+            }
+            .padding(.vertical, 6)
+        } header: {
+            HStack {
+                Text("Mesh Resilience")
+                Spacer()
+                if !ProStore.shared.isPro {
+                    Button { showPaywall = true } label: {
+                        Label("Pro", systemImage: "lock.fill")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
     }
 }

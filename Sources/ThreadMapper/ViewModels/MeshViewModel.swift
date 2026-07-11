@@ -60,6 +60,17 @@ final class MeshViewModel {
     @ObservationIgnored private var offlineDeviceIDs: Set<UUID> = []
     @ObservationIgnored private var pendingOfflineTasks: [UUID: Task<Void, Never>] = [:]
     @ObservationIgnored private var previousHealthScore: Int? = nil
+    /// Fingerprint of the last-written aggregate snapshot — used to skip
+    /// redundant AppGroupStore writes when nothing has changed between ticks.
+    @ObservationIgnored private var lastSnapshotFingerprint: SnapshotFingerprint? = nil
+
+    private struct SnapshotFingerprint: Equatable {
+        let deviceCount: Int
+        let offlineCount: Int
+        let weakCount: Int
+        let brCount: Int
+        let routerCount: Int
+    }
 
     private var effectiveGracePeriod: TimeInterval {
         let stored = UserDefaults.standard.double(forKey: "offlineGracePeriod")
@@ -120,12 +131,22 @@ final class MeshViewModel {
                     // Assign only on change — NetworkHealthScore is Equatable, so an
                     // identical tick no longer invalidates every Dashboard observer (D4).
                     if newHealth != self.health { self.health = newHealth }
-                    AppGroupStore.writeSnapshot(self.buildWidgetSnapshot(health: newHealth, aggregates: agg))
-                    AppGroupStore.writeDeviceStates(agg.deviceStates)
-                    HealthHistoryStore.shared.record(score: newHealth.score, grade: newHealth.grade)
-                    HealthStreakStore.shared.record(grade: newHealth.grade)
-                    if newHealth.grade == "A" { AchievementStore.shared.unlock("firstGradeA") }
-                    if agg.brCount >= 2 && agg.routerCount >= 4 { AchievementStore.shared.unlock("resilienceA") }
+                    // Only write the snapshot and trigger side-effects when the aggregate
+                    // state actually changed. The offline grace-period sweep above runs
+                    // every tick regardless, so we still detect transitions promptly.
+                    let fingerprint = SnapshotFingerprint(
+                        deviceCount: self.devices.count, offlineCount: agg.offlineCount,
+                        weakCount: agg.weakCount, brCount: agg.brCount, routerCount: agg.routerCount
+                    )
+                    if fingerprint != self.lastSnapshotFingerprint || newHealth != self.health {
+                        self.lastSnapshotFingerprint = fingerprint
+                        AppGroupStore.writeSnapshot(self.buildWidgetSnapshot(health: newHealth, aggregates: agg))
+                        AppGroupStore.writeDeviceStates(agg.deviceStates)
+                        HealthHistoryStore.shared.record(score: newHealth.score, grade: newHealth.grade)
+                        HealthStreakStore.shared.record(grade: newHealth.grade)
+                        if newHealth.grade == "A" { AchievementStore.shared.unlock("firstGradeA") }
+                        if agg.brCount >= 2 && agg.routerCount >= 4 { AchievementStore.shared.unlock("resilienceA") }
+                    }
                     self.recordHealthDelta(health: newHealth)
                 }
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
