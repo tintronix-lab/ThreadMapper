@@ -4,6 +4,7 @@ struct ActivityEvent: Identifiable, Codable {
     let id: UUID
     let timestamp: Date
     let kind: Kind
+    let deviceID: UUID?
     let deviceName: String?
     let room: String?
     let detail: String

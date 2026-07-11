@@ -26,9 +26,9 @@ final class ActivityStore {
             .appendingPathComponent("\(UUID().uuidString)_activity_events.json"))
     }
 
-    func record(kind: ActivityEvent.Kind, deviceName: String? = nil, room: String? = nil, detail: String) {
+    func record(kind: ActivityEvent.Kind, deviceID: UUID? = nil, deviceName: String? = nil, room: String? = nil, detail: String) {
         let event = ActivityEvent(id: UUID(), timestamp: Date(), kind: kind,
-                                  deviceName: deviceName, room: room, detail: detail)
+                                  deviceID: deviceID, deviceName: deviceName, room: room, detail: detail)
         events.insert(event, at: 0)
         if events.count > maxEvents { events = Array(events.prefix(maxEvents)) }
         schedulePersist()
