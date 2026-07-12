@@ -17,13 +17,23 @@ final class HealthHistoryStore {
     private(set) var entries: [Entry] = []
 
     @ObservationIgnored private let maxEntries = 2016  // 7 days at 5-min intervals
-    @ObservationIgnored private let storeURL: URL = {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("health_history.json")
-    }()
+    @ObservationIgnored private let storeURL: URL
     @ObservationIgnored private var persistTask: Task<Void, Never>?
 
-    private init() { restore() }
+    /// `storeURL` is injectable so tests can use a throwaway file; the shared
+    /// instance persists to Documents.
+    init(storeURL: URL? = nil) {
+        self.storeURL = storeURL ?? FileManager.default
+            .urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("health_history.json")
+        restore()
+    }
+
+    /// Creates a fresh isolated store backed by a temp file. For tests only.
+    static func makeTestInstance() -> HealthHistoryStore {
+        HealthHistoryStore(storeURL: FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(UUID().uuidString)_health_history.json"))
+    }
 
     // Throttles to at most one sample per 5 minutes.
     func record(score: Int, grade: String) {
