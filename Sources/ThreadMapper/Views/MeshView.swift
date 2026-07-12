@@ -1,9 +1,13 @@
 import SwiftUI
 import Observation
 
+private enum ViewMode: Hashable {
+    case map, list
+}
+
 struct MeshView: View {
     @Environment(MeshViewModel.self) private var viewModel
-    @State private var showingMap = false
+    @State private var viewMode: ViewMode = .map
 
     private var selectedDeviceBinding: Binding<ThreadDevice?> {
         Binding(get: { viewModel.selectedDevice }, set: { viewModel.selectedDevice = $0 })
@@ -37,57 +41,70 @@ struct MeshView: View {
     }
 
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 0) {
-                if viewModel.isScanning && viewModel.nodes.isEmpty {
-                    scanningPlaceholder
-                } else if viewModel.nodes.isEmpty {
-                    emptyPlaceholder
-                } else {
-                    meshContent
+        content
+            .background(Color(UIColor.systemGroupedBackground))
+            .sheet(item: selectedDeviceBinding) { device in
+                DeviceDetailView(device: device)
+                    .presentationDetents([.large])
+            }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                topBar
+            }
+            .onAppear {
+                if !viewModel.isScanning {
+                    Task { await viewModel.startScan() }
                 }
             }
-            .padding(.bottom, 24)
-        }
-        .background(Color(UIColor.systemGroupedBackground))
-        .sheet(item: selectedDeviceBinding) { device in
-            DeviceDetailView(device: device)
-                .presentationDetents([.large])
-        }
-        .sheet(isPresented: $showingMap) {
-            // Always show the complete topology — not the room/channel-filtered view.
-            MeshMapSheet(devices: viewModel.devices,
-                         diagnostics: viewModel.latestDiagnostics)
-        }
-        .safeAreaInset(edge: .top, spacing: 0) {
-            topBar
-        }
-        .onAppear {
-            if !viewModel.isScanning {
-                Task { await viewModel.startScan() }
-            }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if viewModel.isScanning && viewModel.nodes.isEmpty {
+            scanningPlaceholder
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if viewModel.nodes.isEmpty {
+            emptyPlaceholder
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if viewMode == .map {
+            mapContent
+        } else {
+            listContent
         }
     }
 
-    // MARK: - Main content
+    // MARK: - Map view
 
-    @ViewBuilder
-    private var meshContent: some View {
-        // Stats summary
-        statsBanner
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-            .padding(.bottom, 8)
+    private var mapContent: some View {
+        MeshGraphView(
+            nodes: viewModel.nodes,
+            links: viewModel.links,
+            devices: viewModel.devices,
+            isLive: !viewModel.latestDiagnostics.isEmpty,
+            onSelectNode: { _ in },
+            onSelectDevice: { device in viewModel.selectedDevice = device }
+        )
+    }
 
-        // Backbone strip — border routers are the network's spine
-        if !borderRouters.isEmpty {
-            backboneStrip
-                .padding(.bottom, 16)
-        }
+    // MARK: - List view
 
-        // Room sections
-        ForEach(roomGroups, id: \.room) { group in
-            roomSection(room: group.room, nodes: group.nodes)
+    private var listContent: some View {
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                statsBanner
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+                    .padding(.bottom, 8)
+
+                if !borderRouters.isEmpty {
+                    backboneStrip
+                        .padding(.bottom, 16)
+                }
+
+                ForEach(roomGroups, id: \.room) { group in
+                    roomSection(room: group.room, nodes: group.nodes)
+                }
+            }
+            .padding(.bottom, 24)
         }
     }
 
@@ -283,7 +300,16 @@ struct MeshView: View {
 
     @ViewBuilder
     private var filterBar: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 8) {
+            // Map / List toggle
+            Picker("View", selection: $viewMode) {
+                Image(systemName: "map").tag(ViewMode.map)
+                Image(systemName: "list.bullet").tag(ViewMode.list)
+            }
+            .pickerStyle(.segmented)
+            .frame(width: 72)
+
+            // Room & Channel filter chips
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
                     Menu {
@@ -333,20 +359,7 @@ struct MeshView: View {
                 }
             }
 
-            Spacer(minLength: 4)
-
-            Text("\(viewModel.visibleDeviceCount)")
-                .font(.caption2.monospacedDigit())
-                .foregroundStyle(.secondary)
-
-            Button {
-                showingMap = true
-            } label: {
-                Image(systemName: "point.3.filled.connected.trianglepath.dotted")
-                    .font(.caption2)
-            }
-            .accessibilityLabel("View mesh map")
-
+            // Scan button
             Button {
                 Task { await viewModel.startScan() }
             } label: {
@@ -642,55 +655,5 @@ private struct MeshDeviceRowView: View {
             .padding(.vertical, 11)
         }
         .buttonStyle(.plain)
-    }
-}
-
-// MARK: - Mesh Map Sheet
-
-/// Full-screen canvas graph presented as a sheet from MeshView.
-/// Always shows the COMPLETE topology (all devices, ignoring any room/channel
-/// filter that may be active in the list), so the mesh structure is legible.
-/// Manages its own device-selection state so tapping a node inside the sheet
-/// opens DeviceDetailView within the same sheet context.
-private struct MeshMapSheet: View {
-    let devices: [ThreadDevice]
-    let diagnostics: [UUID: ThreadNodeDiagnostics]
-
-    @Environment(\.dismiss) private var dismiss
-    @State private var selectedDevice: ThreadDevice?
-    @State private var graphNodes: [MeshNode] = []
-    @State private var graphLinks: [MeshLink] = []
-
-    var body: some View {
-        NavigationStack {
-            MeshGraphView(
-                nodes: graphNodes,
-                links: graphLinks,
-                devices: devices,
-                isLive: !diagnostics.isEmpty,
-                onSelectNode: { _ in },
-                // Called by the HUD "Details →" button — not on every tap.
-                onSelectDevice: { device in selectedDevice = device }
-            )
-            .navigationTitle("Mesh Map")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
-                        .fontWeight(.semibold)
-                }
-            }
-            .sheet(item: $selectedDevice) { device in
-                DeviceDetailView(device: device)
-                    .presentationDetents([.large])
-            }
-        }
-        .presentationDetents([.large])
-        .presentationDragIndicator(.visible)
-        .task {
-            let (n, l) = MeshTopologyBuilder.buildGraph(from: devices, diagnostics: diagnostics)
-            graphNodes = n
-            graphLinks = l
-        }
     }
 }

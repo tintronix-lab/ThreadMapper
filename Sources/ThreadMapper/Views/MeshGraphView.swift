@@ -25,6 +25,7 @@ struct MeshGraphView: View {
     @State private var viewSize: CGSize = .zero
     // Gating hash: skip layout re-solve when node membership/rooms/size are unchanged.
     @State private var layoutHash: Int? = nil
+    @State private var legendExpanded = false
 
     private var nodesByID: [UUID: MeshNode] {
         Dictionary(nodes.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
@@ -36,7 +37,7 @@ struct MeshGraphView: View {
 
     var body: some View {
         ZStack {
-            Color(UIColor.systemGroupedBackground)
+            Color(UIColor.systemBackground)
                 .ignoresSafeArea()
 
             // Canvas handles all transforms internally (no scaleEffect).
@@ -113,27 +114,41 @@ struct MeshGraphView: View {
                 if nodes.isEmpty { emptyState }
             }
 
-            // HUD pinned to top. Only the card itself consumes taps; the spacer
-            // below is transparent so canvas gestures reach through it.
+            // Bottom overlay: info card (when a node is selected) + legend toggle + fit button.
+            // The Spacer at the top is transparent — canvas gestures pass through it.
             VStack(spacing: 0) {
+                Spacer(minLength: 0)
                 selectedHUD
                     .padding(.horizontal, 12)
-                    .padding(.top, 8)
-                Spacer(minLength: 0)
+                    .padding(.bottom, 8)
+                HStack(alignment: .bottom) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        if legendExpanded {
+                            legendView
+                                .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .bottomLeading)))
+                        }
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) { legendExpanded.toggle() }
+                        } label: {
+                            Image(systemName: legendExpanded ? "info.circle.fill" : "info.circle")
+                                .font(.caption)
+                                .padding(6)
+                                .background(.ultraThinMaterial, in: Circle())
+                        }
+                        .accessibilityLabel("Toggle legend")
+                    }
+                    .padding(10)
+                    Spacer()
+                    fitResetButton.padding(12)
+                }
+                .padding(.bottom, 4)
             }
-            .animation(.easeInOut(duration: 0.15), value: selectedNodeID)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .animation(.spring(response: 0.3, dampingFraction: 0.8), value: selectedNodeID)
             .zIndex(10)
 
-            HStack(alignment: .bottom) {
-                legendView.padding(10)
-                Spacer()
-                fitResetButton.padding(12)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-            .allowsHitTesting(true)
-
-            // Hint: only visible when end-device labels are hidden (scale < 0.7).
-            if scale < 0.7, !nodes.isEmpty {
+            // Hint: only visible when labels are hidden and no node is selected.
+            if scale < 0.7, !nodes.isEmpty, selectedNodeID == nil {
                 Text("Pinch to zoom for device names")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -233,11 +248,12 @@ struct MeshGraphView: View {
                         .lineLimit(2)
                 }
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 8)
-            .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .transition(.opacity.combined(with: .move(edge: .top)))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .shadow(color: .black.opacity(0.10), radius: 10, x: 0, y: -3)
+            .transition(.opacity.combined(with: .move(edge: .bottom)))
         }
     }
 
