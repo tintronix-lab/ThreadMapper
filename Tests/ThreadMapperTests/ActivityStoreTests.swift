@@ -1,6 +1,7 @@
 import XCTest
 @testable import ThreadMapper
 
+@MainActor
 final class ActivityStoreTests: XCTestCase {
 
     func testRecordInsertsNewestFirst() {

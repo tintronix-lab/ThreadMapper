@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 
+@MainActor
 @Observable
 final class HealthStreakStore {
     static let shared = HealthStreakStore()

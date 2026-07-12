@@ -27,8 +27,8 @@ final class MeshViewModel {
     }
     var recentTopologyChanges: [TopologyChange] = []
 
-    var selectedRoom: String? = nil { didSet { applyFilters() } }
-    var selectedChannel: Int? = nil { didSet { applyFilters() } }
+    var selectedRoom: String? = nil { didSet { MainActor.assumeIsolated { applyFilters() } } }
+    var selectedChannel: Int? = nil { didSet { MainActor.assumeIsolated { applyFilters() } } }
 
     var rooms: [String] {
         Set(devices.compactMap(\.room)).sorted()
@@ -205,7 +205,7 @@ final class MeshViewModel {
     /// Detects join/leave events keyed by stable UUID identity, fires notifications
     /// and activity records, and updates membership tracking state.
     /// Returns true when the graph needs a rebuild.
-    private func processTopologyChanges() -> Bool {
+    @MainActor private func processTopologyChanges() -> Bool {
         let currentIDs = Set(devices.map(\.uniqueIdentifier))
         let currentNamesByID = Dictionary(
             devices.map { ($0.uniqueIdentifier, $0.name) },
@@ -249,7 +249,7 @@ final class MeshViewModel {
     }
 
     /// Manages grace-period offline/online transitions for all current devices.
-    private func processOfflineTransitions() {
+    @MainActor private func processOfflineTransitions() {
         for device in devices {
             let uuid = device.uniqueIdentifier
             let name = device.name
@@ -329,7 +329,7 @@ final class MeshViewModel {
     }
 
     /// Emits a health activity event when the score shifts by 15+ points.
-    private func recordHealthDelta(health: NetworkHealthScore) {
+    @MainActor private func recordHealthDelta(health: NetworkHealthScore) {
         defer { previousHealthScore = health.score }
         guard let prev = previousHealthScore else { return }
         let delta = health.score - prev
@@ -399,8 +399,10 @@ final class MeshViewModel {
         return msgs
     }
 
-    private func applyFilters() {
+    @MainActor private func applyFilters() {
+        let nonThread = DeviceOverrideStore.shared.nonThreadIDs
         let subset = devices.filter { device in
+            if nonThread.contains(device.uniqueIdentifier) { return false }
             if let room = selectedRoom, device.room != room { return false }
             if let channel = selectedChannel, device.channel != channel { return false }
             return true

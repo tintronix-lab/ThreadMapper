@@ -3,6 +3,7 @@ import Observation
 
 // MARK: - Store
 
+@MainActor
 @Observable
 final class DeviceStatsStore {
 
