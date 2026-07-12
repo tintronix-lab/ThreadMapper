@@ -8,30 +8,30 @@ struct MeshGraphView: View {
     let onSelectNode: (MeshNode) -> Void
     let onSelectDevice: (ThreadDevice?) -> Void
 
-    @State private var layout: [UUID: CGPoint] = [:]
+    @State var layout: [UUID: CGPoint] = [:]
     // Explicit room-card bounds (layout-space) produced by GraphLayout.byRoom.
     // Used by drawRoomZones so zones are positioned by the layout algorithm,
     // not inferred from node positions — this guarantees they never overlap.
-    @State private var roomBounds: [String: CGRect] = [:]
-    @State private var selectedNodeID: UUID?
+    @State var roomBounds: [String: CGRect] = [:]
+    @State var selectedNodeID: UUID?
     // pan is in screen/view space; zoom is applied around view center.
-    @State private var scale: CGFloat = 1.0
-    @State private var baseScale: CGFloat = 1.0   // accumulated zoom between gestures
-    @State private var pan: CGSize = .zero
-    @State private var lastPan: CGSize = .zero
-    @State private var isDragging = false
+    @State var scale: CGFloat = 1.0
+    @State var baseScale: CGFloat = 1.0   // accumulated zoom between gestures
+    @State var pan: CGSize = .zero
+    @State var lastPan: CGSize = .zero
+    @State var isDragging = false
     // Tracked via onGeometryChange — reliable inside NavigationStack/sheet contexts
     // where onAppear may fire before the final size is settled.
-    @State private var viewSize: CGSize = .zero
+    @State var viewSize: CGSize = .zero
     // Gating hash: skip layout re-solve when node membership/rooms/size are unchanged.
-    @State private var layoutHash: Int? = nil
-    @State private var legendExpanded = false
+    @State var layoutHash: Int? = nil
+    @State var legendExpanded = false
 
-    private var nodesByID: [UUID: MeshNode] {
+    var nodesByID: [UUID: MeshNode] {
         Dictionary(nodes.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
     }
 
-    private var devicesByID: [UUID: ThreadDevice] {
+    var devicesByID: [UUID: ThreadDevice] {
         Dictionary(devices.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
     }
 
@@ -287,7 +287,7 @@ struct MeshGraphView: View {
         return result
     }
 
-    private var highlightedNodeIDs: Set<UUID> {
+    var highlightedNodeIDs: Set<UUID> {
         guard let selectedNodeID, let node = nodesByID[selectedNodeID] else { return [] }
         return Set(pathToRoot(from: node.id).map(\.id))
     }
@@ -349,337 +349,6 @@ struct MeshGraphView: View {
             }
             .frame(width: 10)
             Text(label).font(.caption).foregroundStyle(.secondary)
-        }
-    }
-}
-
-// MARK: - Layout & Transform
-extension MeshGraphView {
-
-    private func layoutMembershipHash(nodes: [MeshNode], size: CGSize) -> Int {
-        var hasher = Hasher()
-        for node in nodes.sorted(by: { $0.id < $1.id }) {
-            hasher.combine(node.id)
-            hasher.combine(node.room)
-            hasher.combine(node.kind.rawValue)
-        }
-        hasher.combine(Int(size.width))
-        hasher.combine(Int(size.height))
-        return hasher.finalize()
-    }
-
-    private func applyLayout(size: CGSize) {
-        guard !nodes.isEmpty, size.width > 80, size.height > 80 else { return }
-        let newHash = layoutMembershipHash(nodes: nodes, size: size)
-        guard newHash != layoutHash else { return }
-        layoutHash = newHash
-        let (newLayout, newRoomBounds) = GraphLayout.byRoom(nodes: nodes, size: size)
-        layout     = newLayout
-        roomBounds = newRoomBounds
-        selectedNodeID = nil
-        fitToView(size: size)
-    }
-
-    private func fitToView(size: CGSize) {
-        guard !layout.isEmpty,
-              let minX = layout.values.map(\.x).min(),
-              let maxX = layout.values.map(\.x).max(),
-              let minY = layout.values.map(\.y).min(),
-              let maxY = layout.values.map(\.y).max() else { return }
-
-        let graphWidth  = max(maxX - minX, 1)
-        let graphHeight = max(maxY - minY, 1)
-        let padding: CGFloat = 36
-        let scaleX = (size.width  - padding * 2) / graphWidth
-        let scaleY = (size.height - padding * 2) / graphHeight
-        // Cap at 1.5 so small networks don't over-zoom; floor at 0.35 so large ones still fit.
-        let newScale = max(0.35, min(scaleX, scaleY, 1.5))
-
-        scale     = newScale
-        baseScale = newScale
-
-        let cx = size.width / 2, cy = size.height / 2
-        let gcx = (minX + maxX) / 2, gcy = (minY + maxY) / 2
-        pan = CGSize(
-            width:  -(gcx - cx) * newScale,
-            height: -(gcy - cy) * newScale
-        )
-        lastPan = pan
-    }
-
-    private func nodeRadius(_ kind: MeshNodeKind) -> CGFloat {
-        switch kind {
-        case .gateway:      return 15
-        case .borderRouter: return 13
-        case .router:       return 11
-        case .endDevice:    return 9
-        }
-    }
-
-    /// Layout-space → screen/canvas space.
-    private func screenPos(_ p: CGPoint, in size: CGSize) -> CGPoint {
-        let cx = size.width / 2, cy = size.height / 2
-        return CGPoint(
-            x: cx + (p.x - cx) * scale + pan.width,
-            y: cy + (p.y - cy) * scale + pan.height
-        )
-    }
-
-    /// Screen/canvas space → layout space (inverse of screenPos).
-    private func toLayout(_ screen: CGPoint, in size: CGSize) -> CGPoint {
-        let cx = size.width / 2, cy = size.height / 2
-        return CGPoint(
-            x: cx + (screen.x - pan.width - cx) / scale,
-            y: cy + (screen.y - pan.height - cy) / scale
-        )
-    }
-
-    private func handleTap(at location: CGPoint, in size: CGSize) {
-        let lp = toLayout(location, in: size)
-        // Hit radius in layout space: generous contact area so small nodes are tappable.
-        let extraTap: CGFloat = max(12, 28 / scale)
-        if let hit = nodes.first(where: { node in
-            guard let pos = layout[node.id] else { return false }
-            return distance(lp, pos) <= nodeRadius(node.kind) + extraTap
-        }) {
-            withAnimation(.easeInOut(duration: 0.15)) { selectedNodeID = hit.id }
-            onSelectNode(hit)
-            // onSelectDevice is not called here — use the HUD "Details →" button instead,
-            // so tapping a node shows info first without immediately navigating away.
-        } else {
-            withAnimation(.easeInOut(duration: 0.15)) { selectedNodeID = nil }
-        }
-    }
-}
-
-// MARK: - Drawing
-extension MeshGraphView {
-
-    private func drawRoomZones(ctx: inout GraphicsContext, size: CGSize) {
-        guard size.width > 0, size.height > 0, !roomBounds.isEmpty else { return }
-
-        // Pre-count non-gateway devices per room once instead of O(n) per room per frame.
-        var roomDeviceCount: [String: Int] = [:]
-        for node in nodes where node.kind != .gateway {
-            let key = node.room ?? "Unassigned"
-            roomDeviceCount[key, default: 0] += 1
-        }
-
-        for (room, cellRect) in roomBounds {
-            // Transform layout-space room rectangle into screen space.
-            let tl = screenPos(cellRect.origin, in: size)
-            let br = screenPos(CGPoint(x: cellRect.maxX, y: cellRect.maxY), in: size)
-            let screenRect = CGRect(x: tl.x, y: tl.y, width: br.x - tl.x, height: br.y - tl.y)
-            guard screenRect.width > 4, screenRect.height > 4 else { continue }
-
-            let zoneColor = roomZoneColor(for: room)
-            let path = Path(roundedRect: screenRect, cornerRadius: 12, style: .continuous)
-
-            ctx.fill(path, with: .color(zoneColor.opacity(0.10)))
-            ctx.stroke(path, with: .color(zoneColor.opacity(0.50)), lineWidth: 1)
-
-            let deviceCount = roomDeviceCount[room] ?? 0
-            let labelText = "\(room)  ·  \(deviceCount) device\(deviceCount == 1 ? "" : "s")"
-            let label = ctx.resolve(
-                Text(labelText)
-                    .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(zoneColor)
-            )
-            ctx.draw(label, at: CGPoint(x: screenRect.midX, y: screenRect.minY + 13))
-        }
-    }
-
-    private func roomZoneColor(for room: String) -> Color {
-        let bucket = abs(room.unicodeScalars.reduce(0) { $0 &+ Int($1.value) }) % 12
-        let hue = Double(bucket) / 12.0
-        return Color(hue: hue, saturation: 0.55, brightness: 0.72)
-    }
-
-    private func drawLinks(ctx: inout GraphicsContext, size: CGSize) {
-        guard size.width > 0, size.height > 0 else { return }
-        let highlight = highlightedNodeIDs
-        let hasSelection = !highlight.isEmpty
-        let nodeMap = nodesByID
-
-        for link in links {
-            guard let srcLayout = layout[link.sourceID],
-                  let dstLayout = layout[link.targetID] else { continue }
-            let sourcePos = screenPos(srcLayout, in: size)
-            let targetPos = screenPos(dstLayout, in: size)
-            let onPath = highlight.contains(link.sourceID) && highlight.contains(link.targetID)
-
-            // Cross-room mesh links arc as quadratic beziers to avoid piercing room cards.
-            // Backbone links (gateway → border router) stay straight — they already travel
-            // above the card grid and straight lines read clearly.
-            let srcRoom = nodeMap[link.sourceID]?.room
-            let dstRoom = nodeMap[link.targetID]?.room
-            let isCrossRoom = link.kind == .mesh && srcRoom != dstRoom
-
-            var path = Path()
-            if isCrossRoom {
-                let mid = CGPoint(x: (sourcePos.x + targetPos.x) / 2,
-                                  y: (sourcePos.y + targetPos.y) / 2)
-                let dx = targetPos.x - sourcePos.x
-                let dy = targetPos.y - sourcePos.y
-                let len = max(sqrt(dx * dx + dy * dy), 1)
-                // Arc height: 35% of chord length, capped so very long links stay readable.
-                let arcHeight = min(len * 0.35, 72)
-                // Perpendicular unit vector (90° CCW rotation of the chord direction).
-                let perpX = -dy / len
-                let perpY =  dx / len
-                // Choose the side that faces away from the canvas centre so the curve
-                // arcs outward and doesn't cut further through adjacent room cards.
-                let cx = size.width / 2, cy = size.height / 2
-                let dot = perpX * (mid.x - cx) + perpY * (mid.y - cy)
-                let sign: CGFloat = dot >= 0 ? 1 : -1
-                let ctrl = CGPoint(x: mid.x + perpX * arcHeight * sign,
-                                   y: mid.y + perpY * arcHeight * sign)
-                path.move(to: sourcePos)
-                path.addQuadCurve(to: targetPos, control: ctrl)
-            } else {
-                path.move(to: sourcePos)
-                path.addLine(to: targetPos)
-            }
-
-            let base = link.kind == .backbone ? Color.secondary : linkColor(for: link)
-            let color = hasSelection ? (onPath ? Color.accentColor : base.opacity(0.18)) : base
-            let width = onPath ? 2.0 : max(0.8, CGFloat(link.linkQuality) * 0.5)
-            let dash: [CGFloat] = link.kind == .backbone ? [3, 2] : []
-
-            ctx.stroke(path, with: .color(color),
-                       style: .init(lineWidth: width, lineCap: .round, dash: dash))
-        }
-    }
-
-    private func drawNodes(ctx: inout GraphicsContext, size: CGSize) {
-        guard size.width > 0, size.height > 0 else { return }
-        let highlight = highlightedNodeIDs
-        let hasSelection = !highlight.isEmpty
-        let devMap = devicesByID
-        for node in nodes {
-            guard let layoutP = layout[node.id] else { continue }
-            let pos = screenPos(layoutP, in: size)
-            let device = node.deviceID.flatMap { devMap[$0] }
-            let isSelected = node.id == selectedNodeID
-            let dimmed = hasSelection && !highlight.contains(node.id)
-            let radius = nodeRadius(node.kind) + (isSelected ? 2 : 0)
-            let fill = color(for: node, device: device).opacity(dimmed ? 0.3 : 1)
-
-            switch node.kind {
-            case .gateway:
-                let rect = CGRect(x: pos.x - radius, y: pos.y - radius,
-                                  width: radius * 2, height: radius * 2)
-                ctx.fill(Path(roundedRect: rect, cornerRadius: 5),
-                         with: .color(Color(UIColor.systemGray)))
-                let icon = ctx.resolve(Text("\(Image(systemName: "wifi"))")
-                    .foregroundStyle(.white)
-                    .font(.system(size: radius)))
-                ctx.draw(icon, at: pos)
-
-            case .borderRouter:
-                ctx.fill(circle(pos, radius), with: .color(fill))
-                ctx.stroke(circle(pos, radius - 3),
-                           with: .color(.white.opacity(dimmed ? 0.3 : 0.85)), lineWidth: 1.5)
-
-            case .router:
-                ctx.fill(circle(pos, radius), with: .color(fill.opacity(dimmed ? 0.15 : 0.25)))
-                ctx.stroke(circle(pos, radius), with: .color(fill), lineWidth: 2)
-
-            case .endDevice:
-                if node.isBattery {
-                    ctx.fill(circle(pos, max(2, radius - 2)), with: .color(fill))
-                    ctx.stroke(circle(pos, radius),
-                               with: .color(.green.opacity(dimmed ? 0.3 : 0.85)), lineWidth: 1.5)
-                } else {
-                    ctx.fill(circle(pos, radius), with: .color(fill))
-                }
-            }
-
-            if isSelected {
-                ctx.stroke(circle(pos, radius + 3), with: .color(.accentColor), lineWidth: 1.5)
-            }
-
-            if let rssi = device?.rssi, rssi < -80, !dimmed {
-                ctx.stroke(circle(pos, radius + 3),
-                           with: .color(.red.opacity(0.55)), lineWidth: 1)
-            }
-
-            // Border routers and routers always show their name — they're the landmarks that
-            // make the map readable. End-device labels appear when zoomed past 0.7×.
-            let showLabel = scale >= 0.7
-                || isSelected
-                || (hasSelection && highlight.contains(node.id))
-                || node.kind == .borderRouter
-                || node.kind == .router
-            if showLabel {
-                let maxChars: Int
-                if isSelected        { maxChars = 18 }
-                else if scale >= 2.5 { maxChars = 16 }
-                else if scale >= 1.8 { maxChars = 11 }
-                else                 { maxChars = 7  }
-
-                let displayName = node.name.count > maxChars
-                    ? String(node.name.prefix(maxChars - 1)) + "…"
-                    : node.name
-
-                let labelSize: CGFloat = isSelected ? 10 : (scale >= 2.0 ? 9 : 8)
-                let label = ctx.resolve(Text(displayName)
-                    .foregroundStyle(Color(UIColor.label).opacity(dimmed ? 0.35 : 1))
-                    .font(.system(size: labelSize, weight: isSelected ? .semibold : .regular)))
-                ctx.draw(label, at: CGPoint(x: pos.x, y: pos.y - radius - 6))
-            }
-        }
-    }
-
-    private func circle(_ center: CGPoint, _ r: CGFloat) -> Path {
-        Path(ellipseIn: CGRect(x: center.x - r, y: center.y - r, width: r * 2, height: r * 2))
-    }
-
-    private func color(for node: MeshNode, device: ThreadDevice?) -> Color {
-        switch node.kind {
-        case .gateway:      return Color(UIColor.systemGray)
-        case .borderRouter: return .blue
-        case .router:
-            guard let device else { return .indigo }
-            return device.rssi?.rssiColor ?? .indigo
-        case .endDevice:
-            guard let device else { return .teal }
-            return device.rssi?.rssiColor ?? .teal
-        }
-    }
-
-    private func linkColor(for link: MeshLink) -> Color {
-        switch link.linkQuality {
-        case 4:  return .green
-        case 3:  return .mint
-        case 2:  return .orange
-        default: return .red
-        }
-    }
-
-    private func distance(_ a: CGPoint, _ b: CGPoint) -> CGFloat {
-        let dx = a.x - b.x, dy = a.y - b.y
-        return sqrt(dx * dx + dy * dy)
-    }
-
-    private func accessibilityValue(for node: MeshNode, device: ThreadDevice?) -> String {
-        var parts: [String] = [node.kind.rawValue]
-        if let room = node.room { parts.append(room) }
-        if let rssi = device?.rssi {
-            parts.append(rssi.rssiQualityLabel + " signal")
-        } else if device?.isOffline == true {
-            parts.append("offline")
-        }
-        if let ch = node.channel { parts.append("Channel \(ch)") }
-        return parts.joined(separator: ", ")
-    }
-
-    private func accessibilityHint(for node: MeshNode) -> String {
-        switch node.kind {
-        case .gateway:      return "Internet uplink — not a physical device"
-        case .borderRouter: return "Connects Thread mesh to the internet. Double-tap to view details."
-        case .router:       return "Relays traffic for nearby devices. Double-tap to view details."
-        case .endDevice:    return "End device. Double-tap to view details."
         }
     }
 }
