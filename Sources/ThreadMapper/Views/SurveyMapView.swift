@@ -124,7 +124,7 @@ struct SurveyMapView: View {
             ], id: \.0) { label, color in
                 HStack(spacing: 3) {
                     Circle().fill(color).frame(width: 8, height: 8)
-                    Text(label).font(.system(size: 9))
+                    Text(label).font(.caption2)
                 }
             }
         }

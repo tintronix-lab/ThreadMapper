@@ -134,7 +134,7 @@ struct GuidedSurveyView: View {
                     .fill(isRecording ? Color.red.opacity(0.1) : Color.accentColor.opacity(0.1))
                     .frame(width: 100, height: 100)
                 Image(systemName: TMStyle.roomIcon(room))
-                    .font(.system(size: 44))
+                    .font(.largeTitle)
                     .foregroundStyle(isRecording ? .red : .accentColor)
                     .symbolEffect(.pulse, isActive: isRecording)
             }
@@ -208,10 +208,10 @@ struct GuidedSurveyView: View {
                     let rssi = device.rssi!
                     VStack(spacing: 2) {
                         Text(rssi.rssiQualityLabel)
-                            .font(.system(size: 9, weight: .semibold))
+                            .font(.caption2.weight(.semibold))
                             .foregroundStyle(rssi.rssiColor)
                         Text(device.name)
-                            .font(.system(size: 8))
+                            .font(.caption2)
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
@@ -238,7 +238,7 @@ struct GuidedSurveyView: View {
                     .fill(Color.green.opacity(0.12))
                     .frame(width: 100, height: 100)
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 56))
+                    .font(.largeTitle)
                     .foregroundStyle(.green)
             }
 

@@ -49,7 +49,7 @@ struct ActivityFeedView: View {
     private var emptyState: some View {
         VStack(spacing: 16) {
             Image(systemName: "clock.arrow.circlepath")
-                .font(.system(size: 48))
+                .font(.largeTitle)
                 .foregroundStyle(.tertiary)
             Text("No Activity Yet")
                 .font(.headline)

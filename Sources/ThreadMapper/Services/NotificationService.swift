@@ -2,6 +2,7 @@ import UserNotifications
 import Foundation
 import Observation
 
+@MainActor
 @Observable
 final class NotificationService {
     static let shared = NotificationService()
@@ -79,7 +80,7 @@ final class NotificationService {
 
     /// Pure window check: start inclusive, end exclusive; a start > end window
     /// wraps midnight (e.g. 22–7). Extracted so the wrap logic is unit-testable.
-    static func isInQuietHours(hour: Int, start: Int, end: Int) -> Bool {
+    nonisolated static func isInQuietHours(hour: Int, start: Int, end: Int) -> Bool {
         if start <= end {
             return hour >= start && hour < end
         }

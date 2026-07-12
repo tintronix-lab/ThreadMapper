@@ -6,6 +6,7 @@ import Observation
 /// radio protocol (Thread, Zigbee, Z-Wave, etc.). This store lets users mark
 /// individual devices as "not a Thread device" to hide them from the mesh
 /// topology while keeping them visible in list and dashboard views.
+@MainActor
 @Observable
 final class DeviceOverrideStore {
     static let shared = DeviceOverrideStore()

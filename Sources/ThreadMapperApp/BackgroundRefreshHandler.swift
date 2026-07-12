@@ -86,10 +86,12 @@ private final class ReachabilityChecker: NSObject, HMHomeManagerDelegate {
             guard let uuid = UUID(uuidString: key) else { continue }
             let name = names[key] ?? "Device"
             let wasReachable = previous[key] ?? true
-            if !reachable && wasReachable {
-                NotificationService.shared.notifyDeviceOffline(name, room: rooms[key], deviceID: uuid)
-            } else if reachable && !wasReachable {
-                NotificationService.shared.clearOfflineNotification(for: uuid)
+            await MainActor.run {
+                if !reachable && wasReachable {
+                    NotificationService.shared.notifyDeviceOffline(name, room: rooms[key], deviceID: uuid)
+                } else if reachable && !wasReachable {
+                    NotificationService.shared.clearOfflineNotification(for: uuid)
+                }
             }
         }
 

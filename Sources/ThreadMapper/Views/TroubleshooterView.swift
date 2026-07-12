@@ -43,7 +43,7 @@ struct TroubleshooterView: View {
             // Header card
             VStack(spacing: 8) {
                 Image(systemName: problem == .offline ? "network.slash" : "wifi.exclamationmark")
-                    .font(.system(size: 36))
+                    .font(.largeTitle)
                     .foregroundStyle(problem == .offline ? Color.red : Color.orange)
                     .padding(.top, 24)
 
@@ -156,7 +156,7 @@ struct TroubleshooterView: View {
         VStack(spacing: 20) {
             Spacer()
             Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 64))
+                .font(.largeTitle)
                 .foregroundStyle(.green)
             Text("Great!")
                 .font(.title.weight(.bold))

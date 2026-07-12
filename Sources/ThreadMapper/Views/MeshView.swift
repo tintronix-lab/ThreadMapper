@@ -128,10 +128,10 @@ struct MeshView: View {
     private func statCell(value: String, label: String, color: Color) -> some View {
         VStack(spacing: 2) {
             Text(value)
-                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .font(.system(.title3, design: .rounded, weight: .bold))
                 .foregroundStyle(color)
             Text(label)
-                .font(.system(size: 10))
+                .font(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
@@ -168,54 +168,9 @@ struct MeshView: View {
     }
 
     private func borderRouterCard(node: MeshNode, device: ThreadDevice?) -> some View {
-        Button {
-            if let device { viewModel.selectedDevice = device }
-        } label: {
-            VStack(alignment: .leading, spacing: 6) {
-                HStack {
-                    Image(systemName: "antenna.radiowaves.left.and.right")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(.blue)
-                    Spacer()
-                    if let rssi = device?.rssi {
-                        signalBars(rssi, size: .small)
-                    }
-                }
-
-                Text(node.name)
-                    .font(.system(size: 13, weight: .semibold))
-                    .lineLimit(2)
-                    .foregroundStyle(.primary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                Spacer(minLength: 0)
-
-                HStack(spacing: 5) {
-                    if let room = node.room {
-                        Label(room, systemImage: "house")
-                            .lineLimit(1)
-                    }
-                    if let ch = node.channel ?? device?.channel {
-                        Text("CH \(ch)")
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 2)
-                            .background(Color.blue.opacity(0.15), in: Capsule())
-                            .foregroundStyle(.blue)
-                    }
-                }
-                .font(.system(size: 9, weight: .medium))
-                .foregroundStyle(.secondary)
-            }
-            .padding(12)
-            .frame(width: 148, height: 98)
-            .background(Color(UIColor.secondarySystemGroupedBackground),
-                        in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .strokeBorder(Color.blue.opacity(0.3), lineWidth: 1)
-            )
+        BorderRouterCardView(node: node, device: device) { d in
+            viewModel.selectedDevice = d
         }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Room section
@@ -260,149 +215,12 @@ struct MeshView: View {
     // MARK: - Device row
 
     private func deviceRow(node: MeshNode, device: ThreadDevice?) -> some View {
-        Button {
-            if let device { viewModel.selectedDevice = device }
-        } label: {
-            HStack(spacing: 12) {
-                // Role icon
-                ZStack {
-                    Circle()
-                        .fill(roleColor(node.kind).opacity(0.12))
-                        .frame(width: 38, height: 38)
-                    Image(systemName: roleIcon(node.kind))
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundStyle(roleColor(node.kind))
-                }
-
-                // Name + role + signal
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 6) {
-                        Text(node.name)
-                            .font(.system(size: 14, weight: .medium))
-                            .lineLimit(1)
-                            .foregroundStyle(device?.isOffline == true ? .secondary : .primary)
-
-                        roleBadge(node.kind)
-                    }
-
-                    HStack(spacing: 6) {
-                        if let rssi = device?.rssi {
-                            signalBars(rssi, size: .small)
-                            Text(rssi.rssiQualityLabel)
-                                .font(.system(size: 11))
-                                .foregroundStyle(rssi.rssiColor)
-                        } else if device?.isOffline == true {
-                            Label("Offline", systemImage: "wifi.slash")
-                                .font(.system(size: 11))
-                                .foregroundStyle(.red)
-                        } else {
-                            Text("No signal data")
-                                .font(.system(size: 11))
-                                .foregroundStyle(.tertiary)
-                        }
-
-                        if let ch = device?.channel {
-                            Text("·")
-                                .foregroundStyle(.tertiary)
-                            Text("CH \(ch)")
-                                .font(.system(size: 11))
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-
-                Spacer(minLength: 0)
-
-                // Battery + chevron
-                VStack(alignment: .trailing, spacing: 2) {
-                    if let pct = device?.batteryPercentage {
-                        HStack(spacing: 3) {
-                            Image(systemName: batteryIcon(pct))
-                                .font(.system(size: 12))
-                                .foregroundStyle(pct < 20 ? .red : .secondary)
-                            Text("\(pct)%")
-                                .font(.system(size: 11))
-                                .foregroundStyle(pct < 20 ? .red : .secondary)
-                        }
-                    }
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(.tertiaryLabel)
-                }
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 11)
+        MeshDeviceRowView(node: node, device: device) { d in
+            viewModel.selectedDevice = d
         }
-        .buttonStyle(.plain)
-    }
-
-    // MARK: - Signal bars
-
-    private enum BarSize { case small, medium }
-
-    @ViewBuilder
-    private func signalBars(_ rssi: Int, size: BarSize) -> some View {
-        let count = barCount(rssi)
-        let w: CGFloat = size == .small ? 3 : 4
-        let baseH: CGFloat = size == .small ? 4 : 5
-        HStack(alignment: .bottom, spacing: 2) {
-            ForEach(0..<4) { i in
-                RoundedRectangle(cornerRadius: 1)
-                    .fill(i < count ? rssi.rssiColor : Color.secondary.opacity(0.2))
-                    .frame(width: w, height: baseH + CGFloat(i) * (size == .small ? 2.5 : 3))
-            }
-        }
-    }
-
-    private func barCount(_ rssi: Int) -> Int {
-        if rssi > -50 { return 4 }
-        if rssi > -65 { return 3 }
-        if rssi > -80 { return 2 }
-        return 1
     }
 
     // MARK: - Role helpers
-
-    private func roleColor(_ kind: MeshNodeKind) -> Color {
-        switch kind {
-        case .gateway:      return .gray
-        case .borderRouter: return .blue
-        case .router:       return .indigo
-        case .endDevice:    return .green
-        }
-    }
-
-    private func roleIcon(_ kind: MeshNodeKind) -> String {
-        switch kind {
-        case .gateway:      return "globe"
-        case .borderRouter: return "antenna.radiowaves.left.and.right"
-        case .router:       return "dot.radiowaves.right"
-        case .endDevice:    return "sensor.tag.radiowaves.forward"
-        }
-    }
-
-    @ViewBuilder
-    private func roleBadge(_ kind: MeshNodeKind) -> some View {
-        switch kind {
-        case .endDevice:
-            EmptyView()
-        case .gateway:
-            badgeCapsule("Gateway", color: roleColor(kind))
-        case .borderRouter:
-            badgeCapsule("Border Router", color: roleColor(kind))
-        case .router:
-            badgeCapsule("Relay", color: roleColor(kind))
-        }
-    }
-
-    private func badgeCapsule(_ label: String, color: Color) -> some View {
-        Text(label)
-            .font(.system(size: 9, weight: .semibold))
-            .foregroundStyle(color)
-            .padding(.horizontal, 5)
-            .padding(.vertical, 2)
-            .background(color.opacity(0.1), in: Capsule())
-    }
 
     private func roleOrder(_ node: MeshNode) -> Int {
         switch node.kind {
@@ -411,16 +229,6 @@ struct MeshView: View {
         case .router: return 2
         case .endDevice: return 3
         }
-    }
-
-    // MARK: - Battery
-
-    private func batteryIcon(_ p: Int) -> String {
-        if p < 10 { return "battery.0percent" }
-        if p < 35 { return "battery.25percent" }
-        if p < 60 { return "battery.50percent" }
-        if p < 80 { return "battery.75percent" }
-        return "battery.100percent"
     }
 
     // MARK: - Placeholders
@@ -440,7 +248,7 @@ struct MeshView: View {
     @ViewBuilder private var emptyPlaceholder: some View {
         VStack(spacing: 8) {
             Image(systemName: "network.slash")
-                .font(.system(size: 32))
+                .font(.largeTitle)
                 .foregroundStyle(.secondary)
                 .padding(.bottom, 4)
             Text("No Thread devices found")
@@ -576,7 +384,7 @@ struct MeshView: View {
                 ForEach(viewModel.threadNetworks) { net in
                     HStack(spacing: 5) {
                         Image(systemName: "point.3.filled.connected.trianglepath.dotted")
-                            .font(.system(size: 9))
+                            .font(.caption2)
                             .foregroundStyle(.green)
                         Text(net.networkName)
                             .font(.caption2.weight(.semibold))
@@ -633,6 +441,208 @@ struct MeshView: View {
 // Silence `Color.tertiaryLabel` warning — use UIKit bridge.
 private extension ShapeStyle where Self == Color {
     static var tertiaryLabel: Color { Color(UIColor.tertiaryLabel) }
+}
+
+// MARK: - Private subviews
+
+/// Four-bar signal-quality indicator. Extracted so it can be compared by SwiftUI
+/// independently and reused in border router cards and device rows.
+private struct SignalBarsView: View {
+    let rssi: Int
+    enum Size { case small, medium }
+    var size: Size = .small
+
+    private var barCount: Int {
+        if rssi > -50 { return 4 }
+        if rssi > -65 { return 3 }
+        if rssi > -80 { return 2 }
+        return 1
+    }
+
+    var body: some View {
+        let w: CGFloat    = size == .small ? 3 : 4
+        let baseH: CGFloat = size == .small ? 4 : 5
+        HStack(alignment: .bottom, spacing: 2) {
+            ForEach(0..<4) { i in
+                RoundedRectangle(cornerRadius: 1)
+                    .fill(i < barCount ? rssi.rssiColor : Color.secondary.opacity(0.2))
+                    .frame(width: w, height: baseH + CGFloat(i) * (size == .small ? 2.5 : 3))
+            }
+        }
+    }
+}
+
+/// Fixed-size card for a border router in the backbone strip.
+private struct BorderRouterCardView: View {
+    let node: MeshNode
+    let device: ThreadDevice?
+    let onSelect: (ThreadDevice) -> Void
+
+    var body: some View {
+        Button {
+            if let device { onSelect(device) }
+        } label: {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Image(systemName: "antenna.radiowaves.left.and.right")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.blue)
+                    Spacer()
+                    if let rssi = device?.rssi {
+                        SignalBarsView(rssi: rssi, size: .small)
+                    }
+                }
+                Text(node.name)
+                    .font(.footnote.weight(.semibold))
+                    .lineLimit(2)
+                    .foregroundStyle(.primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Spacer(minLength: 0)
+                HStack(spacing: 5) {
+                    if let room = node.room {
+                        Label(room, systemImage: "house").lineLimit(1)
+                    }
+                    if let ch = node.channel ?? device?.channel {
+                        Text("CH \(ch)")
+                            .padding(.horizontal, 5).padding(.vertical, 2)
+                            .background(Color.blue.opacity(0.15), in: Capsule())
+                            .foregroundStyle(.blue)
+                    }
+                }
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(.secondary)
+            }
+            .padding(12)
+            .frame(width: 148, height: 98)
+            .background(Color(UIColor.secondarySystemGroupedBackground),
+                        in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .strokeBorder(Color.blue.opacity(0.3), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+/// A single device row inside a room section.
+private struct MeshDeviceRowView: View {
+    let node: MeshNode
+    let device: ThreadDevice?
+    let onSelect: (ThreadDevice) -> Void
+
+    private func roleColor(_ kind: MeshNodeKind) -> Color {
+        switch kind {
+        case .gateway: return .gray
+        case .borderRouter: return .blue
+        case .router: return .indigo
+        case .endDevice: return .green
+        }
+    }
+
+    private func roleIcon(_ kind: MeshNodeKind) -> String {
+        switch kind {
+        case .gateway: return "globe"
+        case .borderRouter: return "antenna.radiowaves.left.and.right"
+        case .router: return "dot.radiowaves.right"
+        case .endDevice: return "sensor.tag.radiowaves.forward"
+        }
+    }
+
+    @ViewBuilder private func roleBadge(_ kind: MeshNodeKind) -> some View {
+        switch kind {
+        case .endDevice: EmptyView()
+        case .gateway: badgeCapsule("Gateway", color: roleColor(kind))
+        case .borderRouter: badgeCapsule("Border Router", color: roleColor(kind))
+        case .router: badgeCapsule("Relay", color: roleColor(kind))
+        }
+    }
+
+    private func badgeCapsule(_ label: String, color: Color) -> some View {
+        Text(label)
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(color)
+            .padding(.horizontal, 5).padding(.vertical, 2)
+            .background(color.opacity(0.1), in: Capsule())
+    }
+
+    private func batteryIcon(_ p: Int) -> String {
+        if p < 10 { return "battery.0percent" }
+        if p < 35 { return "battery.25percent" }
+        if p < 60 { return "battery.50percent" }
+        if p < 80 { return "battery.75percent" }
+        return "battery.100percent"
+    }
+
+    var body: some View {
+        Button {
+            if let device { onSelect(device) }
+        } label: {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(roleColor(node.kind).opacity(0.12))
+                        .frame(width: 38, height: 38)
+                    Image(systemName: roleIcon(node.kind))
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(roleColor(node.kind))
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 6) {
+                        Text(node.name)
+                            .font(.subheadline.weight(.medium))
+                            .lineLimit(1)
+                            .foregroundStyle(device?.isOffline == true ? .secondary : .primary)
+                        roleBadge(node.kind)
+                    }
+                    HStack(spacing: 6) {
+                        if let rssi = device?.rssi {
+                            SignalBarsView(rssi: rssi, size: .small)
+                            Text(rssi.rssiQualityLabel)
+                                .font(.caption2)
+                                .foregroundStyle(rssi.rssiColor)
+                        } else if device?.isOffline == true {
+                            Label("Offline", systemImage: "wifi.slash")
+                                .font(.caption2)
+                                .foregroundStyle(.red)
+                        } else {
+                            Text("No signal data")
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                        }
+                        if let ch = device?.channel {
+                            Text("·").foregroundStyle(.tertiary)
+                            Text("CH \(ch)")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+
+                Spacer(minLength: 0)
+
+                VStack(alignment: .trailing, spacing: 2) {
+                    if let pct = device?.batteryPercentage {
+                        HStack(spacing: 3) {
+                            Image(systemName: batteryIcon(pct))
+                                .font(.caption)
+                                .foregroundStyle(pct < 20 ? .red : .secondary)
+                            Text("\(pct)%")
+                                .font(.caption2)
+                                .foregroundStyle(pct < 20 ? .red : .secondary)
+                        }
+                    }
+                    Image(systemName: "chevron.right")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.tertiaryLabel)
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 11)
+        }
+        .buttonStyle(.plain)
+    }
 }
 
 // MARK: - Mesh Map Sheet

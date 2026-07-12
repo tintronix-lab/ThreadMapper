@@ -2,6 +2,7 @@ import StoreKit
 import Foundation
 import Observation
 
+@MainActor
 @Observable
 final class ProStore {
     static let shared = ProStore()

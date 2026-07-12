@@ -1,6 +1,7 @@
 import XCTest
 @testable import ThreadMapper
 
+@MainActor
 final class HealthStreakStoreTests: XCTestCase {
 
     private let cal = Calendar.current

@@ -220,7 +220,7 @@ struct SurveyWalkView: View {
                                     .font(.caption2.weight(.semibold))
                                     .foregroundStyle(q.color)
                                 Text("response quality")
-                                    .font(.system(size: 9))
+                                    .font(.caption2)
                                     .foregroundStyle(q.color.opacity(0.7))
                             }
                         } else {
@@ -331,7 +331,7 @@ struct SurveyWalkView: View {
         let ordered = viewModel.weakDevices.sorted { $0.name < $1.name }
         Section("Weak Links") {
             if ordered.isEmpty {
-                Text("None — threshold RSSI < −80 dBm")
+                Text("None — threshold response quality < −80")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {

@@ -1,6 +1,7 @@
 import XCTest
 @testable import ThreadMapper
 
+@MainActor
 final class AchievementStoreTests: XCTestCase {
 
     private func unlocked(_ store: AchievementStore, _ id: String) -> Bool {

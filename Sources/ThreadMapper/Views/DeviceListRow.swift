@@ -40,7 +40,7 @@ struct DeviceListRow: View {
                 }
                 if let stats = statsStore.stats(for: device.uniqueIdentifier) {
                     Text(stats.healthGrade)
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .font(.system(.caption2, design: .rounded, weight: .bold))
                         .foregroundStyle(stats.healthColor)
                         .frame(minWidth: 14, alignment: .trailing)
                 }

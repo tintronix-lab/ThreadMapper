@@ -63,7 +63,7 @@ struct DeviceDetailView: View {
             // Header row: icon + live RSSI + grade
             HStack(spacing: 12) {
                 Image(systemName: device.rssi.rssiSystemIcon)
-                    .font(.system(size: 26))
+                    .font(.title)
                     .foregroundStyle(currentColor)
                     .frame(width: 32)
 
@@ -85,13 +85,13 @@ struct DeviceDetailView: View {
                 if let s = stats {
                     VStack(spacing: 0) {
                         Text(s.healthGrade)
-                            .font(.system(size: 34, weight: .bold, design: .rounded))
+                            .font(.system(.largeTitle, design: .rounded, weight: .bold))
                             .foregroundStyle(s.healthColor)
                         Text("Grade")
-                            .font(.system(size: 9))
+                            .font(.caption2)
                             .foregroundStyle(.secondary)
                         Text("\(s.stabilityPct)% stable")
-                            .font(.system(size: 9))
+                            .font(.caption2)
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -139,7 +139,7 @@ struct DeviceDetailView: View {
                             HStack(spacing: 2) {
                                 Circle().fill(b.color).frame(width: 5, height: 5)
                                 Text(String(format: "%d%%", Int(b.fraction * 100)))
-                                    .font(.system(size: 8))
+                                    .font(.caption2)
                                     .foregroundStyle(b.color)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -199,10 +199,10 @@ struct DeviceDetailView: View {
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(value.rssiColor)
             Text(sublabel)
-                .font(.system(size: 8))
+                .font(.caption2)
                 .foregroundStyle(.secondary)
             Text(label)
-                .font(.system(size: 8))
+                .font(.caption2)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
@@ -214,10 +214,10 @@ struct DeviceDetailView: View {
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(jitter < 10 ? .green : jitter < 20 ? .orange : .red)
             Text("\(jitter) pts spread")
-                .font(.system(size: 8))
+                .font(.caption2)
                 .foregroundStyle(.secondary)
             Text("Jitter")
-                .font(.system(size: 8))
+                .font(.caption2)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
@@ -229,10 +229,10 @@ struct DeviceDetailView: View {
                 .font(.caption.weight(.semibold).monospacedDigit())
                 .foregroundStyle(color)
             Text("RQ")   // Response Quality — latency-estimated, not radio dBm
-                .font(.system(size: 8))
+                .font(.caption2)
                 .foregroundStyle(.secondary)
             Text(label)
-                .font(.system(size: 8))
+                .font(.caption2)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
@@ -277,7 +277,7 @@ struct DeviceDetailView: View {
     @ViewBuilder
     private func roleBadge(_ title: String, active: Bool, color: Color) -> some View {
         Text(title)
-            .font(.system(size: 10, weight: active ? .semibold : .regular))
+            .font(.caption.weight(active ? .semibold : .regular))
             .lineLimit(1)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
@@ -415,7 +415,7 @@ struct DeviceDetailView: View {
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(color)
             Text(label)
-                .font(.system(size: 9))
+                .font(.caption2)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
