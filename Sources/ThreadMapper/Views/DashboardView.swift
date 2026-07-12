@@ -120,6 +120,24 @@ struct DashboardView: View {
         }
     }
 
+    // MARK: - Sections forwarded to isolated structs
+
+    @ViewBuilder private var tipsSection: some View {
+        if !health.tips.isEmpty { DashboardTipsSection(tips: health.tips) }
+    }
+
+    @ViewBuilder private var issuesSection: some View {
+        DashboardIssuesSection(health: health, navPath: $navPath)
+    }
+
+    @ViewBuilder private var healthHistorySection: some View {
+        DashboardHealthHistorySection(entries: historyStore.entries, healthColor: health.color)
+    }
+
+    @ViewBuilder private var placementSection: some View {
+        DashboardPlacementSection(suggestions: buildPlacementSuggestions())
+    }
+
     // MARK: - Topology Change Banner
 
     @ViewBuilder
@@ -267,136 +285,12 @@ struct DashboardView: View {
 
     // MARK: - Issues
 
-    @ViewBuilder
-    private var issuesSection: some View {
-        Section {
-            if health.issues.isEmpty {
-                HStack(spacing: 12) {
-                    ZStack {
-                        Circle()
-                            .fill(Color.green.opacity(0.12))
-                            .frame(width: 36, height: 36)
-                        Image(systemName: "checkmark.shield.fill")
-                            .foregroundStyle(.green)
-                            .imageScale(.medium)
-                    }
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("All Clear")
-                            .font(.subheadline.weight(.semibold))
-                        Text("No network issues detected")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .padding(.vertical, 6)
-            } else {
-                ForEach(health.issues) { issue in
-                    issueRow(issue)
-                }
-            }
-        } header: {
-            HStack {
-                Text("Issues")
-                Spacer()
-                let critCount = health.issues.filter(\.isCritical).count
-                if critCount > 0 {
-                    Label("\(critCount) Critical", systemImage: "exclamationmark.circle.fill")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(.red)
-                } else if !health.issues.isEmpty {
-                    Label("\(health.issues.count)", systemImage: "exclamationmark.triangle.fill")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(.orange)
-                }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func issueRow(_ issue: NetworkHealthScore.Issue) -> some View {
-        if !issue.affectedDevices.isEmpty {
-            // Button + navPath rather than an in-row NavigationLink, so it plays
-            // nicely with the other tappable rows in the List (fixes D2).
-            Button {
-                navPath.append(DeviceFilterSpec(
-                    title: issue.message,
-                    category: .ids(issue.affectedDevices.map(\.uniqueIdentifier))
-                ))
-            } label: {
-                issueRowContent(issue, actionable: true)
-            }
-            .buttonStyle(.plain)
-        } else {
-            issueRowContent(issue, actionable: false)
-        }
-    }
-
-    private func issueRowContent(_ issue: NetworkHealthScore.Issue, actionable: Bool) -> some View {
-        HStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(issue.isCritical ? Color.red.opacity(0.12) : Color.orange.opacity(0.12))
-                    .frame(width: 34, height: 34)
-                Image(systemName: issue.icon)
-                    .font(.caption)
-                    .foregroundStyle(issue.isCritical ? .red : .orange)
-            }
-            Text(issue.message)
-                .font(.subheadline)
-                .foregroundStyle(.primary)
-            Spacer()
-            if issue.isCritical {
-                Text("Critical")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.red)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 3)
-                    .background(.red.opacity(0.1), in: Capsule())
-            }
-            // Only actionable rows advertise navigation, so the affordance
-            // matches behaviour (fixes D2's inconsistent tap targets).
-            if actionable {
-                Image(systemName: "chevron.right")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-            }
-        }
-        .contentShape(Rectangle())
-        .padding(.vertical, 3)
-    }
-
     // MARK: - Resilience
 
     @ViewBuilder
     private var resilienceSection: some View {
         if !viewModel.devices.isEmpty {
             DashboardResilienceSection(devices: viewModel.devices, showPaywall: $showPaywall)
-        }
-    }
-
-    // MARK: - Tips
-
-    @ViewBuilder
-    private var tipsSection: some View {
-        Section {
-            ForEach(Array(health.tips.enumerated()), id: \.offset) { index, tip in
-                HStack(alignment: .top, spacing: 12) {
-                    Text("\(index + 1)")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 20, height: 20)
-                        .background(.blue.opacity(0.85), in: Circle())
-                    Text(tip)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .padding(.vertical, 3)
-            }
-        } header: {
-            Label("Recommendations", systemImage: "lightbulb.fill")
-                .foregroundStyle(.primary)
-                .symbolRenderingMode(.multicolor)
         }
     }
 
@@ -608,11 +502,152 @@ struct DashboardView: View {
         }
     }
 
-    // MARK: - Health History Chart
+    private func buildPlacementSuggestions() -> [String] {
+        var suggestions: [String] = []
+        for group in roomGroups {
+            let avgRSSIs = group.devices.compactMap { statsStore.stats(for: $0.uniqueIdentifier)?.avgRSSI }
+            guard !avgRSSIs.isEmpty else { continue }
+            let roomAvg = avgRSSIs.reduce(0, +) / avgRSSIs.count
+            guard roomAvg < -75 else { continue }
+            let quality = roomAvg < -85 ? "very weak" : "weak"
+            suggestions.append(
+                "Response quality in \(group.room) is \(quality) (\(roomAvg.rssiQualityLabel)) — consider adding a Thread router nearby"
+            )
+        }
+        return suggestions
+    }
+}
+
+// MARK: - Private subviews
+
+private struct DashboardTipsSection: View {
+    let tips: [String]
+    var body: some View {
+        Section {
+            ForEach(Array(tips.enumerated()), id: \.offset) { index, tip in
+                HStack(alignment: .top, spacing: 12) {
+                    Text("\(index + 1)")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 20, height: 20)
+                        .background(.blue.opacity(0.85), in: Circle())
+                    Text(tip)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(.vertical, 3)
+            }
+        } header: {
+            Label("Recommendations", systemImage: "lightbulb.fill")
+                .foregroundStyle(.primary)
+                .symbolRenderingMode(.multicolor)
+        }
+    }
+}
+
+private struct DashboardIssuesSection: View {
+    let health: NetworkHealthScore
+    @Binding var navPath: NavigationPath
+
+    var body: some View {
+        Section {
+            if health.issues.isEmpty {
+                HStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.green.opacity(0.12))
+                            .frame(width: 36, height: 36)
+                        Image(systemName: "checkmark.shield.fill")
+                            .foregroundStyle(.green)
+                            .imageScale(.medium)
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("All Clear")
+                            .font(.subheadline.weight(.semibold))
+                        Text("No network issues detected")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.vertical, 6)
+            } else {
+                ForEach(health.issues) { issue in issueRow(issue) }
+            }
+        } header: {
+            HStack {
+                Text("Issues")
+                Spacer()
+                let critCount = health.issues.filter(\.isCritical).count
+                if critCount > 0 {
+                    Label("\(critCount) Critical", systemImage: "exclamationmark.circle.fill")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.red)
+                } else if !health.issues.isEmpty {
+                    Label("\(health.issues.count)", systemImage: "exclamationmark.triangle.fill")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.orange)
+                }
+            }
+        }
+    }
 
     @ViewBuilder
-    private var healthHistorySection: some View {
-        if historyStore.entries.count >= 2 {
+    private func issueRow(_ issue: NetworkHealthScore.Issue) -> some View {
+        if !issue.affectedDevices.isEmpty {
+            Button {
+                navPath.append(DeviceFilterSpec(
+                    title: issue.message,
+                    category: .ids(issue.affectedDevices.map(\.uniqueIdentifier))
+                ))
+            } label: {
+                issueRowContent(issue, actionable: true)
+            }
+            .buttonStyle(.plain)
+        } else {
+            issueRowContent(issue, actionable: false)
+        }
+    }
+
+    private func issueRowContent(_ issue: NetworkHealthScore.Issue, actionable: Bool) -> some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(issue.isCritical ? Color.red.opacity(0.12) : Color.orange.opacity(0.12))
+                    .frame(width: 34, height: 34)
+                Image(systemName: issue.icon)
+                    .font(.caption)
+                    .foregroundStyle(issue.isCritical ? .red : .orange)
+            }
+            Text(issue.message)
+                .font(.subheadline)
+                .foregroundStyle(.primary)
+            Spacer()
+            if issue.isCritical {
+                Text("Critical")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.red)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 3)
+                    .background(.red.opacity(0.1), in: Capsule())
+            }
+            if actionable {
+                Image(systemName: "chevron.right")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .contentShape(Rectangle())
+        .padding(.vertical, 3)
+    }
+}
+
+private struct DashboardHealthHistorySection: View {
+    let entries: [HealthHistoryStore.Entry]
+    let healthColor: Color
+
+    var body: some View {
+        if entries.count >= 2 {
             Section {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
@@ -620,7 +655,7 @@ struct DashboardView: View {
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                         Spacer()
-                        if let latest = historyStore.entries.last {
+                        if let latest = entries.last {
                             HStack(spacing: 4) {
                                 Circle()
                                     .fill(TMStyle.gradeColor(latest.grade))
@@ -631,13 +666,12 @@ struct DashboardView: View {
                             }
                         }
                     }
-
-                    Chart(historyStore.entries) { entry in
+                    Chart(entries) { entry in
                         LineMark(
                             x: .value("Time", entry.timestamp),
                             y: .value("Score", entry.score)
                         )
-                        .foregroundStyle(health.color)
+                        .foregroundStyle(healthColor)
                         .interpolationMethod(.catmullRom)
                         .lineStyle(StrokeStyle(lineWidth: 2))
 
@@ -647,7 +681,7 @@ struct DashboardView: View {
                         )
                         .foregroundStyle(
                             LinearGradient(
-                                colors: [health.color.opacity(0.22), health.color.opacity(0.0)],
+                                colors: [healthColor.opacity(0.22), healthColor.opacity(0.0)],
                                 startPoint: .top,
                                 endPoint: .bottom
                             )
@@ -672,12 +706,11 @@ struct DashboardView: View {
             }
         }
     }
+}
 
-    // MARK: - Placement Suggestions
-
-    @ViewBuilder
-    private var placementSection: some View {
-        let suggestions = buildPlacementSuggestions()
+private struct DashboardPlacementSection: View {
+    let suggestions: [String]
+    var body: some View {
         if !suggestions.isEmpty {
             Section("Placement Suggestions") {
                 ForEach(suggestions, id: \.self) { suggestion in
@@ -694,24 +727,7 @@ struct DashboardView: View {
             }
         }
     }
-
-    private func buildPlacementSuggestions() -> [String] {
-        var suggestions: [String] = []
-        for group in roomGroups {
-            let avgRSSIs = group.devices.compactMap { statsStore.stats(for: $0.uniqueIdentifier)?.avgRSSI }
-            guard !avgRSSIs.isEmpty else { continue }
-            let roomAvg = avgRSSIs.reduce(0, +) / avgRSSIs.count
-            guard roomAvg < -75 else { continue }
-            let quality = roomAvg < -85 ? "very weak" : "weak"
-            suggestions.append(
-                "Response quality in \(group.room) is \(quality) (\(roomAvg.rssiQualityLabel)) — consider adding a Thread router nearby"
-            )
-        }
-        return suggestions
-    }
 }
-
-// MARK: - Private subviews
 
 /// Animated grade ring that isolates Dynamic Type metrics from the parent view,
 /// preventing DashboardView from re-rendering when only scale changes.

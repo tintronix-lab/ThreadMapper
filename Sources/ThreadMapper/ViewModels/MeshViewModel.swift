@@ -106,7 +106,8 @@ final class MeshViewModel {
 
                 // Every 5 seconds: measure latency-based signal quality for all devices.
                 self.pollTick += 1
-                if self.pollTick % 5 == 0 {
+                let rssiJustMeasured = self.pollTick % 5 == 0
+                if rssiJustMeasured {
                     let qualities = await self.discovery.measureSignalQualities()
                     await MainActor.run {
                         for device in self.devices {
@@ -124,7 +125,16 @@ final class MeshViewModel {
                     if self.processTopologyChanges() { graphNeedsRebuild = true }
                     if graphNeedsRebuild { self.applyFilters() }
                     self.scanError = self.discovery.discoveryError?.userMessage
+                    // Grace-period offline sweep runs every tick so transitions are
+                    // detected promptly regardless of whether we recompute aggregates.
                     self.processOfflineTransitions()
+
+                    // Only recompute aggregates and health when something could have
+                    // changed: topology shifted or RSSI (and thus isOffline/isWeak) was
+                    // just measured. On idle ticks where nothing changed, skip the O(n)
+                    // pass, badge write, and all downstream side-effects.
+                    guard graphNeedsRebuild || rssiJustMeasured else { return }
+
                     let agg = self.computeAggregates()
                     NotificationService.shared.updateBadge(agg.offlineCount)
                     let newHealth = NetworkHealthScore.compute(devices: self.devices)
@@ -132,8 +142,7 @@ final class MeshViewModel {
                     // identical tick no longer invalidates every Dashboard observer (D4).
                     if newHealth != self.health { self.health = newHealth }
                     // Only write the snapshot and trigger side-effects when the aggregate
-                    // state actually changed. The offline grace-period sweep above runs
-                    // every tick regardless, so we still detect transitions promptly.
+                    // state actually changed.
                     let fingerprint = SnapshotFingerprint(
                         deviceCount: self.devices.count, offlineCount: agg.offlineCount,
                         weakCount: agg.weakCount, brCount: agg.brCount, routerCount: agg.routerCount
