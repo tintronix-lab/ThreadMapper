@@ -197,6 +197,7 @@ struct BorderRouterCardView: View {
 struct MeshDeviceRowView: View {
     let node: MeshNode
     let device: ThreadDevice?
+    var hopCount: Int? = nil
     let onSelect: (ThreadDevice) -> Void
 
     private func roleColor(_ kind: MeshNodeKind) -> Color {
@@ -284,6 +285,12 @@ struct MeshDeviceRowView: View {
                             Text("CH \(ch)")
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
+                        }
+                        if let hop = hopCount, node.kind == .endDevice || node.kind == .router {
+                            Text("·").foregroundStyle(.tertiary)
+                            Text("\(hop) hop\(hop == 1 ? "" : "s")")
+                                .font(.caption2.weight(hop >= 4 ? .semibold : .regular))
+                                .foregroundStyle(hop <= 2 ? Color.secondary : hop == 3 ? Color.orange : Color.red)
                         }
                     }
                 }

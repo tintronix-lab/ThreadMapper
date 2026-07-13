@@ -229,10 +229,32 @@ struct MeshView: View {
         }
     }
 
+    // MARK: - Hop counts (BFS from border routers through parentID chain)
+
+    private var hopCountByNodeID: [UUID: Int] {
+        var childrenOf: [UUID: [UUID]] = [:]
+        for node in viewModel.nodes {
+            if let pid = node.parentID { childrenOf[pid, default: []].append(node.id) }
+        }
+        var hopCounts: [UUID: Int] = [:]
+        var queue: [(id: UUID, hop: Int)] = viewModel.nodes
+            .filter { $0.kind == .borderRouter }
+            .map { ($0.id, 1) }
+        while !queue.isEmpty {
+            let (id, hop) = queue.removeFirst()
+            guard hopCounts[id] == nil else { continue }
+            hopCounts[id] = hop
+            for childID in childrenOf[id] ?? [] where hopCounts[childID] == nil {
+                queue.append((childID, hop + 1))
+            }
+        }
+        return hopCounts
+    }
+
     // MARK: - Device row
 
     private func deviceRow(node: MeshNode, device: ThreadDevice?) -> some View {
-        MeshDeviceRowView(node: node, device: device) { d in
+        MeshDeviceRowView(node: node, device: device, hopCount: hopCountByNodeID[node.id]) { d in
             viewModel.selectedDevice = d
         }
     }
