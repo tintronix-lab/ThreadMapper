@@ -901,3 +901,38 @@ of the entry date.
 P4.2 (persistence consolidation) evaluated and closed as "hold" — stores are 62–88
 lines each with heterogeneous restore logic; a `JSONStore<T>` generic would save ~35
 lines across 3 files at the cost of meaningful new indirection.
+
+## Phase 8 — Iteration 17 (2026-07-13: pre-submission audit)
+
+**Goal:** sweep the remaining surface before App Store submission — privacy manifest
+placement, background task registration, accessibility, IAP error handling.
+
+**Fixes (6 commits):**
+
+- `Info.plist`: added `UIBackgroundModes: [fetch]` — required for `BGAppRefreshTask`
+  to be scheduled by the OS. Without this key the background widget refresh and
+  offline-detection tasks would silently never fire.
+
+- `PaywallView`: two IAP robustness fixes:
+  1. Product loading failure now shows a "Couldn't load products / Try Again" state
+     after the async task completes; previously the `ProgressView` spun indefinitely.
+  2. Purchase errors (network failure, payment declined) are no longer swallowed via
+     `try?`; surfaced via a standard alert so users understand why a transaction failed.
+
+- `GradeRingView`: `.accessibilityElement(children: .ignore)` + unified label
+  ("Network health grade A, score 85 out of 100") — VoiceOver previously read two
+  disconnected strings.
+
+- `ConfettiView`: `.accessibilityHidden(true)` — decorative Canvas animation has no
+  semantic content; hiding prevents unwanted VoiceOver focus during celebrations.
+
+- `PrivacyInfo.xcprivacy` placement confirmed in Xcode project Resources build phase.
+
+**Verified:** `PrivacyInfo.xcprivacy` present in project Resources. App icon is
+1024×1024 universal. All 70 tests pass; 0 navigator issues; 0 strict-concurrency
+warnings. `StrictConcurrency` enforced in `Package.swift`.
+
+**Remaining pre-submission open items (deferred):**
+- P1.2: multi-home store key namespacing
+- P2.5: singleton DI container
+- P5.3: iPad/landscape layout
