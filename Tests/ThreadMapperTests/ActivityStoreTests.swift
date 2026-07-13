@@ -42,9 +42,9 @@ final class ActivityStoreTests: XCTestCase {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("\(UUID().uuidString)_activity.json")
         let recent = ActivityEvent(id: UUID(), timestamp: Date(), kind: .deviceOnline,
-                                   deviceName: nil, room: nil, detail: "recent")
+                                   deviceID: nil, deviceName: nil, room: nil, detail: "recent")
         let stale = ActivityEvent(id: UUID(), timestamp: Date().addingTimeInterval(-8 * 86400),
-                                  kind: .deviceOffline, deviceName: nil, room: nil, detail: "stale")
+                                  kind: .deviceOffline, deviceID: nil, deviceName: nil, room: nil, detail: "stale")
         let data = try JSONEncoder().encode([recent, stale])
         try data.write(to: url)
 

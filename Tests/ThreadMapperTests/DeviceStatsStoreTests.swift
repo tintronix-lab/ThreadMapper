@@ -3,6 +3,7 @@ import Foundation
 @testable import ThreadMapper
 
 @Suite("DeviceStatsStore")
+@MainActor
 struct DeviceStatsStoreTests {
 
     private func makeStore() -> DeviceStatsStore { .makeTestInstance() }

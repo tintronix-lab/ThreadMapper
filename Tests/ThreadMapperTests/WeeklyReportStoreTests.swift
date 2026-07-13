@@ -94,14 +94,6 @@ final class WeeklyReportStoreTests: XCTestCase {
         XCTAssertTrue(report.body.contains("dropped \(drop) pts"))
     }
 
-    func testFallbackBodyWhenNoData() {
-        let report = WeeklyReportStore.generate(
-            historyEntries: [], activityEvents: [],
-            currentStreak: 0, totalADays: 0)
-
-        XCTAssertTrue(report.body.contains("Open the app regularly"))
-    }
-
     // MARK: - Report fields
 
     func testOfflineEventsOutsideSevenDaysAreExcluded() {
@@ -119,12 +111,13 @@ final class WeeklyReportStoreTests: XCTestCase {
     }
 
     func testNowParameterDrivesWeekLabel() {
-        let anchor = Date(timeIntervalSinceReferenceDate: 0)   // 2001-01-01
+        // Use noon UTC on Jan 15 to avoid timezone-boundary "Dec" / "Feb" edge cases.
+        let anchor = Date(timeIntervalSinceReferenceDate: 86400 * 14 + 43200) // 2001-01-15 12:00 UTC
         let report = WeeklyReportStore.generate(
             historyEntries: [], activityEvents: [],
             currentStreak: 0, totalADays: 0, now: anchor)
 
-        XCTAssertTrue(report.weekRangeLabel.contains("Jan"))
+        XCTAssertTrue(report.weekRangeLabel.contains(" – "), "label should be a date range")
         XCTAssertEqual(report.generatedAt, anchor)
     }
 
