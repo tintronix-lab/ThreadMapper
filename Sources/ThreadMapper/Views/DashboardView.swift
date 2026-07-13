@@ -19,6 +19,7 @@ struct DashboardView: View {
     @State private var allDevicesExpanded = true
     @State private var showConfetti = false
     @State private var hasCompletedFirstScan = false
+    @State private var showDiagnostics = false
 
     private var health: NetworkHealthScore { viewModel.health }
 
@@ -89,6 +90,11 @@ struct DashboardView: View {
                     }
                     .disabled(viewModel.isScanning)
                 }
+                ToolbarItem(placement: .secondaryAction) {
+                    Button { showDiagnostics = true } label: {
+                        Label("Network Diagnostics", systemImage: "stethoscope")
+                    }
+                }
                 if WeeklyReportStore.shared.latestReport != nil {
                     ToolbarItem(placement: .secondaryAction) {
                         Button { showWeeklyReport = true } label: {
@@ -98,6 +104,9 @@ struct DashboardView: View {
                 }
             }
             .sheet(item: $selectedDevice) { device in DeviceDetailView(device: device) }
+            .sheet(isPresented: $showDiagnostics) {
+                NetworkDiagnosticsView(devices: viewModel.devices)
+            }
             .sheet(isPresented: $showWeeklyReport) {
                 if let report = WeeklyReportStore.shared.latestReport {
                     WeeklyReportView(report: report)
