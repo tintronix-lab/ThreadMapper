@@ -28,6 +28,10 @@
 	<array>
 		<string>com.tintronixlab.ThreadMapper.bgrefresh</string>
 	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UIRequiresFullScreen</key>
