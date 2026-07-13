@@ -857,3 +857,32 @@ handles the user-activity type automatically.
   but still not a pre-submission blocker
 - P5.3: iPad/landscape layout — deferred; needs explicit layout design
 - Widget "Updated X ago" `.relative` edge case (show "just now" floor)
+
+## Phase 8 — Iteration 16 (2026-07-13: Swift strict-concurrency audit — P4.1)
+
+**Goal:** resolve all strict-concurrency warnings (those that would be errors in
+Swift 6) and lock in enforcement via `Package.swift`.
+
+**Changes (7 files):**
+- `AppGroupStore`: `nonisolated(unsafe)` on `lastReloadAt`/`lastContentHash` — both
+  are always mutated inside `@MainActor` call sites but the enum itself is unisolated.
+- `ThreadDevice`: added `@unchecked Sendable` — `final class` accessed exclusively
+  through `@MainActor` contexts; the unchecked annotation is sound.
+- `DemoDiscoveryService`: `@unchecked Sendable` — same reasoning; `var devices` only
+  mutated via `await MainActor.run` inside `startScanning()`.
+- `MatterDiscoveryService`: `@unchecked Sendable` — `@Observable` class whose
+  mutable properties are always written from `Task { @MainActor in ... }` blocks.
+- `MeshViewModel`: added `@MainActor` isolation — the class was already effectively
+  main-actor-only (all meaningful work happens in `await MainActor.run { }` blocks);
+  making this explicit silences all `capture of 'self' with non-Sendable type` warnings
+  and makes the actor requirement clear at the declaration site.
+- `SurveyViewModel.isoFormatter`: `nonisolated(unsafe)` — `ISO8601DateFormatter` is
+  not `Sendable`, but this instance is effectively immutable (never re-assigned after
+  creation).
+- `Package.swift`: `.enableExperimentalFeature("StrictConcurrency")` added to both
+  `ThreadMapper` and `ThreadMapperTests` targets — prevents regression.
+
+**Result:** 0 strict-concurrency warnings under `SWIFT_STRICT_CONCURRENCY=complete`;
+all 70 tests pass. P4.2 (persistence consolidation) evaluated and closed as "hold" —
+stores are 62–88 lines each with heterogeneous restore logic; a `JSONStore<T>` generic
+would save ~35 lines across 3 files at the cost of meaningful new indirection.

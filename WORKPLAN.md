@@ -59,8 +59,8 @@ Low-risk changes requiring no design decisions. All preserve existing behavior; 
 
 ### P4 — Modernization (verify deployment target first)
 
-9. **Swift Concurrency correctness.** Audit for `Sendable`/actor isolation on the shared stores; the poll loop hops MainActor frequently — consider an `actor` for the sampling/merge core. Adopt strict-concurrency checking incrementally.
-10. **Persistence consolidation.** Multiple hand-rolled `Codable`/`JSONSerialization` stores with debounced writes. Evaluate a single SwiftData store or at least a shared `JSONStore<T>` generic to remove per-store boilerplate.
+9. ~~**Swift Concurrency correctness.**~~ **Done ✓** (Iteration 16) `@MainActor` on `MeshViewModel`; `@unchecked Sendable` on `ThreadDevice`, `DemoDiscoveryService`, `MatterDiscoveryService`; `nonisolated(unsafe)` on two `AppGroupStore` static vars and `SurveyViewModel.isoFormatter`; `StrictConcurrency` enabled in `Package.swift`. Zero warnings under `SWIFT_STRICT_CONCURRENCY=complete`.
+10. ~~**Persistence consolidation.**~~ **Evaluated — hold.** Stores are 62–88 lines each with heterogeneous restore logic. A `JSONStore<T>` generic would save ~35 lines across 3 debounced stores at the cost of new indirection. Not worth it at current scale; revisit if a SwiftData migration is undertaken.
 
 ### P5 — UX & accessibility
 
