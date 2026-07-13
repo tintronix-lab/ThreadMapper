@@ -40,34 +40,34 @@ Low-risk changes requiring no design decisions. All preserve existing behavior; 
 
 ## Backlog (prioritized)
 
-### P1 — Correctness & identity (do next)
+### P1 — Correctness & identity
 
-1. **Kill name-keyed identity.** `MeshViewModel` tracks topology via `knownDeviceNames: Set<String>` and emits `deviceStates: [String: Bool]` keyed by `name`. A rename reads as leave+join, and duplicate names collide. Switch join/leave detection and device-state maps to `uniqueIdentifier`; carry a display name alongside. *Risk: medium (touches notifications, activity feed, widget snapshot). Needs device-fixture tests.*
-2. **Multi-home safety.** Stores keyed by device name/UUID assume one home; `accessoryCache` merges homes. Namespace persisted keys by `HMHome.uniqueIdentifier` before promoting multi-home as a feature.
+1. ~~**Kill name-keyed identity.**~~ **Done ✓** Switch join/leave detection and device-state maps to `uniqueIdentifier`; carry display name alongside.
+2. **Multi-home safety.** Stores keyed by device name/UUID assume one home; `accessoryCache` merges homes. Namespace persisted keys by `HMHome.uniqueIdentifier` before promoting multi-home as a feature. *(deferred — needs migration strategy)*
 
 ### P2 — Maintainability & testability
 
-3. **Decompose the `MeshViewModel` poll loop.** ~180 lines live inside the `init` closure: signal sampling, HomeKit merge, topology diffing, offline/online transitions, aggregate computation, snapshot encode, achievements. Extract pure functions (`mergeDevices`, `diffTopology`, `computeAggregates`, `buildSnapshot`) that are unit-testable, and keep the loop as an orchestrator. *Highest maintainability ROI.*
-4. **Break up the large views.** `DashboardView` (833), `MeshView` (685), `MeshGraphView` (644), `SurveyWalkView` (459) exceed the 400-line lint threshold. Extract subviews/sections; this also reduces SwiftUI body recomputation surface.
-5. **Reduce singletons for testability.** ~11 `static let shared` stores. Introduce a lightweight environment/DI container so views and the view model can be tested with fakes (the discovery layer already demonstrates the pattern via `DiscoveryService`).
-6. **Dead-code sweep.** Confirm and remove if truly unreferenced: `RoomFilterView`, `Utils/ThreadMapperError`. (Keep `SignalExtrapolator` — covered by tests.)
+3. ~~**Decompose the `MeshViewModel` poll loop.**~~ **Done ✓** Extracted pure functions; loop kept as orchestrator.
+4. ~~**Break up the large views.**~~ **Done ✓** Subviews extracted from `DashboardView`, `MeshView`, `MeshGraphView`, `SurveyWalkView`.
+5. **Reduce singletons for testability.** ~11 `static let shared` stores. Introduce a lightweight DI container so views and the view model can be tested with fakes. *(deferred pre-submission)*
+6. ~~**Dead-code sweep.**~~ **Done ✓** Removed `RoomFilterView`, `Utils/ThreadMapperError`, and stale verification scripts.
 
 ### P3 — Performance
 
-7. **Gate the 1 Hz MainActor work.** Even idle-foreground, the loop recomputes aggregates + encodes a snapshot every second. Only recompute when devices/health actually change; keep the timer for the offline grace-period sweep.
-8. **Force-directed layout off the main thread.** `GraphLayout` runs O(n²)×iterations; move to a background task and publish positions, or cache layout keyed by membership hash so it doesn't re-solve on every rebuild.
+7. ~~**Gate the 1 Hz MainActor work.**~~ **Done ✓** Only recomputes aggregates + snapshot when devices/health actually change.
+8. ~~**Force-directed layout off the main thread.**~~ **Done ✓** Layout runs on background task; positions published to main actor.
 
 ### P4 — Modernization (verify deployment target first)
 
 9. **Swift Concurrency correctness.** Audit for `Sendable`/actor isolation on the shared stores; the poll loop hops MainActor frequently — consider an `actor` for the sampling/merge core. Adopt strict-concurrency checking incrementally.
-10. **Persistence consolidation.** Multiple hand-rolled `Codable`/`JSONSerialization` stores with debounced writes. Evaluate a single SwiftData store (the CHANGELOG references SwiftData that doesn't exist yet) or at least a shared `JSONStore<T>` generic to remove per-store boilerplate.
+10. **Persistence consolidation.** Multiple hand-rolled `Codable`/`JSONSerialization` stores with debounced writes. Evaluate a single SwiftData store or at least a shared `JSONStore<T>` generic to remove per-store boilerplate.
 
 ### P5 — UX & accessibility
 
-11. **Dynamic Type.** Replace fixed 8–10 pt fonts with text styles so large-type users aren't broken.
-12. **Contextual permissions.** Request location at survey start, not app launch.
-13. **iPad/landscape.** Reconsider portrait-only + `UIRequiresFullScreen`.
-14. **Data honesty copy.** Confirm latency-derived values are consistently labeled "Response Quality" (not "dBm") across all views, per the original review's S1.
+11. ~~**Dynamic Type.**~~ **Done ✓** (Iteration 14) 25 hardcoded font sizes replaced with scaled text styles across 5 files.
+12. ~~**Contextual permissions.**~~ **Done ✓** Location requested at survey start, not app launch.
+13. **iPad/landscape.** Reconsider portrait-only + `UIRequiresFullScreen`. *(deferred — needs layout design decisions)*
+14. ~~**Data honesty copy.**~~ **Done ✓** Latency-derived values consistently labeled "Response Quality" across all views.
 
 ---
 
