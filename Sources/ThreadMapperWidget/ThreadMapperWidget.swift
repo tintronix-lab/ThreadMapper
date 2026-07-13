@@ -216,7 +216,7 @@ struct MediumWidgetView: View {
 
                 Spacer()
 
-                Text("Updated \(snap.updatedAt, style: .relative) ago")
+                Text("Updated \(snap.updatedAt, style: .relative)")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
