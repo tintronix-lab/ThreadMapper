@@ -760,3 +760,100 @@ renames, and (later) multi-home.
 
 **Still open (P1 remainder):** namespace persisted keys by `HMHome.uniqueIdentifier`
 before promoting multi-home. Verify with `make ci` before committing.
+
+---
+
+## Phase 8 — Iteration 13 (2026-07-11: test coverage sweep)
+
+Systematically expanded the unit-test suite to cover all observable stores and the
+core session manager. All tests use injectable stores (temp-file–backed) so they
+run in complete isolation; no shared state or mocking.
+
+**New test suites (Swift Testing `@Suite`):**
+- `HealthHistoryStoreTests` — 5-minute throttle, cap enforcement, restore/cutoff, clearAll
+- `ActivityStoreTests` — record ordering, 500-event cap, restore, 7-day cutoff, clearAll
+- `AchievementStoreTests` — unlock idempotency, 5/10-device thresholds, restore/merge
+- `HealthStreakStoreTests` — consecutive-day streak, same-day no-double-count, reset, totalADays
+- `DeviceNotesStoreTests` — set/trim/debounce-key, clear, restore
+- `WeeklyReportStoreTests` — generate-on-nil, 23-hour cooldown, stale replacement, persist-across-restart
+- `SurveySessionManagerTests` — 11 tests covering `recordSample` (min samples, no duplicate coords,
+  cap enforcement), `endSession` (7 cases including empty/GPS/coord variants), `startSession` reset.
+  Uses `@MainActor` (`CLLocationManager` requires main thread); bypasses location tracker by passing
+  explicit coordinates directly.
+
+**`WeeklyReportStore` made injectable:** `init(storeURL: URL? = nil)` pattern
+(shared instance keeps Documents path); `generateIfNeeded(now: Date = Date())` for
+deterministic cooldown testing; `makeTestInstance()` static factory.
+
+**`SurveySessionManager` `@MainActor`:** class required `@MainActor` isolation for
+`CLLocationManager` — added annotation; all existing call sites were already on the
+main actor so no behavior change.
+
+---
+
+## Phase 8 — Iteration 14 (2026-07-11: Dynamic Type audit — P5.1)
+
+Audited all Swift source files for hardcoded `.font(.system(size: N))` literals.
+Found 25 instances across 4 files. Replaced every one with either:
+- **`@ScaledMetric`** (Canvas contexts, where semantic styles cannot be used directly)
+- **Semantic text styles** (`.caption`, `.caption2`, `.system(.title, ...)` with `minimumScaleFactor`)
+
+**Files changed:**
+- `DeviceStatsStore.swift` (`SignalSparklineView`) — Canvas p50/p95 and Y-axis labels:
+  `@ScaledMetric(relativeTo: .caption2) private var sparklineLabelSize: CGFloat = 7`
+- `MeshGraphView.swift` — two `@ScaledMetric` properties (`canvasNodeLabel`, `canvasRoomLabel`)
+  accessible by the Drawing/Layout extensions via `self`
+- `MeshGraphView+Drawing.swift` — room zone label and node label switched from literals
+  to `canvasRoomLabel`/`canvasNodeLabel + offset`
+- `DashboardSections.swift` (`DashboardHealthHistorySection`) — chart axis `AxisValueLabel`:
+  `@ScaledMetric(relativeTo: .caption2) private var chartAxisFont: CGFloat = 7`
+- `ThreadMapperWidget.swift` (all 4 widget views) — grade letter literals (20/26/28 pt)
+  replaced with `.system(.title3/.title, design: .rounded, weight: .black)` +
+  `minimumScaleFactor(0.5).lineLimit(1)`; status/label sizes replaced with
+  `.caption`, `.caption2` semantic styles
+
+Closes P5.1. Widget grade letter now scales with the user's preferred text size while
+`minimumScaleFactor` prevents overflow in the fixed widget canvas.
+
+---
+
+## Phase 8 — Iteration 15 (2026-07-13: quick wins + confetti + Spotlight)
+
+**Correctness fixes:**
+- `HealthHistoryStore.Entry.id` changed from `var id: Date { timestamp }` (duplicate
+  timestamps broke `Identifiable`/`ForEach`) to `let id: UUID`. Custom `init(from:)`
+  falls back to `UUID()` if `id` key is absent, so existing persisted JSON migrates
+  silently on first launch.
+- Onboarding Skip button: removed `#if DEBUG` gate so release users can skip the
+  three-screen onboarding without paging through all screens.
+- README: corrected "Force-directed layout" → "Hierarchical room-based layout",
+  replaced `xcodegen`/`.xcodeproj` build instructions with SPM workspace commands,
+  removed stale "Iteration 3 (next)" roadmap section.
+
+**Feature: confetti on grade improvement (#53)**
+`ConfettiView` — 60-particle Canvas animation driven by `TimelineView` at 60 fps.
+Particles rain from the top edge with randomized horizontal drift, spin, size, and
+per-particle stagger delay. Fade-out starts at 1.8 s; auto-dismisses at 2.6 s by
+clearing its binding. Respects `accessibilityReduceMotion` — no animation when
+enabled.
+
+`DashboardView` watches `health.grade` via `onChange`. Changes before the first
+scan completes (`hasCompletedFirstScan`) are ignored to prevent cold-start false
+positives. Only improvements (`gradeRank(new) > gradeRank(old)`) trigger the burst.
+
+**Feature: Spotlight device indexing (#57)**
+`SpotlightService` — `CSSearchableItem` per device in the domain
+`com.tintronixlab.ThreadMapper.devices`. Each item carries: title = device name,
+contentDescription = room + role (Border Router / Router / Thread Device), keywords
+(room, "Thread", "HomeKit"). Indexed via `CSSearchableIndex.default()` whenever
+the device graph rebuilds (`mergeDevices` detects a change). Domain is cleared if
+the device list drops to empty. No Info.plist changes required; `CoreSpotlight`
+handles the user-activity type automatically.
+
+**Remaining open items (pre-submission):**
+- P1.2: namespace persisted store keys by `HMHome.uniqueIdentifier` (multi-home
+  safety — needs migration strategy design before implementing)
+- P2.5: singleton DI container — deferred; test suite coverage makes this lower risk
+  but still not a pre-submission blocker
+- P5.3: iPad/landscape layout — deferred; needs explicit layout design
+- Widget "Updated X ago" `.relative` edge case (show "just now" floor)
