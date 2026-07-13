@@ -1,6 +1,7 @@
 import XCTest
 @testable import ThreadMapper
 
+@MainActor
 final class MeshViewModelOnlyTests: XCTestCase {
     func testWarnings_noRouters_reportsBorderRouter() throws {
         let devices = [

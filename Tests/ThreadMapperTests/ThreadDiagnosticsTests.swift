@@ -1,6 +1,7 @@
 import XCTest
 @testable import ThreadMapper
 
+@MainActor
 final class ThreadDiagnosticsTests: XCTestCase {
 
     private func dev(_ name: String, br: Bool = false, battery: Int? = nil, room: String? = nil) -> ThreadDevice {
