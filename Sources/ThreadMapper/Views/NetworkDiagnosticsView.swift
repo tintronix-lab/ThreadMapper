@@ -77,6 +77,9 @@ struct NetworkDiagnosticsView: View {
             } else {
                 healthySection
             }
+            if report.totalBorderRouters >= 2 {
+                borderRouterComparisonSection(report)
+            }
             if !report.roomCoverage.isEmpty {
                 roomCoverageSection(report.roomCoverage)
             }
@@ -243,6 +246,83 @@ struct NetworkDiagnosticsView: View {
             Text("Room Coverage")
         } footer: {
             Text("Grade reflects signal strength and device availability. Rooms without a router rely on hops from another location.")
+                .font(.caption)
+        }
+    }
+
+    private struct BRStats {
+        let node: MeshNode
+        let directCount: Int
+        let totalCount: Int
+    }
+
+    private func borderRouterStats(from report: NetworkDiagnosticsEngine.Report) -> [BRStats] {
+        let brNodes = report.meshNodes.filter { $0.kind == .borderRouter }
+        var childrenOf: [UUID: [UUID]] = [:]
+        for link in report.meshLinks { childrenOf[link.sourceID, default: []].append(link.targetID) }
+
+        return brNodes.map { br in
+            let direct = childrenOf[br.id]?.count ?? 0
+            var total = 0
+            var queue = childrenOf[br.id] ?? []
+            var seen = Set<UUID>()
+            while !queue.isEmpty {
+                let next = queue.removeFirst()
+                guard seen.insert(next).inserted else { continue }
+                total += 1
+                queue.append(contentsOf: childrenOf[next] ?? [])
+            }
+            return BRStats(node: br, directCount: direct, totalCount: total)
+        }
+    }
+
+    @ViewBuilder
+    private func borderRouterComparisonSection(_ report: NetworkDiagnosticsEngine.Report) -> some View {
+        let stats = borderRouterStats(from: report)
+        Section {
+            ForEach(stats, id: \.node.id) { entry in
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Image(systemName: "antenna.radiowaves.left.and.right")
+                            .foregroundStyle(.blue)
+                        Text(entry.node.name)
+                            .font(.subheadline.weight(.semibold))
+                        Spacer()
+                        if let ch = entry.node.channel {
+                            Text("CH \(ch)")
+                                .font(.caption.monospacedDigit())
+                                .padding(.horizontal, 6).padding(.vertical, 2)
+                                .background(.blue.opacity(0.1), in: Capsule())
+                                .foregroundStyle(.blue)
+                        }
+                    }
+                    HStack(spacing: 20) {
+                        VStack(spacing: 1) {
+                            Text("\(entry.directCount)")
+                                .font(.title3.weight(.bold).monospacedDigit())
+                            Text("Direct")
+                                .font(.caption2).foregroundStyle(.secondary)
+                        }
+                        VStack(spacing: 1) {
+                            Text("\(entry.totalCount)")
+                                .font(.title3.weight(.bold).monospacedDigit())
+                            Text("Total Served")
+                                .font(.caption2).foregroundStyle(.secondary)
+                        }
+                        if let room = entry.node.room {
+                            Spacer()
+                            Label(room, systemImage: "mappin")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+        } header: {
+            Text("Border Router Comparison")
+        } footer: {
+            Text("Direct = devices routed immediately through this BR. Total = all devices whose traffic passes through it upstream.")
                 .font(.caption)
         }
     }

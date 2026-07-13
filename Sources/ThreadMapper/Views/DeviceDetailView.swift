@@ -3,6 +3,8 @@ import SwiftUI
 struct DeviceDetailView: View {
     let device: ThreadDevice
     @Environment(\.dismiss) private var dismiss
+    @Environment(MeshViewModel.self) private var meshViewModel
+    @Environment(ActivityStore.self) private var activityStore
     @Environment(SurveyViewModel.self) private var surveyVM
     @Environment(DeviceStatsStore.self) private var statsStore
     @Environment(DeviceNotesStore.self) private var notesStore
@@ -21,10 +23,13 @@ struct DeviceDetailView: View {
             Form {
                 signalSection
                 networkSection
+                meshPathSection
                 deviceSection
                 if device.batteryPercentage != nil { batterySection }
                 if device.isBorderRouter { threadClassificationSection }
+                vendorInsightSection
                 surveySection
+                deviceHistorySection
                 notesSection
             }
             .navigationTitle(device.name)
@@ -263,8 +268,10 @@ struct DeviceDetailView: View {
                         .font(.caption.monospacedDigit())
                 }
             }
-            if let parent = device.parentNodeID {
-                LabeledContent("Parent Node", value: parent)
+            if let parentRaw = device.parentNodeID {
+                let parentName = meshViewModel.devices
+                    .first { $0.id.uuidString == parentRaw }?.name ?? parentRaw
+                LabeledContent("Parent Node", value: parentName)
             }
             if device.isSleepyEndDevice {
                 Label("Sleepy End Device", systemImage: "moon.zzz.fill")
@@ -432,6 +439,203 @@ struct DeviceDetailView: View {
                 .onChange(of: noteText) { _, new in
                     notesStore.setNote(new, for: device.uniqueIdentifier.uuidString)
                 }
+        }
+    }
+
+    // MARK: - Mesh Path
+
+    private struct HopEntry {
+        let name: String
+        let kind: MeshNodeKind
+        let isCurrentDevice: Bool
+    }
+
+    private var meshPath: [HopEntry] {
+        let (nodes, _) = MeshTopologyBuilder.buildGraph(from: meshViewModel.devices)
+        let nodeByID = Dictionary(uniqueKeysWithValues: nodes.map { ($0.id, $0) })
+
+        var path: [MeshNode] = []
+        var current: UUID? = device.id
+        var visited = Set<UUID>()
+
+        while let id = current, !visited.contains(id), path.count < 12 {
+            visited.insert(id)
+            if let node = nodeByID[id] {
+                path.append(node)
+                current = node.parentID
+            } else {
+                break
+            }
+        }
+        // Include the gateway if the last node's parentID resolves
+        if let lastParentID = path.last?.parentID, let gateway = nodeByID[lastParentID] {
+            path.append(gateway)
+        }
+
+        return path.reversed().map {
+            HopEntry(name: $0.name, kind: $0.kind, isCurrentDevice: $0.id == device.id)
+        }
+    }
+
+    @ViewBuilder
+    private var meshPathSection: some View {
+        let path = meshPath
+        if path.count >= 2 {
+            Section {
+                // Hop count row
+                let hopCount = path.count - 1  // gateway excluded from "hops"
+                HStack(spacing: 10) {
+                    Image(systemName: hopCount <= 2 ? "checkmark.circle.fill" : hopCount == 3 ? "exclamationmark.circle" : "exclamationmark.triangle.fill")
+                        .foregroundStyle(hopCount <= 2 ? .green : hopCount == 3 ? .orange : .red)
+                    Text("\(hopCount) hop\(hopCount == 1 ? "" : "s") from border router")
+                        .font(.subheadline.weight(.semibold))
+                    Spacer()
+                }
+                .padding(.vertical, 2)
+
+                // Visual hop chain
+                ForEach(path.indices, id: \.self) { i in
+                    let hop = path[i]
+                    VStack(alignment: .leading, spacing: 0) {
+                        if i > 0 {
+                            HStack {
+                                Spacer().frame(width: 10)
+                                Image(systemName: "chevron.up")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary.opacity(0.5))
+                                Spacer()
+                            }
+                        }
+                        HStack(spacing: 10) {
+                            Image(systemName: nodeKindIcon(hop.kind))
+                                .foregroundStyle(hop.isCurrentDevice ? Color.accentColor : hop.kind == .gateway ? .blue : .secondary)
+                                .frame(width: 22)
+                            Text(hop.name)
+                                .font(hop.isCurrentDevice ? .subheadline.weight(.semibold) : .subheadline)
+                                .foregroundStyle(hop.isCurrentDevice ? .primary : .secondary)
+                            Spacer()
+                            Text(hop.kind.rawValue)
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                }
+            } header: {
+                Text("Mesh Path to Internet")
+            } footer: {
+                Text("Inferred routing path from this device to your border router. Fewer hops means lower latency and better reliability.")
+                    .font(.caption)
+            }
+        }
+    }
+
+    private func nodeKindIcon(_ kind: MeshNodeKind) -> String {
+        switch kind {
+        case .gateway:      return "globe"
+        case .borderRouter: return "antenna.radiowaves.left.and.right"
+        case .router:       return "point.3.connected.trianglepath.dotted"
+        case .endDevice:    return "circle.dotted"
+        }
+    }
+
+    // MARK: - Vendor Insight
+
+    @ViewBuilder
+    private var vendorInsightSection: some View {
+        if let insight = vendorInsight {
+            Section {
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: "lightbulb.fill")
+                        .foregroundStyle(.yellow)
+                        .imageScale(.small)
+                        .padding(.top, 1)
+                    Text(insight)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(.vertical, 2)
+            } header: {
+                Text("Vendor Notes")
+            }
+        }
+    }
+
+    private var vendorInsight: String? {
+        let mfr = device.manufacturer.lowercased()
+        if mfr.contains("eve") {
+            return "Eve devices are native Thread. Mains-powered Eve accessories (Eve Energy, Eve Outdoor Plug) act as Thread routers — place them strategically to extend your mesh reach."
+        }
+        if mfr.contains("nanoleaf") {
+            return "Nanoleaf Thread devices act as mesh routers when mains-powered. Large glass or metal panels can absorb 2.4 GHz signal — position them as relays, not dead ends."
+        }
+        if mfr.contains("apple") {
+            return "HomePod mini and Apple TV 4K are Thread border routers. Keep them updated via Settings → General → Software Update for the latest Thread firmware improvements."
+        }
+        if mfr.contains("ikea") {
+            return "IKEA DIRIGERA hub uses Zigbee, not Thread. Look for the Thread logo on IKEA packaging — compatible models include Trådfri and Symfonisk (2nd gen)."
+        }
+        if mfr.contains("philips") || mfr.contains("hue") || mfr.contains("signify") {
+            return "Philips Hue Bridge uses Zigbee. Newer Hue devices support Matter over Thread — use the Hue app to migrate eligible bulbs to your Thread fabric."
+        }
+        if mfr.contains("aqara") {
+            return "Aqara M2/M3 hubs bridge multiple protocols. Thread-capable Aqara devices may appear as proxied through the hub rather than directly on the mesh."
+        }
+        if mfr.contains("bosch") {
+            return "Bosch Smart Home devices typically operate as sleepy end devices — waking only to transmit. Higher response latency is expected and normal for battery-powered Bosch sensors."
+        }
+        if mfr.contains("samsung") || mfr.contains("smartthings") {
+            return "Samsung SmartThings Station supports Thread and Matter. It can act as a border router for your mesh alongside HomePod and Apple TV devices."
+        }
+        return nil
+    }
+
+    // MARK: - Device History
+
+    private var deviceEvents: [ActivityEvent] {
+        activityStore.events.filter { $0.deviceID == device.id }
+    }
+
+    @ViewBuilder
+    private var deviceHistorySection: some View {
+        let events = deviceEvents
+        if !events.isEmpty {
+            Section("Device History") {
+                let offlineEvents = events.filter { $0.kind == .deviceOffline }
+                let joinEvents = events.filter { $0.kind == .topologyJoined }
+
+                if let firstSeen = joinEvents.last {
+                    LabeledContent("First Seen") {
+                        Text(firstSeen.timestamp, format: .dateTime.month().day().year())
+                            .font(.caption.monospacedDigit())
+                    }
+                }
+
+                if !offlineEvents.isEmpty {
+                    LabeledContent("Offline Events (7d)") {
+                        Text("\(offlineEvents.count)")
+                            .font(.caption.weight(.semibold).monospacedDigit())
+                            .foregroundStyle(offlineEvents.count >= 5 ? .red : offlineEvents.count >= 2 ? .orange : .secondary)
+                    }
+                }
+
+                if let latest = events.first {
+                    HStack(spacing: 8) {
+                        Image(systemName: latest.kind.icon)
+                            .foregroundStyle(latest.kind.color)
+                            .imageScale(.small)
+                        Text(latest.kind.label)
+                            .font(.caption)
+                        Spacer()
+                        Text(latest.timestamp, style: .relative)
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                        Text("ago")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+            }
         }
     }
 
