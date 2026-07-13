@@ -53,11 +53,37 @@ struct NetworkDiagnosticsEngine {
         let parentName: String?
     }
 
+    struct ChannelStats: Identifiable {
+        enum InterferenceRisk {
+            case high    // directly overlaps a common Wi-Fi non-overlapping channel (1, 6, 11)
+            case medium  // near a common Wi-Fi channel
+            case low     // in a cleaner part of the 2.4 GHz band
+
+            var label: String {
+                switch self { case .high: "High"; case .medium: "Medium"; case .low: "Low" }
+            }
+            var color: Color {
+                switch self { case .high: .red; case .medium: .orange; case .low: .green }
+            }
+            var icon: String {
+                switch self { case .high: "exclamationmark.triangle.fill"; case .medium: "exclamationmark.circle"; case .low: "checkmark.circle.fill" }
+            }
+        }
+
+        let id = UUID()
+        let channel: Int
+        let deviceCount: Int
+        let deviceNames: [String]
+        let interferenceRisk: InterferenceRisk
+        let frequencyMHz: Int   // center frequency
+    }
+
     struct Report {
         let recommendations: [Recommendation]
         let roomCoverage: [RoomCoverage]     // sorted worst-first
         let deviceHops: [DeviceHopInfo]       // sorted deepest-first
         let singlePointsOfFailure: [ThreadDevice]
+        let channelStats: [ChannelStats]      // sorted by channel number
         let totalBorderRouters: Int
         let totalRouters: Int
         let meshLinks: [MeshLink]
@@ -69,7 +95,8 @@ struct NetworkDiagnosticsEngine {
     static func analyze(devices: [ThreadDevice]) -> Report {
         guard !devices.isEmpty else {
             return Report(recommendations: [], roomCoverage: [], deviceHops: [],
-                          singlePointsOfFailure: [], totalBorderRouters: 0, totalRouters: 0,
+                          singlePointsOfFailure: [], channelStats: [],
+                          totalBorderRouters: 0, totalRouters: 0,
                           meshLinks: [], meshNodes: [])
         }
 
@@ -241,11 +268,39 @@ struct NetworkDiagnosticsEngine {
 
         recs.sort { $0.priority < $1.priority }
 
+        // Channel analysis
+        // Thread 802.15.4 channel 11 starts at 2405 MHz, each channel is 5 MHz wide.
+        // Wi-Fi 2.4 GHz non-overlapping channels: 1 (2412), 6 (2437), 11 (2462) ± ~11 MHz
+        // Thread channels that fall within those Wi-Fi bands:
+        //   Wi-Fi CH1  (2401–2423): Thread 11–13
+        //   Wi-Fi CH6  (2426–2448): Thread 17–19
+        //   Wi-Fi CH11 (2451–2473): Thread 22–24
+        let highRiskChannels: Set<Int> = [11, 12, 13, 17, 18, 19, 22, 23, 24]
+        let mediumRiskChannels: Set<Int> = [14, 16, 20, 21, 25]
+
+        let devicesByChannel = Dictionary(grouping: devices.compactMap { d -> (Int, ThreadDevice)? in
+            guard let ch = d.channel else { return nil }
+            return (ch, d)
+        }, by: { $0.0 })
+
+        let channelStats: [ChannelStats] = devicesByChannel.map { ch, pairs in
+            let devs = pairs.map(\.1)
+            let risk: ChannelStats.InterferenceRisk
+            if highRiskChannels.contains(ch) { risk = .high }
+            else if mediumRiskChannels.contains(ch) { risk = .medium }
+            else { risk = .low }
+            let freqMHz = 2405 + (ch - 11) * 5
+            return ChannelStats(channel: ch, deviceCount: devs.count,
+                                deviceNames: devs.map(\.name).sorted(),
+                                interferenceRisk: risk, frequencyMHz: freqMHz)
+        }.sorted { $0.channel < $1.channel }
+
         return Report(
             recommendations: recs,
             roomCoverage: roomCoverage,
             deviceHops: deviceHops,
             singlePointsOfFailure: spofDevices,
+            channelStats: channelStats,
             totalBorderRouters: borderRouters.count,
             totalRouters: routerDevices.count,
             meshLinks: links,

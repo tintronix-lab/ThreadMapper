@@ -87,6 +87,9 @@ struct NetworkDiagnosticsView: View {
             if !report.singlePointsOfFailure.isEmpty {
                 spofSection(report.singlePointsOfFailure)
             }
+            if !report.channelStats.isEmpty {
+                channelAnalysisSection(report.channelStats)
+            }
         }
     }
 
@@ -412,6 +415,56 @@ struct NetworkDiagnosticsView: View {
             Text("Single-Point Routers")
         } footer: {
             Text("These routers have no backup in their area. If one fails, the end devices connected to it lose mesh access.")
+                .font(.caption)
+        }
+    }
+
+    // MARK: - Channel Analysis
+
+    @ViewBuilder
+    private func channelAnalysisSection(_ channels: [NetworkDiagnosticsEngine.ChannelStats]) -> some View {
+        Section {
+            ForEach(channels) { stats in
+                HStack(spacing: 14) {
+                    // Channel badge
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(stats.interferenceRisk.color.opacity(0.12))
+                            .frame(width: 48, height: 40)
+                        VStack(spacing: 1) {
+                            Text("CH")
+                                .font(.system(size: 8, weight: .semibold))
+                                .foregroundStyle(stats.interferenceRisk.color.opacity(0.8))
+                            Text("\(stats.channel)")
+                                .font(.system(.headline, design: .rounded, weight: .bold))
+                                .foregroundStyle(stats.interferenceRisk.color)
+                        }
+                    }
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 6) {
+                            Text("\(stats.frequencyMHz) MHz")
+                                .font(.subheadline.weight(.semibold))
+                                .monospacedDigit()
+                            Image(systemName: stats.interferenceRisk.icon)
+                                .imageScale(.small)
+                                .foregroundStyle(stats.interferenceRisk.color)
+                            Text(stats.interferenceRisk.label + " interference risk")
+                                .font(.caption2)
+                                .foregroundStyle(stats.interferenceRisk.color)
+                        }
+                        Text("\(stats.deviceCount) device\(stats.deviceCount == 1 ? "" : "s"): \(stats.deviceNames.prefix(3).joined(separator: ", "))\(stats.deviceNames.count > 3 ? "…" : "")")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+                .padding(.vertical, 2)
+            }
+        } header: {
+            Text("Thread Channel Analysis")
+        } footer: {
+            Text("Thread uses 2.4 GHz channels 11–26. Channels 15, 20, and 25 have the lowest overlap with Wi-Fi 2.4 GHz. Channels 11–14, 17–19, and 22–24 overlap with Wi-Fi non-overlapping channels 1, 6, and 11.")
                 .font(.caption)
         }
     }
