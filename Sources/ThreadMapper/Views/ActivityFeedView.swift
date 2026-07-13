@@ -5,6 +5,7 @@ struct ActivityFeedView: View {
     @State private var selectedDevice: ThreadDevice?
     @State private var searchText = ""
     @State private var kindFilter: ActivityEvent.Kind? = nil
+    @State private var showDeviceHistory = false
 
     private var filtered: [ActivityEvent] {
         store.events.filter { event in
@@ -46,7 +47,17 @@ struct ActivityFeedView: View {
             }
             .navigationTitle("Activity")
             .searchable(text: $searchText, prompt: "Search events")
+            .navigationDestination(isPresented: $showDeviceHistory) {
+                DeviceHistoryView()
+            }
             .toolbar {
+                ToolbarItem(placement: .secondaryAction) {
+                    Button {
+                        showDeviceHistory = true
+                    } label: {
+                        Label("Device History", systemImage: "chart.bar.doc.horizontal")
+                    }
+                }
                 if !store.events.isEmpty {
                     ToolbarItem(placement: .primaryAction) {
                         Menu {
