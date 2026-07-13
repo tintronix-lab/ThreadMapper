@@ -882,7 +882,22 @@ Swift 6) and lock in enforcement via `Package.swift`.
 - `Package.swift`: `.enableExperimentalFeature("StrictConcurrency")` added to both
   `ThreadMapper` and `ThreadMapperTests` targets — prevents regression.
 
+**Round 2 (same iteration):** Six residual warnings from protocol existentials:
+- `DiscoveryService`, `DiagnosticsProvider`: added `: Sendable` to the protocol
+  declarations; conformers (`NoDiagnosticsProvider`, `ThreadCredentialsService`,
+  `BorderRouterClient`) marked `@unchecked Sendable`.
+- `SurveyViewModel.loadRecentSamplePoints`: removed redundant `Task { @MainActor in }`
+  wrapper — the function is synchronous; dropped `@escaping` accordingly.
+- `MeshViewModelOnlyTests`, `ThreadDiagnosticsTests`: added `@MainActor` to test
+  classes that construct or call the now-isolated `MeshViewModel`.
+
+**Widget polish:** `MediumWidgetView` "Updated 0 seconds ago" floor — pass `entryDate`
+down from `NetworkHealthEntry`; show "Updated just now" when `updatedAt` is within 60 s
+of the entry date.
+
 **Result:** 0 strict-concurrency warnings under `SWIFT_STRICT_CONCURRENCY=complete`;
-all 70 tests pass. P4.2 (persistence consolidation) evaluated and closed as "hold" —
-stores are 62–88 lines each with heterogeneous restore logic; a `JSONStore<T>` generic
-would save ~35 lines across 3 files at the cost of meaningful new indirection.
+0 navigator issues; all 70 tests pass with 0 failures.
+
+P4.2 (persistence consolidation) evaluated and closed as "hold" — stores are 62–88
+lines each with heterogeneous restore logic; a `JSONStore<T>` generic would save ~35
+lines across 3 files at the cost of meaningful new indirection.
