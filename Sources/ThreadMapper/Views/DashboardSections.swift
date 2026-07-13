@@ -621,6 +621,8 @@ struct GradeRingView: View {
         }
         .frame(width: 92, height: 92)
         .shadow(color: health.color.opacity(0.25), radius: 8, x: 0, y: 3)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Network health grade \(health.grade), score \(health.score) out of 100")
     }
 }
 

@@ -37,6 +37,7 @@ struct ConfettiView: View {
             }
             .ignoresSafeArea()
             .allowsHitTesting(false)
+            .accessibilityHidden(true)
             .onAppear {
                 startDate = Date()
                 particles = ConfettiParticle.burst(count: 60)
