@@ -5,6 +5,7 @@ struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var proStore = ProStore.shared
     @State private var loadError = false
+    @State private var purchaseError: String?
 
     private let features: [(icon: String, title: String, detail: String)] = [
         ("clock.arrow.circlepath",      "30-Day Health History",   "Track network trends over weeks, not just 24 hours"),
@@ -34,7 +35,18 @@ struct PaywallView: View {
                 }
             }
         }
-        .task { await proStore.loadProducts() }
+        .task {
+            await proStore.loadProducts()
+            if proStore.products.isEmpty { loadError = true }
+        }
+        .alert("Purchase Failed", isPresented: .init(
+            get: { purchaseError != nil },
+            set: { if !$0 { purchaseError = nil } }
+        )) {
+            Button("OK", role: .cancel) { purchaseError = nil }
+        } message: {
+            Text(purchaseError ?? "")
+        }
     }
 
     // MARK: - Header
@@ -96,8 +108,24 @@ struct PaywallView: View {
     @ViewBuilder
     private var purchaseSection: some View {
         VStack(spacing: 12) {
-            if proStore.products.isEmpty {
-                // Products not yet loaded or unavailable
+            if loadError {
+                VStack(spacing: 8) {
+                    Text("Couldn't load products")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Button("Try Again") {
+                        loadError = false
+                        Task {
+                            await proStore.loadProducts()
+                            if proStore.products.isEmpty { loadError = true }
+                        }
+                    }
+                    .font(.subheadline)
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+            } else if proStore.products.isEmpty {
+                // Products not yet loaded
                 ProgressView("Loading…")
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -129,8 +157,12 @@ struct PaywallView: View {
         let isAnnual = product.id == ProStore.annualID
         Button {
             Task {
-                try? await proStore.purchase(product)
-                if proStore.isPro { dismiss() }
+                do {
+                    try await proStore.purchase(product)
+                    if proStore.isPro { dismiss() }
+                } catch {
+                    purchaseError = error.localizedDescription
+                }
             }
         } label: {
             HStack {
