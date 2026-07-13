@@ -123,7 +123,10 @@ final class MeshViewModel {
                     let latest = self.discovery.devices
                     var graphNeedsRebuild = self.mergeDevices(latest: latest)
                     if self.processTopologyChanges() { graphNeedsRebuild = true }
-                    if graphNeedsRebuild { self.applyFilters() }
+                    if graphNeedsRebuild {
+                        self.applyFilters()
+                        SpotlightService.index(self.devices)
+                    }
                     self.scanError = self.discovery.discoveryError?.userMessage
                     // Grace-period offline sweep runs every tick so transitions are
                     // detected promptly regardless of whether we recompute aggregates.
