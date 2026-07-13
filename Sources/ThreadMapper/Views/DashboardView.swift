@@ -17,6 +17,8 @@ struct DashboardView: View {
     @State private var bannerDismissTask: Task<Void, Never>?
     @State private var roomCoverageExpanded = true
     @State private var allDevicesExpanded = true
+    @State private var showConfetti = false
+    @State private var hasCompletedFirstScan = false
 
     private var health: NetworkHealthScore { viewModel.health }
 
@@ -136,6 +138,27 @@ struct DashboardView: View {
             .onAppear {
                 if !viewModel.isScanning { Task { await viewModel.startScan() } }
             }
+        }
+        .overlay {
+            ConfettiView(isShowing: $showConfetti)
+        }
+        .onChange(of: viewModel.isScanning) { old, new in
+            if old && !new { hasCompletedFirstScan = true }
+        }
+        .onChange(of: health.grade) { old, new in
+            guard hasCompletedFirstScan, gradeRank(new) > gradeRank(old) else { return }
+            showConfetti = true
+        }
+    }
+
+    private func gradeRank(_ g: String) -> Int {
+        switch g {
+        case "A": return 5
+        case "B": return 4
+        case "C": return 3
+        case "D": return 2
+        case "F": return 1
+        default:  return 0
         }
     }
 
