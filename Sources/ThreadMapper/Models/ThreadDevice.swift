@@ -8,7 +8,7 @@ enum Reachability: Equatable {
 }
 
 @Observable
-final class ThreadDevice: Identifiable, Codable, Hashable, Equatable {
+final class ThreadDevice: Identifiable, Codable, Hashable, Equatable, @unchecked Sendable {
     let id: UUID
     var name: String
     var manufacturer: String

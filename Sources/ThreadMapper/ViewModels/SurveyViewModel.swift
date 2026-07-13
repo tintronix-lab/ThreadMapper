@@ -197,7 +197,7 @@ final class SurveyViewModel {
 
     // MARK: - Persistence
 
-    private static let isoFormatter = ISO8601DateFormatter()
+    nonisolated(unsafe) private static let isoFormatter = ISO8601DateFormatter()
 
     private func persist() {
         do {

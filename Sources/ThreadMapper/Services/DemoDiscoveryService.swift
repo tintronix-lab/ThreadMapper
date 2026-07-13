@@ -2,7 +2,7 @@ import Foundation
 
 /// Simulated Thread network for demo mode, App Store review, and SwiftUI Previews.
 /// Provides a realistic 8-device home without requiring HomeKit authorization.
-final class DemoDiscoveryService: DiscoveryService {
+final class DemoDiscoveryService: DiscoveryService, @unchecked Sendable {
 
     var devices: [ThreadDevice] = []
     var discoveryError: DiscoveryError? = nil

@@ -31,7 +31,7 @@ protocol DiscoveryService: AnyObject {
 }
 
 @Observable
-final class MatterDiscoveryService: DiscoveryService {
+final class MatterDiscoveryService: DiscoveryService, @unchecked Sendable {
     static let shared = MatterDiscoveryService()
 
     var devices: [ThreadDevice] = []

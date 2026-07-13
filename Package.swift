@@ -14,8 +14,13 @@ let package = Package(
             exclude: ["ThreadMapper/Assets.xcassets",
                       "ThreadMapper/Info.plist",
                       "ThreadMapper/ThreadMapper.entitlements"],
-            sources: ["ThreadMapper", "Shared"]
+            sources: ["ThreadMapper", "Shared"],
+            swiftSettings: [.enableExperimentalFeature("StrictConcurrency")]
         ),
-        .testTarget(name: "ThreadMapperTests", dependencies: ["ThreadMapper"]),
+        .testTarget(
+            name: "ThreadMapperTests",
+            dependencies: ["ThreadMapper"],
+            swiftSettings: [.enableExperimentalFeature("StrictConcurrency")]
+        ),
     ]
 )

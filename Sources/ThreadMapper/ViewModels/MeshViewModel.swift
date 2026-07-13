@@ -1,7 +1,7 @@
 import SwiftUI
 import Observation
 
-@Observable
+@Observable @MainActor
 final class MeshViewModel {
     var devices: [ThreadDevice] = []
     var nodes: [MeshNode] = []
