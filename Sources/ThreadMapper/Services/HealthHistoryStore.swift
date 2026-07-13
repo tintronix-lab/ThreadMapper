@@ -6,10 +6,27 @@ import Observation
 final class HealthHistoryStore {
 
     struct Entry: Codable, Identifiable {
-        var id: Date { timestamp }
+        let id: UUID
         let timestamp: Date
         let score: Int
         let grade: String
+
+        init(timestamp: Date, score: Int, grade: String) {
+            id = UUID()
+            self.timestamp = timestamp
+            self.score = score
+            self.grade = grade
+        }
+
+        private enum CodingKeys: String, CodingKey { case id, timestamp, score, grade }
+
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            id = (try? c.decode(UUID.self, forKey: .id)) ?? UUID()
+            timestamp = try c.decode(Date.self, forKey: .timestamp)
+            score = try c.decode(Int.self, forKey: .score)
+            grade = try c.decode(String.self, forKey: .grade)
+        }
     }
 
     static let shared = HealthHistoryStore()

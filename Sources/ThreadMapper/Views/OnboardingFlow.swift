@@ -64,7 +64,6 @@ public struct OnboardingFlow: View {
             }
             .padding(.horizontal)
 
-            #if DEBUG
             HStack {
                 Spacer()
                 Button("Skip") { isPresented = false }
@@ -73,7 +72,6 @@ public struct OnboardingFlow: View {
                     .padding(.trailing, 4)
             }
             .padding(.top, 4)
-            #endif
 
             Spacer()
         }

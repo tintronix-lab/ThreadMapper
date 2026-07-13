@@ -25,9 +25,11 @@
 - **Troubleshooter** — guided step-by-step fix flow for offline and weak-signal devices, role-aware steps
 
 ### Mesh Graph
-- **Force-directed layout** visualizing logical device topology
+- **Hierarchical room-based layout** visualizing logical device topology
+- Room zone cards group devices by HomeKit room
+- Cross-room links rendered as arcs; backbone links as dashed straight lines
 - Filter by room or Thread channel
-- Tap a node to open device detail
+- Tap a node to open device detail; selected node highlights its route to the internet
 
 ### Survey
 - **Guided room-by-room survey** — walk each room, capture response-quality samples tagged to the room
@@ -94,20 +96,16 @@ Sources/
 **Requirements:** Xcode 26+, iOS 17+ device or simulator, HomeKit-enabled home for real data.
 
 ```bash
-# Generate Xcode project (required after adding source files)
-xcodegen generate
+# Open the SPM workspace in Xcode
+open .swiftpm/xcode/package.xcworkspace
 
-# Open in Xcode
-open ThreadMapper.xcodeproj
-
-# Or build for device via xcodebuild
-xcrun xcodebuild -project ThreadMapper.xcodeproj \
+# Build for a connected device via xcodebuild
+xcrun xcodebuild \
+  -workspace .swiftpm/xcode/package.xcworkspace \
   -scheme ThreadMapper \
   -destination 'id=<device-udid>' \
   -configuration Debug build
 ```
-
-**CI:** GitHub Actions runs SwiftLint + xcodegen + `xcodebuild test` on an iOS Simulator on every push. See `.github/workflows/ci.yml`.
 
 ---
 
@@ -125,16 +123,7 @@ Real Thread diagnostics (true RSSI, LQI, actual parent/child links) require the 
 
 ## Roadmap
 
-See [REVIEW.md](REVIEW.md) for the full technical-lead review and 72-idea feature backlog.
-
-**Iteration 3 (next):**
-- `Reachability` enum replacing the `-100`/`-92` Int sentinels for offline/error state
-- `DiscoveryService` protocol + `DemoDiscoveryService` (demo mode, Previews, testable poll loop)
-- Re-key `DeviceStatsStore` / `ActivityStore` / notifications by `uniqueIdentifier` (survives device renames)
-
-**Sprint 2 (planned):** Room-first survey as primary flow, demo network for App Review, empty-state polish.
-
-**Sprint 3 (planned):** Matter diagnostics spike, resilience score, uptime history, notification digests.
+See [REVIEW.md](REVIEW.md) for the full technical-lead review and feature backlog.
 
 ---
 
