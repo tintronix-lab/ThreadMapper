@@ -36,28 +36,42 @@ final class WeeklyReportStore {
         NotificationService.shared.scheduleWeeklyReport()
     }
 
+    /// Instance entry-point: reads live data from the shared stores and delegates to the pure function.
     func generate() -> Report {
-        let sevenDaysAgo = Date().addingTimeInterval(-7 * 86400)
+        Self.generate(
+            historyEntries: HealthHistoryStore.shared.entries,
+            activityEvents: ActivityStore.shared.events,
+            currentStreak: HealthStreakStore.shared.currentStreak,
+            totalADays: HealthStreakStore.shared.totalADays
+        )
+    }
+
+    /// Pure report generator — all inputs are explicit so this can be called from tests
+    /// without touching any singleton store.
+    static func generate(
+        historyEntries: [HealthHistoryStore.Entry],
+        activityEvents: [ActivityEvent],
+        currentStreak: Int,
+        totalADays: Int,
+        now: Date = Date()
+    ) -> Report {
+        let sevenDaysAgo = now.addingTimeInterval(-7 * 86400)
         let fmt = DateFormatter(); fmt.dateFormat = "MMM d"
-        let weekLabel = "\(fmt.string(from: sevenDaysAgo)) – \(fmt.string(from: Date()))"
+        let weekLabel = "\(fmt.string(from: sevenDaysAgo)) – \(fmt.string(from: now))"
 
         // Health history (up to 7 days)
-        let historyEntries = HealthHistoryStore.shared.entries
         let avgScore = historyEntries.isEmpty ? 0
             : historyEntries.map(\.score).reduce(0, +) / historyEntries.count
         let peakGrade = historyEntries.max(by: { $0.score < $1.score })?.grade ?? "—"
 
         // Offline events from ActivityStore (7-day window already kept)
-        let offlineEvents = ActivityStore.shared.events.filter {
+        let offlineEvents = activityEvents.filter {
             $0.timestamp > sevenDaysAgo &&
             ($0.kind == .deviceOffline || $0.kind == .borderRouterOffline)
         }
         let deviceCounts = Dictionary(grouping: offlineEvents) { $0.deviceName ?? "Unknown" }
             .mapValues { $0.count }
         let worstDevice = deviceCounts.max(by: { $0.value < $1.value })?.key
-
-        // Streak data
-        let streak = HealthStreakStore.shared
 
         // Build prose
         var sentences: [String] = []
@@ -70,10 +84,10 @@ final class WeeklyReportStore {
             let n = deviceCounts[device] ?? 0
             sentences.append("\(device) caused the most disruption with \(n) offline event\(n == 1 ? "" : "s").")
         }
-        if streak.currentStreak >= 3 {
-            sentences.append("You're on a \(streak.currentStreak)-day Grade A streak — excellent!")
-        } else if streak.totalADays > 0 {
-            sentences.append("You've reached Grade A on \(streak.totalADays) day\(streak.totalADays == 1 ? "" : "s") total.")
+        if currentStreak >= 3 {
+            sentences.append("You're on a \(currentStreak)-day Grade A streak — excellent!")
+        } else if totalADays > 0 {
+            sentences.append("You've reached Grade A on \(totalADays) day\(totalADays == 1 ? "" : "s") total.")
         }
         if let first = historyEntries.first, let last = historyEntries.last, historyEntries.count >= 2 {
             let delta = last.score - first.score
@@ -86,14 +100,14 @@ final class WeeklyReportStore {
 
         return Report(
             id: UUID(),
-            generatedAt: Date(),
+            generatedAt: now,
             weekRangeLabel: weekLabel,
             avgScore: avgScore,
             peakGrade: peakGrade,
             offlineEventCount: offlineEvents.count,
             mostProblematicDevice: worstDevice,
-            streakDays: streak.currentStreak,
-            totalADays: streak.totalADays,
+            streakDays: currentStreak,
+            totalADays: totalADays,
             body: sentences.joined(separator: " ")
         )
     }
