@@ -70,7 +70,7 @@ struct ThreadMapperWidgetView: View {
     var body: some View {
         switch family {
         case .systemSmall:         SmallWidgetView(snap: entry.snapshot)
-        case .systemMedium:        MediumWidgetView(snap: entry.snapshot)
+        case .systemMedium:        MediumWidgetView(snap: entry.snapshot, entryDate: entry.date)
         case .accessoryCircular:   CircularWidgetView(snap: entry.snapshot)
         case .accessoryRectangular: RectangularWidgetView(snap: entry.snapshot)
         default:                   SmallWidgetView(snap: entry.snapshot)
@@ -148,6 +148,7 @@ struct SmallWidgetView: View {
 
 struct MediumWidgetView: View {
     let snap: WidgetSnapshot
+    let entryDate: Date
     private var color: Color { gradeColor(snap.grade) }
 
     var body: some View {
@@ -216,7 +217,9 @@ struct MediumWidgetView: View {
 
                 Spacer()
 
-                Text("Updated \(snap.updatedAt, style: .relative)")
+                Text(entryDate.timeIntervalSince(snap.updatedAt) < 60
+                     ? "Updated just now"
+                     : "Updated \(snap.updatedAt, style: .relative)")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
