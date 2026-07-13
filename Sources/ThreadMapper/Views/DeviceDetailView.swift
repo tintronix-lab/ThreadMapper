@@ -24,6 +24,7 @@ struct DeviceDetailView: View {
                 signalSection
                 networkSection
                 meshPathSection
+                threadNeighborSection
                 deviceSection
                 if device.batteryPercentage != nil { batterySection }
                 if device.isBorderRouter { threadClassificationSection }
@@ -439,6 +440,61 @@ struct DeviceDetailView: View {
                 .onChange(of: noteText) { _, new in
                     notesStore.setNote(new, for: device.uniqueIdentifier.uuidString)
                 }
+        }
+    }
+
+    // MARK: - Thread Neighbor Table (real OTBR data when available)
+
+    @ViewBuilder
+    private var threadNeighborSection: some View {
+        if let diag = meshViewModel.latestDiagnostics[device.id], !diag.neighbors.isEmpty {
+            Section {
+                ForEach(diag.neighbors.indices, id: \.self) { i in
+                    let neighbor = diag.neighbors[i]
+                    HStack(spacing: 12) {
+                        Image(systemName: neighbor.isChild ? "arrow.down.circle" : "arrow.up.arrow.down.circle")
+                            .foregroundStyle(neighbor.isChild ? .blue : .purple)
+                            .imageScale(.small)
+                            .frame(width: 22)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(String(format: "0x%04X", neighbor.rloc16))
+                                .font(.caption.monospaced())
+                            Text(neighbor.isChild ? "Child device" : "Router neighbor")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+
+                        // Link quality indicator
+                        VStack(alignment: .trailing, spacing: 2) {
+                            if let rssi = neighbor.averageRSSI {
+                                Text("\(rssi) dBm")
+                                    .font(.caption2.monospacedDigit())
+                                    .foregroundStyle(rssi.rssiColor)
+                            }
+                            if let margin = neighbor.linkMarginDB {
+                                Text("\(margin) dB margin")
+                                    .font(.caption2.monospacedDigit())
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 2)
+                }
+            } header: {
+                HStack {
+                    Text("Live Thread Neighbors")
+                    Spacer()
+                    Label("OTBR", systemImage: "antenna.radiowaves.left.and.right")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.green)
+                }
+            } footer: {
+                Text("Real neighbor data from your OpenThread Border Router. RLOC16 is each node's Thread routing address. Children route through this device; router neighbors are peers on the mesh backbone.")
+                    .font(.caption)
+            }
         }
     }
 
