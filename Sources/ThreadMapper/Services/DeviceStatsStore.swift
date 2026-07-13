@@ -220,6 +220,7 @@ struct DeviceStats {
 
 struct SignalSparklineView: View {
     let readings: [DeviceStatsStore.Reading]
+    @ScaledMetric(relativeTo: .caption2) private var sparklineLabelSize: CGFloat = 7
 
     var body: some View {
         Canvas { ctx, size in
@@ -266,7 +267,7 @@ struct SignalSparklineView: View {
                 ln.addLine(to: CGPoint(x: size.width, y: yVal))
                 ctx.stroke(ln, with: .color(color.opacity(0.55)),
                            style: StrokeStyle(lineWidth: 1.0, dash: [4, 3]))
-                let txt = ctx.resolve(Text(label).font(.system(size: 7)).foregroundStyle(color.opacity(0.8)))
+                let txt = ctx.resolve(Text(label).font(.system(size: sparklineLabelSize)).foregroundStyle(color.opacity(0.8)))
                 ctx.draw(txt, at: CGPoint(x: 10, y: yVal - 4))
             }
         }
@@ -284,7 +285,7 @@ struct SignalSparklineView: View {
         // Y-axis labels
         for (thresh, label) in [(-50, "-50"), (-65, "-65"), (-80, "-80")] {
             let yT = yPos(thresh)
-            let txt = ctx.resolve(Text(label).font(.system(size: 7)).foregroundStyle(Color.secondary))
+            let txt = ctx.resolve(Text(label).font(.system(size: sparklineLabelSize)).foregroundStyle(Color.secondary))
             ctx.draw(txt, at: CGPoint(x: 14, y: yT - 4))
         }
 

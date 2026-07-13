@@ -95,7 +95,7 @@ struct SmallWidgetView: View {
     var body: some View {
         VStack(spacing: 6) {
             Text("ThreadMapper")
-                .font(.system(size: 11, weight: .semibold))
+                .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -112,10 +112,12 @@ struct SmallWidgetView: View {
                     .rotationEffect(.degrees(-90))
                 VStack(spacing: 0) {
                     Text(snap.grade)
-                        .font(.system(size: 28, weight: .black, design: .rounded))
+                        .font(.system(.title, design: .rounded, weight: .black))
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(1)
                         .foregroundStyle(color)
                     Text("\(snap.score)")
-                        .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                        .font(.caption2.weight(.semibold).monospacedDigit())
                         .foregroundStyle(color.opacity(0.7))
                 }
             }
@@ -124,16 +126,16 @@ struct SmallWidgetView: View {
 
             HStack {
                 Label("\(snap.deviceCount)", systemImage: "cpu")
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.caption2.weight(.medium))
                     .foregroundStyle(.secondary)
                 Spacer()
                 if snap.offlineCount > 0 {
                     Label("\(snap.offlineCount)", systemImage: "wifi.slash")
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(.caption2.weight(.semibold))
                         .foregroundStyle(.red)
                 } else {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 10))
+                        .font(.caption2)
                         .foregroundStyle(.green)
                 }
             }
@@ -163,15 +165,17 @@ struct MediumWidgetView: View {
                         .rotationEffect(.degrees(-90))
                     VStack(spacing: 0) {
                         Text(snap.grade)
-                            .font(.system(size: 26, weight: .black, design: .rounded))
+                            .font(.system(.title, design: .rounded, weight: .black))
+                            .minimumScaleFactor(0.5)
+                            .lineLimit(1)
                             .foregroundStyle(color)
                         Text("\(snap.score)")
-                            .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                            .font(.caption2.weight(.semibold).monospacedDigit())
                             .foregroundStyle(color.opacity(0.7))
                     }
                 }
                 Text(snap.offlineCount > 0 ? "\(snap.offlineCount) offline" : "All online")
-                    .font(.system(size: 9, weight: .medium))
+                    .font(.caption2.weight(.medium))
                     .foregroundStyle(snap.offlineCount > 0 ? Color.red : Color.green)
             }
 
@@ -181,30 +185,30 @@ struct MediumWidgetView: View {
             // Right: room list
             VStack(alignment: .leading, spacing: 4) {
                 Text("Network Health")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
 
                 ForEach(snap.rooms.prefix(4), id: \.name) { room in
                     HStack(spacing: 5) {
                         Image(systemName: roomIcon(room.name))
-                            .font(.system(size: 9))
+                            .font(.caption2)
                             .foregroundStyle(room.offlineCount > 0 ? Color.red : Color.secondary)
                             .frame(width: 12)
                         Text(room.name)
-                            .font(.system(size: 11))
+                            .font(.caption)
                             .lineLimit(1)
                         Spacer()
                         if room.offlineCount > 0 {
                             Text("\(room.offlineCount)⚠")
-                                .font(.system(size: 9, weight: .semibold))
+                                .font(.caption2.weight(.semibold))
                                 .foregroundStyle(.red)
                         } else if room.weakCount > 0 {
                             Text("\(room.weakCount)~")
-                                .font(.system(size: 9))
+                                .font(.caption2)
                                 .foregroundStyle(.orange)
                         } else {
                             Image(systemName: "checkmark")
-                                .font(.system(size: 8))
+                                .font(.caption2)
                                 .foregroundStyle(.green)
                         }
                     }
@@ -213,7 +217,7 @@ struct MediumWidgetView: View {
                 Spacer()
 
                 Text("Updated \(snap.updatedAt, style: .relative) ago")
-                    .font(.system(size: 8))
+                    .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
         }
@@ -235,10 +239,12 @@ struct CircularWidgetView: View {
                 .rotationEffect(.degrees(-90))
             VStack(spacing: 0) {
                 Text(snap.grade)
-                    .font(.system(size: 20, weight: .black, design: .rounded))
+                    .font(.system(.title3, design: .rounded, weight: .black))
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
                 if snap.offlineCount > 0 {
                     Text("\(snap.offlineCount)!")
-                        .font(.system(size: 8, weight: .bold))
+                        .font(.caption2.weight(.bold))
                         .foregroundStyle(.red)
                 }
             }
@@ -255,12 +261,14 @@ struct RectangularWidgetView: View {
     var body: some View {
         HStack(spacing: 8) {
             Text(snap.grade)
-                .font(.system(size: 28, weight: .black, design: .rounded))
+                .font(.system(.title, design: .rounded, weight: .black))
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
                 .foregroundStyle(color)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("Network Health")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.caption.weight(.semibold))
                 HStack(spacing: 6) {
                     Label("\(snap.deviceCount)", systemImage: "cpu")
                     if snap.offlineCount > 0 {
@@ -268,7 +276,7 @@ struct RectangularWidgetView: View {
                             .foregroundStyle(.red)
                     }
                 }
-                .font(.system(size: 9))
+                .font(.caption2)
                 .foregroundStyle(.secondary)
             }
         }

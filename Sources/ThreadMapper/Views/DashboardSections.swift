@@ -504,6 +504,7 @@ struct DashboardIssuesSection: View {
 struct DashboardHealthHistorySection: View {
     let entries: [HealthHistoryStore.Entry]
     let healthColor: Color
+    @ScaledMetric(relativeTo: .caption2) private var chartAxisFont: CGFloat = 7
 
     var body: some View {
         if entries.count >= 2 {
@@ -554,7 +555,7 @@ struct DashboardHealthHistorySection: View {
                             AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [3, 3]))
                             AxisValueLabel {
                                 if let v = value.as(Int.self) {
-                                    Text("\(v)").font(.system(size: 7))
+                                    Text("\(v)").font(.system(size: chartAxisFont))
                                 }
                             }
                         }

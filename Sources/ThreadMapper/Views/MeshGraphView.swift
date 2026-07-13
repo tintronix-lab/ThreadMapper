@@ -27,6 +27,9 @@ struct MeshGraphView: View {
     @State var layoutHash: Int? = nil
     @State var legendExpanded = false
 
+    @ScaledMetric(relativeTo: .caption2) var canvasNodeLabel: CGFloat = 8
+    @ScaledMetric(relativeTo: .caption2) var canvasRoomLabel: CGFloat = 9
+
     var nodesByID: [UUID: MeshNode] {
         Dictionary(nodes.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
     }

@@ -30,7 +30,7 @@ extension MeshGraphView {
             let labelText = "\(room)  ·  \(deviceCount) device\(deviceCount == 1 ? "" : "s")"
             let label = ctx.resolve(
                 Text(labelText)
-                    .font(.system(size: 9, weight: .semibold))
+                    .font(.system(size: canvasRoomLabel, weight: .semibold))
                     .foregroundStyle(zoneColor)
             )
             ctx.draw(label, at: CGPoint(x: screenRect.midX, y: screenRect.minY + 13))
@@ -170,7 +170,7 @@ extension MeshGraphView {
                     ? String(node.name.prefix(maxChars - 1)) + "…"
                     : node.name
 
-                let labelSize: CGFloat = isSelected ? 10 : (scale >= 2.0 ? 9 : 8)
+                let labelSize = isSelected ? canvasNodeLabel + 2 : (scale >= 2.0 ? canvasNodeLabel + 1 : canvasNodeLabel)
                 let label = ctx.resolve(Text(displayName)
                     .foregroundStyle(Color(UIColor.label).opacity(dimmed ? 0.35 : 1))
                     .font(.system(size: labelSize, weight: isSelected ? .semibold : .regular)))
