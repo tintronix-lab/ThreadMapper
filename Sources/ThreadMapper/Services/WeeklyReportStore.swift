@@ -21,17 +21,30 @@ final class WeeklyReportStore {
 
     private(set) var latestReport: Report?
 
-    @ObservationIgnored private let storeURL: URL = {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("weekly_report.json")
-    }()
+    @ObservationIgnored private let storeURL: URL
 
-    private init() { restore() }
+    init(storeURL: URL? = nil) {
+        self.storeURL = storeURL ?? FileManager.default
+            .urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("weekly_report.json")
+        restore()
+    }
+
+    static func makeTestInstance() -> WeeklyReportStore {
+        WeeklyReportStore(storeURL: FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(UUID().uuidString)_weekly_report.json"))
+    }
 
     /// Generates a new report if more than 23 hours have passed since the last one.
-    func generateIfNeeded() {
-        if let r = latestReport, Date().timeIntervalSince(r.generatedAt) < 23 * 3600 { return }
-        latestReport = generate()
+    func generateIfNeeded(now: Date = Date()) {
+        if let r = latestReport, now.timeIntervalSince(r.generatedAt) < 23 * 3600 { return }
+        latestReport = Self.generate(
+            historyEntries: HealthHistoryStore.shared.entries,
+            activityEvents: ActivityStore.shared.events,
+            currentStreak: HealthStreakStore.shared.currentStreak,
+            totalADays: HealthStreakStore.shared.totalADays,
+            now: now
+        )
         persist()
         NotificationService.shared.scheduleWeeklyReport()
     }

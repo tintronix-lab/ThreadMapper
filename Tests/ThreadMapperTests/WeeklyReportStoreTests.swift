@@ -127,4 +127,51 @@ final class WeeklyReportStoreTests: XCTestCase {
         XCTAssertTrue(report.weekRangeLabel.contains("Jan"))
         XCTAssertEqual(report.generatedAt, anchor)
     }
+
+    // MARK: - generateIfNeeded cooldown and persistence
+
+    func testGenerateIfNeededCreatesReportWhenNoneExists() {
+        let store = WeeklyReportStore.makeTestInstance()
+        XCTAssertNil(store.latestReport)
+
+        store.generateIfNeeded()
+
+        XCTAssertNotNil(store.latestReport)
+    }
+
+    func testGenerateIfNeededSkipsWhenReportIsWithin23Hours() {
+        let store = WeeklyReportStore.makeTestInstance()
+        let t1 = Date()
+        store.generateIfNeeded(now: t1)
+        let firstID = store.latestReport?.id
+
+        let t2 = t1.addingTimeInterval(22 * 3600)   // 22 h later — still within window
+        store.generateIfNeeded(now: t2)
+
+        XCTAssertEqual(store.latestReport?.id, firstID, "report should not be replaced within 23 h")
+    }
+
+    func testGenerateIfNeededReplacesStaleReport() {
+        let store = WeeklyReportStore.makeTestInstance()
+        let t1 = Date()
+        store.generateIfNeeded(now: t1)
+        let firstID = store.latestReport?.id
+
+        let t2 = t1.addingTimeInterval(25 * 3600)   // 25 h later — past cooldown
+        store.generateIfNeeded(now: t2)
+
+        XCTAssertNotEqual(store.latestReport?.id, firstID, "stale report should be replaced")
+        XCTAssertEqual(store.latestReport?.generatedAt, t2)
+    }
+
+    func testGenerateIfNeededPersistsAcrossRestart() throws {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(UUID().uuidString)_wr.json")
+        let store = WeeklyReportStore(storeURL: url)
+        store.generateIfNeeded()
+        let id = try XCTUnwrap(store.latestReport?.id)
+
+        let reloaded = WeeklyReportStore(storeURL: url)
+        XCTAssertEqual(reloaded.latestReport?.id, id)
+    }
 }
