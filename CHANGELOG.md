@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.0.0 (2026-07-13) — Initial App Store Release
+
+### Fixed
+- **Background refresh never fired** — `UIBackgroundModes: fetch` was missing from Info.plist; BGAppRefreshTask is now scheduled by the OS as intended
+- **Widget timestamp duplication** — "Updated 2 minutes ago ago" (`Text.DateStyle.relative` already appends directional context; removed the extra literal)
+- **Widget "0 seconds ago"** — sub-60-second snapshots now show "Updated just now"
+- **Paywall infinite spinner** — product load failure left a permanent `ProgressView`; now shows "Couldn't load products / Try Again"
+- **Silent purchase errors** — IAP failures (network, payment declined) were swallowed via `try?`; surfaced via alert
+- **HealthHistoryStore UUID crash** — `Entry.id` was a computed `Date` property causing `List` identity conflicts on iOS 17; migrated to stable `UUID` with backwards-compatible JSON decoder
+- **Onboarding Skip button** hidden behind `#if DEBUG` in release builds; removed the guard
+- **Device join/leave false positives** — topology diffing now keys on `uniqueIdentifier` (UUID) instead of device name; renames no longer appear as leave+join events
+- **Aggregate recompute on every tick** — aggregates and widget snapshot are now only recomputed when topology or RSSI actually changed (was O(n) every second)
+
+### Added
+- **Confetti animation** on network grade improvement — 60-particle `Canvas` animation at 60 fps; respects `accessibilityReduceMotion`
+- **Spotlight indexing** — Thread devices are indexed via `CoreSpotlight` whenever the device graph changes; searchable from Spotlight with room, role, and type keywords
+- **Siri Shortcuts** — "Check my Thread network" and "Show offline devices" App Intents readable without opening the app
+
+### Accessibility
+- `GradeRingView` now has a combined VoiceOver label ("Network health grade A, score 85 out of 100") instead of two disconnected strings
+- Confetti animation hidden from VoiceOver (`accessibilityHidden`)
+- Dynamic Type: 25 hardcoded font sizes replaced with scaled text styles across 5 files
+
+### Test coverage
+- 70 tests across 14 suites: `ActivityStore`, `AchievementStore`, `DeviceNotesStore`, `DeviceOverrideStore`, `DeviceStats`, `GraphLayout`, `HealthHistory`, `HealthStreak`, `MeshTopology`, `MeshViewModel`, `NotificationService`, `SignalExtrapolator`, `SurveyHeatmap`, `ThreadDiagnostics`, `WeeklyReportStore`
+
+### Internals
+- Swift strict-concurrency warnings fully resolved; `StrictConcurrency` enforced in `Package.swift`
+- `@MainActor` on `MeshViewModel`; `@unchecked Sendable` on `ThreadDevice`, discovery services, and diagnostics providers
+- `DiscoveryService` and `DiagnosticsProvider` protocols now `: Sendable`
+
 ## 0.2.0 (2026-07-05)
 
 Technical-lead review pass (see REVIEW.md for the full report and roadmap).
