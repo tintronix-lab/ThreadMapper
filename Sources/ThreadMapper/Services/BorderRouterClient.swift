@@ -12,7 +12,7 @@ import Foundation
 /// (child/route tables) into `ThreadNodeDiagnostics` and correlate OTBR nodes
 /// (by ext-address) to HomeKit accessories — hence `nodeDiagnostics()` is empty
 /// for now.
-final class BorderRouterClient: DiagnosticsProvider {
+final class BorderRouterClient: DiagnosticsProvider, @unchecked Sendable {
 
     typealias Fetcher = (URLRequest) async throws -> Data
 

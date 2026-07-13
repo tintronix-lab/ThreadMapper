@@ -120,11 +120,8 @@ final class SurveyViewModel {
         return url
     }
 
-    func loadRecentSamplePoints(completion: @escaping ([SurveyPoint]) -> Void) {
-        let points = savedPoints
-        Task { @MainActor in
-            completion(points)
-        }
+    func loadRecentSamplePoints(completion: ([SurveyPoint]) -> Void) {
+        completion(savedPoints)
     }
 
     var savedPointCount: Int { savedPoints.count }

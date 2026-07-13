@@ -22,7 +22,7 @@ extension DiscoveryError {
 }
 
 /// Seam between the poll loop and any device source (HomeKit or Demo).
-protocol DiscoveryService: AnyObject {
+protocol DiscoveryService: AnyObject, Sendable {
     var devices: [ThreadDevice] { get }
     var discoveryError: DiscoveryError? { get }
     func startScanning() async throws

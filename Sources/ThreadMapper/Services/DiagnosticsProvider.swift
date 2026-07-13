@@ -7,7 +7,7 @@ import Foundation
 /// network facts, and an OpenThread Border Router (OTBR) REST connection can
 /// provide the real routing table. When no provider yields data,
 /// `MeshTopologyBuilder` falls back to inference (today's behavior).
-protocol DiagnosticsProvider: AnyObject {
+protocol DiagnosticsProvider: AnyObject, Sendable {
     /// Real network-level facts (name, channel, PAN ID) when available.
     func threadNetworks() async -> [ThreadNetworkInfo]
 
@@ -19,7 +19,7 @@ protocol DiagnosticsProvider: AnyObject {
 
 /// Default provider used until a real source is wired up: yields nothing, so the
 /// mesh stays inferred. Keeps call sites simple (no optionals) before Feature #2.
-final class NoDiagnosticsProvider: DiagnosticsProvider {
+final class NoDiagnosticsProvider: DiagnosticsProvider, @unchecked Sendable {
     func threadNetworks() async -> [ThreadNetworkInfo] { [] }
     func nodeDiagnostics(for devices: [ThreadDevice]) async -> [UUID: ThreadNodeDiagnostics] { [:] }
 }
