@@ -33,7 +33,7 @@ final class NotificationService {
               !isInQuietHours() else { return }
         let content = UNMutableNotificationContent()
         content.title = "Thread Device Offline"
-        content.body = room != nil ? "\(name) (\(room!)) is unreachable" : "\(name) is unreachable"
+        content.body = room.map { "\(name) (\($0)) is unreachable" } ?? "\(name) is unreachable"
         content.sound = .default
         content.categoryIdentifier = "DEVICE_OFFLINE"
         schedule(content, id: "offline-\(deviceID.uuidString)")

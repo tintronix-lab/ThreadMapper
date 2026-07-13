@@ -3,11 +3,26 @@ import SwiftUI
 struct ActivityFeedView: View {
     @Environment(ActivityStore.self) private var store
     @State private var selectedDevice: ThreadDevice?
+    @State private var searchText = ""
+    @State private var kindFilter: ActivityEvent.Kind? = nil
+
+    private var filtered: [ActivityEvent] {
+        store.events.filter { event in
+            let matchesKind = kindFilter.map { event.kind == $0 } ?? true
+            guard matchesKind else { return false }
+            guard !searchText.isEmpty else { return true }
+            let q = searchText.lowercased()
+            return event.detail.lowercased().contains(q)
+                || event.kind.label.lowercased().contains(q)
+                || (event.deviceName?.lowercased().contains(q) ?? false)
+                || (event.room?.lowercased().contains(q) ?? false)
+        }
+    }
 
     private var grouped: [(day: Date, events: [ActivityEvent])] {
         let cal = Calendar.current
-        let dict = Dictionary(grouping: store.events) { cal.startOfDay(for: $0.timestamp) }
-        return dict.keys.sorted(by: >).map { day in (day: day, events: dict[day]!) }
+        let dict = Dictionary(grouping: filtered) { cal.startOfDay(for: $0.timestamp) }
+        return dict.keys.sorted(by: >).map { day in (day: day, events: dict[day, default: []]) }
     }
 
     var body: some View {
@@ -15,6 +30,8 @@ struct ActivityFeedView: View {
             Group {
                 if store.events.isEmpty {
                     emptyState
+                } else if filtered.isEmpty {
+                    noResultsState
                 } else {
                     List {
                         ForEach(grouped, id: \.day) { group in
@@ -28,15 +45,40 @@ struct ActivityFeedView: View {
                 }
             }
             .navigationTitle("Activity")
+            .searchable(text: $searchText, prompt: "Search events")
             .toolbar {
                 if !store.events.isEmpty {
                     ToolbarItem(placement: .primaryAction) {
                         Menu {
+                            Section("Filter by type") {
+                                Button {
+                                    kindFilter = nil
+                                } label: {
+                                    Label("All Events", systemImage: kindFilter == nil ? "checkmark" : "list.bullet")
+                                }
+                                ForEach([
+                                    ActivityEvent.Kind.deviceOffline,
+                                    .deviceOnline,
+                                    .borderRouterOffline,
+                                    .healthDegraded,
+                                    .healthImproved,
+                                    .topologyJoined,
+                                    .topologyLeft,
+                                ], id: \.self) { kind in
+                                    Button {
+                                        kindFilter = kindFilter == kind ? nil : kind
+                                    } label: {
+                                        Label(kind.label, systemImage: kindFilter == kind ? "checkmark" : kind.icon)
+                                    }
+                                }
+                            }
+                            Divider()
                             Button("Clear All Events", role: .destructive) {
                                 store.clearAll()
+                                kindFilter = nil
                             }
                         } label: {
-                            Image(systemName: "ellipsis.circle")
+                            Image(systemName: kindFilter != nil ? "line.3.horizontal.decrease.circle.fill" : "ellipsis.circle")
                         }
                     }
                 }
@@ -44,7 +86,7 @@ struct ActivityFeedView: View {
         }
     }
 
-    // MARK: - Empty state
+    // MARK: - Empty states
 
     private var emptyState: some View {
         VStack(spacing: 16) {
@@ -58,6 +100,21 @@ struct ActivityFeedView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var noResultsState: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "magnifyingglass")
+                .font(.largeTitle)
+                .foregroundStyle(.tertiary)
+            Text("No matching events")
+                .font(.headline)
+            if kindFilter != nil {
+                Button("Clear Filter") { kindFilter = nil }
+                    .font(.subheadline)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

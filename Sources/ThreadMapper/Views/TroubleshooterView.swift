@@ -117,26 +117,28 @@ struct TroubleshooterView: View {
                 .buttonStyle(.borderedProminent)
                 .tint(.green)
 
-                Button {
-                    withAnimation {
-                        if stepIndex + 1 < steps.count {
-                            stepIndex += 1
-                        }
+                if stepIndex + 1 < steps.count {
+                    Button {
+                        withAnimation { stepIndex += 1 }
+                    } label: {
+                        Label("Still broken — next step", systemImage: "arrow.right")
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
                     }
-                } label: {
-                    Group {
-                        if stepIndex + 1 < steps.count {
-                            Label("Still broken — next step", systemImage: "arrow.right")
-                        } else {
-                            Text("No more steps")
-                                .foregroundStyle(.secondary)
-                        }
+                    .buttonStyle(.bordered)
+                } else {
+                    VStack(spacing: 6) {
+                        Text("All steps attempted")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                        Text("If none of these steps helped, try removing and re-adding the device in the Apple Home app, or contact Apple Support for hardware assistance.")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                            .multilineTextAlignment(.center)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 8)
                 }
-                .buttonStyle(.bordered)
-                .disabled(stepIndex + 1 >= steps.count)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
