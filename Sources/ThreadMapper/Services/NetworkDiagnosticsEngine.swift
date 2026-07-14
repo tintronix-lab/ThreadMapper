@@ -27,6 +27,7 @@ struct NetworkDiagnosticsEngine {
         let title: String
         let detail: String
         let icon: String
+        var fixSteps: [String] = []
     }
 
     struct RoomCoverage: Identifiable {
@@ -205,14 +206,26 @@ struct NetworkDiagnosticsEngine {
                 priority: .critical, category: .redundancy,
                 title: "No Border Router Detected",
                 detail: "Your Thread network cannot function without a border router. Add a HomePod mini, HomePod, or Apple TV 4K.",
-                icon: "antenna.radiowaves.left.and.right.slash"
+                icon: "antenna.radiowaves.left.and.right.slash",
+                fixSteps: [
+                    "Add a HomePod mini, HomePod 2nd gen, or Apple TV 4K (3rd gen or later) to your home.",
+                    "Open the Home app and follow the device setup wizard.",
+                    "Once set up, the device automatically becomes a Thread border router.",
+                    "Tap Rescan in ThreadMapper to verify detection."
+                ]
             ))
         } else if borderRouters.count == 1 {
             recs.append(.init(
                 priority: .high, category: .redundancy,
                 title: "Single Border Router — No Failover",
                 detail: "If \(borderRouters[0].name) goes offline, your entire Thread mesh loses internet connectivity. Add a second border router.",
-                icon: "exclamationmark.triangle.fill"
+                icon: "exclamationmark.triangle.fill",
+                fixSteps: [
+                    "Add a second Thread border router — HomePod mini, HomePod, or Apple TV 4K.",
+                    "Place it in a different room or floor from your existing border router.",
+                    "Thread will automatically configure leader election and failover.",
+                    "No manual setup required — border routers coordinate automatically."
+                ]
             ))
         }
 
@@ -224,7 +237,13 @@ struct NetworkDiagnosticsEngine {
                 priority: .critical, category: .coverage,
                 title: "\(offline.count) Device\(offline.count == 1 ? "" : "s") Offline",
                 detail: "\(names)\(tail) cannot be reached. Check power supply and mesh reachability.",
-                icon: "network.slash"
+                icon: "network.slash",
+                fixSteps: [
+                    "Confirm each offline device is powered on and within range of a Thread router.",
+                    "Power-cycle the device: unplug it, wait 10 seconds, then plug it back in.",
+                    "Verify the device's room is covered by at least one Thread router.",
+                    "If the device stays offline, remove it from the Home app and re-add it."
+                ]
             ))
         }
 
@@ -234,7 +253,13 @@ struct NetworkDiagnosticsEngine {
                 priority: .medium, category: .coverage,
                 title: "\(room.room) Has No Thread Router",
                 detail: "\(room.totalDevices) devices in \(room.room) depend on a distant router. Add a mains-powered Thread device to this room.",
-                icon: "house.and.flag"
+                icon: "house.and.flag",
+                fixSteps: [
+                    "Add a mains-powered Thread device (smart plug, bulb, or hub) in \(room.room).",
+                    "Mains-powered Thread devices automatically act as mesh routers.",
+                    "Alternatively, reposition an existing router closer to \(room.room).",
+                    "Re-run diagnostics after placement to confirm coverage improves."
+                ]
             ))
         }
 
@@ -246,7 +271,13 @@ struct NetworkDiagnosticsEngine {
                 priority: .medium, category: .performance,
                 title: "\(deepDevices.count) Device\(deepDevices.count == 1 ? "" : "s") at 4+ Hops",
                 detail: "\(names) — deep hop counts increase latency and reduce mesh reliability. Add an intermediate router to shorten the path.",
-                icon: "point.3.connected.trianglepath.dotted"
+                icon: "point.3.connected.trianglepath.dotted",
+                fixSteps: [
+                    "Review Mesh Depth below to identify which room is missing a Thread router.",
+                    "Add a mains-powered Thread device in that room — it becomes a relay automatically.",
+                    "Aim to keep all devices within 3 hops of a border router.",
+                    "Re-run diagnostics after placement to verify hop counts improved."
+                ]
             ))
         }
 
@@ -257,7 +288,13 @@ struct NetworkDiagnosticsEngine {
                 priority: .high, category: .coverage,
                 title: "Weak Signal Cluster in \(room)",
                 detail: "\(weakDevices.count) devices in \(room) report poor signal (< −80 dBm). Add a router or move devices closer to an existing one.",
-                icon: "wifi.exclamationmark"
+                icon: "wifi.exclamationmark",
+                fixSteps: [
+                    "Add a Thread router (mains-powered device) in \(room) to serve as a local relay.",
+                    "Check for physical obstructions — concrete walls and metal cabinets attenuate 2.4 GHz significantly.",
+                    "Try moving the affected devices closer to an existing router.",
+                    "Weak signal (< −80 dBm) increases packet loss — aim for above −75 dBm."
+                ]
             ))
         }
 
@@ -269,7 +306,13 @@ struct NetworkDiagnosticsEngine {
                 priority: .high, category: .redundancy,
                 title: "Single-Point Routers Detected",
                 detail: "\(names)\(tail) are the only routers in their rooms. Add a second router per affected room to eliminate this vulnerability.",
-                icon: "exclamationmark.circle.fill"
+                icon: "exclamationmark.circle.fill",
+                fixSteps: [
+                    "Add a second mains-powered Thread device in the same room as each flagged router.",
+                    "Thread automatically distributes traffic across both routers.",
+                    "If the primary fails, the backup takes over with no manual intervention.",
+                    "Smart plugs and light switches are cost-effective options for Thread routing."
+                ]
             ))
         }
 
@@ -283,7 +326,13 @@ struct NetworkDiagnosticsEngine {
                 priority: .medium, category: .interference,
                 title: "Thread Channel Overlaps 2.4 GHz Wi-Fi",
                 detail: "\(chList) overlap with Wi-Fi. Thread channels 15, 20, or 25 avoid 2.4 GHz interference. Adjust via your border router settings.",
-                icon: "waveform.badge.exclamationmark"
+                icon: "waveform.badge.exclamationmark",
+                fixSteps: [
+                    "Open your border router management interface (OTBR Web UI or vendor app).",
+                    "Change the Thread network to channel 15, 20, or 25 — these avoid Wi-Fi overlap.",
+                    "Channels 11–14, 17–19, and 22–24 overlap Wi-Fi channels 1, 6, and 11 respectively.",
+                    "After the change, all Thread devices rejoin automatically."
+                ]
             ))
         }
 
@@ -314,7 +363,13 @@ struct NetworkDiagnosticsEngine {
                 priority: .high, category: .performance,
                 title: "\(signalTrendAlerts.count) Device\(signalTrendAlerts.count == 1 ? "" : "s") Signal Degrading",
                 detail: "\(names)\(tail) — signal dropped 8+ dBm in the last 30 minutes. Check for new interference or obstructions.",
-                icon: "chart.line.downtrend.xyaxis"
+                icon: "chart.line.downtrend.xyaxis",
+                fixSteps: [
+                    "Check if anything new (furniture, appliance) was recently placed near the affected device.",
+                    "Power-cycle the device — temporary interference can cause RSSI drops.",
+                    "Look for new 2.4 GHz devices or microwave activity in the affected area.",
+                    "If degradation persists, add a Thread router closer to the device."
+                ]
             ))
         }
 

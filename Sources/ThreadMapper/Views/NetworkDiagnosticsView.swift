@@ -224,37 +224,72 @@ struct NetworkDiagnosticsView: View {
     private func recommendationsSection(_ recs: [NetworkDiagnosticsEngine.Recommendation]) -> some View {
         Section {
             ForEach(recs) { rec in
-                HStack(alignment: .top, spacing: 12) {
-                    Image(systemName: rec.icon)
-                        .font(.title3)
-                        .foregroundStyle(rec.priority.color)
-                        .frame(width: 28)
-                        .padding(.top, 1)
-
-                    VStack(alignment: .leading, spacing: 5) {
-                        HStack(alignment: .top) {
-                            Text(rec.title)
-                                .font(.subheadline.weight(.semibold))
-                                .fixedSize(horizontal: false, vertical: true)
-                            Spacer(minLength: 8)
-                            Text(rec.priority.label)
-                                .font(.caption2.weight(.semibold))
-                                .foregroundStyle(rec.priority.color)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(rec.priority.color.opacity(0.12), in: Capsule())
-                        }
-                        Text(rec.detail)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
+                if rec.fixSteps.isEmpty {
+                    recRow(rec)
+                } else {
+                    DisclosureGroup {
+                        fixStepsContent(rec.fixSteps)
+                    } label: {
+                        recRow(rec)
                     }
                 }
-                .padding(.vertical, 4)
             }
         } header: {
             Text("Recommendations (\(recs.count))")
+        } footer: {
+            Text("Tap a recommendation to see step-by-step fix instructions.")
+                .font(.caption)
         }
+    }
+
+    private func recRow(_ rec: NetworkDiagnosticsEngine.Recommendation) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: rec.icon)
+                .font(.title3)
+                .foregroundStyle(rec.priority.color)
+                .frame(width: 28)
+                .padding(.top, 1)
+
+            VStack(alignment: .leading, spacing: 5) {
+                HStack(alignment: .top) {
+                    Text(rec.title)
+                        .font(.subheadline.weight(.semibold))
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 8)
+                    Text(rec.priority.label)
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(rec.priority.color)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(rec.priority.color.opacity(0.12), in: Capsule())
+                }
+                Text(rec.detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func fixStepsContent(_ steps: [String]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(Array(steps.enumerated()), id: \.offset) { i, step in
+                HStack(alignment: .top, spacing: 8) {
+                    Text("\(i + 1).")
+                        .font(.caption.monospacedDigit().weight(.semibold))
+                        .foregroundStyle(.tint)
+                        .frame(width: 16, alignment: .leading)
+                    Text(step)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .padding(.top, 6)
+        .padding(.bottom, 2)
+        .padding(.leading, 40)
     }
 
     @ViewBuilder
