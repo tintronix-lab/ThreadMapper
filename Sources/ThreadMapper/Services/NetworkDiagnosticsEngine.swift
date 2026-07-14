@@ -71,6 +71,13 @@ struct NetworkDiagnosticsEngine {
         let degradationDB: Int  // positive = getting worse
     }
 
+    // A cluster of devices with no path to any border router
+    struct NetworkPartition: Identifiable {
+        let id = UUID()
+        let devices: [ThreadDevice]
+        let gatewayDevice: ThreadDevice?  // the reachable device this cluster should route through
+    }
+
     struct ChannelStats: Identifiable {
         enum InterferenceRisk {
             case high    // directly overlaps a common Wi-Fi non-overlapping channel (1, 6, 11)
@@ -104,6 +111,7 @@ struct NetworkDiagnosticsEngine {
         let channelStats: [ChannelStats]          // sorted by channel number
         let resilienceNodes: [ResilienceNode]     // sorted by isolatedCount desc, top 5
         let signalTrendAlerts: [SignalTrendAlert] // sorted by degradationDB desc
+        let partitions: [NetworkPartition]        // isolated device clusters, largest first
         let totalBorderRouters: Int
         let totalRouters: Int
         let meshLinks: [MeshLink]
@@ -117,7 +125,7 @@ struct NetworkDiagnosticsEngine {
         guard !devices.isEmpty else {
             return Report(recommendations: [], roomCoverage: [], deviceHops: [],
                           singlePointsOfFailure: [], channelStats: [],
-                          resilienceNodes: [], signalTrendAlerts: [],
+                          resilienceNodes: [], signalTrendAlerts: [], partitions: [],
                           totalBorderRouters: 0, totalRouters: 0,
                           meshLinks: [], meshNodes: [])
         }
@@ -144,6 +152,43 @@ struct NetworkDiagnosticsEngine {
             hopCounts[nodeID] = hop
             for childID in childrenOf[nodeID] ?? [] where hopCounts[childID] == nil {
                 bfsQueue.append((childID, hop + 1))
+            }
+        }
+
+        let borderRouters = devices.filter(\.isBorderRouter)
+
+        // Network partition detection: find isolated device clusters with no border router path
+        var networkPartitions: [NetworkPartition] = []
+        if !borderRouters.isEmpty {
+            let unreachableIDs = Set(nodes.filter { hopCounts[$0.id] == nil }.map { $0.id })
+            if !unreachableIDs.isEmpty {
+                // Partition roots: unreachable nodes whose parent is reachable (or absent)
+                let partitionRoots = unreachableIDs.filter { id -> Bool in
+                    guard let node = nodeByID[id], let parentID = node.parentID else { return true }
+                    return !unreachableIDs.contains(parentID)
+                }
+                var visitedInPartition = Set<UUID>()
+                for rootID in partitionRoots where !visitedInPartition.contains(rootID) {
+                    var component: [ThreadDevice] = []
+                    var queue: [UUID] = [rootID]
+                    var seen = Set<UUID>()
+                    while !queue.isEmpty {
+                        let cur = queue.removeFirst()
+                        guard seen.insert(cur).inserted else { continue }
+                        visitedInPartition.insert(cur)
+                        if let device = deviceByID[cur] { component.append(device) }
+                        for childID in childrenOf[cur] ?? [] where unreachableIDs.contains(childID) {
+                            queue.append(childID)
+                        }
+                    }
+                    guard !component.isEmpty else { continue }
+                    let gatewayID = nodeByID[rootID]?.parentID
+                    networkPartitions.append(NetworkPartition(
+                        devices: component.sorted { $0.name < $1.name },
+                        gatewayDevice: gatewayID.flatMap { deviceByID[$0] }
+                    ))
+                }
+                networkPartitions.sort { $0.devices.count > $1.devices.count }
             }
         }
 
@@ -196,7 +241,6 @@ struct NetworkDiagnosticsEngine {
 
         // Recommendations
         var recs: [Recommendation] = []
-        let borderRouters = devices.filter(\.isBorderRouter)
         let offline = devices.filter(\.isOffline)
         let weak = devices.filter(\.isWeak)
 
@@ -408,6 +452,24 @@ struct NetworkDiagnosticsEngine {
         resilienceNodes.sort { $0.isolatedCount > $1.isolatedCount }
         let topResilienceNodes = Array(resilienceNodes.prefix(5))
 
+        // Network partition recommendation
+        if !networkPartitions.isEmpty {
+            let totalIsolated = networkPartitions.reduce(0) { $0 + $1.devices.count }
+            let clusterWord = networkPartitions.count == 1 ? "cluster" : "clusters"
+            recs.append(.init(
+                priority: .critical, category: .redundancy,
+                title: "Thread Network Fragmented — \(totalIsolated) Device\(totalIsolated == 1 ? "" : "s") Isolated",
+                detail: "\(networkPartitions.count) isolated \(clusterWord) detected with no path to any border router. Affected devices are completely unreachable.",
+                icon: "exclamationmark.triangle.fill",
+                fixSteps: [
+                    "Check if the router(s) these clusters depended on are powered off or offline.",
+                    "Power-cycle the missing intermediate router and wait 60 seconds for it to rejoin.",
+                    "If the router is gone permanently, add a new Thread router in the affected area.",
+                    "Re-run diagnostics to confirm isolated devices have rejoined the mesh."
+                ]
+            ))
+        }
+
         recs.sort { $0.priority < $1.priority }
 
         // Channel analysis
@@ -445,6 +507,7 @@ struct NetworkDiagnosticsEngine {
             channelStats: channelStats,
             resilienceNodes: topResilienceNodes,
             signalTrendAlerts: signalTrendAlerts,
+            partitions: networkPartitions,
             totalBorderRouters: borderRouters.count,
             totalRouters: routerDevices.count,
             meshLinks: links,

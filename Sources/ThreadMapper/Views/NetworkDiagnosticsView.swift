@@ -118,6 +118,9 @@ struct NetworkDiagnosticsView: View {
     private func reportView(_ report: NetworkDiagnosticsEngine.Report) -> some View {
         List {
             summarySection(report)
+            if !report.partitions.isEmpty {
+                partitionsSection(report.partitions)
+            }
             if let snap = currentSnapshot, let base = baseline {
                 snapshotComparisonSection(base.diff(against: snap))
             }
@@ -509,6 +512,76 @@ struct NetworkDiagnosticsView: View {
             Text("Single-Point Routers")
         } footer: {
             Text("These routers have no backup in their area. If one fails, the end devices connected to it lose mesh access.")
+                .font(.caption)
+        }
+    }
+
+    // MARK: - Network Partitions
+
+    @ViewBuilder
+    private func partitionsSection(_ partitions: [NetworkDiagnosticsEngine.NetworkPartition]) -> some View {
+        let totalIsolated = partitions.reduce(0) { $0 + $1.devices.count }
+        Section {
+            ForEach(partitions) { partition in
+                DisclosureGroup {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(partition.devices) { device in
+                            HStack(spacing: 10) {
+                                Image(systemName: iconForDevice(device))
+                                    .imageScale(.small)
+                                    .foregroundStyle(.red.opacity(0.7))
+                                    .frame(width: 16)
+                                Text(device.name)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                                if let room = device.room {
+                                    Text(room)
+                                        .font(.caption2)
+                                        .foregroundStyle(.tertiary)
+                                }
+                            }
+                        }
+                    }
+                    .padding(.top, 4)
+                    .padding(.leading, 52)
+                } label: {
+                    HStack(spacing: 12) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.red.opacity(0.12))
+                                .frame(width: 42, height: 42)
+                            Image(systemName: "wifi.slash")
+                                .foregroundStyle(.red)
+                                .font(.system(size: 17))
+                        }
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("\(partition.devices.count) device\(partition.devices.count == 1 ? "" : "s") isolated")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.red)
+                            if let gateway = partition.gatewayDevice {
+                                Text("Missing link: \(gateway.name)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("No routing path found")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        Spacer()
+                        Text("\(partition.devices.count)")
+                            .font(.title3.weight(.bold).monospacedDigit())
+                            .foregroundStyle(.red)
+                    }
+                    .padding(.vertical, 3)
+                }
+            }
+        } header: {
+            Label("Isolated Clusters (\(totalIsolated) device\(totalIsolated == 1 ? "" : "s"))", systemImage: "wifi.slash")
+                .foregroundStyle(.red)
+        } footer: {
+            Text("These devices have no path to any border router. They cannot be controlled remotely until the missing routing link is restored.")
                 .font(.caption)
         }
     }
@@ -930,6 +1003,20 @@ struct NetworkDiagnosticsView: View {
             lines.append("SIGNAL DEGRADATION (last 30 min)")
             for a in report.signalTrendAlerts {
                 lines.append("  \(a.device.name): \(a.baselineAvgRSSI) → \(a.recentAvgRSSI) dBm (−\(a.degradationDB) dBm)")
+            }
+            lines.append("")
+        }
+
+        // Isolated partitions
+        if !report.partitions.isEmpty {
+            let totalIsolated = report.partitions.reduce(0) { $0 + $1.devices.count }
+            lines.append("ISOLATED CLUSTERS (\(totalIsolated) devices)")
+            for (i, partition) in report.partitions.enumerated() {
+                let gateway = partition.gatewayDevice?.name ?? "unknown"
+                lines.append("  Cluster \(i + 1): \(partition.devices.count) device\(partition.devices.count == 1 ? "" : "s") — missing link: \(gateway)")
+                for d in partition.devices {
+                    lines.append("    • \(d.name)\(d.room.map { " (\($0))" } ?? "")")
+                }
             }
             lines.append("")
         }
