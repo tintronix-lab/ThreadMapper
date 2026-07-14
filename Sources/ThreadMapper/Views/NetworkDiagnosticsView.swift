@@ -140,6 +140,7 @@ struct NetworkDiagnosticsView: View {
             }
             if !report.roomCoverage.isEmpty {
                 roomCoverageSection(report.roomCoverage)
+                roomSignalTrendSection(report.roomCoverage)
             }
             meshDepthSection(report.deviceHops)
             if !report.singlePointsOfFailure.isEmpty {
@@ -348,6 +349,86 @@ struct NetworkDiagnosticsView: View {
             Text("Grade reflects signal strength and device availability. Rooms without a router rely on hops from another location.")
                 .font(.caption)
         }
+    }
+
+    // MARK: - Room Signal History
+
+    @ViewBuilder
+    private func roomSignalTrendSection(_ coverage: [NetworkDiagnosticsEngine.RoomCoverage]) -> some View {
+        let roomData = coverage.compactMap { room -> (room: NetworkDiagnosticsEngine.RoomCoverage, readings: [DeviceStatsStore.Reading])? in
+            let readings = aggregatedReadings(for: room.room)
+            guard !readings.isEmpty else { return nil }
+            return (room: room, readings: readings)
+        }
+        if !roomData.isEmpty {
+            Section {
+                ForEach(roomData, id: \.room.id) { entry in
+                    let trend = roomSignalTrend(readings: entry.readings)
+                    DisclosureGroup {
+                        SignalSparklineView(readings: entry.readings)
+                            .frame(height: 88)
+                            .padding(.vertical, 6)
+                            .padding(.horizontal, 4)
+                    } label: {
+                        HStack(spacing: 12) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(entry.room.gradeColor.opacity(0.15))
+                                    .frame(width: 40, height: 40)
+                                Text(entry.room.grade)
+                                    .font(.title2.weight(.bold))
+                                    .foregroundStyle(entry.room.gradeColor)
+                            }
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(entry.room.room)
+                                    .font(.subheadline.weight(.semibold))
+                                HStack(spacing: 6) {
+                                    if let latest = entry.readings.last {
+                                        Text("\(latest.rssi) dBm")
+                                            .font(.caption2.monospacedDigit())
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Image(systemName: trend.icon)
+                                        .imageScale(.small)
+                                        .foregroundStyle(trend.color)
+                                    Text(trend.label)
+                                        .font(.caption2)
+                                        .foregroundStyle(trend.color)
+                                }
+                            }
+                            Spacer()
+                            Text("\(entry.readings.count) pts")
+                                .font(.caption2.monospacedDigit())
+                                .foregroundStyle(.tertiary)
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
+            } header: {
+                Text("Room Signal History")
+            } footer: {
+                Text("Aggregated RSSI from all devices per room over the last 30 minutes. Tap a room to reveal the sparkline.")
+                    .font(.caption)
+            }
+        }
+    }
+
+    private func aggregatedReadings(for room: String) -> [DeviceStatsStore.Reading] {
+        devices
+            .filter { $0.room == room }
+            .flatMap { statsStore.readings[$0.uniqueIdentifier.uuidString] ?? [] }
+            .sorted { $0.timestamp < $1.timestamp }
+    }
+
+    private func roomSignalTrend(readings: [DeviceStatsStore.Reading]) -> (icon: String, color: Color, label: String) {
+        guard readings.count >= 6 else { return ("minus", .secondary, "Stable") }
+        let half = readings.count / 2
+        let baselineAvg = readings.prefix(half).map(\.rssi).reduce(0, +) / half
+        let recentAvg = readings.suffix(half).map(\.rssi).reduce(0, +) / (readings.count - half)
+        let delta = recentAvg - baselineAvg
+        if delta >= 4 { return ("arrow.up.right", Color.green, "Improving") }
+        if delta <= -4 { return ("arrow.down.right", Color.orange, "Degrading") }
+        return ("minus", Color.secondary, "Stable")
     }
 
     private struct BRStats {
