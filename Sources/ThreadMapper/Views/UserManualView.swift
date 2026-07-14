@@ -79,6 +79,18 @@ private extension ManualChapter {
             .init(title: "Confetti Animation", icon: "party.popper", body: [
                 .paragraph("When your network grade improves — for example moving from B to A — a brief confetti burst plays. The animation is suppressed automatically if Reduce Motion is enabled in iOS Accessibility settings."),
             ]),
+            .init(title: "Network Diagnostics", icon: "stethoscope", body: [
+                .paragraph("Tap the ··· menu in the Dashboard toolbar and choose Network Diagnostics to open a full diagnostic report for your Thread network. The report runs automatically when the sheet opens and covers:"),
+                .bullets([
+                    "Prioritised recommendations — Critical, High, and Medium issues to fix",
+                    "Border Router Comparison — side-by-side stats for each border router (shown when you have two or more)",
+                    "Room Coverage — per-room signal grades (A–F) with average RSSI",
+                    "Mesh Depth — every device grouped by hop count from the nearest border router",
+                    "Thread Channel Analysis — interference risk for each channel your devices use",
+                    "Single Points of Failure — routers whose loss would isolate end devices",
+                ]),
+                .tip("Tap Share Diagnostic Report at the bottom to export a plain-text report you can paste into a support ticket or save for later."),
+            ]),
         ]),
 
         .init(title: "Mesh Map", topics: [
@@ -119,20 +131,56 @@ private extension ManualChapter {
                 .tip("Use the filter bar at the top to narrow by room, role (router / end device), or signal quality."),
             ]),
             .init(title: "Device Detail", icon: "info.circle", body: [
-                .paragraph("Tap any device to open its detail sheet. You'll find:"),
+                .paragraph("Tap any device to open its detail sheet. Sections include:"),
                 .bullets([
-                    "Live RSSI and link-quality reading",
-                    "Uptime / last-seen timestamp",
-                    "Thread role (Router, REED, End Device, Sleepy End Device)",
-                    "HomeKit room assignment",
-                    "Signal history sparkline (last 24 hours)",
-                    "Notes field — free-text notes that persist across sessions",
-                    "Custom display name — override the HomeKit name just within ThreadMapper",
+                    "Signal — live RSSI, link quality, and 24-hour sparkline",
+                    "Network — Thread role, room, channel, and parent device",
+                    "Mesh Path to Internet — the full hop chain from this device to the border router",
+                    "Thread Neighbors (OTBR) — live neighbor table from your OpenThread Border Router",
+                    "Device — manufacturer, model, firmware, HomeKit accessory ID",
+                    "Battery — remaining charge and charging state (where reported)",
+                    "Border Router Info — channel, PAN ID, and network name (border routers only)",
+                    "Vendor Notes — model-specific tips and known quirks",
+                    "Signal Survey — quick-launch shortcut to start a survey for this device",
+                    "Device History — offline count, first seen, and last event from the activity log",
+                    "Notes — free-text field, saved automatically",
                 ]),
+            ]),
+            .init(title: "Mesh Path to Internet", icon: "arrow.up.forward.circle", body: [
+                .paragraph("The Mesh Path section traces the routing chain from the selected device up through its parent nodes to the border router. Each hop is shown with the device name and its Thread role."),
+                .bullets([
+                    "Green — 1–2 hops: excellent path length",
+                    "Orange — 3 hops: acceptable but worth monitoring",
+                    "Red — 4+ hops: latency risk; consider adding a router between the device and the border router",
+                ]),
+                .tip("Devices marked as unreachable show a dashed path — this means ThreadMapper cannot trace a complete route, usually because the device is offline."),
+            ]),
+            .init(title: "Thread Neighbors (OTBR)", icon: "network", body: [
+                .paragraph("If you have an OpenThread Border Router configured in Settings, the Thread Neighbors section appears with live data pulled directly from the OTBR REST API. For each neighbor you'll see:"),
+                .bullets([
+                    "RLOC16 — the Thread routing-layer address in hex (e.g. 0x1400)",
+                    "Role — whether this neighbor is a Child or a Router relative to the selected device",
+                    "Average RSSI — signal strength of the direct link to that neighbor",
+                    "Link Margin — headroom above the receiver sensitivity floor (higher is better)",
+                ]),
+                .paragraph("This section is invisible when no OTBR is configured or when the selected device has no reported neighbors."),
+                .tip("An \"OTBR\" green badge in the section header confirms the data is live rather than estimated from HomeKit."),
+            ]),
+            .init(title: "Vendor Notes", icon: "building.2", body: [
+                .paragraph("ThreadMapper includes built-in tips for popular Thread device brands. When you open a device detail for a recognised manufacturer, a Vendor Notes card appears with model-specific guidance — for example, known firmware quirks, optimal placement advice, or pairing tips."),
+                .paragraph("Supported brands include Apple (HomePod), Eve, Nanoleaf, IKEA, Philips Hue, Aqara, Bosch, and Samsung SmartThings."),
             ]),
             .init(title: "Device Notes", icon: "note.text", body: [
                 .paragraph("Notes are saved automatically as you type (with a short debounce). They are stored locally on device and are not shared with HomeKit or any cloud service."),
                 .tip("Use notes to record things like installation date, cable run length, or anything that helps you understand why a device is where it is."),
+            ]),
+            .init(title: "Device History (Detail)", icon: "clock.arrow.circlepath", body: [
+                .paragraph("At the bottom of each device detail sheet, the Device History section shows a summary of that device's activity over the last 7 days:"),
+                .bullets([
+                    "First Seen — when ThreadMapper first recorded the device joining the network",
+                    "Offline Events — how many times it has gone offline (colour-coded: green = 0, orange = 1–4, red = 5+)",
+                    "Last Event — the most recent activity log entry for this device with a relative timestamp",
+                ]),
             ]),
         ]),
 
@@ -149,6 +197,93 @@ private extension ManualChapter {
             ]),
             .init(title: "Clearing the Feed", icon: "trash", body: [
                 .paragraph("Go to Settings → Data → Clear Activity Feed to erase all logged events. This only affects the in-app log — it does not change anything in HomeKit."),
+            ]),
+            .init(title: "Device History", icon: "chart.bar.doc.horizontal", body: [
+                .paragraph("Tap the chart icon in the Activity toolbar to open Device History — an aggregated view of every device that has appeared in the activity log over the past 7 days."),
+                .paragraph("Each device row shows:"),
+                .bullets([
+                    "Stability grade (A–F) — based on how often the device went offline relative to how many times it re-joined",
+                    "Live status dot — green if the device is currently online",
+                    "First seen date — when ThreadMapper first recorded it",
+                    "Offline count — colour-coded: green = never, orange = 1–2, red = 3+",
+                    "Last event — most recent activity, shown as a relative time",
+                ]),
+                .paragraph("The header shows three summary statistics: total devices seen, devices that never went offline, and unstable devices (3+ offline events)."),
+                .tip("A device with a high offline count but grade B suggests it re-joins quickly each time — look at the first-seen date to assess whether this is a new, settling device or a chronic problem."),
+            ]),
+        ]),
+
+        .init(title: "Network Diagnostics", topics: [
+            .init(title: "Opening Diagnostics", icon: "stethoscope", body: [
+                .paragraph("Network Diagnostics is reached from the Dashboard — tap the ··· menu in the top-right toolbar and choose Network Diagnostics. The analysis runs automatically each time the sheet opens; pull down to dismiss and re-open to refresh."),
+            ]),
+            .init(title: "Recommendations", icon: "checklist", body: [
+                .paragraph("The top section lists actionable recommendations sorted by severity:"),
+                .bullets([
+                    "Critical (red) — problems that are actively breaking your network, such as no border router or multiple devices offline",
+                    "High (orange) — single points of failure and weak-signal clusters that risk outages",
+                    "Medium (yellow) — optimisation opportunities such as deep hop counts or channel interference",
+                ]),
+                .paragraph("If no issues are found, a green \"Network looks healthy\" card is shown instead."),
+            ]),
+            .init(title: "Border Router Comparison", icon: "arrow.left.arrow.right", body: [
+                .paragraph("When two or more border routers are present, a comparison table appears showing for each:"),
+                .bullets([
+                    "Direct children — devices whose parentID links directly to this border router",
+                    "Total subtree — all devices reachable through this border router's branch of the mesh",
+                    "Channel — the Thread channel this border router is operating on",
+                ]),
+                .tip("Uneven subtree sizes can indicate that one border router is doing all the routing work. Adding more end devices or routers near the underloaded border router can improve balance."),
+            ]),
+            .init(title: "Room Coverage", icon: "house.and.flag", body: [
+                .paragraph("Room Coverage grades each HomeKit room from A to F based on signal quality and device availability:"),
+                .bullets([
+                    "A — average RSSI better than −65 dBm: excellent",
+                    "B — average RSSI −65 to −75 dBm: good",
+                    "C — average RSSI −75 to −85 dBm: fair",
+                    "D / F — very weak signal or majority of devices offline",
+                ]),
+                .paragraph("Each room row also shows whether a Thread router is present. Rooms without a router depend entirely on distant routing nodes; adding a mains-powered Thread device there creates a local router."),
+            ]),
+            .init(title: "Mesh Depth", icon: "point.3.connected.trianglepath.dotted", body: [
+                .paragraph("Mesh Depth lists every device grouped by hop count — the number of Thread hops between that device and the nearest border router. Border routers themselves are 1 hop."),
+                .bullets([
+                    "1–2 hops — ideal; low latency and reliable delivery",
+                    "3 hops — acceptable for most use cases",
+                    "4+ hops — increasing risk; commands can time out and devices may appear intermittently offline",
+                ]),
+                .tip("To reduce hop count, place a Thread router (a mains-powered Thread device) roughly halfway between the deep device and its current parent."),
+            ]),
+            .init(title: "Thread Channel Analysis", icon: "waveform.badge.exclamationmark", body: [
+                .paragraph("Thread 802.15.4 operates in the 2.4 GHz band on channels 11–26, each 5 MHz wide starting at 2405 MHz. This band overlaps with 2.4 GHz Wi-Fi."),
+                .paragraph("The Channel Analysis section rates each channel your network uses:"),
+                .bullets([
+                    "High risk (red) — channels 11–13, 17–19, 22–24 fall directly inside the three Wi-Fi non-overlapping channels (1, 6, 11)",
+                    "Medium risk (orange) — channels near the Wi-Fi channel edges",
+                    "Low risk (green) — channels 15, 20, and 25 sit in cleaner parts of the spectrum",
+                ]),
+                .paragraph("Change the Thread channel in your border router's admin interface (OTBR web UI, Home Assistant OTBR add-on, etc.). All Thread devices on the network will follow automatically."),
+                .warning("Not all border routers allow manual channel selection. Apple HomePod and Google Nest border routers manage the channel automatically."),
+            ]),
+            .init(title: "Single Points of Failure", icon: "exclamationmark.circle.fill", body: [
+                .paragraph("A Single Point of Failure (SPOF) is a non-border-router routing device that:"),
+                .bullets([
+                    "Is the only Thread router in its room, AND",
+                    "Has at least one end device whose traffic passes through it",
+                ]),
+                .paragraph("If that router goes offline, the end devices it serves lose their path to the border router and go offline too. ThreadMapper highlights these devices so you can add redundancy before it becomes a problem."),
+                .tip("The easiest fix is to add a second mains-powered Thread device (which can act as a router) to the same room."),
+            ]),
+            .init(title: "Sharing the Report", icon: "square.and.arrow.up", body: [
+                .paragraph("Tap Share Diagnostic Report at the bottom of the Network Diagnostics sheet to export a plain-text summary of the full report. The export includes:"),
+                .bullets([
+                    "Timestamp and device count",
+                    "All recommendations with priority labels",
+                    "Room coverage grades",
+                    "Hop-count table",
+                    "Channel assignments and interference risk",
+                ]),
+                .paragraph("Use the iOS share sheet to save it to Files, copy it to the clipboard, or send it directly to someone helping you diagnose the network."),
             ]),
         ]),
 
