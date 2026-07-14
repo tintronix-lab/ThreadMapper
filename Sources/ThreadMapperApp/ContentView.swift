@@ -66,22 +66,81 @@ struct ContentView: View {
 }
 
 struct MainTabView: View {
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    // iPad sidebar uses optional selection (iOS List requirement)
+    @State private var sidebarSelection: AppTab? = .dashboard
+    // iPhone TabView uses non-optional selection
+    @State private var tabSelection: AppTab = .dashboard
+
     var body: some View {
-        TabView {
-            DashboardView()
-                .tabItem { Label("Dashboard", systemImage: "square.grid.2x2") }
+        if sizeClass == .regular {
+            iPadLayout
+        } else {
+            iPhoneLayout
+        }
+    }
 
-            MeshView()
-                .tabItem { Label("Mesh", systemImage: "network") }
+    // MARK: - iPad: NavigationSplitView
 
-            SurveyWalkView()
-                .tabItem { Label("Survey", systemImage: "figure.walk") }
+    private var iPadLayout: some View {
+        NavigationSplitView {
+            List(AppTab.allCases, id: \.self, selection: $sidebarSelection) { tab in
+                Label(tab.title, systemImage: tab.icon)
+            }
+            .navigationTitle("ThreadMapper")
+            .navigationSplitViewColumnWidth(220)
+        } detail: {
+            (sidebarSelection ?? .dashboard).destination
+        }
+    }
 
-            ActivityFeedView()
-                .tabItem { Label("Activity", systemImage: "clock.arrow.circlepath") }
+    // MARK: - iPhone: TabView
 
-            SettingsView()
-                .tabItem { Label("Settings", systemImage: "gearshape") }
+    private var iPhoneLayout: some View {
+        TabView(selection: $tabSelection) {
+            ForEach(AppTab.allCases, id: \.self) { tab in
+                tab.destination
+                    .tabItem { Label(tab.title, systemImage: tab.icon) }
+                    .tag(tab)
+            }
+        }
+    }
+}
+
+// MARK: - Tab definition
+
+enum AppTab: CaseIterable, Hashable, Identifiable {
+    var id: Self { self }
+    case dashboard, mesh, survey, activity, settings
+
+    var title: String {
+        switch self {
+        case .dashboard: return "Dashboard"
+        case .mesh:      return "Mesh"
+        case .survey:    return "Survey"
+        case .activity:  return "Activity"
+        case .settings:  return "Settings"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .dashboard: return "square.grid.2x2"
+        case .mesh:      return "network"
+        case .survey:    return "figure.walk"
+        case .activity:  return "clock.arrow.circlepath"
+        case .settings:  return "gearshape"
+        }
+    }
+
+    @ViewBuilder
+    var destination: some View {
+        switch self {
+        case .dashboard: DashboardView()
+        case .mesh:      MeshView()
+        case .survey:    SurveyWalkView()
+        case .activity:  ActivityFeedView()
+        case .settings:  SettingsView()
         }
     }
 }
