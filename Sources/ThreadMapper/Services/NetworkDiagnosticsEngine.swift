@@ -53,6 +53,23 @@ struct NetworkDiagnosticsEngine {
         let parentName: String?
     }
 
+    // Routing device whose removal would isolate downstream end devices
+    struct ResilienceNode: Identifiable {
+        let id = UUID()
+        let device: ThreadDevice
+        let isolatedCount: Int       // devices that lose connectivity if this node fails
+        let isolatedNames: [String]  // first 4 names for display
+    }
+
+    // Device whose RSSI has dropped significantly in the last 30 minutes
+    struct SignalTrendAlert: Identifiable {
+        let id = UUID()
+        let device: ThreadDevice
+        let recentAvgRSSI: Int
+        let baselineAvgRSSI: Int
+        let degradationDB: Int  // positive = getting worse
+    }
+
     struct ChannelStats: Identifiable {
         enum InterferenceRisk {
             case high    // directly overlaps a common Wi-Fi non-overlapping channel (1, 6, 11)
@@ -80,10 +97,12 @@ struct NetworkDiagnosticsEngine {
 
     struct Report {
         let recommendations: [Recommendation]
-        let roomCoverage: [RoomCoverage]     // sorted worst-first
-        let deviceHops: [DeviceHopInfo]       // sorted deepest-first
+        let roomCoverage: [RoomCoverage]         // sorted worst-first
+        let deviceHops: [DeviceHopInfo]           // sorted deepest-first
         let singlePointsOfFailure: [ThreadDevice]
-        let channelStats: [ChannelStats]      // sorted by channel number
+        let channelStats: [ChannelStats]          // sorted by channel number
+        let resilienceNodes: [ResilienceNode]     // sorted by isolatedCount desc, top 5
+        let signalTrendAlerts: [SignalTrendAlert] // sorted by degradationDB desc
         let totalBorderRouters: Int
         let totalRouters: Int
         let meshLinks: [MeshLink]
@@ -92,10 +111,12 @@ struct NetworkDiagnosticsEngine {
 
     // MARK: - Analysis
 
-    static func analyze(devices: [ThreadDevice]) -> Report {
+    // trendsByDeviceID: keyed by ThreadDevice.uniqueIdentifier → RSSI readings oldest-first
+    static func analyze(devices: [ThreadDevice], trendsByDeviceID: [UUID: [Int]] = [:]) -> Report {
         guard !devices.isEmpty else {
             return Report(recommendations: [], roomCoverage: [], deviceHops: [],
                           singlePointsOfFailure: [], channelStats: [],
+                          resilienceNodes: [], signalTrendAlerts: [],
                           totalBorderRouters: 0, totalRouters: 0,
                           meshLinks: [], meshNodes: [])
         }
@@ -266,6 +287,72 @@ struct NetworkDiagnosticsEngine {
             ))
         }
 
+        // Signal trend analysis: flag devices whose RSSI dropped ≥8 dBm in the last 30 min
+        let deviceByUniqueID = Dictionary(uniqueKeysWithValues: devices.map { ($0.uniqueIdentifier, $0) })
+        var signalTrendAlerts: [SignalTrendAlert] = []
+        for (uniqueID, readings) in trendsByDeviceID {
+            guard readings.count >= 12, let device = deviceByUniqueID[uniqueID] else { continue }
+            let half = readings.count / 2
+            let baselineAvg = readings.prefix(half).reduce(0, +) / half
+            let recentAvg = readings.suffix(half).reduce(0, +) / (readings.count - half)
+            let degradation = baselineAvg - recentAvg  // positive = signal getting worse
+            if degradation >= 8 {
+                signalTrendAlerts.append(SignalTrendAlert(
+                    device: device,
+                    recentAvgRSSI: recentAvg,
+                    baselineAvgRSSI: baselineAvg,
+                    degradationDB: degradation
+                ))
+            }
+        }
+        signalTrendAlerts.sort { $0.degradationDB > $1.degradationDB }
+
+        if !signalTrendAlerts.isEmpty {
+            let names = signalTrendAlerts.prefix(2).map(\.device.name).joined(separator: ", ")
+            let tail = signalTrendAlerts.count > 2 ? " and \(signalTrendAlerts.count - 2) more" : ""
+            recs.append(.init(
+                priority: .high, category: .performance,
+                title: "\(signalTrendAlerts.count) Device\(signalTrendAlerts.count == 1 ? "" : "s") Signal Degrading",
+                detail: "\(names)\(tail) — signal dropped 8+ dBm in the last 30 minutes. Check for new interference or obstructions.",
+                icon: "chart.line.downtrend.xyaxis"
+            ))
+        }
+
+        // Failure impact simulation: for each non-BR router, remove it and re-run BFS
+        var resilienceNodes: [ResilienceNode] = []
+        let meshRouterNodes = nodes.filter { $0.kind == .router }
+        for router in meshRouterNodes {
+            let routerID = router.id
+            guard deviceByID[routerID] != nil else { continue }
+            // Build modified children map without this router's subtree
+            var modChildrenOf = childrenOf
+            modChildrenOf.removeValue(forKey: routerID)
+            if let pid = router.parentID { modChildrenOf[pid]?.removeAll { $0 == routerID } }
+
+            // BFS from border routers without this node
+            var reachable = Set<UUID>()
+            var q = nodes.filter { $0.kind == .borderRouter }.map(\.id)
+            while !q.isEmpty {
+                let cur = q.removeFirst()
+                guard reachable.insert(cur).inserted else { continue }
+                q.append(contentsOf: modChildrenOf[cur] ?? [])
+            }
+
+            // Devices that were reachable before but are now isolated
+            let isolated = devices.filter { d in
+                d.id != routerID && hopCounts[d.id] != nil && !reachable.contains(d.id)
+            }
+            if !isolated.isEmpty {
+                resilienceNodes.append(ResilienceNode(
+                    device: deviceByID[routerID]!,
+                    isolatedCount: isolated.count,
+                    isolatedNames: isolated.prefix(4).map(\.name)
+                ))
+            }
+        }
+        resilienceNodes.sort { $0.isolatedCount > $1.isolatedCount }
+        let topResilienceNodes = Array(resilienceNodes.prefix(5))
+
         recs.sort { $0.priority < $1.priority }
 
         // Channel analysis
@@ -301,6 +388,8 @@ struct NetworkDiagnosticsEngine {
             deviceHops: deviceHops,
             singlePointsOfFailure: spofDevices,
             channelStats: channelStats,
+            resilienceNodes: topResilienceNodes,
+            signalTrendAlerts: signalTrendAlerts,
             totalBorderRouters: borderRouters.count,
             totalRouters: routerDevices.count,
             meshLinks: links,

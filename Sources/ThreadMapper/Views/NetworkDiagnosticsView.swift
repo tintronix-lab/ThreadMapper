@@ -6,6 +6,7 @@ struct NetworkDiagnosticsView: View {
     @State private var report: NetworkDiagnosticsEngine.Report?
     @State private var isAnalyzing = false
     @Environment(\.dismiss) private var dismiss
+    @Environment(DeviceStatsStore.self) private var statsStore
 
     var body: some View {
         NavigationStack {
@@ -76,6 +77,12 @@ struct NetworkDiagnosticsView: View {
                 recommendationsSection(report.recommendations)
             } else {
                 healthySection
+            }
+            if !report.signalTrendAlerts.isEmpty {
+                signalTrendSection(report.signalTrendAlerts)
+            }
+            if !report.resilienceNodes.isEmpty {
+                resilienceSection(report.resilienceNodes)
             }
             if report.totalBorderRouters >= 2 {
                 borderRouterComparisonSection(report)
@@ -420,6 +427,96 @@ struct NetworkDiagnosticsView: View {
         }
     }
 
+    // MARK: - Signal Degradation
+
+    @ViewBuilder
+    private func signalTrendSection(_ alerts: [NetworkDiagnosticsEngine.SignalTrendAlert]) -> some View {
+        Section {
+            ForEach(alerts) { alert in
+                HStack(spacing: 12) {
+                    Image(systemName: "chart.line.downtrend.xyaxis")
+                        .foregroundStyle(.orange)
+                        .font(.title3)
+                        .frame(width: 28)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(alert.device.name)
+                            .font(.subheadline.weight(.semibold))
+                        HStack(spacing: 6) {
+                            Text("\(alert.baselineAvgRSSI) dBm")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .monospacedDigit()
+                            Image(systemName: "arrow.right")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                            Text("\(alert.recentAvgRSSI) dBm")
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(.red)
+                                .monospacedDigit()
+                        }
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing, spacing: 1) {
+                        Text("−\(alert.degradationDB)")
+                            .font(.callout.weight(.bold).monospacedDigit())
+                            .foregroundStyle(.orange)
+                        Text("dBm")
+                            .font(.system(size: 9))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.vertical, 2)
+            }
+        } header: {
+            Label("Signal Degradation", systemImage: "chart.line.downtrend.xyaxis")
+        } footer: {
+            Text("Devices whose average signal dropped 8+ dBm over the last 30 minutes. This can indicate new interference, physical obstruction, or a device in need of attention.")
+                .font(.caption)
+        }
+    }
+
+    // MARK: - Failure Impact Analysis
+
+    @ViewBuilder
+    private func resilienceSection(_ nodes: [NetworkDiagnosticsEngine.ResilienceNode]) -> some View {
+        Section {
+            ForEach(nodes) { node in
+                HStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.red.opacity(0.1))
+                            .frame(width: 38, height: 38)
+                        Image(systemName: "minus.circle.fill")
+                            .foregroundStyle(.red.opacity(0.85))
+                    }
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(node.device.name)
+                            .font(.subheadline.weight(.semibold))
+                        Text("Failure would isolate \(node.isolatedCount) device\(node.isolatedCount == 1 ? "" : "s")")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        if !node.isolatedNames.isEmpty {
+                            Text(node.isolatedNames.joined(separator: " · "))
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                                .lineLimit(1)
+                        }
+                    }
+                    Spacer()
+                    Text("\(node.isolatedCount)")
+                        .font(.title3.weight(.bold).monospacedDigit())
+                        .foregroundStyle(node.isolatedCount >= 3 ? .red : .orange)
+                }
+                .padding(.vertical, 3)
+            }
+        } header: {
+            Label("Failure Impact", systemImage: "exclamationmark.shield.fill")
+        } footer: {
+            Text("How many end devices would lose internet access if each routing device were to fail. Add a second router nearby to eliminate single points of failure.")
+                .font(.caption)
+        }
+    }
+
     // MARK: - Channel Analysis
 
     @ViewBuilder
@@ -589,6 +686,27 @@ struct NetworkDiagnosticsView: View {
             lines.append("")
         }
 
+        // Failure impact
+        if !report.resilienceNodes.isEmpty {
+            lines.append("FAILURE IMPACT ANALYSIS")
+            for n in report.resilienceNodes {
+                lines.append("  \(n.device.name) → \(n.isolatedCount) device\(n.isolatedCount == 1 ? "" : "s") isolated if removed")
+                if !n.isolatedNames.isEmpty {
+                    lines.append("    (\(n.isolatedNames.joined(separator: ", ")))")
+                }
+            }
+            lines.append("")
+        }
+
+        // Signal degradation
+        if !report.signalTrendAlerts.isEmpty {
+            lines.append("SIGNAL DEGRADATION (last 30 min)")
+            for a in report.signalTrendAlerts {
+                lines.append("  \(a.device.name): \(a.baselineAvgRSSI) → \(a.recentAvgRSSI) dBm (−\(a.degradationDB) dBm)")
+            }
+            lines.append("")
+        }
+
         lines.append("─────────────────────────────────────")
         lines.append("Generated by ThreadMapper")
         return lines.joined(separator: "\n")
@@ -599,9 +717,20 @@ struct NetworkDiagnosticsView: View {
         isAnalyzing = true
         report = nil
         Task {
-            let result = NetworkDiagnosticsEngine.analyze(devices: devices)
+            let trends = buildTrends()
+            let result = NetworkDiagnosticsEngine.analyze(devices: devices, trendsByDeviceID: trends)
             report = result
             isAnalyzing = false
         }
+    }
+
+    private func buildTrends() -> [UUID: [Int]] {
+        var out: [UUID: [Int]] = [:]
+        for device in devices {
+            if let s = statsStore.stats(for: device.uniqueIdentifier) {
+                out[device.uniqueIdentifier] = s.readings.map(\.rssi)
+            }
+        }
+        return out
     }
 }
