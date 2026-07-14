@@ -233,6 +233,11 @@ struct SettingsView: View {
     @ViewBuilder
     private var aboutSection: some View {
         Section("About") {
+            NavigationLink {
+                UserManualView()
+            } label: {
+                Label("User Manual", systemImage: "book.pages")
+            }
             LabeledContent("Version") {
                 Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—")
                     .foregroundStyle(.secondary)
