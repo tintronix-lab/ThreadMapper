@@ -119,6 +119,16 @@ final class BorderRouterClient: DiagnosticsProvider, @unchecked Sendable {
         return result
     }
 
+    /// Full active operational dataset — Thread network identity and security policy.
+    func activeDataset() async -> OTBRActiveDataset? {
+        try? await decode(OTBRActiveDataset.self, path: "node/dataset/active")
+    }
+
+    /// Current OTBR node state (role, RLOC16, network name).
+    func nodeInfo() async -> OTBRNode? {
+        try? await decode(OTBRNode.self, path: "node")
+    }
+
     /// Lightweight reachability check for the Settings "Test connection" button.
     func testConnection() async -> Bool {
         (try? await decode(OTBRNode.self, path: "node")) != nil
@@ -160,12 +170,23 @@ struct OTBRActiveDataset: Decodable {
     let channel: Int?
     let panId: Int?
     let extPanId: String?
+    let meshLocalPrefix: String?
+    let securityPolicy: OTBRSecurityPolicy?
 
     enum CodingKeys: String, CodingKey {
-        case networkName = "NetworkName"
-        case channel = "Channel"
-        case panId = "PanId"
-        case extPanId = "ExtPanId"
+        case networkName     = "NetworkName"
+        case channel         = "Channel"
+        case panId           = "PanId"
+        case extPanId        = "ExtPanId"
+        case meshLocalPrefix = "MeshLocalPrefix"
+        case securityPolicy  = "SecurityPolicy"
+    }
+}
+
+struct OTBRSecurityPolicy: Decodable {
+    let rotationTime: Int?
+    enum CodingKeys: String, CodingKey {
+        case rotationTime = "RotationTime"
     }
 }
 

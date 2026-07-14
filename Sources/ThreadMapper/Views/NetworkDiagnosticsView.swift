@@ -6,10 +6,23 @@ struct NetworkDiagnosticsView: View {
     @State private var report: NetworkDiagnosticsEngine.Report?
     @State private var currentSnapshot: TopologySnapshot?
     @State private var baseline: TopologySnapshot? = TopologySnapshot.loadBaseline()
+    @State private var otbrInfo: OTBRThreadInfo?
     @State private var isAnalyzing = false
     @State private var baselineSavedFeedback = false
     @Environment(\.dismiss) private var dismiss
     @Environment(DeviceStatsStore.self) private var statsStore
+    @AppStorage("borderRouterURL") private var borderRouterURL = ""
+
+    private struct OTBRThreadInfo {
+        let networkName: String?
+        let channel: Int?
+        let panID: String?            // "0xDEAD" hex form
+        let extPanID: String?
+        let meshLocalPrefix: String?
+        let keyRotationHours: Int?
+        let role: String?             // "leader", "router", "child", "detached"
+        let rloc16: String?           // "0x1400" hex form
+    }
 
     var body: some View {
         NavigationStack {
@@ -131,6 +144,9 @@ struct NetworkDiagnosticsView: View {
             }
             if !report.channelStats.isEmpty {
                 channelAnalysisSection(report.channelStats)
+            }
+            if let info = otbrInfo {
+                otbrDatasetSection(info)
             }
             exportSection(report)
         }
@@ -660,6 +676,71 @@ struct NetworkDiagnosticsView: View {
         }
     }
 
+    // MARK: - OTBR Thread Dataset
+
+    @ViewBuilder
+    private func otbrDatasetSection(_ info: OTBRThreadInfo) -> some View {
+        Section {
+            if let name = info.networkName {
+                otbrRow(label: "Network Name", value: name, icon: "network")
+            }
+            if let ch = info.channel {
+                otbrRow(label: "Channel", value: "\(ch)", icon: "waveform")
+            }
+            if let pan = info.panID {
+                otbrRow(label: "PAN ID", value: pan, icon: "number")
+            }
+            if let ext = info.extPanID {
+                otbrRow(label: "Extended PAN ID", value: ext, icon: "key.horizontal")
+            }
+            if let prefix = info.meshLocalPrefix {
+                otbrRow(label: "Mesh Local Prefix", value: prefix, icon: "network.badge.shield.half.filled")
+            }
+            if let hours = info.keyRotationHours {
+                let days = hours / 24
+                let detail = days > 0 ? "\(days) day\(days == 1 ? "" : "s") (\(hours) h)" : "\(hours) h"
+                otbrRow(label: "Key Rotation", value: detail, icon: "arrow.clockwise.circle")
+            }
+            if let role = info.role {
+                otbrRow(label: "OTBR Role", value: role.capitalized, icon: "antenna.radiowaves.left.and.right",
+                        valueColor: role == "leader" ? .green : .primary)
+            }
+            if let rloc = info.rloc16 {
+                otbrRow(label: "RLOC16", value: rloc, icon: "location.circle")
+            }
+        } header: {
+            HStack(spacing: 6) {
+                Text("Thread Network Identity")
+                Circle()
+                    .fill(Color.green)
+                    .frame(width: 6, height: 6)
+                Text("LIVE")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundStyle(.green)
+            }
+        } footer: {
+            Text("Live data from your OpenThread Border Router. The Extended PAN ID uniquely identifies this Thread network — useful for verifying commissioning targets.")
+                .font(.caption)
+        }
+    }
+
+    private func otbrRow(label: String, value: String, icon: String, valueColor: Color = .secondary) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .foregroundStyle(.blue)
+                .imageScale(.small)
+                .frame(width: 20)
+            Text(label)
+                .font(.subheadline)
+            Spacer()
+            Text(value)
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(valueColor)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+        }
+    }
+
     // MARK: - Helpers
 
     private func iconForDevice(_ device: ThreadDevice) -> String {
@@ -827,13 +908,38 @@ struct NetworkDiagnosticsView: View {
         guard !devices.isEmpty else { return }
         isAnalyzing = true
         report = nil
+        otbrInfo = nil
         Task {
             let trends = buildTrends()
+            async let infoFetch = fetchOTBRInfo()
             let result = NetworkDiagnosticsEngine.analyze(devices: devices, trendsByDeviceID: trends)
+            let info = await infoFetch
             report = result
             currentSnapshot = TopologySnapshot.capture(report: result, devices: devices)
+            otbrInfo = info
             isAnalyzing = false
         }
+    }
+
+    private func fetchOTBRInfo() async -> OTBRThreadInfo? {
+        guard !borderRouterURL.isEmpty, let url = URL(string: borderRouterURL) else { return nil }
+        let client = BorderRouterClient(baseURL: url)
+        async let nodeResult = client.nodeInfo()
+        async let datasetResult = client.activeDataset()
+        let (node, dataset) = await (nodeResult, datasetResult)
+        guard node != nil || dataset != nil else { return nil }
+        let panIDStr = dataset?.panId.map { String(format: "0x%04X", $0) }
+        let rloc16Str = node?.rloc16.map { String(format: "0x%04X", $0) }
+        return OTBRThreadInfo(
+            networkName: dataset?.networkName ?? node?.networkName,
+            channel: dataset?.channel,
+            panID: panIDStr,
+            extPanID: dataset?.extPanId ?? node?.extPanId,
+            meshLocalPrefix: dataset?.meshLocalPrefix,
+            keyRotationHours: dataset?.securityPolicy?.rotationTime,
+            role: node?.state,
+            rloc16: rloc16Str
+        )
     }
 
     private func buildTrends() -> [UUID: [Int]] {
