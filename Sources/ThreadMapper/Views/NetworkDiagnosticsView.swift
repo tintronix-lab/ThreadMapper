@@ -1,4 +1,5 @@
 import SwiftUI
+import Charts
 
 struct NetworkDiagnosticsView: View {
     let devices: [ThreadDevice]
@@ -9,6 +10,7 @@ struct NetworkDiagnosticsView: View {
     @State private var otbrInfo: OTBRThreadInfo?
     @State private var isAnalyzing = false
     @State private var baselineSavedFeedback = false
+    @State private var runStore = DiagnosticRunStore.shared
     @Environment(\.dismiss) private var dismiss
     @Environment(DeviceStatsStore.self) private var statsStore
     @AppStorage("borderRouterURL") private var borderRouterURL = ""
@@ -151,6 +153,9 @@ struct NetworkDiagnosticsView: View {
             }
             if let info = otbrInfo {
                 otbrDatasetSection(info)
+            }
+            if !runStore.runs.isEmpty {
+                diagnosticHistorySection()
             }
             exportSection(report)
         }
@@ -964,6 +969,121 @@ struct NetworkDiagnosticsView: View {
         }
     }
 
+    // MARK: - Diagnostic History
+
+    @ViewBuilder
+    private func diagnosticHistorySection() -> some View {
+        let recent = Array(runStore.runs.prefix(10))
+        let chartRuns = Array(runStore.runs.prefix(15).reversed())
+
+        Section {
+            if chartRuns.count >= 2 {
+                Chart {
+                    ForEach(Array(chartRuns.enumerated()), id: \.element.id) { i, run in
+                        BarMark(
+                            x: .value("Run", i),
+                            y: .value("Score", run.score)
+                        )
+                        .foregroundStyle(scoreColor(run.score))
+                        .cornerRadius(3)
+                    }
+                    RuleMark(y: .value("Target", 80))
+                        .foregroundStyle(.green.opacity(0.45))
+                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 2]))
+                }
+                .chartYScale(domain: 0...100)
+                .chartXAxis(.hidden)
+                .chartYAxis {
+                    AxisMarks(values: [0, 50, 80, 100]) { value in
+                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [3, 3]))
+                        AxisValueLabel {
+                            if let v = value.as(Int.self) {
+                                Text("\(v)").font(.system(size: 8))
+                            }
+                        }
+                    }
+                }
+                .frame(height: 90)
+                .padding(.vertical, 4)
+            }
+
+            ForEach(recent) { run in
+                HStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(scoreColor(run.score).opacity(0.15))
+                            .frame(width: 42, height: 42)
+                        Text("\(run.score)")
+                            .font(.system(.callout, design: .rounded).weight(.bold))
+                            .foregroundStyle(scoreColor(run.score))
+                    }
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        HStack(spacing: 4) {
+                            Text(run.timestamp, style: .relative)
+                                .font(.subheadline.weight(.medium))
+                            Text("ago")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        HStack(spacing: 6) {
+                            if run.criticalCount > 0 { runChip("\(run.criticalCount) critical", .red) }
+                            if run.highCount > 0     { runChip("\(run.highCount) high", .orange) }
+                            if run.isolatedDeviceCount > 0 { runChip("\(run.isolatedDeviceCount) isolated", .red) }
+                            if run.criticalCount == 0 && run.highCount == 0 && run.isolatedDeviceCount == 0 {
+                                runChip("Healthy", .green)
+                            }
+                        }
+                    }
+
+                    Spacer()
+
+                    if let idx = runStore.runs.firstIndex(where: { $0.id == run.id }),
+                       idx + 1 < runStore.runs.count {
+                        let delta = run.score - runStore.runs[idx + 1].score
+                        if delta != 0 {
+                            Label(delta > 0 ? "+\(delta)" : "\(delta)",
+                                  systemImage: delta > 0 ? "arrow.up" : "arrow.down")
+                                .font(.caption2.monospacedDigit().weight(.semibold))
+                                .foregroundStyle(delta > 0 ? .green : .red)
+                                .labelStyle(.titleAndIcon)
+                        }
+                    }
+                }
+                .padding(.vertical, 2)
+            }
+        } header: {
+            HStack {
+                Text("Diagnostic History")
+                Spacer()
+                Text("\(runStore.runs.count) run\(runStore.runs.count == 1 ? "" : "s")")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+        } footer: {
+            Text("Score = 100 minus issue penalties (−20 per critical, −10 per high, −5 per medium, −15 per isolated device). Green line = 80 target. Saved automatically on each refresh.")
+                .font(.caption)
+        }
+    }
+
+    private func runChip(_ label: String, _ color: Color) -> some View {
+        Text(label)
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(color)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(color.opacity(0.12), in: Capsule())
+    }
+
+    private func scoreColor(_ score: Int) -> Color {
+        switch score {
+        case 80...: return .green
+        case 60..<80: return .yellow
+        case 40..<60: return .orange
+        default: return .red
+        }
+    }
+
     // MARK: - Export
 
     @ViewBuilder
@@ -1120,6 +1240,7 @@ struct NetworkDiagnosticsView: View {
             report = result
             currentSnapshot = TopologySnapshot.capture(report: result, devices: devices)
             otbrInfo = info
+            runStore.record(result)
             isAnalyzing = false
         }
     }
