@@ -936,3 +936,89 @@ warnings. `StrictConcurrency` enforced in `Package.swift`.
 - P1.2: multi-home store key namespacing
 - P2.5: singleton DI container
 - P5.3: iPad/landscape layout
+
+---
+
+## Phase 8 — Iteration 18 (2026-07-13: search, troubleshooter, UX polish)
+
+- **Troubleshooter** (`TroubleshooterView`): expanded problem-type coverage and improved step copy; steps now reflect the specific device role (border router vs end device) for more actionable guidance.
+- **Activity Feed** (`ActivityFeedView`): in-list search bar added (`.searchable`) so users can filter events by device name or event type in long activity logs. Event rows polished with relative timestamps.
+- **User Manual** (`UserManualView`): comprehensive in-app documentation added covering all major features — dashboard, mesh graph, survey, diagnostics, settings, and troubleshooting — formatted as a scrollable reference guide.
+- **Notification Service**: minor fix to notification category registration ordering.
+- **Dead code**: removed empty `Untitled.swift` created by Xcode.
+
+---
+
+## Phase 8 — Iteration 19 (Network Diagnostics engine — first pass)
+
+Added a full Network Diagnostics engine and view as the app's deepest technical analysis feature.
+
+**`NetworkDiagnosticsEngine`** — pure analysis engine producing a `Report` from a device list:
+- `Recommendation` with priority (critical/high/medium), category, fix steps
+- `RoomCoverage` graded A–F per room
+- `DeviceHopInfo` (hop count, parent name)
+- `ResilienceNode` (critical relay removal impact)
+- `SignalTrendAlert` (devices degrading in last 30 min)
+
+**`NetworkDiagnosticsView`** — full-screen sheet with sections: Summary stats, Recommendations, Resilience nodes, Room Coverage, Mesh Depth (hop counts), Channel Analysis, Diagnostic History. "Run Diagnostics" button triggers analysis with a loading state.
+
+**`DiagnosticRunStore`** — `@Observable` singleton persisting scored run history so trend comparisons are possible across sessions.
+
+---
+
+## Phase 8 — Iteration 20 (Diagnostics enhancements — depth, vendor, BR comparison)
+
+Batch of diagnostic depth improvements built on the engine from Iteration 19.
+
+- **Hop-count depth indicators** in `MeshView` / `MeshViewComponents`: each device row in the mesh list now shows its inferred hop distance from the nearest border router (1–5+ hops, color coded green→red). Uses `NetworkDiagnosticsEngine.DeviceHopInfo`.
+- **`DeviceDetailView` enhancements**: Mesh Path section (visual hop chain to internet), vendor insight notes (Eve, Nanoleaf, Apple, IKEA, Philips, Aqara, Bosch, Samsung — per-manufacturer tips), Device History section (first seen, offline event count from `ActivityStore`), Border Router Comparison section (side-by-side quality for multi-BR setups).
+- **Live OTBR neighbor table** in `DeviceDetailView`: when a border router is configured, shows real Thread neighbor RLOCs with link quality and margin from the OTBR REST API.
+- **Share Diagnostic Report**: `ShareLink` in `NetworkDiagnosticsView` exports a plain-text report covering all sections (summary, recommendations, room coverage, mesh depth, signal degradation, partitions).
+
+---
+
+## Phase 8 — Iteration 21 (Matter commissioning history + channel analysis)
+
+- **Device History / Commissioning Timeline** (`DeviceHistoryView`): aggregates `ActivityStore` join/leave/offline events per device into a stability-graded timeline. Shows first seen, last activity, join count, offline count, and a stability grade (A–F). Accessible from the Dashboard.
+- **Thread Channel Analysis** in `NetworkDiagnosticsView`: detects channel conflicts (multiple Thread networks on the same channel), shows device distribution per channel, flags non-standard channels (outside 15/20/25 recommended for Thread).
+
+---
+
+## Phase 8 — Iteration 22 (OTBR Dataset Inspector + Commissioning Readiness)
+
+- **Topology Baseline Comparison** in `NetworkDiagnosticsView`: saves a `TopologySnapshot` (device count, router count, channel, recommendations hash) as baseline; subsequent runs show a diff — devices added/removed, grade change, recommendation delta. Surfaced with "Save as Baseline" toolbar button.
+- **Failure Impact Analysis** (`NetworkDiagnosticsEngine.ResilienceNode`): identifies routing devices whose removal would isolate downstream end devices; shown as a dedicated section with isolation counts and affected device names.
+- **Signal Degradation tracking** (`NetworkDiagnosticsEngine.SignalTrendAlert`): compares recent (last 30 min) vs baseline average RSSI per device; flags devices degrading > 5 dBm with sparkline context.
+- **OTBR Thread Dataset Inspector** (`CommissioningReadinessView`): when an OTBR is configured, fetches and displays the active dataset (network name, channel, PAN ID, ext PAN ID, mesh-local prefix, key rotation interval, RLOC16, role). Includes commissioning readiness checklist and a "Test Connection" button.
+
+---
+
+## Phase 8 — Iteration 23 (Network Timeline + diagnostics polish)
+
+- **Network Timeline** (`NetworkTimelineView`): health score chart (Swift Charts line graph) overlaid with event markers from `ActivityStore` — offline events, topology changes, health degradation/improvement — giving a visual history of what happened when. Accessible from the Dashboard or Activity Feed.
+- **Expandable fix instructions** in `NetworkDiagnosticsView`: each recommendation row expands inline to show numbered fix steps; chevron rotates with spring animation. Steps are now populated by the engine for all recommendation types.
+- **Room Signal History sparklines** in `NetworkDiagnosticsView`: the Room Coverage section gains per-room trend sparklines built from `DeviceStatsStore` readings, showing whether coverage is improving or degrading over the session.
+- **Thread Network Partition Detection** (`NetworkDiagnosticsEngine.NetworkPartition`): BFS from all border routers across inferred topology links; devices with no path to any border router are reported as isolated clusters with a suggested gateway device.
+- **Diagnostic Run History** with scored trend chart: `DiagnosticRunStore` stores scored runs (redundancy/coverage/interference/performance dimensions); the history section in `NetworkDiagnosticsView` shows a 4-line Swift Charts chart of dimension scores over time.
+- **Mesh Quality Scorecard** in `NetworkDiagnosticsView`: 4-dimension fitness breakdown (Redundancy, Coverage, Interference, Performance) each graded A–F, shown as a grid with color-coded grade rings.
+
+---
+
+## Phase 8 — Iteration 24 (firmware tracking + device protocol compatibility)
+
+Closed the two remaining unimplemented items from the original Phase 3 Matter feature brainstorm.
+
+**Firmware Tracking:**
+- `ThreadDevice.firmwareVersion: String?` — captured from `HMAccessory.firmwareVersion` in `MatterDiscoveryService`; sample versions added to all 8 `DemoDiscoveryService` devices.
+- `FirmwareHistoryStore` — `@Observable` singleton recording version-change entries per device UUID. First observation silently seeds the baseline; subsequent changes (detected in `MeshViewModel.mergeDevices`) are logged with from/to versions and timestamps. Persisted with `.completeFileProtection`.
+- `DeviceDetailView.firmwareSection` — shows current version; "Version History" button opens `FirmwareHistorySheet` (change log with from→to arrows and dates).
+- `NetworkDiagnosticsView.firmwareOverviewSection` — lists all devices with reported firmware, shows recent update events with from/to versions.
+
+**Device Protocol Compatibility:**
+- `DeviceProtocol` enum (`threadBorderRouter / threadNative / matterBridge / zigbeeBridge / homeKitOnly / unknown`) added to `ThreadDevice.swift` with icon, color, shortLabel, detail, and `isThreadParticipant` properties.
+- `ThreadDevice.deviceProtocol` — computed from manufacturer + role flags; correctly identifies Zigbee bridges (IKEA, Philips Hue), Thread BRs (Apple, Samsung), Matter bridges (Aqara), and Thread-native devices (Eve, Nanoleaf, Bosch).
+- `DeviceDetailView.compatibilitySection` — shows protocol badge with icon and description; Zigbee bridges show an additional warning that downstream devices are not on the Thread mesh.
+- `NetworkDiagnosticsView.compatibilityOverviewSection` — groups all devices by protocol, shows Zigbee/HomeKit-only callouts with actionable advice, and a "N of M Thread" summary in the header.
+- Settings → About now links to `UserManualView`.
+
+**Open items (continuing):** P1.2 multi-home namespacing, P2.5 DI container, P5.3 iPad/landscape layout.
