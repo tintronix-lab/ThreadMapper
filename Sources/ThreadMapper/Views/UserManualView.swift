@@ -198,6 +198,17 @@ private extension ManualChapter {
             .init(title: "Clearing the Feed", icon: "trash", body: [
                 .paragraph("Go to Settings → Data → Clear Activity Feed to erase all logged events. This only affects the in-app log — it does not change anything in HomeKit."),
             ]),
+            .init(title: "Network Timeline", icon: "chart.xyaxis.line", body: [
+                .paragraph("Tap the chart icon in the Activity toolbar to open the Network Timeline — a combined view that overlays activity events on top of the health score history chart."),
+                .paragraph("Use the 6H / 24H / 7D selector to zoom in or out. Each activity event appears as:"),
+                .bullets([
+                    "A coloured vertical marker on the chart at the event's timestamp",
+                    "A dot at the interpolated health score when the event occurred",
+                    "A row below the chart showing the event kind, detail, and score at that moment",
+                ]),
+                .paragraph("This makes it easy to answer questions like \"Why did my grade drop to C at 2 PM?\" — the chart will show a red Device Offline marker at exactly that point."),
+                .tip("The score annotation on each event row shows the interpolated health score at that instant — useful for seeing whether a single event caused the grade drop or whether it was already declining."),
+            ]),
             .init(title: "Device History", icon: "chart.bar.doc.horizontal", body: [
                 .paragraph("Tap the chart icon in the Activity toolbar to open Device History — an aggregated view of every device that has appeared in the activity log over the past 7 days."),
                 .paragraph("Each device row shows:"),
@@ -273,6 +284,33 @@ private extension ManualChapter {
                 ]),
                 .paragraph("If that router goes offline, the end devices it serves lose their path to the border router and go offline too. ThreadMapper highlights these devices so you can add redundancy before it becomes a problem."),
                 .tip("The easiest fix is to add a second mains-powered Thread device (which can act as a router) to the same room."),
+            ]),
+            .init(title: "Thread Network Identity", icon: "network", body: [
+                .paragraph("When an OpenThread Border Router URL is configured in Settings, Network Diagnostics fetches the full Active Operational Dataset and shows a \"Thread Network Identity\" section with a live OTBR badge:"),
+                .bullets([
+                    "Network Name — the human-readable name of your Thread network",
+                    "Channel — Thread 2.4 GHz channel (11–26)",
+                    "PAN ID — 16-bit network identifier in hex (e.g. 0xDEAD)",
+                    "Extended PAN ID — 64-bit unique identifier used during commissioning",
+                    "Mesh Local Prefix — the /64 IPv6 prefix for Thread mesh-local addresses",
+                    "Key Rotation — how often the Thread master key rotates (security health indicator)",
+                    "OTBR Role — the border router's current role in the Thread network (Leader, Router, etc.)",
+                    "RLOC16 — the routing-layer address of the OTBR in hex",
+                ]),
+                .tip("The Extended PAN ID is the definitive identifier for a Thread network. If a device won't commission, verify it's targeting the same Extended PAN ID as your border router."),
+            ]),
+            .init(title: "Commissioning Readiness", icon: "checkmark.shield", body: [
+                .paragraph("Tap the ··· menu in the Dashboard toolbar and choose Commissioning Readiness. A pre-flight check sheet runs six automated checks before you add a new Thread device:"),
+                .bullets([
+                    "Border Router Present — critical; Thread commissioning requires at least one border router",
+                    "Border Router Redundancy — warning if only one border router exists",
+                    "Mesh Reachability — flags offline devices that may fragment the routing path",
+                    "Routing Capacity — checks for enough routing devices to accommodate a new node",
+                    "Thread Channel — warns if the active channel overlaps with 2.4 GHz Wi-Fi",
+                    "Mesh Depth — warns if existing devices are already at 4+ hops",
+                ]),
+                .paragraph("The overall verdict is shown at the top: Ready, Ready with Caveats, or Not Ready. A step-by-step commissioning guide is included at the bottom of the sheet."),
+                .tip("Run this check before adding each new Thread device to catch configuration issues before they cause a frustrating commissioning failure."),
             ]),
             .init(title: "Sharing the Report", icon: "square.and.arrow.up", body: [
                 .paragraph("Tap Share Diagnostic Report at the bottom of the Network Diagnostics sheet to export a plain-text summary of the full report. The export includes:"),

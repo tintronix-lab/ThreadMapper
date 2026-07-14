@@ -6,6 +6,7 @@ struct ActivityFeedView: View {
     @State private var searchText = ""
     @State private var kindFilter: ActivityEvent.Kind? = nil
     @State private var showDeviceHistory = false
+    @State private var showTimeline = false
 
     private var filtered: [ActivityEvent] {
         store.events.filter { event in
@@ -50,7 +51,17 @@ struct ActivityFeedView: View {
             .navigationDestination(isPresented: $showDeviceHistory) {
                 DeviceHistoryView()
             }
+            .navigationDestination(isPresented: $showTimeline) {
+                NetworkTimelineView()
+            }
             .toolbar {
+                ToolbarItem(placement: .secondaryAction) {
+                    Button {
+                        showTimeline = true
+                    } label: {
+                        Label("Network Timeline", systemImage: "chart.xyaxis.line")
+                    }
+                }
                 ToolbarItem(placement: .secondaryAction) {
                     Button {
                         showDeviceHistory = true
