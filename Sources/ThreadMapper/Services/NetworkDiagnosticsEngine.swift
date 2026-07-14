@@ -118,6 +118,39 @@ struct NetworkDiagnosticsEngine {
         let meshNodes: [MeshNode]
     }
 
+    struct ScoreDimension: Identifiable {
+        let id = UUID()
+        let name: String
+        let score: Int   // 0–100; higher = better
+        let icon: String
+
+        var grade: String {
+            switch score {
+            case 90...: return "A"
+            case 75..<90: return "B"
+            case 60..<75: return "C"
+            case 40..<60: return "D"
+            default: return "F"
+            }
+        }
+        var color: Color {
+            switch score {
+            case 80...: return .green
+            case 60..<80: return .mint
+            case 40..<60: return .orange
+            default: return .red
+            }
+        }
+        var label: String {
+            switch score {
+            case 80...: return "Excellent"
+            case 60..<80: return "Good"
+            case 40..<60: return "Fair"
+            default: return "Poor"
+            }
+        }
+    }
+
     // MARK: - Analysis
 
     // trendsByDeviceID: keyed by ThreadDevice.uniqueIdentifier → RSSI readings oldest-first
@@ -513,5 +546,49 @@ struct NetworkDiagnosticsEngine {
             meshLinks: links,
             meshNodes: nodes
         )
+    }
+
+    // MARK: - Scorecard
+
+    static func scoreDimensions(from report: Report) -> [ScoreDimension] {
+        // Redundancy: border router count, SPOFs, high-impact resilience gaps
+        var redundancy = 100
+        if report.totalBorderRouters == 0      { redundancy -= 60 }
+        else if report.totalBorderRouters == 1 { redundancy -= 25 }
+        redundancy -= min(30, report.singlePointsOfFailure.count * 10)
+        redundancy -= min(15, report.resilienceNodes.filter { $0.isolatedCount >= 3 }.count * 5)
+
+        // Coverage: offline ratio, rooms without router, poor-grade rooms
+        var coverage = 100
+        let totalDevices = report.meshNodes.count
+        if totalDevices > 0 {
+            let offlineCount = report.roomCoverage.reduce(0) { $0 + ($1.totalDevices - $1.onlineDevices) }
+            coverage -= Int(Double(offlineCount) / Double(totalDevices) * 50)
+        }
+        let roomsNoRouter = report.roomCoverage.filter { !$0.hasRouter && $0.totalDevices > 1 }.count
+        coverage -= min(30, roomsNoRouter * 10)
+        let poorRooms = report.roomCoverage.filter { $0.grade == "D" || $0.grade == "F" }.count
+        coverage -= min(20, poorRooms * 7)
+
+        // Interference: high/medium-risk channels, signal degradation alerts
+        var interference = 100
+        interference -= min(40, report.channelStats.filter { $0.interferenceRisk == .high }.count * 20)
+        interference -= min(15, report.channelStats.filter { $0.interferenceRisk == .medium }.count * 5)
+        interference -= min(20, report.signalTrendAlerts.count * 10)
+
+        // Connectivity: partitions, isolated devices, deep-hop devices
+        var connectivity = 100
+        connectivity -= min(60, report.partitions.count * 30)
+        let isolated = report.partitions.reduce(0) { $0 + $1.devices.count }
+        connectivity -= min(20, isolated * 5)
+        let deepDevices = report.deviceHops.filter { $0.hopCount >= 4 && $0.hopCount < 99 }.count
+        connectivity -= min(15, deepDevices * 5)
+
+        return [
+            ScoreDimension(name: "Redundancy",   score: max(0, redundancy),   icon: "shield.lefthalf.filled"),
+            ScoreDimension(name: "Coverage",      score: max(0, coverage),      icon: "wifi"),
+            ScoreDimension(name: "Interference",  score: max(0, interference),  icon: "waveform.badge.exclamationmark"),
+            ScoreDimension(name: "Connectivity",  score: max(0, connectivity),  icon: "point.3.connected.trianglepath.dotted"),
+        ]
     }
 }

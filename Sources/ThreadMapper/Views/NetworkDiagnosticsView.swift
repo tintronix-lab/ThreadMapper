@@ -120,6 +120,7 @@ struct NetworkDiagnosticsView: View {
     private func reportView(_ report: NetworkDiagnosticsEngine.Report) -> some View {
         List {
             summarySection(report)
+            scorecardSection(NetworkDiagnosticsEngine.scoreDimensions(from: report))
             if !report.partitions.isEmpty {
                 partitionsSection(report.partitions)
             }
@@ -206,6 +207,85 @@ struct NetworkDiagnosticsView: View {
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Scorecard
+
+    @ViewBuilder
+    private func scorecardSection(_ dimensions: [NetworkDiagnosticsEngine.ScoreDimension]) -> some View {
+        let overall = dimensions.reduce(0) { $0 + $1.score } / max(1, dimensions.count)
+        let overallColor: Color = overall >= 80 ? .green : overall >= 60 ? .mint : overall >= 40 ? .orange : .red
+
+        Section {
+            VStack(spacing: 12) {
+                HStack(spacing: 8) {
+                    Image(systemName: overall >= 80 ? "checkmark.seal.fill" : overall >= 60 ? "exclamationmark.circle.fill" : "xmark.octagon.fill")
+                        .foregroundStyle(overallColor)
+                    Text("Overall mesh fitness: ")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    + Text("\(overall)/100")
+                        .font(.caption.weight(.semibold).monospacedDigit())
+                        .foregroundStyle(overallColor)
+                    Spacer()
+                }
+
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                    ForEach(dimensions) { dim in
+                        dimensionTile(dim)
+                    }
+                }
+            }
+            .padding(.vertical, 4)
+        } header: {
+            Text("Mesh Quality Scorecard")
+        } footer: {
+            Text("Each dimension is scored independently. Tap a finding below for remediation steps.")
+                .font(.caption)
+        }
+    }
+
+    private func dimensionTile(_ dim: NetworkDiagnosticsEngine.ScoreDimension) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Image(systemName: dim.icon)
+                    .foregroundStyle(dim.color)
+                    .imageScale(.small)
+                Spacer()
+                Text(dim.grade)
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(dim.color)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 2)
+                    .background(dim.color.opacity(0.15), in: Capsule())
+            }
+            HStack(alignment: .bottom, spacing: 2) {
+                Text("\(dim.score)")
+                    .font(.system(.title2, design: .rounded).weight(.bold))
+                    .foregroundStyle(dim.color)
+                    .monospacedDigit()
+                Text("/100")
+                    .font(.system(.caption2, design: .rounded))
+                    .foregroundStyle(.tertiary)
+                    .padding(.bottom, 3)
+            }
+            Text(dim.name)
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(.secondary)
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color.secondary.opacity(0.15))
+                        .frame(height: 4)
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(dim.color)
+                        .frame(width: geo.size.width * CGFloat(dim.score) / 100, height: 4)
+                }
+            }
+            .frame(height: 4)
+        }
+        .padding(12)
+        .background(Color.secondary.opacity(0.07), in: RoundedRectangle(cornerRadius: 12))
     }
 
     @ViewBuilder
