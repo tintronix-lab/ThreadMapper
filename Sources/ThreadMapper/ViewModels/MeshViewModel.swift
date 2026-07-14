@@ -189,13 +189,27 @@ final class MeshViewModel {
             if device.isRouter != updated.isRouter { device.isRouter = updated.isRouter; graphNeedsRebuild = true }
             if device.isSleepyEndDevice != updated.isSleepyEndDevice { device.isSleepyEndDevice = updated.isSleepyEndDevice }
             if device.batteryPercentage != updated.batteryPercentage { device.batteryPercentage = updated.batteryPercentage }
+            if device.firmwareVersion != updated.firmwareVersion {
+                device.firmwareVersion = updated.firmwareVersion
+                if let v = updated.firmwareVersion {
+                    FirmwareHistoryStore.shared.record(deviceID: device.uniqueIdentifier, deviceName: device.name, version: v)
+                }
+            }
             // rssi is intentionally NOT updated here — we measure it ourselves
             // via measureSignalQualities() and don't want HomeKit to overwrite it.
         }
 
-        // Add newly discovered devices
+        // Add newly discovered devices; seed firmware tracking for each
         let newDevices = latest.filter { existingByUID[$0.uniqueIdentifier] == nil }
-        if !newDevices.isEmpty { devices.append(contentsOf: newDevices); graphNeedsRebuild = true }
+        if !newDevices.isEmpty {
+            for d in newDevices {
+                if let v = d.firmwareVersion {
+                    FirmwareHistoryStore.shared.record(deviceID: d.uniqueIdentifier, deviceName: d.name, version: v)
+                }
+            }
+            devices.append(contentsOf: newDevices)
+            graphNeedsRebuild = true
+        }
 
         // Remove devices that disappeared from HomeKit
         let prevCount = devices.count

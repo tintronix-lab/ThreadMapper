@@ -88,7 +88,8 @@ final class MatterDiscoveryService: DiscoveryService, @unchecked Sendable {
                     channel: nil,
                     rssi: accessory.isReachable ? nil : -100,
                     batteryPercentage: batteryLevel(for: accessory),
-                    room: accessory.room?.name ?? home.name
+                    room: accessory.room?.name ?? home.name,
+                    firmwareVersion: accessory.firmwareVersion
                 )
             }
         }

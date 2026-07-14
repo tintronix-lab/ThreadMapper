@@ -25,52 +25,60 @@ final class DemoDiscoveryService: DiscoveryService, @unchecked Sendable {
             name: "HomePod mini",
             manufacturer: "Apple", productName: "HomePod mini", deviceType: "Speaker",
             uniqueIdentifier: id1, isBorderRouter: true, isRouter: true,
-            isSleepyEndDevice: false, channel: 15, rssi: -55, room: "Living Room"
+            isSleepyEndDevice: false, channel: 15, rssi: -55, room: "Living Room",
+            firmwareVersion: "17.5.1"
         ),
         ThreadDevice(
             name: "HomePod mini — Bedroom",
             manufacturer: "Apple", productName: "HomePod mini", deviceType: "Speaker",
             uniqueIdentifier: id2, isBorderRouter: true, isRouter: true,
-            isSleepyEndDevice: false, channel: 15, rssi: -62, room: "Bedroom"
+            isSleepyEndDevice: false, channel: 15, rssi: -62, room: "Bedroom",
+            firmwareVersion: "17.4"
         ),
         // Routers
         ThreadDevice(
             name: "Nanoleaf Shapes",
             manufacturer: "Nanoleaf", productName: "Shapes Hexagon", deviceType: "Light",
             uniqueIdentifier: id3, isBorderRouter: false, isRouter: true,
-            isSleepyEndDevice: false, channel: 15, rssi: -68, room: "Living Room"
+            isSleepyEndDevice: false, channel: 15, rssi: -68, room: "Living Room",
+            firmwareVersion: "7.2.0"
         ),
         ThreadDevice(
             name: "Eve Energy — Kitchen",
             manufacturer: "Eve Systems", productName: "Eve Energy", deviceType: "Outlet",
             uniqueIdentifier: id4, isBorderRouter: false, isRouter: true,
-            isSleepyEndDevice: false, channel: 15, rssi: -63, room: "Kitchen"
+            isSleepyEndDevice: false, channel: 15, rssi: -63, room: "Kitchen",
+            firmwareVersion: "3.3.1"
         ),
         // End devices
         ThreadDevice(
             name: "Eve Motion — Living Room",
             manufacturer: "Eve Systems", productName: "Eve Motion", deviceType: "Sensor",
             uniqueIdentifier: id5, isBorderRouter: false, isRouter: false,
-            isSleepyEndDevice: true, channel: 15, rssi: -70, batteryPercentage: 82, room: "Living Room"
+            isSleepyEndDevice: true, channel: 15, rssi: -70, batteryPercentage: 82, room: "Living Room",
+            firmwareVersion: "2.1.4"
         ),
         ThreadDevice(
             name: "Eve Contact — Bedroom Door",
             manufacturer: "Eve Systems", productName: "Eve Door & Window", deviceType: "Sensor",
             uniqueIdentifier: id6, isBorderRouter: false, isRouter: false,
-            isSleepyEndDevice: true, channel: 15, rssi: -74, batteryPercentage: 54, room: "Bedroom"
+            isSleepyEndDevice: true, channel: 15, rssi: -74, batteryPercentage: 54, room: "Bedroom",
+            firmwareVersion: "2.1.4"
         ),
         ThreadDevice(
             name: "Nanoleaf Bulb — Kitchen",
             manufacturer: "Nanoleaf", productName: "Essentials Bulb", deviceType: "Light",
             uniqueIdentifier: id7, isBorderRouter: false, isRouter: false,
-            isSleepyEndDevice: false, channel: 15, rssi: -77, room: "Kitchen"
+            isSleepyEndDevice: false, channel: 15, rssi: -77, room: "Kitchen",
+            firmwareVersion: "6.9.3"
         ),
         // One weak device to make the dashboard interesting
         ThreadDevice(
             name: "Eve Door — Garage",
             manufacturer: "Eve Systems", productName: "Eve Door & Window", deviceType: "Sensor",
             uniqueIdentifier: id8, isBorderRouter: false, isRouter: false,
-            isSleepyEndDevice: true, channel: 15, rssi: -85, batteryPercentage: 12, room: "Garage"
+            isSleepyEndDevice: true, channel: 15, rssi: -85, batteryPercentage: 12, room: "Garage",
+            firmwareVersion: "2.0.9"
         ),
     ]
 

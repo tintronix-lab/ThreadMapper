@@ -14,18 +14,24 @@ struct DeviceDetailView: View {
     @State private var troubleshootProblem: TroubleshooterView.Problem? = nil
     // Generated once on appear — generating in body wrote a temp file on every render.
     @State private var exportURL: URL?
+    @State private var showFirmwareHistory = false
 
     private var stats: DeviceStats? { statsStore.stats(for: device.uniqueIdentifier) }
     private var surveyPoints: [SurveyPoint] { surveyVM.surveys(for: device.name) }
+    private var firmwareChanges: [FirmwareChange] {
+        FirmwareHistoryStore.shared.changes(for: device.uniqueIdentifier)
+    }
 
     var body: some View {
         NavigationStack {
             Form {
                 signalSection
                 networkSection
+                compatibilitySection
                 meshPathSection
                 threadNeighborSection
                 deviceSection
+                firmwareSection
                 if device.batteryPercentage != nil { batterySection }
                 if device.isBorderRouter { threadClassificationSection }
                 vendorInsightSection
@@ -43,6 +49,9 @@ struct DeviceDetailView: View {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Done") { dismiss() }
                 }
+            }
+            .sheet(isPresented: $showFirmwareHistory) {
+                FirmwareHistorySheet(device: device)
             }
             .sheet(item: $troubleshootProblem) { problem in
                 TroubleshooterView(device: device, problem: problem)
@@ -291,6 +300,81 @@ struct DeviceDetailView: View {
             .padding(.vertical, 4)
             .background(active ? color.opacity(0.15) : Color.secondary.opacity(0.08), in: Capsule())
             .foregroundStyle(active ? color : Color.secondary)
+    }
+
+    // MARK: - Compatibility
+
+    @ViewBuilder
+    private var compatibilitySection: some View {
+        let proto = device.deviceProtocol
+        Section {
+            HStack(spacing: 12) {
+                Image(systemName: proto.icon)
+                    .font(.title2)
+                    .foregroundStyle(proto.color)
+                    .frame(width: 36)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(proto.shortLabel)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(proto.color)
+                    Text(proto.detail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(.vertical, 4)
+            if proto == .zigbeeBridge {
+                Label("Devices behind this hub are not on the Thread mesh", systemImage: "exclamationmark.triangle")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+            }
+        } header: {
+            Text("Protocol Compatibility")
+        }
+    }
+
+    // MARK: - Firmware
+
+    @ViewBuilder
+    private var firmwareSection: some View {
+        let fwVersion = device.firmwareVersion
+        let history = firmwareChanges
+        if fwVersion != nil || !history.isEmpty {
+            Section {
+                if let ver = fwVersion {
+                    LabeledContent("Firmware Version") {
+                        Text(ver)
+                            .font(.caption.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                if !history.isEmpty {
+                    Button {
+                        showFirmwareHistory = true
+                    } label: {
+                        HStack {
+                            Label("Version History", systemImage: "clock.arrow.trianglehead.counterclockwise.rotate.90")
+                            Spacer()
+                            Text("\(history.count) change\(history.count == 1 ? "" : "s")")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Image(systemName: "chevron.right")
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                    .foregroundStyle(.primary)
+                }
+            } header: {
+                Text("Firmware")
+            } footer: {
+                if fwVersion != nil {
+                    Text("Firmware version reported by HomeKit. Keep devices updated for the latest Thread and Matter improvements.")
+                        .font(.caption)
+                }
+            }
+        }
     }
 
     // MARK: - Device Identity
