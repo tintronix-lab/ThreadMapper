@@ -4,7 +4,10 @@ struct NetworkDiagnosticsView: View {
     let devices: [ThreadDevice]
 
     @State private var report: NetworkDiagnosticsEngine.Report?
+    @State private var currentSnapshot: TopologySnapshot?
+    @State private var baseline: TopologySnapshot? = TopologySnapshot.loadBaseline()
     @State private var isAnalyzing = false
+    @State private var baselineSavedFeedback = false
     @Environment(\.dismiss) private var dismiss
     @Environment(DeviceStatsStore.self) private var statsStore
 
@@ -32,6 +35,35 @@ struct NetworkDiagnosticsView: View {
                         Label("Refresh", systemImage: "arrow.clockwise")
                     }
                     .disabled(isAnalyzing || devices.isEmpty)
+                }
+                if let snap = currentSnapshot {
+                    ToolbarItem(placement: .secondaryAction) {
+                        Button {
+                            baseline = snap
+                            TopologySnapshot.saveBaseline(snap)
+                            withAnimation { baselineSavedFeedback = true }
+                            Task {
+                                try? await Task.sleep(for: .seconds(2))
+                                withAnimation { baselineSavedFeedback = false }
+                            }
+                        } label: {
+                            Label(
+                                baselineSavedFeedback ? "Baseline Saved" :
+                                    (baseline == nil ? "Save as Baseline" : "Update Baseline"),
+                                systemImage: baselineSavedFeedback ? "checkmark.circle.fill" : "pin.circle"
+                            )
+                        }
+                    }
+                }
+                if baseline != nil {
+                    ToolbarItem(placement: .secondaryAction) {
+                        Button(role: .destructive) {
+                            baseline = nil
+                            TopologySnapshot.clearBaseline()
+                        } label: {
+                            Label("Clear Baseline", systemImage: "pin.slash")
+                        }
+                    }
                 }
             }
         }
@@ -73,6 +105,9 @@ struct NetworkDiagnosticsView: View {
     private func reportView(_ report: NetworkDiagnosticsEngine.Report) -> some View {
         List {
             summarySection(report)
+            if let snap = currentSnapshot, let base = baseline {
+                snapshotComparisonSection(base.diff(against: snap))
+            }
             if !report.recommendations.isEmpty {
                 recommendationsSection(report.recommendations)
             } else {
@@ -427,6 +462,64 @@ struct NetworkDiagnosticsView: View {
         }
     }
 
+    // MARK: - Baseline Comparison
+
+    @ViewBuilder
+    private func snapshotComparisonSection(_ diff: SnapshotDiff) -> some View {
+        Section {
+            if diff.hasChanges {
+                ForEach(diff.changes) { change in
+                    HStack(spacing: 12) {
+                        Image(systemName: change.kind.icon)
+                            .foregroundStyle(change.kind.isRegression ? .red : .green)
+                            .frame(width: 22)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(change.name)
+                                .font(.subheadline.weight(.semibold))
+                            if let room = change.room {
+                                Text(room)
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
+                            }
+                        }
+                        Spacer()
+                        Text(change.kind.label)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(change.kind.isRegression ? .red : .green)
+                    }
+                    .padding(.vertical, 2)
+                }
+            } else {
+                HStack(spacing: 12) {
+                    Image(systemName: "checkmark.seal.fill")
+                        .font(.title3)
+                        .foregroundStyle(.green)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("No Changes Since Baseline")
+                            .font(.subheadline.weight(.semibold))
+                        Text("Network topology matches the saved snapshot exactly.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+        } header: {
+            HStack {
+                Text("Changes Since Baseline")
+                Spacer()
+                if diff.regressions.count > 0 {
+                    Text("\(diff.regressions.count) regression\(diff.regressions.count == 1 ? "" : "s")")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.red)
+                }
+            }
+        } footer: {
+            Text("Baseline captured \(diff.baselineAt, style: .relative) ago — \(diff.changes.count) change\(diff.changes.count == 1 ? "" : "s") detected.")
+                .font(.caption)
+        }
+    }
+
     // MARK: - Signal Degradation
 
     @ViewBuilder
@@ -605,9 +698,12 @@ struct NetworkDiagnosticsView: View {
 
     @ViewBuilder
     private func exportSection(_ report: NetworkDiagnosticsEngine.Report) -> some View {
+        let diff: SnapshotDiff? = currentSnapshot.flatMap { snap in
+            baseline.map { base in base.diff(against: snap) }
+        }
         Section {
             ShareLink(
-                item: generateReportText(report),
+                item: generateReportText(report, diff: diff),
                 subject: Text("ThreadMapper Diagnostic Report"),
                 message: Text("Network diagnostic report from ThreadMapper")
             ) {
@@ -620,7 +716,7 @@ struct NetworkDiagnosticsView: View {
         }
     }
 
-    private func generateReportText(_ report: NetworkDiagnosticsEngine.Report) -> String {
+    private func generateReportText(_ report: NetworkDiagnosticsEngine.Report, diff: SnapshotDiff? = nil) -> String {
         let dateStr = Date().formatted(.dateTime.month().day().year().hour().minute())
         var lines: [String] = [
             "ThreadMapper Network Diagnostic Report",
@@ -633,6 +729,21 @@ struct NetworkDiagnosticsView: View {
             "  Critical Issues: \(report.recommendations.filter { $0.priority == .critical }.count)",
             "",
         ]
+
+        // Baseline comparison
+        if let diff {
+            let ago = diff.baselineAt.formatted(.relative(presentation: .numeric))
+            lines.append("BASELINE COMPARISON (saved \(ago))")
+            if diff.hasChanges {
+                for c in diff.changes {
+                    let tag = c.kind.isRegression ? "[REGRESSION]" : "[IMPROVEMENT]"
+                    lines.append("  \(tag) \(c.name): \(c.kind.label)")
+                }
+            } else {
+                lines.append("  No changes detected since baseline.")
+            }
+            lines.append("")
+        }
 
         // Recommendations
         lines.append("RECOMMENDATIONS (\(report.recommendations.count))")
@@ -720,6 +831,7 @@ struct NetworkDiagnosticsView: View {
             let trends = buildTrends()
             let result = NetworkDiagnosticsEngine.analyze(devices: devices, trendsByDeviceID: trends)
             report = result
+            currentSnapshot = TopologySnapshot.capture(report: result, devices: devices)
             isAnalyzing = false
         }
     }
