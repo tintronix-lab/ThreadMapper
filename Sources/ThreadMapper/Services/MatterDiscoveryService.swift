@@ -89,7 +89,7 @@ final class MatterDiscoveryService: DiscoveryService, @unchecked Sendable {
                     rssi: accessory.isReachable ? nil : -100,
                     batteryPercentage: batteryLevel(for: accessory),
                     room: accessory.room?.name ?? home.name,
-                    firmwareVersion: accessory.firmwareVersion
+                    firmwareVersion: Self.firmwareVersion(for: accessory)
                 )
             }
         }
@@ -145,6 +145,20 @@ final class MatterDiscoveryService: DiscoveryService, @unchecked Sendable {
         for service in accessory.services where service.serviceType == HMServiceTypeBattery {
             for char in service.characteristics where char.characteristicType == HMCharacteristicTypeBatteryLevel {
                 return char.value as? Int
+            }
+        }
+        return nil
+    }
+
+    /// Returns firmware version from `accessory.firmwareVersion` first, then falls back to
+    /// reading the FirmwareRevision characteristic from the accessory information service.
+    /// HomeKit caches characteristic values from pairing data, so this works without a readValue call.
+    private static func firmwareVersion(for accessory: HMAccessory) -> String? {
+        if let v = accessory.firmwareVersion, !v.isEmpty { return v }
+        for service in accessory.services where service.serviceType == HMServiceTypeAccessoryInformation {
+            // "52" is the HAP UUID for Firmware Revision in the Accessory Information service
+            for char in service.characteristics where char.characteristicType == "00000052-0000-1000-8000-0026BB765291" {
+                if let v = char.value as? String, !v.isEmpty { return v }
             }
         }
         return nil

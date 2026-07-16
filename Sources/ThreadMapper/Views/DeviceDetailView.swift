@@ -340,39 +340,41 @@ struct DeviceDetailView: View {
     private var firmwareSection: some View {
         let fwVersion = device.firmwareVersion
         let history = firmwareChanges
-        if fwVersion != nil || !history.isEmpty {
-            Section {
+        Section {
+            LabeledContent("Firmware Version") {
                 if let ver = fwVersion {
-                    LabeledContent("Firmware Version") {
-                        Text(ver)
-                            .font(.caption.monospacedDigit())
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                if !history.isEmpty {
-                    Button {
-                        showFirmwareHistory = true
-                    } label: {
-                        HStack {
-                            Label("Version History", systemImage: "clock.arrow.trianglehead.counterclockwise.rotate.90")
-                            Spacer()
-                            Text("\(history.count) change\(history.count == 1 ? "" : "s")")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            Image(systemName: "chevron.right")
-                                .font(.caption2)
-                                .foregroundStyle(.tertiary)
-                        }
-                    }
-                    .foregroundStyle(.primary)
-                }
-            } header: {
-                Text("Firmware")
-            } footer: {
-                if fwVersion != nil {
-                    Text("Firmware version reported by HomeKit. Keep devices updated for the latest Thread and Matter improvements.")
+                    Text(ver)
+                        .font(.caption.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("Not reported by HomeKit")
                         .font(.caption)
+                        .foregroundStyle(.tertiary)
                 }
+            }
+            if !history.isEmpty {
+                Button {
+                    showFirmwareHistory = true
+                } label: {
+                    HStack {
+                        Label("Version History", systemImage: "clock.arrow.trianglehead.counterclockwise.rotate.90")
+                        Spacer()
+                        Text("\(history.count) change\(history.count == 1 ? "" : "s")")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Image(systemName: "chevron.right")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .foregroundStyle(.primary)
+            }
+        } header: {
+            Text("Firmware")
+        } footer: {
+            if fwVersion != nil {
+                Text("Firmware version reported by HomeKit. Keep devices updated for the latest Thread and Matter improvements.")
+                    .font(.caption)
             }
         }
     }

@@ -1022,3 +1022,37 @@ Closed the two remaining unimplemented items from the original Phase 3 Matter fe
 - Settings → About now links to `UserManualView`.
 
 **Open items (continuing):** P1.2 multi-home namespacing, P2.5 DI container, P5.3 iPad/landscape layout.
+
+---
+
+## Phase 8 — Iteration 25 (2026-07-14: P5.3 — iPad NavigationSplitView + landscape orientation)
+
+Closed P5.3: the app was portrait-only and `UIRequiresFullScreen = true`, which blocked split-view on iPad and broke landscape on iPhone.
+
+**`ContentView.swift` — `MainTabView` restructured:**
+- Added `AppTab` enum (`CaseIterable`, `Hashable`, `Identifiable`) encapsulating title, SF Symbol icon, and `@ViewBuilder destination` for each of the 5 tabs. Single source of truth — both layouts driven from it.
+- `MainTabView` reads `@Environment(\.horizontalSizeClass)`. On `.regular` (iPad / large iPhone landscape) it renders an `iPadLayout`; on `.compact` the existing `iPhoneLayout`.
+- `iPadLayout` — `NavigationSplitView` with a 220 pt sidebar column. Sidebar uses `List(AppTab.allCases, id: \.self, selection: $sidebarSelection)` with an **optional** binding (`AppTab?`) as required by iOS's List selection API; falls back to `.dashboard` when nil.
+- `iPhoneLayout` — `TabView` unchanged in behavior; now driven by `ForEach(AppTab.allCases)` instead of hand-rolled tab items.
+
+**`Info.plist`:**
+- Removed `UIRequiresFullScreen` — enables Split View and Slide Over on iPad.
+- `UISupportedInterfaceOrientations` (iPhone): Portrait + LandscapeLeft + LandscapeRight.
+- `UISupportedInterfaceOrientations~ipad`: all four orientations.
+
+**Compile-time learnings captured:** iOS `List` selection requires an optional binding (`Binding<SelectionValue?>`), not a non-optional — using a non-optional produces `'init(_:selection:rowContent:)' is unavailable in iOS`. The `ForEach`-inside-`List` form has the same restriction; `List(data, id:, selection:)` with optional binding is the correct form.
+
+---
+
+## Phase 8 — Iteration 26 (2026-07-16: firmware section always visible + characteristic fallback)
+
+**Problem:** `DeviceDetailView.firmwareSection` was gated with `if fwVersion != nil || !history.isEmpty`, so on real HomeKit devices where `HMAccessory.firmwareVersion` returns nil and no version changes have been recorded yet, the entire Firmware section was invisible.
+
+**Fix 1 — Characteristic fallback (`MatterDiscoveryService`):**
+Added `static func firmwareVersion(for: HMAccessory) -> String?` helper. Checks `accessory.firmwareVersion` first; if nil or empty, scans `HMServiceTypeAccessoryInformation` for the HAP Firmware Revision characteristic (UUID `00000052-0000-1000-8000-0026BB765291`) and reads its cached value. HomeKit caches characteristic values from pairing data, so no async `readValue` call is needed.
+
+**Fix 2 — Unconditional section (`DeviceDetailView`):**
+Removed the `if fwVersion != nil || !history.isEmpty` outer guard. The section always renders. When `firmwareVersion` is nil it shows "Not reported by HomeKit" in `.tertiary` style so users know the section is intentional, not missing.
+
+**Device build process clarified:**
+The `.swiftpm/xcode/package.xcworkspace` builds only the Swift library target (produces `.o`/`.swiftmodule`, never a `.app`). Device installation requires either: (a) Xcode's own build system via AppleScript `run`, or (b) `xcodegen generate` → `xcodebuild -project ThreadMapper.xcodeproj` → `devicectl install`. All subsequent device pushes use path (b) to guarantee the binary reflects current source.
