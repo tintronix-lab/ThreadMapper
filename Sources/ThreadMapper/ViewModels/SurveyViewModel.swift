@@ -86,8 +86,7 @@ final class SurveyViewModel {
         }
     }
 
-    func exportCSVURL() -> URL? {
-        let points = savedPoints
+    private func writeCSV(points: [SurveyPoint], filename: String) -> URL? {
         guard !points.isEmpty else { return nil }
         let header = "timestamp,latitude,longitude,meanRSSI,weakDevices,sampleCount\n"
         let rows = points.map { point in
@@ -95,29 +94,21 @@ final class SurveyViewModel {
             let weaks = point.weakDevices.replacingOccurrences(of: ",", with: ";")
             return "\(ts),\(point.latitude),\(point.longitude),\(point.meanRSSI),\"\(weaks)\",\(point.sampleCount)"
         }.joined(separator: "\n")
-        let content = header + rows
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("threadmapper_survey_\(Date().timeIntervalSince1970).csv")
-        try? content.write(to: url, atomically: true, encoding: .utf8)
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
+        try? (header + rows).write(to: url, atomically: true, encoding: .utf8)
         return url
     }
 
+    func exportCSVURL() -> URL? {
+        writeCSV(points: savedPoints,
+                 filename: "threadmapper_survey_\(Date().timeIntervalSince1970).csv")
+    }
+
     func exportCSV(for deviceID: String) -> URL? {
-        let points = savedPoints.filter { $0.weakDeviceList.contains(deviceID) }
-        guard !points.isEmpty else { return nil }
-        let header = "timestamp,latitude,longitude,meanRSSI,weakDevices,sampleCount\n"
-        let rows = points.map { point in
-            let ts = Self.isoStyle.format(point.timestamp)
-            let weaks = point.weakDevices.replacingOccurrences(of: ",", with: ";")
-            return "\(ts),\(point.latitude),\(point.longitude),\(point.meanRSSI),\"\(weaks)\",\(point.sampleCount)"
-        }.joined(separator: "\n")
-        let content = header + rows
         // Sanitize the device name — "/" or ":" in accessory names would break the path
         let safeName = deviceID.components(separatedBy: .init(charactersIn: "/:\\?%*|\"<>")).joined(separator: "-")
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("threadmapper_survey_\(safeName)_\(Date().timeIntervalSince1970).csv")
-        try? content.write(to: url, atomically: true, encoding: .utf8)
-        return url
+        return writeCSV(points: savedPoints.filter { $0.weakDeviceList.contains(deviceID) },
+                        filename: "threadmapper_survey_\(safeName)_\(Date().timeIntervalSince1970).csv")
     }
 
     func loadRecentSamplePoints(completion: ([SurveyPoint]) -> Void) {

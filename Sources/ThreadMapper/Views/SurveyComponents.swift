@@ -77,6 +77,8 @@ struct HeatmapCanvas: View {
                 }
             }
             .background(Color(UIColor.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8))
+            .accessibilityLabel(Text("Survey coverage heatmap"))
+            .accessibilityValue(Text("^[\(cells.count) surveyed point](inflect: true)"))
         }
     }
 

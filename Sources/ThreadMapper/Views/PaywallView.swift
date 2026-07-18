@@ -99,8 +99,7 @@ struct PaywallView: View {
             }
         }
         .padding(18)
-        .background(Color(UIColor.secondarySystemGroupedBackground),
-                    in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .cardBackground(cornerRadius: 16)
     }
 
     // MARK: - Purchase

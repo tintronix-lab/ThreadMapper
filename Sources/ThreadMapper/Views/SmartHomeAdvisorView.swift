@@ -185,7 +185,7 @@ private struct PlacementRow: View {
                             .fill(suggestion.priority.color.opacity(0.15))
                             .frame(width: 36, height: 36)
                         Image(systemName: suggestion.icon)
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.callout.weight(.medium))
                             .foregroundStyle(suggestion.priority.color)
                     }
 
@@ -249,7 +249,7 @@ private struct AutomationRow: View {
                             .fill(Color.blue.opacity(0.12))
                             .frame(width: 36, height: 36)
                         Image(systemName: suggestion.icon)
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.callout.weight(.medium))
                             .foregroundStyle(.blue)
                     }
 
@@ -319,7 +319,7 @@ private struct SceneRow: View {
                             .fill(Color.purple.opacity(0.12))
                             .frame(width: 36, height: 36)
                         Image(systemName: scene.icon)
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.callout.weight(.medium))
                             .foregroundStyle(.purple)
                     }
 

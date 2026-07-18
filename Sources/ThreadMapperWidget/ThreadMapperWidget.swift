@@ -102,7 +102,7 @@ struct ThreadNetworkLiveActivityWidget: Widget {
                                 .frame(width: 46, height: 46)
                             VStack(spacing: 0) {
                                 Text("Grade")
-                                    .font(.system(size: 7, weight: .semibold))
+                                    .font(.system(size: 8, weight: .semibold))
                                     .foregroundStyle(gradeColor(context.state.grade).opacity(0.8))
                                 Text(context.state.grade)
                                     .font(.system(.title2, design: .rounded, weight: .black))

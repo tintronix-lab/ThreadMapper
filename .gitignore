@@ -10,6 +10,7 @@
 
 # --- SPM / Swift ---
 .build/
+build/
 DerivedData/
 *.swiftpm
 Package.resolved

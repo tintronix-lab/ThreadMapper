@@ -24,6 +24,7 @@ private let suggestedQuestions = [
 
 @available(iOS 26, *)
 struct NetworkAssistantView: View {
+    @ScaledMetric(relativeTo: .largeTitle) private var heroIconSize: CGFloat = 44
     @Environment(MeshViewModel.self)     private var meshVM
     @Environment(ActivityStore.self)     private var activityStore
     @Environment(DeviceStatsStore.self)  private var statsStore
@@ -66,7 +67,7 @@ struct NetworkAssistantView: View {
             VStack(spacing: 24) {
                 VStack(spacing: 8) {
                     Image(systemName: "apple.intelligence")
-                        .font(.system(size: 44))
+                        .font(.system(size: heroIconSize))
                         .foregroundStyle(.purple)
                     Text("Ask anything about your network")
                         .font(.title3.weight(.semibold))
@@ -99,7 +100,7 @@ struct NetworkAssistantView: View {
                             }
                             .padding(.horizontal, 16)
                             .padding(.vertical, 11)
-                            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .cardBackground()
                             .padding(.horizontal)
                         }
                         .buttonStyle(.plain)
@@ -163,7 +164,7 @@ struct NetworkAssistantView: View {
                 .font(.subheadline)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .cardBackground(cornerRadius: 22)
                 .onSubmit { if !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { send() } }
 
             Button {
@@ -332,7 +333,7 @@ private struct StreamingBubbleView: View {
                 .foregroundStyle(.primary)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .cardBackground(cornerRadius: 18)
             Spacer(minLength: 60)
         }
         .padding(.horizontal, 14)
@@ -365,7 +366,7 @@ private struct ThinkingBubbleView: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
-            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .cardBackground(cornerRadius: 18)
             Spacer(minLength: 60)
         }
         .padding(.horizontal, 14)

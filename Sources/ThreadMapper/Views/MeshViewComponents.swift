@@ -213,8 +213,7 @@ struct BorderRouterCardView: View {
             }
             .padding(12)
             .frame(width: 148, height: 98)
-            .background(Color(UIColor.secondarySystemGroupedBackground),
-                        in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .cardBackground()
             .overlay(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .strokeBorder(Color.blue.opacity(0.3), lineWidth: 1)

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct CommissioningReadinessView: View {
+    @ScaledMetric(relativeTo: .title) private var statusIconSize: CGFloat = 28
     let devices: [ThreadDevice]
 
     @Environment(\.dismiss) private var dismiss
@@ -76,7 +77,7 @@ struct CommissioningReadinessView: View {
                         .fill(overallStatus.color.opacity(0.12))
                         .frame(width: 64, height: 64)
                     Image(systemName: overallStatus.icon)
-                        .font(.system(size: 28))
+                        .font(.system(size: statusIconSize))
                         .foregroundStyle(overallStatus.color)
                 }
                 VStack(alignment: .leading, spacing: 4) {

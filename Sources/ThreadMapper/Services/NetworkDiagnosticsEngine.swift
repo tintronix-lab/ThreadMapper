@@ -247,7 +247,7 @@ struct NetworkDiagnosticsEngine {
         let roomCoverage: [RoomCoverage] = devicesByRoom.map { room, roomDevices in
             let total = roomDevices.count
             let online = roomDevices.filter { !$0.isOffline }.count
-            let rssis = roomDevices.compactMap(\.rssi).filter { $0 != -100 && $0 != 0 }
+            let rssis = roomDevices.compactMap(\.rssi).filter { $0 != SignalThresholds.offlineSentinel && $0 != 0 }
             let avg: Int? = rssis.isEmpty ? nil : rssis.reduce(0, +) / rssis.count
             let roomRouters = roomDevices.filter(\.isRoutingCapable)
 

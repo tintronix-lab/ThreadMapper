@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct ChannelScannerView: View {
+    @ScaledMetric(relativeTo: .caption2) private var starLabelSize: CGFloat = 9
+    @ScaledMetric(relativeTo: .caption2) private var microLabelSize: CGFloat = 8
     @Environment(MeshViewModel.self) private var meshVM
     @Environment(\.dismiss) private var dismiss
 
@@ -30,6 +32,18 @@ struct ChannelScannerView: View {
 
     private static let highRisk:   Set<Int> = [11, 12, 13, 17, 18, 19, 22, 23, 24]
     private static let mediumRisk: Set<Int> = [14, 16, 20, 21, 25]
+
+    private func spectrumAccessibilitySummary(channels: [ChannelInfo], recommended: Set<Int>) -> Text {
+        let inUse = channels.filter(\.isInUse)
+        let usedList = inUse
+            .map { String(localized: "channel \($0.channel) with ^[\($0.deviceCount) device](inflect: true)") }
+            .joined(separator: ", ")
+        let recList = recommended.sorted().map(String.init).joined(separator: ", ")
+        if inUse.isEmpty {
+            return Text("No Thread channels in use. Recommended channels: \(recList)")
+        }
+        return Text("In use: \(usedList). Recommended channels: \(recList)")
+    }
 
     private var channelData: [ChannelInfo] {
         let byChannel: [Int: [ThreadDevice]] = Dictionary(
@@ -106,6 +120,8 @@ struct ChannelScannerView: View {
                 drawSpectrum(ctx: ctx, size: size, channels: data, recommended: recommended)
             }
             .frame(height: 110)
+            .accessibilityLabel(Text("Thread channel spectrum chart"))
+            .accessibilityValue(spectrumAccessibilitySummary(channels: data, recommended: recommended))
 
             HStack(spacing: 14) {
                 legendDot(.red,    "High Wi-Fi overlap")
@@ -128,8 +144,7 @@ struct ChannelScannerView: View {
             }
         }
         .padding(14)
-        .background(Color(UIColor.secondarySystemGroupedBackground),
-                    in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .cardBackground()
     }
 
     private func drawSpectrum(ctx: GraphicsContext, size: CGSize,
@@ -164,7 +179,7 @@ struct ChannelScannerView: View {
             if recommended.contains(info.channel) {
                 let starY = baseY - bH - 14
                 ctx.draw(
-                    Text("★").font(.system(size: 9)).foregroundColor(.yellow),
+                    Text(verbatim: "★").font(.system(size: starLabelSize)).foregroundColor(.yellow),
                     in: CGRect(x: x, y: starY, width: w, height: 12)
                 )
             }
@@ -172,14 +187,14 @@ struct ChannelScannerView: View {
             // Device count badge
             if info.deviceCount > 0 {
                 ctx.draw(
-                    Text("\(info.deviceCount)").font(.system(size: 7, weight: .bold)).foregroundColor(.white),
+                    Text(verbatim: "\(info.deviceCount)").font(.system(size: microLabelSize, weight: .bold)).foregroundColor(.white),
                     in: CGRect(x: x, y: baseY - bH + 2, width: w, height: 10)
                 )
             }
 
             // Channel label
             ctx.draw(
-                Text("\(info.channel)").font(.system(size: 7)).foregroundColor(.secondary),
+                Text(verbatim: "\(info.channel)").font(.system(size: microLabelSize)).foregroundColor(.secondary),
                 in: CGRect(x: x, y: baseY + 3, width: w, height: 12)
             )
         }
@@ -232,8 +247,7 @@ struct ChannelScannerView: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(14)
-        .background(Color(UIColor.secondarySystemGroupedBackground),
-                    in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .cardBackground()
     }
 
     // MARK: - Channel detail list
@@ -255,8 +269,7 @@ struct ChannelScannerView: View {
             }
         }
         .padding(14)
-        .background(Color(UIColor.secondarySystemGroupedBackground),
-                    in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .cardBackground()
     }
 
     @ViewBuilder

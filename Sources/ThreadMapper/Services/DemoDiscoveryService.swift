@@ -96,7 +96,7 @@ final class DemoDiscoveryService: DiscoveryService, @unchecked Sendable {
         // Simulate realistic jitter (±5 dBm) so the sparklines show movement.
         var result: [UUID: Int] = [:]
         for device in devices {
-            guard let base = device.rssi, base != -100 else { continue }
+            guard let base = device.rssi, base != SignalThresholds.offlineSentinel else { continue }
             let jitter = Int.random(in: -5...5)
             result[device.uniqueIdentifier] = max(-92, min(-55, base + jitter))
         }
