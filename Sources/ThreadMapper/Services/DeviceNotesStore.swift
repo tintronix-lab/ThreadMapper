@@ -49,14 +49,11 @@ final class DeviceNotesStore {
     }
 
     private func persist() {
-        guard let data = try? JSONEncoder().encode(notes) else { return }
-        try? data.write(to: storeURL, options: [.atomic, .completeFileProtection])
+        PersistedStore.save(notes, to: storeURL)
     }
 
     private func restore() {
-        guard let data = try? Data(contentsOf: storeURL),
-              let decoded = try? JSONDecoder().decode([String: String].self, from: data)
-        else { return }
+        guard let decoded = PersistedStore.load([String: String].self, from: storeURL) else { return }
         notes = decoded
     }
 }

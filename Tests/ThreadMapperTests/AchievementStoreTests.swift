@@ -35,12 +35,13 @@ final class AchievementStoreTests: XCTestCase {
         XCTAssertNil(store.recentlyUnlocked)
     }
 
-    func testRestoreMergesUnlocksOntoFullCatalog() {
+    func testRestoreMergesUnlocksOntoFullCatalog() async {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("\(UUID().uuidString)_ach.json")
         let store = AchievementStore(storeURL: url)
         store.unlock("firstSurvey")
         store.unlock("resilienceA")
+        await PersistedStore.flush()   // writes land on a background actor
 
         // A fresh store over the same file restores those unlocks; others stay
         // locked, and the full catalog is preserved (merge doesn't drop entries).

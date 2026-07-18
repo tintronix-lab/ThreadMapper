@@ -69,13 +69,11 @@ final class HealthStreakStore {
             totalADays: totalADays,
             lastRecordedDate: lastRecordedDate
         )
-        guard let data = try? JSONEncoder().encode(p) else { return }
-        try? data.write(to: storeURL, options: [.atomic, .completeFileProtection])
+        PersistedStore.save(p, to: storeURL)
     }
 
     private func restore() {
-        guard let data = try? Data(contentsOf: storeURL),
-              let p = try? JSONDecoder().decode(Persistence.self, from: data) else { return }
+        guard let p = PersistedStore.load(Persistence.self, from: storeURL) else { return }
         currentStreak = p.currentStreak
         longestStreak = p.longestStreak
         totalADays = p.totalADays

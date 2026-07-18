@@ -101,16 +101,14 @@ final class DeviceStatsStore {
         }
     }
 
+    private struct Payload: Codable { var entries: [String: [Reading]] }
+
     private func persist() {
-        struct Payload: Codable { var entries: [String: [Reading]] }
-        guard let data = try? JSONEncoder().encode(Payload(entries: readings)) else { return }
-        try? data.write(to: storeURL, options: [.atomic, .completeFileProtection])
+        PersistedStore.save(Payload(entries: readings), to: storeURL)
     }
 
     private func restore() {
-        struct Payload: Codable { var entries: [String: [Reading]] }
-        guard let data = try? Data(contentsOf: storeURL),
-              let payload = try? JSONDecoder().decode(Payload.self, from: data) else { return }
+        guard let payload = PersistedStore.load(Payload.self, from: storeURL) else { return }
         // Discard readings older than 1 hour
         let cutoff = Date().addingTimeInterval(-3600)
         readings = payload.entries.mapValues { list in

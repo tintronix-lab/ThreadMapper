@@ -146,7 +146,7 @@ extension MeshGraphView {
                 ctx.stroke(circle(pos, radius + 3), with: .color(.accentColor), lineWidth: 1.5)
             }
 
-            if let rssi = device?.rssi, rssi < -80, !dimmed {
+            if let rssi = device?.rssi, rssi.isWeakRSSI, !dimmed {
                 ctx.stroke(circle(pos, radius + 3),
                            with: .color(.red.opacity(0.55)), lineWidth: 1)
             }

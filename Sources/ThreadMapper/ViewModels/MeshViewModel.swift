@@ -32,8 +32,10 @@ final class MeshViewModel {
     }
     var recentTopologyChanges: [TopologyChange] = []
 
-    var selectedRoom: String? = nil { didSet { MainActor.assumeIsolated { applyFilters() } } }
-    var selectedChannel: Int? = nil { didSet { MainActor.assumeIsolated { applyFilters() } } }
+    // The class is @MainActor, so these observers are already isolated —
+    // no assumeIsolated needed (it would trap on a future isolation slip).
+    var selectedRoom: String? { didSet { applyFilters() } }
+    var selectedChannel: Int? { didSet { applyFilters() } }
 
     var rooms: [String] {
         Set(devices.compactMap(\.room)).sorted()

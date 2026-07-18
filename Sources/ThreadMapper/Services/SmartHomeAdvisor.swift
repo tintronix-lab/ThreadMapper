@@ -198,7 +198,7 @@ struct SmartHomeAdvisor {
         // Avoid using offline/weak devices as triggers
         let weakTriggerDevices = onlineDevices.filter {
             let rssi = $0.rssi ?? -65
-            return rssi < -80 && $0.isBorderRouter == false
+            return rssi.isWeakRSSI && $0.isBorderRouter == false
         }
         if let weak = weakTriggerDevices.first, let reliable = reliableTriggers.first(where: { $0.room == weak.room || $0.room != nil }) {
             results.append(AutomationSuggestion(

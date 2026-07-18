@@ -49,7 +49,7 @@ final class SurveyViewModel {
         manager.recordSample(deviceID: deviceID, rssi: rssi, location: location)
         currentRSSI = rssi
         syncSessionStats()
-        if rssi < -80, !weakDevices.contains(where: { $0.name == deviceID }) {
+        if rssi.isWeakRSSI, !weakDevices.contains(where: { $0.name == deviceID }) {
             weakDevices.append(WeakDevice(name: deviceID, rssi: rssi))
         }
     }
@@ -62,7 +62,7 @@ final class SurveyViewModel {
             let rssi = device.rssi ?? -65
             manager.recordSample(deviceID: device.name, rssi: rssi, location: nil)
             lastRSSI = rssi
-            if rssi < -80, !weakDevices.contains(where: { $0.name == device.name }) {
+            if rssi.isWeakRSSI, !weakDevices.contains(where: { $0.name == device.name }) {
                 weakDevices.append(WeakDevice(name: device.name, rssi: rssi))
             }
         }
@@ -91,7 +91,7 @@ final class SurveyViewModel {
         guard !points.isEmpty else { return nil }
         let header = "timestamp,latitude,longitude,meanRSSI,weakDevices,sampleCount\n"
         let rows = points.map { point in
-            let ts = Self.isoFormatter.string(from: point.timestamp)
+            let ts = Self.isoStyle.format(point.timestamp)
             let weaks = point.weakDevices.replacingOccurrences(of: ",", with: ";")
             return "\(ts),\(point.latitude),\(point.longitude),\(point.meanRSSI),\"\(weaks)\",\(point.sampleCount)"
         }.joined(separator: "\n")
@@ -107,7 +107,7 @@ final class SurveyViewModel {
         guard !points.isEmpty else { return nil }
         let header = "timestamp,latitude,longitude,meanRSSI,weakDevices,sampleCount\n"
         let rows = points.map { point in
-            let ts = Self.isoFormatter.string(from: point.timestamp)
+            let ts = Self.isoStyle.format(point.timestamp)
             let weaks = point.weakDevices.replacingOccurrences(of: ",", with: ";")
             return "\(ts),\(point.latitude),\(point.longitude),\(point.meanRSSI),\"\(weaks)\",\(point.sampleCount)"
         }.joined(separator: "\n")
@@ -194,13 +194,17 @@ final class SurveyViewModel {
 
     // MARK: - Persistence
 
-    nonisolated(unsafe) private static let isoFormatter = ISO8601DateFormatter()
+    // Same wire format as the previous ISO8601DateFormatter, but Sendable.
+    private static let isoStyle = Date.ISO8601FormatStyle()
+
+    /// Serializes this store's file writes off the main thread in call order.
+    @ObservationIgnored private var writeChain: Task<Void, Never>?
 
     private func persist() {
         do {
             let payload: [[String: Any]] = savedPoints.map { point in
                 var dict: [String: Any] = [
-                    "timestamp": Self.isoFormatter.string(from: point.timestamp),
+                    "timestamp": Self.isoStyle.format(point.timestamp),
                     "latitude": point.latitude,
                     "longitude": point.longitude,
                     "meanRSSI": point.meanRSSI,
@@ -212,7 +216,12 @@ final class SurveyViewModel {
                 return dict
             }
             let data = try JSONSerialization.data(withJSONObject: payload, options: [])
-            try data.write(to: storeURL, options: [.atomic, .completeFileProtection])
+            let url = storeURL
+            let previous = writeChain
+            writeChain = Task {
+                await previous?.value
+                await PersistenceWriter.shared.write(data, to: url)
+            }
         } catch {
             print("Survey persist failed: \(error)")
         }
@@ -223,7 +232,7 @@ final class SurveyViewModel {
               let raw = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else { return }
         savedPoints = raw.compactMap { dict -> SurveyPoint? in
             guard let tsString = dict["timestamp"] as? String,
-                  let ts = Self.isoFormatter.date(from: tsString),
+                  let ts = try? Date(tsString, strategy: Self.isoStyle),
                   let lat = dict["latitude"] as? Double,
                   let lng = dict["longitude"] as? Double,
                   let mean = dict["meanRSSI"] as? Double,

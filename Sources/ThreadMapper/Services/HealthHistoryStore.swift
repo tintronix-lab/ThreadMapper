@@ -75,13 +75,11 @@ final class HealthHistoryStore {
     }
 
     private func persist() {
-        guard let data = try? JSONEncoder().encode(entries) else { return }
-        try? data.write(to: storeURL, options: [.atomic, .completeFileProtection])
+        PersistedStore.save(entries, to: storeURL)
     }
 
     private func restore() {
-        guard let data = try? Data(contentsOf: storeURL),
-              let decoded = try? JSONDecoder().decode([Entry].self, from: data) else { return }
+        guard let decoded = PersistedStore.load([Entry].self, from: storeURL) else { return }
         let cutoff = Date().addingTimeInterval(-7 * 86400)
         entries = decoded.filter { $0.timestamp > cutoff }
     }

@@ -25,13 +25,14 @@ final class ActivityStoreTests: XCTestCase {
         XCTAssertEqual(store.events.last?.detail, "tick 20")
     }
 
-    func testClearAllEmptiesAndPersists() {
+    func testClearAllEmptiesAndPersists() async {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("\(UUID().uuidString)_activity.json")
         let store = ActivityStore(storeURL: url)
         store.record(kind: .deviceOffline, detail: "x")
-        store.clearAll()   // persists synchronously
+        store.clearAll()
         XCTAssertTrue(store.events.isEmpty)
+        await PersistedStore.flush()   // writes land on a background actor
 
         // A fresh store over the same file restores nothing.
         let reloaded = ActivityStore(storeURL: url)

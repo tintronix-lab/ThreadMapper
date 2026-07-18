@@ -73,7 +73,8 @@ struct AppChecklistView: View {
     }
 
     private var weakCount: Int {
-        meshVM.devices.filter { ($0.rssi ?? -120) < -80 }.count
+        // nil RSSI intentionally counts as weak here (unmeasured ⇒ assume worst)
+        meshVM.devices.filter { ($0.rssi ?? SignalThresholds.offlineSentinel).isWeakRSSI }.count
     }
 
     private var lowBatteryCount: Int {

@@ -1,0 +1,1274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>  %@ → ^[%lld device](inflect: true) isolated if removed</key>
+	<string>  %1$@ → ^[%2$lld enhet](inflect: true) isolerade om borttagen</string>
+	<key>  %@: ^[%lld device](inflect: true)</key>
+	<string>  %1$@: ^[%2$lld enhet](inflect: true)</string>
+	<key>  CH %lld (%lld MHz) — %@ interference risk, ^[%lld device](inflect: true)</key>
+	<string>  KN %1$lld (%2$lld MHz) — %3$@ störningsrisk, ^[%4$lld enhet](inflect: true)</string>
+	<key>  Cluster %lld: ^[%lld device](inflect: true) — missing link: %@</key>
+	<string>  Kluster %1$lld: ^[%2$lld enhet](inflect: true) — saknar länk: %3$@</string>
+	<key> Wi-Fi interference risk</key>
+	<string>Wi-Fi-störningsrisk</string>
+	<key> interference risk</key>
+	<string>störningsrisk</string>
+	<key>%@ (%@) is unreachable</key>
+	<string>%1$@ (%2$@) är inte nåbar</string>
+	<key>%@ caused the most disruption with %lld offline %@.</key>
+	<string>%1$@ orsakade störst avbrott med %2$lld offline %3$@.</string>
+	<key>%@ has joined your mesh for the first time.</key>
+	<string>%@ har gått med i ditt nät för första gången.</string>
+	<key>%@ is unreachable</key>
+	<string>%@ är inte nåbar</string>
+	<key>%@ joined</key>
+	<string>%@ anslöt</string>
+	<key>%@ left</key>
+	<string>%@ lämnade</string>
+	<key>%@ should be back online shortly. If it doesn't reappear in the next minute, try restarting the app.</key>
+	<string>%@ borde vara online inom kort. Om den inte dyker upp inom en minut, prova att starta om appen.</string>
+	<key>%@ showing critical signal drop</key>
+	<string>%@ visar kritiskt signalfall</string>
+	<key>%@ signal</key>
+	<string>%@ signal</string>
+	<key>%@ signal declining</key>
+	<string>%@ signal försämras</string>
+	<key>%@ — ^[%lld device](inflect: true) offline</key>
+	<string>%1$@ — ^[%2$lld enhet](inflect: true) offline</string>
+	<key>%@ → %@</key>
+	<string>%1$@ → %2$@</string>
+	<key>%lld Critical</key>
+	<string>%lld Kritisk</string>
+	<key>%lld MHz · %@ interference</key>
+	<string>%1$lld MHz · %2$@ störning</string>
+	<key>%lld Thread device is offline: %@.</key>
+	<string>%1$lld Thread-enhet är offline: %2$@.</string>
+	<key>%lld Thread devices are offline: %@.</key>
+	<string>%1$lld Thread-enheter är offline: %2$@.</string>
+	<key>%lld affected</key>
+	<string>%lld påverkade</string>
+	<key>%lld border routers provide failover if one goes offline.</key>
+	<string>%lld gränsroutrar ger redundans om en går offline.</string>
+	<key>%lld in window</key>
+	<string>%lld i fönster</string>
+	<key>%lld of %lld Thread</key>
+	<string>%1$lld av %2$lld Thread</string>
+	<key>%lld of %lld ^[room](inflect: true) surveyed</key>
+	<string>%1$lld av %2$lld ^[rum](inflect: true) mätt</string>
+	<key>%lld of %lld reported</key>
+	<string>%1$lld av %2$lld rapporterade</string>
+	<key>%lld of %lld rooms</key>
+	<string>%1$lld av %2$lld rum</string>
+	<key>%lld of %lld unlocked</key>
+	<string>%1$lld av %2$lld upplåsta</string>
+	<key>%lld pts spread</key>
+	<string>%lld poängs spridning</string>
+	<key>%lld readings · ~%@</key>
+	<string>%1$lld avläsningar · ~%2$@</string>
+	<key>%lld samples</key>
+	<string>%lld mätningar</string>
+	<key>%lld → %lld hops</key>
+	<string>%1$lld → %2$lld hopp</string>
+	<key>%lld%% stable</key>
+	<string>%lld%% stabil</string>
+	<key>%lld-day streak</key>
+	<string>%lld-dagarssvit</string>
+	<key>%lld/%lld online</key>
+	<string>%1$lld/%2$lld online</string>
+	<key>2.4 GHz Thread Spectrum</key>
+	<string>2,4 GHz Thread-spektrum</string>
+	<key>24-Hour Predictions</key>
+	<string>24-timmarsprediktioner</string>
+	<key>30-day Reliability</key>
+	<string>30-dagars tillförlitlighet</string>
+	<key>&lt; 1 day</key>
+	<string>&lt; 1 dag</string>
+	<key>AI Analysis</key>
+	<string>AI-analys</string>
+	<key>AI Device Summary</key>
+	<string>AI-enhetssammanfattning</string>
+	<key>AI Insights</key>
+	<string>AI-insikter</string>
+	<key>AI Insights requires iOS 26 or later with Apple Intelligence.</key>
+	<string>AI-insikter kräver iOS 26 eller senare med Apple Intelligence.</string>
+	<key>AI Network Insight</key>
+	<string>AI-nätverksinsikt</string>
+	<key>AI Summary</key>
+	<string>AI-sammanfattning</string>
+	<key>AI-generated recommendations based on your current mesh state. All analysis is private and on-device.</key>
+	<string>AI-genererade rekommendationer baserade på ditt aktuella nättillstånd. All analys är privat och sker på enheten.</string>
+	<key>AI: %@</key>
+	<string>AI: %@</string>
+	<key>About</key>
+	<string>Om</string>
+	<key>Achievement Unlocked</key>
+	<string>Prestation upplåst</string>
+	<key>Achievements</key>
+	<string>Prestationer</string>
+	<key>Action Plan</key>
+	<string>Åtgärdsplan</string>
+	<key>Activity</key>
+	<string>Aktivitet</string>
+	<key>Acts as a gateway between Thread mesh and your Wi-Fi network.</key>
+	<string>Fungerar som gateway mellan Thread-nätet och ditt Wi-Fi-nätverk.</string>
+	<key>Add Thread accessories in the Home app,
+then tap Scan.</key>
+	<string>Lägg till Thread-tillbehör i Hem-appen,
+tryck sedan Skanna.</string>
+	<key>Add a HomePod mini or Apple TV as a Thread border router</key>
+	<string>Lägg till en HomePod mini eller Apple TV som Thread-gränsrouter</string>
+	<key>Add a Thread router between weak devices and the border router</key>
+	<string>Lägg till en Thread-router mellan svaga enheter och gränsroutern</string>
+	<key>Add a note about this device…</key>
+	<string>Lägg till en kommentar om den här enheten…</string>
+	<key>Add a second border router before removing or moving this device. Without it, all Thread devices will lose internet connectivity.</key>
+	<string>Lägg till en andra gränsrouter innan du tar bort eller flyttar den här enheten. Utan den förlorar alla Thread-enheter internetanslutning.</string>
+	<key>Add a second border router for resilience against outages</key>
+	<string>Lägg till en andra gränsrouter för skydd mot avbrott</string>
+	<key>Advanced: connect an OpenThread Border Router's REST API to read real Thread network facts (channel, PAN ID) and improve link quality readings. Changes apply immediately. Apple/Google border routers don't expose this; OTBR-based ones (e.g. Home Assistant) do.</key>
+	<string>Avancerat: anslut en OpenThread-gränsrouters REST API för att läsa verkliga Thread-nätfakta (kanal, PAN-ID) och förbättra länkkvalitetsavläsningar. Ändringar träder i kraft omedelbart. Apple/Googles gränsroutrar exponerar inte detta; OTBR-baserade (t.ex. Home Assistant) gör det.</string>
+	<key>Affected Devices</key>
+	<string>Berörda enheter</string>
+	<key>Affected: %@</key>
+	<string>Berörda: %@</string>
+	<key>Aggregated RSSI from all devices per room over the last 30 minutes. Tap a room to reveal the sparkline.</key>
+	<string>Aggregerat RSSI från alla enheter per rum under de senaste 30 minuterna. Tryck på ett rum för att visa sparkline.</string>
+	<key>All %lld Thread devices are online and your mesh is fully connected.</key>
+	<string>Alla %lld Thread-enheter är online och ditt nät är fullt anslutet.</string>
+	<key>All Channels</key>
+	<string>Alla kanaler</string>
+	<key>All Clear</key>
+	<string>Allt klart</string>
+	<key>All Devices</key>
+	<string>Alla enheter</string>
+	<key>All Devices Back Online</key>
+	<string>Alla enheter online igen</string>
+	<key>All Events</key>
+	<string>Alla händelser</string>
+	<key>All Rooms</key>
+	<string>Alla rum</string>
+	<key>All ^[%lld device](inflect: true) are online and reachable.</key>
+	<string>Alla ^[%lld enhet](inflect: true) är online och nåbara.</string>
+	<key>All reachable devices are within 3 hops of a border router.</key>
+	<string>Alla nåbara enheter är inom 3 hopp från en gränsrouter.</string>
+	<key>All steps attempted</key>
+	<string>Alla steg försökts</string>
+	<key>Also good: CH %@</key>
+	<string>Också bra: KN %@</string>
+	<key>Analysing device risk…</key>
+	<string>Analyserar enhetsrisk…</string>
+	<key>Analyzing your Thread network…</key>
+	<string>Analyserar ditt Thread-nätverk…</string>
+	<key>Ask AI about this device</key>
+	<string>Fråga AI om den här enheten</string>
+	<key>Ask about your network…</key>
+	<string>Fråga om ditt nätverk…</string>
+	<key>Ask anything about your mesh in plain English</key>
+	<string>Fråga vad som helst om ditt nät på vanlig svenska</string>
+	<key>Ask anything about your network</key>
+	<string>Fråga vad som helst om ditt nätverk</string>
+	<key>At least one other border router is present, but ^[%lld downstream device](inflect: true) will lose their mesh path. Reconnect them to another router first.</key>
+	<string>Minst en annan gränsrouter finns, men ^[%1$lld nedströmsenhet](inflect: true) förlorar sin nätväg. Anslut dem till en annan router först.</string>
+	<key>Automation Ideas</key>
+	<string>Automationsidéer</string>
+	<key>BR Health Monitor</key>
+	<string>BR-hälsomonitor</string>
+	<key>Back</key>
+	<string>Tillbaka</string>
+	<key>Back online</key>
+	<string>Online igen</string>
+	<key>Based on 7 days of recorded activity. Stability grade reflects how often a device goes offline relative to how many times it has re-joined the mesh.</key>
+	<string>Baserat på 7 dagars inspelad aktivitet. Stabilitetsbetyg speglar hur ofta en enhet går offline relativt hur många gånger den återanslutit till nätet.</string>
+	<key>Based on ^[%lld device](inflect: true) across your Thread mesh</key>
+	<string>Baserat på ^[%1$lld enhet](inflect: true) i ditt Thread-nät</string>
+	<key>Based on activity events recorded by ThreadMapper in the last 30 days.</key>
+	<string>Baserat på aktivitetshändelser inspelade av ThreadMapper de senaste 30 dagarna.</string>
+	<key>Baseline Saved</key>
+	<string>Baslinje sparad</string>
+	<key>Baseline captured %@ ago — ^[%lld change](inflect: true) detected.</key>
+	<string>Baslinje tagen %1$@ sedan — ^[%2$lld ändring](inflect: true) hittad.</string>
+	<key>Battery</key>
+	<string>Batteri</string>
+	<key>Best Channel</key>
+	<string>Bästa kanal</string>
+	<key>Border Router</key>
+	<string>Gränsrouter</string>
+	<key>Border Router Comparison</key>
+	<string>Gränsrouterjämförelse</string>
+	<key>Border Router Health</key>
+	<string>Gränsrouterhälsa</string>
+	<key>Border Router Offline</key>
+	<string>Gränsrouter offline</string>
+	<key>Border Router Present</key>
+	<string>Gränsrouter tillgänglig</string>
+	<key>Border Router Redundancy</key>
+	<string>Gränsrouterredundans</string>
+	<key>Border routers bridge Thread and Wi-Fi. Add a Thread border router in the Home app to enable monitoring.</key>
+	<string>Gränsroutrar bryggar Thread och Wi-Fi. Lägg till en Thread-gränsrouter i Hem-appen för att aktivera övervakning.</string>
+	<key>Bridges Matter or multiple protocols to your Thread network.</key>
+	<string>Bryggar Matter eller flera protokoll till ditt Thread-nätverk.</string>
+	<key>Build</key>
+	<string>Bygge</string>
+	<key>Building optimisation plan…</key>
+	<string>Skapar optimeringsplan…</string>
+	<key>Cancel</key>
+	<string>Avbryt</string>
+	<key>Change Log</key>
+	<string>Ändringslogg</string>
+	<key>Change the Thread network channel via your border router's web interface or OTBR commissioner. Devices rejoin automatically.</key>
+	<string>Byt Thread-nätets kanal via din gränsrouters webbgränssnitt eller OTBR-kommissionär. Enheter återansluter automatiskt.</string>
+	<key>Changes Since Baseline</key>
+	<string>Ändringar sedan baslinje</string>
+	<key>Channel</key>
+	<string>Kanal</string>
+	<key>Channel Scanner</key>
+	<string>Kanalskanner</string>
+	<key>Check Thread Health</key>
+	<string>Kontrollera Thread-hälsa</string>
+	<key>Check Thread Network Health</key>
+	<string>Kontrollera Thread-nätverkshälsa</string>
+	<key>Check the Mesh tab for trajectory details.</key>
+	<string>Se fliken Nät för bandetaljer.</string>
+	<key>Checklist</key>
+	<string>Checklista</string>
+	<key>Checks</key>
+	<string>Kontroller</string>
+	<key>Child device</key>
+	<string>Barnenhet</string>
+	<key>Clear</key>
+	<string>Rensa</string>
+	<key>Clear Activity</key>
+	<string>Rensa aktivitet</string>
+	<key>Clear Activity Feed</key>
+	<string>Rensa aktivitetsflöde</string>
+	<key>Clear All Events</key>
+	<string>Rensa alla händelser</string>
+	<key>Clear All Signal Data</key>
+	<string>Rensa all signaldata</string>
+	<key>Clear Baseline</key>
+	<string>Rensa baslinje</string>
+	<key>Clear Filter</key>
+	<string>Rensa filter</string>
+	<key>Clear Health Score History</key>
+	<string>Rensa hälsopoänghistorik</string>
+	<key>Clear History</key>
+	<string>Rensa historik</string>
+	<key>Clear Search</key>
+	<string>Rensa sökning</string>
+	<key>Clear Signal History</key>
+	<string>Rensa signalhistorik</string>
+	<key>Clear all activity events?</key>
+	<string>Rensa alla aktivitetshändelser?</string>
+	<key>Clear all stored per-device signal readings?</key>
+	<string>Rensa alla sparade signalmätningar per enhet?</string>
+	<key>Clear the 24-hour health score history?</key>
+	<string>Rensa 24-timmars hälsopoänghistorik?</string>
+	<key>Collecting readings — check back in a few seconds.</key>
+	<string>Samlar mätningar – kom tillbaka om några sekunder.</string>
+	<key>Colored markers show when network events occurred and how much they affected the score.</key>
+	<string>Färgade markörer visar när nätverkshändelser inträffade och hur mycket de påverkade poängen.</string>
+	<key>Commissioning Guide</key>
+	<string>Driftsättningsguide</string>
+	<key>Commissioning Readiness</key>
+	<string>Driftsättningsberedskap</string>
+	<key>Communicates natively over the Thread mesh protocol.</key>
+	<string>Kommunicerar direkt via Thread mesh-protokollet.</string>
+	<key>Connects via Wi-Fi or Bluetooth — not part of the Thread mesh.</key>
+	<string>Ansluter via Wi-Fi eller Bluetooth – inte en del av Thread-nätet.</string>
+	<key>Contacting HomeKit…</key>
+	<string>Kontaktar HomeKit…</string>
+	<key>Continue</key>
+	<string>Fortsätt</string>
+	<key>Copy Name</key>
+	<string>Kopiera namn</string>
+	<key>Copy Name &amp; Room</key>
+	<string>Kopiera namn och rum</string>
+	<key>Copy Signal Quality</key>
+	<string>Kopiera signalkvalitet</string>
+	<key>Correlating device issues…</key>
+	<string>Korrelerar enhetsproblem…</string>
+	<key>Couldn't load products</key>
+	<string>Kunde inte ladda produkter</string>
+	<key>Critical</key>
+	<string>Kritisk</string>
+	<key>Critical — all Thread devices have lost internet connectivity.</key>
+	<string>Kritisk – alla Thread-enheter har förlorat internetanslutning.</string>
+	<key>Critical — network issues detected</key>
+	<string>Kritisk – nätverksproblem hittade</string>
+	<key>Critical: %@</key>
+	<string>Kritisk: %@</string>
+	<key>Current</key>
+	<string>Aktuell</string>
+	<key>Dashboard</key>
+	<string>Instrumentpanel</string>
+	<key>Data</key>
+	<string>Data</string>
+	<key>Days remaining is an estimate based on typical Thread sensor battery profiles (~90 day total life). Actual life varies by device and usage.</key>
+	<string>Återstående dagar är en uppskattning baserad på typiska Thread-sensorbatteriprofiler (~90 dagars total livslängd). Faktisk livslängd varierar beroende på enhet och användning.</string>
+	<key>Declining</key>
+	<string>Försämras</string>
+	<key>Delete All</key>
+	<string>Radera alla</string>
+	<key>Delete all %lld survey sessions?</key>
+	<string>Radera alla %lld mätningssessioner?</string>
+	<key>Demo Mode</key>
+	<string>Demoläge</string>
+	<key>Details →</key>
+	<string>Detaljer →</string>
+	<key>Detected</key>
+	<string>Hittad</string>
+	<key>Device</key>
+	<string>Enhet</string>
+	<key>Device History</key>
+	<string>Enhetshistorik</string>
+	<key>Device Joined</key>
+	<string>Enhet anslöt</string>
+	<key>Device Left</key>
+	<string>Enhet lämnade</string>
+	<key>Device Offline</key>
+	<string>Enhet offline</string>
+	<key>Device Online</key>
+	<string>Enhet online</string>
+	<key>Device Placement</key>
+	<string>Enhetsplacering</string>
+	<key>Device is offline</key>
+	<string>Enheten är offline</string>
+	<key>Devices</key>
+	<string>Enheter</string>
+	<key>Devices behind this hub are not on the Thread mesh</key>
+	<string>Enheter bakom det här navet är inte på Thread-nätet</string>
+	<key>Devices whose average signal dropped 8+ dBm over the last 30 minutes. This can indicate new interference, physical obstruction, or a device in need of attention.</key>
+	<string>Enheter vars genomsnittliga signal sjönk med 8+ dBm under de senaste 30 minuterna. Detta kan tyda på ny störning, fysiskt hinder eller en enhet som behöver åtgärdas.</string>
+	<key>Diagnostic History</key>
+	<string>Diagnostikhistorik</string>
+	<key>Direct</key>
+	<string>Direkt</string>
+	<key>Direct = devices routed immediately through this BR. Total = all devices whose traffic passes through it upstream.</key>
+	<string>Direkt = enheter som dirigeras direkt via denna BR. Totalt = alla enheter vars trafik går via den uppströms.</string>
+	<key>Disable if this bridge uses Zigbee, Z-Wave, or another non-Thread protocol. HomeKit classifies all bridges as border routers regardless of radio type.</key>
+	<string>Inaktivera om den här bryggan använder Zigbee, Z-Wave eller ett annat icke-Thread-protokoll. HomeKit klassificerar alla bryggor som gränsroutrar oavsett radiotyp.</string>
+	<key>Done</key>
+	<string>Klar</string>
+	<key>Done with %@</key>
+	<string>Klar med %@</string>
+	<key>Each dimension is scored independently. Tap a finding below for remediation steps.</key>
+	<string>Varje dimension poängsätts separat. Tryck på ett fynd nedan för åtgärdssteg.</string>
+	<key>Enable Quiet Hours</key>
+	<string>Aktivera tysta timmar</string>
+	<key>Enable in iOS Settings</key>
+	<string>Aktivera i iOS-inställningar</string>
+	<key>End</key>
+	<string>Slut</string>
+	<key>Ensure HomeKit access is granted in Settings</key>
+	<string>Se till att HomeKit-åtkomst är beviljad i inställningar</string>
+	<key>Est. remaining</key>
+	<string>Beräknat kvar</string>
+	<key>Estimated paths — HomeKit
+doesn't report Thread routing</key>
+	<string>Beräknade vägar – HomeKit
+rapporterar inte Thread-routing</string>
+	<key>Event</key>
+	<string>Händelse</string>
+	<key>Event Legend</key>
+	<string>Händelseförklaring</string>
+	<key>Events</key>
+	<string>Händelser</string>
+	<key>Excellent</key>
+	<string>Utmärkt</string>
+	<key>Excellent redundancy — true mesh failover</key>
+	<string>Utmärkt redundans – äkta mesh-redundans</string>
+	<key>Excellent — network is healthy</key>
+	<string>Utmärkt – nätverket är friskt</string>
+	<key>Explore</key>
+	<string>Utforska</string>
+	<key>Export Activity Log</key>
+	<string>Exportera aktivitetslogg</string>
+	<key>Export CSV</key>
+	<string>Exportera CSV</string>
+	<key>Export CSV for This Device</key>
+	<string>Exportera CSV för den här enheten</string>
+	<key>Export Map</key>
+	<string>Exportera karta</string>
+	<key>Exports a plain-text summary of this diagnostic run — useful for sharing with support forums or keeping a network health snapshot.</key>
+	<string>Exporterar en klartext-sammanfattning av den här diagnostikkörningen – användbar för att dela med supportforum eller spara en nätverkshälsoögonblicksbild.</string>
+	<key>Fail</key>
+	<string>Misslyckades</string>
+	<key>Failure Impact</key>
+	<string>Felkonsekvens</string>
+	<key>Failure would isolate ^[%lld device](inflect: true)</key>
+	<string>Fel skulle isolera ^[%lld enhet](inflect: true)</string>
+	<key>Fair</key>
+	<string>Godkänd</string>
+	<key>Fair — attention recommended</key>
+	<string>Godkänd – rekommenderar uppmärksamhet</string>
+	<key>Filter by type</key>
+	<string>Filtrera efter typ</string>
+	<key>Finding expansion opportunities…</key>
+	<string>Söker expansionsmöjligheter…</string>
+	<key>Firmware</key>
+	<string>Firmware</string>
+	<key>Firmware History</key>
+	<string>Firmware-historik</string>
+	<key>Firmware Version</key>
+	<string>Firmware-version</string>
+	<key>Firmware Versions</key>
+	<string>Firmware-versioner</string>
+	<key>Firmware version reported by HomeKit. Keep devices updated for the latest Thread and Matter improvements.</key>
+	<string>Firmware-version rapporterad av HomeKit. Håll enheter uppdaterade för de senaste Thread- och Matter-förbättringarna.</string>
+	<key>Firmware versions are reported by HomeKit and may not reflect the latest available update from each manufacturer.</key>
+	<string>Firmware-versioner rapporteras av HomeKit och kanske inte återspeglar den senaste tillgängliga uppdateringen från varje tillverkare.</string>
+	<key>First Seen</key>
+	<string>Första gången sedd</string>
+	<key>Fit graph to view</key>
+	<string>Anpassa graf till vy</string>
+	<key>Free Walk</key>
+	<string>Fri promenad</string>
+	<key>GPS survey</key>
+	<string>GPS-mätning</string>
+	<key>Generating AI analysis…</key>
+	<string>Genererar AI-analys…</string>
+	<key>Get personalised advice and diagnostics</key>
+	<string>Få personliga råd och diagnostik</string>
+	<key>Get the current health grade and score for your Thread network.</key>
+	<string>Hämta aktuellt hälsobetyg och poäng för ditt Thread-nätverk.</string>
+	<key>Good</key>
+	<string>Bra</string>
+	<key>Good resilience — dual border routers</key>
+	<string>Bra motståndskraft – dubbla gränsroutrar</string>
+	<key>Good — minor issues present</key>
+	<string>Bra – mindre problem finns</string>
+	<key>Grade</key>
+	<string>Betyg</string>
+	<key>Grade %@ · %lld pts</key>
+	<string>Betyg %1$@ · %2$lld poäng</string>
+	<key>Grade drop alerts fire when your network health falls by one letter grade or more. Offline alerts wait for the grace period before firing. Weekly report arrives Sunday mornings.</key>
+	<string>Betygsfallsaviseringar aktiveras när din nätverkshälsa sjunker med ett bokstavsbetyg eller mer. Offline-aviseringar väntar på respitperioden. Veckorapporten levereras söndagsmorgnar.</string>
+	<key>Grade reflects signal strength and device availability. Rooms without a router rely on hops from another location.</key>
+	<string>Betyget speglar signalstyrka och enhetstillgänglighet. Rum utan router förlitar sig på hopp från en annan plats.</string>
+	<key>Great!</key>
+	<string>Utmärkt!</string>
+	<key>Guided Survey</key>
+	<string>Guidad mätning</string>
+	<key>Health Card</key>
+	<string>Hälsokort</string>
+	<key>Health Degraded</key>
+	<string>Hälsa försämrad</string>
+	<key>Health Improved</key>
+	<string>Hälsa förbättrad</string>
+	<key>Health Score</key>
+	<string>Hälsopoäng</string>
+	<key>Health Score — Last 24h</key>
+	<string>Hälsopoäng – senaste 24h</string>
+	<key>Heatmap</key>
+	<string>Värmekarta</string>
+	<key>Helpful</key>
+	<string>Hjälpsam</string>
+	<key>High</key>
+	<string>Hög</string>
+	<key>High Impact</key>
+	<string>Stor påverkan</string>
+	<key>High Wi-Fi overlap</key>
+	<string>Stor Wi-Fi-överlappning</string>
+	<key>History</key>
+	<string>Historik</string>
+	<key>Hop count = routing steps from border router. Each additional hop adds latency. Aim for 3 hops or fewer.</key>
+	<string>Hopptal = routingsteg från gränsrouter. Varje extra hopp lägger till latens. Sikta på 3 hopp eller färre.</string>
+	<key>How many end devices would lose internet access if each routing device were to fail. Add a second router nearby to eliminate single points of failure.</key>
+	<string>Hur många slutenheter skulle förlora internetåtkomst om varje routningsenhet fallerar. Lägg till en andra router i närheten för att eliminera enstaka felkällor.</string>
+	<key>How to Commission a Thread Device</key>
+	<string>Hur man driftsätter en Thread-enhet</string>
+	<key>I know your current mesh topology, signal levels, and device history.</key>
+	<string>Jag känner till din aktuella nättopologi, signalnivåer och enhetshistorik.</string>
+	<key>If none of these steps helped, try removing and re-adding the device in the Apple Home app, or contact Apple Support for hardware assistance.</key>
+	<string>Om ingen av dessa åtgärder hjälpte, prova att ta bort och lägga till enheten igen i Apple Home-appen, eller kontakta Apples support för hårdvaruhjälp.</string>
+	<key>Impact Summary</key>
+	<string>Påverkanssammanfattning</string>
+	<key>Impact is small — ^[%lld device](inflect: true) will need to find a new parent node.</key>
+	<string>Påverkan är liten – ^[%lld enhet](inflect: true) behöver hitta en ny föräldernod.</string>
+	<key>In use</key>
+	<string>Används</string>
+	<key>Include in Thread mesh</key>
+	<string>Inkludera i Thread-nät</string>
+	<key>Include these devices</key>
+	<string>Inkludera dessa enheter</string>
+	<key>Inferred routing path from this device to your border router. Fewer hops means lower latency and better reliability.</key>
+	<string>Beräknad routingväg från den här enheten till din gränsrouter. Färre hopp innebär lägre latens och bättre tillförlitlighet.</string>
+	<key>Isolated Clusters — ^[%lld device](inflect: true)</key>
+	<string>Isolerade kluster – ^[%lld enhet](inflect: true)</string>
+	<key>Issues</key>
+	<string>Problem</string>
+	<key>Jitter</key>
+	<string>Jitter</string>
+	<key>Joined: %@</key>
+	<string>Anslöt: %@</string>
+	<key>LIVE</key>
+	<string>LIVE</string>
+	<key>Language</key>
+	<string>Språk</string>
+	<key>Last seen %lldd ago</key>
+	<string>Senast sedd %lldd sedan</string>
+	<key>Last seen %lldh ago</key>
+	<string>Senast sedd %lldh sedan</string>
+	<key>Last seen %lldm ago</key>
+	<string>Senast sedd %lldm sedan</string>
+	<key>Last seen just now</key>
+	<string>Senast sedd nyss</string>
+	<key>Left: %@</key>
+	<string>Lämnade: %@</string>
+	<key>Limited — single router, no failover path</key>
+	<string>Begränsad – ensam router, ingen redundansväg</string>
+	<key>List any Thread devices that are currently offline.</key>
+	<string>Lista alla Thread-enheter som för närvarande är offline.</string>
+	<key>Live Signal</key>
+	<string>Live-signal</string>
+	<key>Live Thread Neighbors</key>
+	<string>Live Thread-grannar</string>
+	<key>Live data from your OpenThread Border Router. The Extended PAN ID uniquely identifies this Thread network — useful for verifying commissioning targets.</key>
+	<string>Live-data från din OpenThread-gränsrouter. Det utökade PAN-ID:t identifierar unikt det här Thread-nätverket – användbart för att verifiera driftsättningspunkter.</string>
+	<key>Live routing · Border Router</key>
+	<string>Live-routing · Gränsrouter</string>
+	<key>Loading…</key>
+	<string>Laddar…</string>
+	<key>Lost mesh path</key>
+	<string>Nätväg förlorad</string>
+	<key>Low</key>
+	<string>Låg</string>
+	<key>Low Impact</key>
+	<string>Liten påverkan</string>
+	<key>Low battery</key>
+	<string>Lågt batteri</string>
+	<key>Low overlap</key>
+	<string>Låg överlappning</string>
+	<key>Low — consider replacing</key>
+	<string>Låg – överväg byte</string>
+	<key>Major impact</key>
+	<string>Stor påverkan</string>
+	<key>Manufacturer</key>
+	<string>Tillverkare</string>
+	<key>Measuring…</key>
+	<string>Mäter…</string>
+	<key>Medium</key>
+	<string>Medel</string>
+	<key>Medium overlap</key>
+	<string>Medel överlappning</string>
+	<key>Mesh Depth</key>
+	<string>Nätdjup</string>
+	<key>Mesh Expansion Advisor</key>
+	<string>Nätexpansionsrådgivare</string>
+	<key>Mesh Health Dropped</key>
+	<string>Nätverkshälsa försämrad</string>
+	<key>Mesh Health Improved</key>
+	<string>Nätverkshälsa förbättrad</string>
+	<key>Mesh Health Summary</key>
+	<string>Nätverkshälsosammanfattning</string>
+	<key>Mesh Path to Internet</key>
+	<string>Nätväg till internet</string>
+	<key>Mesh Quality Scorecard</key>
+	<string>Nätverkskvalitetskort</string>
+	<key>Mesh Reachability</key>
+	<string>Nåbarhet i nätet</string>
+	<key>Mesh Resilience</key>
+	<string>Nätverksmotståndskraft</string>
+	<key>Mesh health grade changes</key>
+	<string>Nätverkshälsobetyg förändras</string>
+	<key>Mesh network map</key>
+	<string>Nätverkskarta</string>
+	<key>Minor impact</key>
+	<string>Liten påverkan</string>
+	<key>Missing link: %@</key>
+	<string>Saknar länk: %@</string>
+	<key>Moderate — one border router, some routing</key>
+	<string>Måttlig – en gränsrouter, viss routing</string>
+	<key>Most Popular</key>
+	<string>Mest populär</string>
+	<key>Move the ^[%lld device](inflect: true) in this subtree closer to a border router or another relay before removing this node.</key>
+	<string>Flytta ^[%lld enhet](inflect: true) i det här underträdet närmare en gränsrouter eller annan reläenhet innan du tar bort den här noden.</string>
+	<key>Multiple devices showing the same degradation pattern may share a single root cause.</key>
+	<string>Flera enheter som visar samma försämringsmönster kan dela en enda grundorsak.</string>
+	<key>Network</key>
+	<string>Nätverk</string>
+	<key>Network Assistant</key>
+	<string>Nätverksassistent</string>
+	<key>Network Assistant requires iOS 26 or later with Apple Intelligence.</key>
+	<string>Nätverksassistenten kräver iOS 26 eller senare med Apple Intelligence.</string>
+	<key>Network Diagnostics</key>
+	<string>Nätverksdiagnostik</string>
+	<key>Network Health</key>
+	<string>Nätverkshälsa</string>
+	<key>Network Looks Healthy</key>
+	<string>Nätverket ser friskt ut</string>
+	<key>Network Timeline</key>
+	<string>Nätverkstidslinje</string>
+	<key>Network diagnostic report from ThreadMapper</key>
+	<string>Nätverksdiagnostikrapport från ThreadMapper</string>
+	<key>Network health grade %@, score %lld out of 100</key>
+	<string>Nätverkshälsobetyg %1$@, poäng %2$lld av 100</string>
+	<key>Network topology changed</key>
+	<string>Nätverkstopologi förändrad</string>
+	<key>Network topology changes</key>
+	<string>Förändringar i nätverkstopologi</string>
+	<key>Network topology matches the saved snapshot exactly.</key>
+	<string>Nätverkstopologin matchar den sparade ögonblicksbilden exakt.</string>
+	<key>Network-wide issue</key>
+	<string>Nätverksgripande problem</string>
+	<key>Never offline</key>
+	<string>Aldrig offline</string>
+	<key>New Thread Device Detected</key>
+	<string>Ny Thread-enhet hittad</string>
+	<key>New device</key>
+	<string>Ny enhet</string>
+	<key>New device detected</key>
+	<string>Ny enhet hittad</string>
+	<key>Next</key>
+	<string>Nästa</string>
+	<key>Nice to Have</key>
+	<string>Trevligt att ha</string>
+	<key>No Activity Yet</key>
+	<string>Ingen aktivitet ännu</string>
+	<key>No Border Routers</key>
+	<string>Inga gränsroutrar</string>
+	<key>No Changes Since Baseline</key>
+	<string>Inga ändringar sedan baslinjen</string>
+	<key>No Devices</key>
+	<string>Inga enheter</string>
+	<key>No Devices Found</key>
+	<string>Inga enheter hittade</string>
+	<key>No Events in This Window</key>
+	<string>Inga händelser i det här fönstret</string>
+	<key>No History Yet</key>
+	<string>Ingen historik ännu</string>
+	<key>No Routers Found</key>
+	<string>Inga routrar hittade</string>
+	<key>No Score History</key>
+	<string>Ingen poänghistorik</string>
+	<key>No Signal</key>
+	<string>Ingen signal</string>
+	<key>No Thread devices</key>
+	<string>Inga Thread-enheter</string>
+	<key>No Thread devices detected</key>
+	<string>Inga Thread-enheter hittade</string>
+	<key>No Thread devices found</key>
+	<string>Inga Thread-enheter hittade</string>
+	<key>No Thread devices — connect via HomeKit first</key>
+	<string>Inga Thread-enheter – anslut via HomeKit först</string>
+	<key>No Thread routers detected. New devices will have limited routing options.</key>
+	<string>Inga Thread-routrar hittade. Nya enheter kommer ha begränsade routingalternativ.</string>
+	<key>No Version Changes</key>
+	<string>Inga versionsändringar</string>
+	<key>No border router detected</key>
+	<string>Ingen gränsrouter hittad</string>
+	<key>No border router detected. Add a HomePod mini, HomePod, or Apple TV 4K to enable Thread commissioning.</key>
+	<string>Ingen gränsrouter hittad. Lägg till en HomePod mini, HomePod eller Apple TV 4K för att aktivera Thread-driftsättning.</string>
+	<key>No border router — Thread network at risk</key>
+	<string>Ingen gränsrouter – Thread-nätverket i riskzonen</string>
+	<key>No devices at elevated risk in the next 24 hours.</key>
+	<string>Inga enheter med förhöjd risk de nästa 24 timmarna.</string>
+	<key>No devices found</key>
+	<string>Inga enheter hittade</string>
+	<key>No devices match "%@"</key>
+	<string>Inga enheter matchar "%@"</string>
+	<key>No devices match this category right now.</key>
+	<string>Inga enheter matchar den här kategorin just nu.</string>
+	<key>No issues detected. All routers are redundant, signal strength is good, and no channel conflicts were found.</key>
+	<string>Inga problem hittade. Alla routrar är redundanta, signalstyrkan är bra och inga kanalkonflikter hittades.</string>
+	<key>No longer seen</key>
+	<string>Inte längre sedd</string>
+	<key>No matching events</key>
+	<string>Inga matchande händelser</string>
+	<key>No network issues detected</key>
+	<string>Inga nätverksproblem hittade</string>
+	<key>No outages recorded</key>
+	<string>Inga avbrott registrerade</string>
+	<key>No recent data</key>
+	<string>Inga aktuella data</string>
+	<key>No redundancy</key>
+	<string>Ingen redundans</string>
+	<key>No rooms found — scan for devices first.</key>
+	<string>Inga rum hittade – skanna enheter först.</string>
+	<key>No router in this room</key>
+	<string>Ingen router i det här rummet</string>
+	<key>No routing path found</key>
+	<string>Ingen routingväg hittad</string>
+	<key>No signal data</key>
+	<string>Ingen signaldata</string>
+	<key>No specific improvements detected right now. As your network changes, suggestions will appear here.</key>
+	<string>Inga specifika förbättringar hittades just nu. När ditt nätverk förändras dyker förslag upp här.</string>
+	<key>No survey data yet</key>
+	<string>Ingen mätningsdata ännu</string>
+	<key>No survey sessions recorded yet. Use the Survey tab to walk your space.</key>
+	<string>Inga mätningssessioner registrerade ännu. Använd fliken Mätning för att gå igenom ditt utrymme.</string>
+	<key>None</key>
+	<string>Ingen</string>
+	<key>None found</key>
+	<string>Ingen hittad</string>
+	<key>None — threshold response quality &lt; −80</key>
+	<string>Ingen – tröskel svarskvalitet &lt; −80</string>
+	<key>Not Now</key>
+	<string>Inte nu</string>
+	<key>Not Ready</key>
+	<string>Inte redo</string>
+	<key>Not detected</key>
+	<string>Inte hittad</string>
+	<key>Not reported by HomeKit</key>
+	<string>Rapporteras inte av HomeKit</string>
+	<key>Notes</key>
+	<string>Anteckningar</string>
+	<key>Notifications</key>
+	<string>Aviseringar</string>
+	<key>Notifications are suppressed %@.</key>
+	<string>Aviseringar är undertryckta %@.</string>
+	<key>OK</key>
+	<string>OK</string>
+	<key>Offline</key>
+	<string>Offline</string>
+	<key>Offline Devices</key>
+	<string>Offlineenheter</string>
+	<key>Offline Events (30 days)</key>
+	<string>Offlinehändelser (30 dagar)</string>
+	<key>Offline Events (7d)</key>
+	<string>Offlinehändelser (7d)</string>
+	<key>Offline device alerts</key>
+	<string>Aviseringar för offlineenheter</string>
+	<key>Offline grace period</key>
+	<string>Respitperiod offline</string>
+	<key>Offline — devices that routed through this border router may have rerouted.</key>
+	<string>Offline – enheter som routade via den här gränsroutern kan ha omdirigerats.</string>
+	<key>On-Device AI Analysis</key>
+	<string>AI-analys på enheten</string>
+	<key>Onboarding</key>
+	<string>Introduktion</string>
+	<key>Online</key>
+	<string>Online</string>
+	<key>Online Streak</key>
+	<string>Onlinesvit</string>
+	<key>Only BR</key>
+	<string>Enda BR</string>
+	<key>Only border router — all Thread devices would lose internet connectivity.</key>
+	<string>Enda gränsroutern – alla Thread-enheter förlorar internetanslutning.</string>
+	<key>Only one border router. If it goes offline, the entire mesh loses internet. Consider adding a second.</key>
+	<string>Bara en gränsrouter. Om den går offline förlorar hela nätet internet. Överväg att lägga till en till.</string>
+	<key>Open the Home app and add a Thread border router</key>
+	<string>Öppna Hem-appen och lägg till en Thread-gränsrouter</string>
+	<key>Open the Home app and add your Thread border router and accessories, then tap Rescan.</key>
+	<string>Öppna Hem-appen och lägg till din Thread-gränsrouter och tillbehör, tryck sedan Skanna igen.</string>
+	<key>Open the app regularly to build history for this range.</key>
+	<string>Öppna appen regelbundet för att bygga historik för det här intervallet.</string>
+	<key>Overall mesh fitness: </key>
+	<string>Övergripande nättillstånd: </string>
+	<key>Parent Node</key>
+	<string>Föräldernod</string>
+	<key>Pass</key>
+	<string>Godkänd</string>
+	<key>Path restored</key>
+	<string>Väg återställd</string>
+	<key>Payment charged to your Apple ID. Subscriptions auto-renew unless cancelled at least 24 hours before the end of the period. Manage subscriptions in Settings.</key>
+	<string>Betalning debiteras ditt Apple-ID. Prenumerationer förnyas automatiskt om de inte avbryts minst 24 timmar innan periodens slut. Hantera prenumerationer i Inställningar.</string>
+	<key>Personalised Recommendations</key>
+	<string>Personliga rekommendationer</string>
+	<key>Pinch to zoom for device names</key>
+	<string>Nyp för att zooma och se enhetsnamn</string>
+	<key>Placement Suggestions</key>
+	<string>Placeringsförslag</string>
+	<key>Placement suggestions are based on your current mesh topology and room coverage grades.</key>
+	<string>Placeringsförslag baseras på din aktuella nättopologi och rumstäckningsbetyg.</string>
+	<key>Poor</key>
+	<string>Dålig</string>
+	<key>Poor — action needed</key>
+	<string>Dålig – åtgärd krävs</string>
+	<key>Powered by Apple Intelligence · Private &amp; on-device</key>
+	<string>Drivs av Apple Intelligence · Privat och på enheten</string>
+	<key>Predictions are based on recent offline history, signal strength, and mesh topology. All analysis is on-device and private.</key>
+	<string>Prediktioner baseras på nylig offlinehistorik, signalstyrka och nättopologi. All analys sker på enheten och är privat.</string>
+	<key>Proactive AI insights</key>
+	<string>Proaktiva AI-insikter</string>
+	<key>Product</key>
+	<string>Produkt</string>
+	<key>Protocol Compatibility</key>
+	<string>Protokollkompatibilitet</string>
+	<key>Protocol could not be determined from available data.</key>
+	<string>Protokollet kunde inte fastställas från tillgängliga data.</string>
+	<key>Purchase Failed</key>
+	<string>Köp misslyckades</string>
+	<key>Quiet Hours</key>
+	<string>Tysta timmar</string>
+	<key>RSSI %@ • %lld sample(s)</key>
+	<string>RSSI %1$@ • %2$lld mätning(ar)</string>
+	<key>Radius</key>
+	<string>Radie</string>
+	<key>Ready to Commission</key>
+	<string>Redo för driftsättning</string>
+	<key>Ready with Caveats</key>
+	<string>Redo med förbehåll</string>
+	<key>Real neighbor data from your OpenThread Border Router. RLOC16 is each node's Thread routing address. Children route through this device; router neighbors are peers on the mesh backbone.</key>
+	<string>Verklig grannedata från din OpenThread-gränsrouter. RLOC16 är varje nods Thread-routingadress. Barn routar via den här enheten; routergrannar är jämbördiga i nätets ryggrad.</string>
+	<key>Recent Updates</key>
+	<string>Senaste uppdateringar</string>
+	<key>Recommendation</key>
+	<string>Rekommendation</string>
+	<key>Recommendations</key>
+	<string>Rekommendationer</string>
+	<key>Recommendations (%lld)</key>
+	<string>Rekommendationer (%lld)</string>
+	<key>Recommendations for where to add Thread devices to improve coverage and reliability.</key>
+	<string>Rekommendationer om var du ska lägga till Thread-enheter för att förbättra täckning och tillförlitlighet.</string>
+	<key>Recommended</key>
+	<string>Rekommenderad</string>
+	<key>Recording — %lld samples</key>
+	<string>Spelar in – %lld mätningar</string>
+	<key>Records GPS-tagged samples as you walk. Use Guided Survey above for room-based results.</key>
+	<string>Spelar in GPS-märkta mätningar medan du går. Använd Guidad mätning ovan för rumsbaserade resultat.</string>
+	<key>Refresh</key>
+	<string>Uppdatera</string>
+	<key>Relay</key>
+	<string>Reläenhet</string>
+	<key>Reliability</key>
+	<string>Tillförlitlighet</string>
+	<key>Removal Impact</key>
+	<string>Borttagningskonsekvens</string>
+	<key>Replace or charge batteries in low-power devices</key>
+	<string>Byt eller ladda batterier i lågenergienheter</string>
+	<key>Replace soon</key>
+	<string>Byt snart</string>
+	<key>Rescan</key>
+	<string>Skanna igen</string>
+	<key>Reset</key>
+	<string>Återställ</string>
+	<key>Resilience Simulator</key>
+	<string>Motståndskraftsimulator</string>
+	<key>Resilience simulation requires at least one border router or relay in the mesh.</key>
+	<string>Motståndskraftsimulation kräver minst en gränsrouter eller reläenhet i nätet.</string>
+	<key>Resolution</key>
+	<string>Upplösning</string>
+	<key>Response Quality (estimated) — Last 30 min</key>
+	<string>Svarskvalitet (uppskattad) – senaste 30 min</string>
+	<key>Response Quality · estimated</key>
+	<string>Svarskvalitet · uppskattad</string>
+	<key>Response quality in %@ is %@ (%@) — consider adding a Thread router nearby</key>
+	<string>Svarskvaliteten i %1$@ är %2$@ (%3$@) – överväg att lägga till en Thread-router i närheten</string>
+	<key>Restore Purchases</key>
+	<string>Återställ köp</string>
+	<key>Retry</key>
+	<string>Försök igen</string>
+	<key>Return to the dashboard and tap Rescan to discover your Thread network.</key>
+	<string>Gå till instrumentpanelen och tryck Skanna igen för att hitta ditt Thread-nätverk.</string>
+	<key>Room</key>
+	<string>Rum</string>
+	<key>Room Coverage</key>
+	<string>Rumstäckning</string>
+	<key>Room Signal History</key>
+	<string>Rumssignalhistorik</string>
+	<key>Room-by-room guided walk with instant results</key>
+	<string>Rumsvandring med omedelbara resultat</string>
+	<key>Root Cause Analysis</key>
+	<string>Grundorsaksanalys</string>
+	<key>Router</key>
+	<string>Router</string>
+	<key>Router neighbor</key>
+	<string>Routergranne</string>
+	<key>Router: %@</key>
+	<string>Router: %@</string>
+	<key>Routers</key>
+	<string>Routrar</string>
+	<key>Routing Capacity</key>
+	<string>Routingkapacitet</string>
+	<key>Run</key>
+	<string>Körning</string>
+	<key>Running readiness checks…</key>
+	<string>Kör beredskaps­kontroller…</string>
+	<key>Safe</key>
+	<string>Säker</string>
+	<key>Safe to Remove</key>
+	<string>Säker att ta bort</string>
+	<key>Save as Baseline</key>
+	<string>Spara som baslinje</string>
+	<key>Saved (%lld)</key>
+	<string>Sparade (%lld)</string>
+	<key>Saved Surveys (%lld)</key>
+	<string>Sparade mätningar (%lld)</string>
+	<key>Saved surveys</key>
+	<string>Sparade mätningar</string>
+	<key>Scanning Thread network…</key>
+	<string>Skannar Thread-nätverket…</string>
+	<key>Scene Recommendations</key>
+	<string>Scenrekommendationer</string>
+	<key>Scenes group your Thread devices for quick activation. Create them in the Home app for best results.</key>
+	<string>Scener grupperar dina Thread-enheter för snabb aktivering. Skapa dem i Hem-appen för bästa resultat.</string>
+	<key>Score</key>
+	<string>Poäng</string>
+	<key>Score %lld</key>
+	<string>Poäng %lld</string>
+	<key>Score %lld / 100</key>
+	<string>Poäng %lld / 100</string>
+	<key>Score = 100 minus issue penalties (−20 per critical, −10 per high, −5 per medium, −15 per isolated device). Green line = 80 target. Saved automatically on each refresh.</key>
+	<string>Poäng = 100 minus problemstraff (−20 per kritisk, −10 per hög, −5 per medel, −15 per isolerad enhet). Grön linje = 80-mål. Sparas automatiskt vid varje uppdatering.</string>
+	<key>Score History</key>
+	<string>Poänghistorik</string>
+	<key>Score shown is the interpolated health score at the moment each event was recorded.</key>
+	<string>Poängen som visas är den interpolerade hälsopoängen vid det ögonblick varje händelse registrerades.</string>
+	<key>Search devices</key>
+	<string>Sök enheter</string>
+	<key>Search events</key>
+	<string>Sök händelser</string>
+	<key>See every Thread device in your home, spot weak signal, and get alerted the moment something drops offline.</key>
+	<string>Se varje Thread-enhet i ditt hem, identifiera svag signal och bli aviserad när något går offline.</string>
+	<key>Settings</key>
+	<string>Inställningar</string>
+	<key>Setup</key>
+	<string>Konfiguration</string>
+	<key>Setup Checklist</key>
+	<string>Konfigurationschecklista</string>
+	<key>Share</key>
+	<string>Dela</string>
+	<key>Share Analysis</key>
+	<string>Dela analys</string>
+	<key>Share Diagnostic Report</key>
+	<string>Dela diagnostikrapport</string>
+	<key>Share Health Card</key>
+	<string>Dela hälsokort</string>
+	<key>Share Map</key>
+	<string>Dela karta</string>
+	<key>Show All</key>
+	<string>Visa alla</string>
+	<key>Show Heatmap</key>
+	<string>Visa värmekarta</string>
+	<key>Show Offline Thread Devices</key>
+	<string>Visa offline Thread-enheter</string>
+	<key>Signal Degradation</key>
+	<string>Signalförsämring</string>
+	<key>Signal Health</key>
+	<string>Signalhälsa</string>
+	<key>Signal Intelligence</key>
+	<string>Signalintelligens</string>
+	<key>Signal is weak</key>
+	<string>Signalen är svag</string>
+	<key>Signal values are estimated from HomeKit response time — not measured radio RSSI.</key>
+	<string>Signalvärden är uppskattade från HomeKit-svarstid – inte uppmätt radio-RSSI.</string>
+	<key>Simulates a Thread network — no HomeKit required. Restart the app to apply.</key>
+	<string>Simulerar ett Thread-nätverk – inget HomeKit krävs. Starta om appen för att aktivera.</string>
+	<key>Single Points of Failure</key>
+	<string>Enstaka felkällor</string>
+	<key>Single border router — no redundancy</key>
+	<string>Ensam gränsrouter – ingen redundans</string>
+	<key>Single-Point Routers</key>
+	<string>Enpunktsroutrar</string>
+	<key>Skip</key>
+	<string>Hoppa över</string>
+	<key>Skip %@</key>
+	<string>Hoppa över %@</string>
+	<key>Sleepy End Device</key>
+	<string>Sovande slutenhet</string>
+	<key>Smart Home Advisor</key>
+	<string>Smart hem-rådgivare</string>
+	<key>Sole router in %@</key>
+	<string>Ensam router i %@</string>
+	<key>Stable</key>
+	<string>Stabil</string>
+	<key>Stand in the center of %@, then tap Start.</key>
+	<string>Stå i mitten av %@, tryck sedan Start.</string>
+	<key>Start</key>
+	<string>Start</string>
+	<key>Start Free Walk</key>
+	<string>Starta fri promenad</string>
+	<key>Start Recording</key>
+	<string>Starta inspelning</string>
+	<key>Step %lld of %lld</key>
+	<string>Steg %1$lld av %2$lld</string>
+	<key>Steps</key>
+	<string>Steg</string>
+	<key>Still broken — next step</key>
+	<string>Fortfarande trasig – nästa steg</string>
+	<key>Stop Walk</key>
+	<string>Stoppa promenad</string>
+	<key>Streak</key>
+	<string>Svit</string>
+	<key>Suggested questions</key>
+	<string>Föreslagna frågor</string>
+	<key>Summarising activity…</key>
+	<string>Sammanfattar aktivitet…</string>
+	<key>Summary</key>
+	<string>Sammanfattning</string>
+	<key>Suppress all alerts during a nightly window.</key>
+	<string>Undertryck alla aviseringar under ett nattfönster.</string>
+	<key>Survey</key>
+	<string>Mätning</string>
+	<key>Survey Complete</key>
+	<string>Mätning slutförd</string>
+	<key>Survey Data</key>
+	<string>Mätningsdata</string>
+	<key>Survey History</key>
+	<string>Mätningshistorik</string>
+	<key>Survey Map</key>
+	<string>Mätningskarta</string>
+	<key>Survey My Home</key>
+	<string>Mät mitt hem</string>
+	<key>Switch to Thread channels 15, 20, or 25 to reduce WiFi interference</key>
+	<string>Byt till Thread-kanalerna 15, 20 eller 25 för att minska Wi-Fi-störningar</string>
+	<key>Tap a recommendation to see step-by-step fix instructions.</key>
+	<string>Tryck på en rekommendation för att se steg-för-steg-anvisningar.</string>
+	<key>Tap any border router or relay to see which devices would lose connectivity if it failed or was removed.</key>
+	<string>Tryck på en gränsrouter eller reläenhet för att se vilka enheter som förlorar anslutning om den fallerar eller tas bort.</string>
+	<key>Tap the waveform button while recording to feel signal strength via haptics.</key>
+	<string>Tryck på vågformsknappen under inspelning för att känna signalstyrkan via haptik.</string>
+	<key>Tap to see how your network performed this week.</key>
+	<string>Tryck för att se hur ditt nätverk presterade den här veckan.</string>
+	<key>Target</key>
+	<string>Mål</string>
+	<key>Test Connection</key>
+	<string>Testa anslutning</string>
+	<key>The complete Thread network toolkit</key>
+	<string>Det kompletta Thread-nätverksverktyget</string>
+	<key>These automations are set up in the Home app. ThreadMapper can't create automations directly, but provides the steps.</key>
+	<string>Dessa automationer konfigureras i Hem-appen. ThreadMapper kan inte skapa automationer direkt, men ger stegen.</string>
+	<key>These devices have no path to any border router. They cannot be controlled remotely until the missing routing link is restored.</key>
+	<string>Dessa enheter har ingen väg till någon gränsrouter. De kan inte kontrolleras på distans förrän den saknade routinglänken är återställd.</string>
+	<key>These routers have no backup in their area. If one fails, the end devices connected to it lose mesh access.</key>
+	<string>Dessa routrar har ingen backup i sitt område. Om en fallerar förlorar slutenheterna anslutna till den nätåtkomst.</string>
+	<key>This device has no downstream dependents. It can be safely removed without affecting other devices.</key>
+	<string>Den här enheten har inga nedströmsberoende. Den kan tas bort utan att påverka andra enheter.</string>
+	<key>This device is hidden from the mesh map and topology. It still appears in lists and the dashboard.</key>
+	<string>Den här enheten är dold från nätkartan och topologin. Den visas fortfarande i listor och instrumentpanelen.</string>
+	<key>This fixed it</key>
+	<string>Det löste det</string>
+	<key>Thread Backbone</key>
+	<string>Thread-ryggrad</string>
+	<key>Thread Channel</key>
+	<string>Thread-kanal</string>
+	<key>Thread Channel Analysis</key>
+	<string>Thread-kanalanalys</string>
+	<key>Thread Classification</key>
+	<string>Thread-klassificering</string>
+	<key>Thread Device Offline</key>
+	<string>Thread-enhet offline</string>
+	<key>Thread Devices</key>
+	<string>Thread-enheter</string>
+	<key>Thread Mesh Map</key>
+	<string>Thread-nätverkskarta</string>
+	<key>Thread Network</key>
+	<string>Thread-nätverk</string>
+	<key>Thread Network Changed</key>
+	<string>Thread-nätverk förändrat</string>
+	<key>Thread Network Fragmented — ^[%lld Device](inflect: true) Isolated</key>
+	<string>Thread-nätverk fragmenterat – ^[%lld Enhet](inflect: true) isolerad</string>
+	<key>Thread Network Health</key>
+	<string>Thread-nätverkshälsa</string>
+	<key>Thread Network Identity</key>
+	<string>Thread-nätverksidentitet</string>
+	<key>Thread Network Report</key>
+	<string>Thread-nätverksrapport</string>
+	<key>Thread channel overlaps 2.4 GHz WiFi (%@)</key>
+	<string>Thread-kanalen överlappar 2,4 GHz Wi-Fi (%@)</string>
+	<key>Thread uses 2.4 GHz channels 11–26. Channels 15, 20, and 25 have the lowest overlap with Wi-Fi 2.4 GHz. Channels 11–14, 17–19, and 22–24 overlap with Wi-Fi non-overlapping channels 1, 6, and 11.</key>
+	<string>Thread använder 2,4 GHz-kanalerna 11–26. Kanalerna 15, 20 och 25 har lägst överlappning med Wi-Fi 2,4 GHz. Kanalerna 11–14, 17–19 och 22–24 överlappar Wi-Fis icke-överlappande kanaler 1, 6 och 11.</string>
+	<key>ThreadMapper hasn't scanned yet. Open the app to check your devices.</key>
+	<string>ThreadMapper har inte skannat ännu. Öppna appen för att kontrollera dina enheter.</string>
+	<key>ThreadMapper hasn't scanned yet. Open the app to see your Thread network health.</key>
+	<string>ThreadMapper har inte skannat ännu. Öppna appen för att se din Thread-nätverkshälsa.</string>
+	<key>ThreadMapper needs notification permission to alert you about device and network events.</key>
+	<string>ThreadMapper behöver aviseringstillstånd för att varna dig om enhets- och nätverkshändelser.</string>
+	<key>ThreadMapper records a change entry whenever the firmware version reported by HomeKit differs from the previously known version.</key>
+	<string>ThreadMapper registrerar en ändringspost varje gång firmware-versionen som rapporteras av HomeKit skiljer sig från den tidigare kända versionen.</string>
+	<key>ThreadMapper records device events as your network changes. Check back after devices have joined, left, or gone offline.</key>
+	<string>ThreadMapper registrerar enhetshändelser när ditt nätverk förändras. Kom tillbaka efter att enheter har anslutit, lämnat eller gått offline.</string>
+	<key>ThreadMapper records device events here as your network changes — offline alerts, topology shifts, and health score changes.</key>
+	<string>ThreadMapper registrerar enhetshändelser här när ditt nätverk förändras – offlineaviseringar, topologiförändringar och hälsopoängsändringar.</string>
+	<key>ThreadMapper uses HomeKit to find your devices. You'll need a Thread border router — a HomePod mini, HomePod, or Apple TV 4K — set up in the Home app.</key>
+	<string>ThreadMapper använder HomeKit för att hitta dina enheter. Du behöver en Thread-gränsrouter – en HomePod mini, HomePod eller Apple TV 4K – konfigurerad i Hem-appen.</string>
+	<key>Time</key>
+	<string>Tid</string>
+	<key>Time Range</key>
+	<string>Tidsintervall</string>
+	<key>Today</key>
+	<string>Idag</string>
+	<key>Toggle legend</key>
+	<string>Visa/dölj förklaring</string>
+	<key>Tools</key>
+	<string>Verktyg</string>
+	<key>Total</key>
+	<string>Totalt</string>
+	<key>Total Served</key>
+	<string>Totalt betjänade</string>
+	<key>Troubleshoot Offline Device</key>
+	<string>Felsök offline-enhet</string>
+	<key>Troubleshoot Weak Signal</key>
+	<string>Felsök svag signal</string>
+	<key>Troubleshooter</key>
+	<string>Felsökare</string>
+	<key>Try Again</key>
+	<string>Försök igen</string>
+	<key>Type</key>
+	<string>Typ</string>
+	<key>Unknown</key>
+	<string>Okänd</string>
+	<key>Unreachable</key>
+	<string>Onåbar</string>
+	<key>Update Baseline</key>
+	<string>Uppdatera baslinje</string>
+	<key>Updated %@ ago</key>
+	<string>Uppdaterad %@ sedan</string>
+	<key>User Manual</key>
+	<string>Användarmanual</string>
+	<key>Uses Zigbee, not Thread. Devices behind this hub aren't on your Thread mesh.</key>
+	<string>Använder Zigbee, inte Thread. Enheter bakom det här navet är inte på ditt Thread-nät.</string>
+	<key>Vendor Notes</key>
+	<string>Tillverkaranteckningar</string>
+	<key>Version</key>
+	<string>Version</string>
+	<key>Version History</key>
+	<string>Versionshistorik</string>
+	<key>Via HomeKit latency</key>
+	<string>Via HomeKit-latens</string>
+	<key>View</key>
+	<string>Visa</string>
+	<key>View Details</key>
+	<string>Visa detaljer</string>
+	<key>Walk around %@ while recording captures signal data.</key>
+	<string>Gå runt i %@ medan inspelningen samlar signaldata.</string>
+	<key>Walk your home with the Survey tab to measure signal room by room. ThreadMapper builds a coverage picture and points out weak spots.</key>
+	<string>Gå igenom ditt hem med fliken Mätning för att mäta signal rum för rum. ThreadMapper bygger en täckningsbild och pekar ut svaga punkter.</string>
+	<key>Warning</key>
+	<string>Varning</string>
+	<key>Warnings</key>
+	<string>Varningar</string>
+	<key>Weak</key>
+	<string>Svag</string>
+	<key>Weak Links</key>
+	<string>Svaga länkar</string>
+	<key>Weak Signal Devices</key>
+	<string>Enheter med svag signal</string>
+	<key>Weak devices</key>
+	<string>Svaga enheter</string>
+	<key>Weak links recorded</key>
+	<string>Svaga länkar registrerade</string>
+	<key>Weekly Report</key>
+	<string>Veckorapport</string>
+	<key>Weekly network report</key>
+	<string>Veckovis nätverksrapport</string>
+	<key>Welcome</key>
+	<string>Välkommen</string>
+	<key>Went offline</key>
+	<string>Gick offline</string>
+	<key>What If Analysis</key>
+	<string>Vad-om-analys</string>
+	<key>Yesterday</key>
+	<string>Igår</string>
+	<key>You've reached Grade A on %lld %@ total.</key>
+	<string>Du har nått betyg A på %1$lld %2$@ totalt.</string>
+	<key>Your Thread network grade fell from %@ to %@. Open ThreadMapper to diagnose.</key>
+	<string>Ditt Thread-nätverksbetyg sjönk från %1$@ till %2$@. Öppna ThreadMapper för att diagnostisera.</string>
+	<key>Your Thread network improved from grade %@ to %@.</key>
+	<string>Ditt Thread-nätverk förbättrades från betyg %1$@ till %2$@.</string>
+	<key>Your Thread network is back to an excellent grade %@!</key>
+	<string>Ditt Thread-nätverk är tillbaka till utmärkt betyg %@!</string>
+	<key>Your Thread network passed all checks. You can safely add a new device.</key>
+	<string>Ditt Thread-nätverk klarade alla kontroller. Du kan säkert lägga till en ny enhet.</string>
+	<key>Your Weekly Thread Report</key>
+	<string>Din veckovisa Thread-rapport</string>
+	<key>Your mesh channel</key>
+	<string>Din nätverkskanal</string>
+	<key>Your mesh looks great!</key>
+	<string>Ditt nät ser utmärkt ut!</string>
+	<key>^[%lld Border Router](inflect: true)</key>
+	<string>^[%lld Gränsrouter](inflect: true)</string>
+	<key>^[%lld Device](inflect: true) Offline</key>
+	<string>^[%lld Enhet](inflect: true) offline</string>
+	<key>^[%lld Device](inflect: true) Signal Degrading</key>
+	<string>^[%lld Enhet](inflect: true) signal försämras</string>
+	<key>^[%lld Device](inflect: true) at 4+ Hops</key>
+	<string>^[%lld Enhet](inflect: true) på 4+ hopp</string>
+	<key>^[%lld Thread channel](inflect: true) have low Wi-Fi interference risk.</key>
+	<string>^[%lld Thread-kanal](inflect: true) har låg Wi-Fi-störningsrisk.</string>
+	<key>^[%lld Total Router](inflect: true)</key>
+	<string>^[%lld Totala Router](inflect: true)</string>
+	<key>^[%lld Zigbee bridge](inflect: true) detected — devices behind these hubs are not on your Thread mesh</key>
+	<string>^[%lld Zigbee-brygga](inflect: true) hittad – enheter bakom dessa nav är inte på ditt Thread-nät</string>
+	<key>^[%lld border router](inflect: true)</key>
+	<string>^[%lld gränsrouter](inflect: true)</string>
+	<key>^[%lld border router](inflect: true) found: %@%@.</key>
+	<string>^[%1$lld gränsrouter](inflect: true) hittad: %2$@%3$@.</string>
+	<key>^[%lld cell](inflect: true)</key>
+	<string>^[%lld cell](inflect: true)</string>
+	<key>^[%lld change](inflect: true)</key>
+	<string>^[%lld ändring](inflect: true)</string>
+	<key>^[%lld channel](inflect: true) %@ overlap with 2.4 GHz Wi-Fi. Consider switching to CH 15, 20, or 25.</key>
+	<string>^[%1$lld kanal](inflect: true) %2$@ överlappar 2,4 GHz Wi-Fi. Överväg att byta till KN 15, 20 eller 25.</string>
+	<key>^[%lld critical issue](inflect: true) must be resolved before commissioning.</key>
+	<string>^[%lld kritiskt problem](inflect: true) måste lösas före driftsättning.</string>
+	<key>^[%lld day](inflect: true)</key>
+	<string>^[%lld dag](inflect: true)</string>
+	<key>^[%lld device](inflect: true)</key>
+	<string>^[%lld enhet](inflect: true)</string>
+	<key>^[%lld device](inflect: true) at 4+ hops. New devices added near them may also land deep in the mesh.</key>
+	<string>^[%lld enhet](inflect: true) på 4+ hopp. Nya enheter som läggs till nära dem kan också hamna djupt i nätet.</string>
+	<key>^[%lld device](inflect: true) battery &lt; 15%%</key>
+	<string>^[%lld enhet](inflect: true) batteri &lt; 15%%</string>
+	<key>^[%lld device](inflect: true) connected via HomeKit only — consider Thread-native replacements for better mesh coverage</key>
+	<string>^[%lld enhet](inflect: true) ansluten via HomeKit – överväg Thread-inbyggda ersättningar för bättre täckning</string>
+	<key>^[%lld device](inflect: true) degrading — %@%@</key>
+	<string>^[%1$lld enhet](inflect: true) försämras — %2$@%3$@</string>
+	<key>^[%lld device](inflect: true) found</key>
+	<string>^[%lld enhet](inflect: true) hittad</string>
+	<key>^[%lld device](inflect: true) isolated</key>
+	<string>^[%lld enhet](inflect: true) isolerad</string>
+	<key>^[%lld device](inflect: true) offline</key>
+	<string>^[%lld enhet](inflect: true) offline</string>
+	<key>^[%lld device](inflect: true) offline: %@%@. Offline devices can fragment the mesh.</key>
+	<string>^[%1$lld enhet](inflect: true) offline: %2$@%3$@. Offline-enheter kan fragmentera nätet.</string>
+	<key>^[%lld device](inflect: true) showing critical signal drop</key>
+	<string>^[%lld enhet](inflect: true) visar kritiskt signalfall</string>
+	<key>^[%lld device](inflect: true) signal declining</key>
+	<string>^[%lld enhet](inflect: true) signal försämras</string>
+	<key>^[%lld device](inflect: true) with weak signal</key>
+	<string>^[%lld enhet](inflect: true) med svag signal</string>
+	<key>^[%lld device](inflect: true) · %@</key>
+	<string>^[%1$lld enhet](inflect: true) · %2$@</string>
+	<key>^[%lld device](inflect: true): %@%@</key>
+	<string>^[%1$lld enhet](inflect: true): %2$@%3$@</string>
+	<key>^[%lld hop](inflect: true)</key>
+	<string>^[%lld hopp](inflect: true)</string>
+	<key>^[%lld hop](inflect: true) from border router</key>
+	<string>^[%lld hopp](inflect: true) från gränsrouter</string>
+	<key>^[%lld hop](inflect: true) from hub</key>
+	<string>^[%lld hopp](inflect: true) från nav</string>
+	<key>^[%lld isolated cluster](inflect: true) detected with no path to any border router. Affected devices are completely unreachable.</key>
+	<string>^[%lld isolerat kluster](inflect: true) hittades utan väg till någon gränsrouter. Berörda enheter är helt onåbara.</string>
+	<key>^[%lld regression](inflect: true)</key>
+	<string>^[%lld regression](inflect: true)</string>
+	<key>^[%lld room](inflect: true)</key>
+	<string>^[%lld rum](inflect: true)</string>
+	<key>^[%lld routing device](inflect: true) available. More mains-powered Thread devices improve coverage.</key>
+	<string>^[%lld routningsenhet](inflect: true) tillgänglig. Fler nätanslutna Thread-enheter förbättrar täckningen.</string>
+	<key>^[%lld routing device](inflect: true) provide good mesh capacity for new devices.</key>
+	<string>^[%lld routningsenhet](inflect: true) ger god mesh-kapacitet för nya enheter.</string>
+	<key>^[%lld run](inflect: true)</key>
+	<string>^[%lld körning](inflect: true)</string>
+	<key>^[%lld warning](inflect: true) found. New devices should work, but consider resolving these for the best experience.</key>
+	<string>^[%lld varning](inflect: true) hittad. Nya enheter bör fungera, men överväg att åtgärda dessa för bästa upplevelse.</string>
+	<key>^[%lld weak device](inflect: true) detected</key>
+	<string>^[%lld svag enhet](inflect: true) hittad</string>
+	<key>^[%lld weak spot](inflect: true) detected — consider adding a Thread router</key>
+	<string>^[%lld svag punkt](inflect: true) hittad – överväg att lägga till en Thread-router</string>
+	<key>ago</key>
+	<string>sedan</string>
+	<key>last event</key>
+	<string>senaste händelse</string>
+	<key>response quality</key>
+	<string>svarskvalitet</string>
+	<key>very weak</key>
+	<string>mycket svag</string>
+	<key>weak</key>
+	<string>svag</string>
+	<key>~%lld days</key>
+	<string>~%lld dagar</string>
+	<key>~^[%lld day](inflect: true)</key>
+	<string>~^[%lld dag](inflect: true)</string>
+	<key>· %lld offline</key>
+	<string>· %lld offline</string>
+	<key>· %lld samples</key>
+	<string>· %lld mätningar</string>
+	<key>· %lld weak</key>
+	<string>· %lld svaga</string>
+	<key>★ Best</key>
+	<string>★ Bäst</string>
+</dict>
+</plist>

@@ -69,7 +69,7 @@ final class BorderRouterClient: DiagnosticsProvider, @unchecked Sendable {
         // Match the OTBR border router itself: pick the HomeKit border router with
         // the strongest estimated signal (best proxy without explicit configuration).
         let borderRouters = devices.filter { $0.isBorderRouter }
-        guard let anchorBR = borderRouters.max(by: { ($0.rssi ?? -100) < ($1.rssi ?? -100) }) else {
+        guard let anchorBR = borderRouters.max(by: { ($0.rssi ?? SignalThresholds.offlineSentinel) < ($1.rssi ?? SignalThresholds.offlineSentinel) }) else {
             return [:]
         }
 
@@ -93,12 +93,12 @@ final class BorderRouterClient: DiagnosticsProvider, @unchecked Sendable {
         // Match child neighbors to HomeKit end devices in the anchor border router's room.
         // Sorted weakest-first so we assign the best match to the most likely candidate.
         let childNeighbors = neighbors.filter(\.isChild)
-            .sorted { ($0.rssi ?? -100) > ($1.rssi ?? -100) }
+            .sorted { ($0.rssi ?? SignalThresholds.offlineSentinel) > ($1.rssi ?? SignalThresholds.offlineSentinel) }
 
         let brRoom = anchorBR.room
         let candidateDevices = devices
             .filter { !$0.isBorderRouter && $0.room == brRoom }
-            .sorted { ($0.rssi ?? -100) > ($1.rssi ?? -100) }
+            .sorted { ($0.rssi ?? SignalThresholds.offlineSentinel) > ($1.rssi ?? SignalThresholds.offlineSentinel) }
 
         for (neighbor, device) in zip(childNeighbors, candidateDevices) {
             result[device.id] = ThreadNodeDiagnostics(

@@ -33,7 +33,7 @@ struct NetworkHealthScoreTests {
         let result = NetworkHealthScore.compute(devices: [])
         #expect(result.score == 0)
         #expect(result.grade == "F")
-        #expect(result.issues.contains { $0.message.contains("No Thread devices") })
+        #expect(result.issues.contains { $0.message.key.contains("No Thread devices") })
     }
 
     // MARK: Grade thresholds
@@ -82,7 +82,7 @@ struct NetworkHealthScoreTests {
         let devices = [makeDevice(name: "D1", rssi: -65)]
         let result = NetworkHealthScore.compute(devices: devices)
         #expect(result.score == 60)
-        #expect(result.issues.contains { $0.message.contains("No border router") && $0.isCritical })
+        #expect(result.issues.contains { $0.message.key.contains("No border router") && $0.isCritical })
     }
 
     @Test("Single border router → -15 penalty, non-critical issue")
@@ -93,7 +93,7 @@ struct NetworkHealthScoreTests {
         ]
         let result = NetworkHealthScore.compute(devices: devices)
         #expect(result.score == 85)
-        let issue = result.issues.first { $0.message.contains("Single border router") }
+        let issue = result.issues.first { $0.message.key.contains("Single border router") }
         #expect(issue != nil)
         #expect(issue?.isCritical == false)
     }
@@ -120,7 +120,7 @@ struct NetworkHealthScoreTests {
         ]
         let result = NetworkHealthScore.compute(devices: devices)
         #expect(result.score == 88)
-        #expect(result.issues.contains { $0.message.contains("offline") && $0.isCritical })
+        #expect(result.issues.contains { $0.message.key.contains("offline") && $0.isCritical })
     }
 
     @Test("Offline penalty is capped at 30 points")
@@ -155,7 +155,7 @@ struct NetworkHealthScoreTests {
             makeDevice(name: "W1", rssi: -85),
         ]
         let result = NetworkHealthScore.compute(devices: devices)
-        let issue = result.issues.first { $0.message.contains("weak signal") }
+        let issue = result.issues.first { $0.message.key.contains("weak signal") }
         #expect(issue?.isCritical == false)
     }
 
@@ -169,7 +169,7 @@ struct NetworkHealthScoreTests {
             makeDevice(name: "W3", rssi: -88),
         ]
         let result = NetworkHealthScore.compute(devices: devices)
-        let issue = result.issues.first { $0.message.contains("weak signal") }
+        let issue = result.issues.first { $0.message.key.contains("weak signal") }
         #expect(issue?.isCritical == true)
     }
 
@@ -184,7 +184,7 @@ struct NetworkHealthScoreTests {
         ]
         let result = NetworkHealthScore.compute(devices: devices)
         #expect(result.score == 95)
-        #expect(result.issues.contains { $0.message.contains("battery") })
+        #expect(result.issues.contains { $0.message.key.contains("battery") })
     }
 
     // MARK: Channel interference
@@ -197,7 +197,7 @@ struct NetworkHealthScoreTests {
         ]
         let result = NetworkHealthScore.compute(devices: devices)
         #expect(result.score == 95)
-        #expect(result.issues.contains { $0.message.contains("WiFi") })
+        #expect(result.issues.contains { $0.message.key.contains("WiFi") })
     }
 
     @Test("Thread channel 15 → no interference penalty")

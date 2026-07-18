@@ -24,13 +24,12 @@ struct MeshView: View {
     }
 
     // Border routers sorted best-signal-first for the backbone strip.
-    private var borderRouters: [MeshNode] {
-        let devMap = devicesByID
-        return viewModel.nodes
+    private func borderRouters(devMap: [UUID: ThreadDevice]) -> [MeshNode] {
+        viewModel.nodes
             .filter { $0.kind == .borderRouter }
             .sorted { nodeA, nodeB in
-                let rssiA = nodeA.deviceID.flatMap { devMap[$0] }?.rssi ?? -100
-                let rssiB = nodeB.deviceID.flatMap { devMap[$0] }?.rssi ?? -100
+                let rssiA = nodeA.deviceID.flatMap { devMap[$0] }?.rssi ?? SignalThresholds.offlineSentinel
+                let rssiB = nodeB.deviceID.flatMap { devMap[$0] }?.rssi ?? SignalThresholds.offlineSentinel
                 return rssiA > rssiB
             }
     }
@@ -113,19 +112,24 @@ struct MeshView: View {
     // MARK: - List view
 
     private var listContent: some View {
-        ScrollView {
+        // Derive shared collections once per render — statsBanner, the
+        // backbone strip, and every room section reuse them.
+        let devMap = devicesByID
+        let routers = borderRouters(devMap: devMap)
+        let groups = roomGroups
+        return ScrollView {
             LazyVStack(spacing: 0) {
-                statsBanner
+                statsBanner(borderRouterCount: routers.count)
                     .padding(.horizontal, 16)
                     .padding(.top, 12)
                     .padding(.bottom, 8)
 
-                if !borderRouters.isEmpty {
-                    backboneStrip
+                if !routers.isEmpty {
+                    backboneStrip(borderRouters: routers, devMap: devMap)
                         .padding(.bottom, 16)
                 }
 
-                if roomGroups.isEmpty && !searchText.isEmpty {
+                if groups.isEmpty && !searchText.isEmpty {
                     VStack(spacing: 12) {
                         Image(systemName: "magnifyingglass")
                             .font(.title2)
@@ -139,8 +143,8 @@ struct MeshView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 60)
                 } else {
-                    ForEach(roomGroups, id: \.room) { group in
-                        roomSection(room: group.room, nodes: group.nodes)
+                    ForEach(groups, id: \.room) { group in
+                        roomSection(room: group.room, nodes: group.nodes, devMap: devMap)
                     }
                 }
             }
@@ -153,7 +157,7 @@ struct MeshView: View {
 
     // MARK: - Stats banner
 
-    private var statsBanner: some View {
+    private func statsBanner(borderRouterCount: Int) -> some View {
         HStack(spacing: 0) {
             statCell(
                 value: "\(viewModel.visibleDeviceCount)",
@@ -162,7 +166,7 @@ struct MeshView: View {
             )
             Divider().frame(height: 28)
             statCell(
-                value: "\(borderRouters.count)",
+                value: "\(borderRouterCount)",
                 label: "Border Routers",
                 color: .blue
             )
@@ -201,7 +205,7 @@ struct MeshView: View {
 
     // MARK: - Backbone strip (border routers)
 
-    private var backboneStrip: some View {
+    private func backboneStrip(borderRouters: [MeshNode], devMap: [UUID: ThreadDevice]) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Label("Thread Backbone", systemImage: "point.3.filled.connected.trianglepath.dotted")
@@ -215,7 +219,6 @@ struct MeshView: View {
             .padding(.horizontal, 16)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                let devMap = devicesByID
                 HStack(spacing: 10) {
                     ForEach(borderRouters) { node in
                         let device = node.deviceID.flatMap { devMap[$0] }
@@ -235,7 +238,7 @@ struct MeshView: View {
 
     // MARK: - Room section
 
-    private func roomSection(room: String, nodes: [MeshNode]) -> some View {
+    private func roomSection(room: String, nodes: [MeshNode], devMap: [UUID: ThreadDevice]) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             // Room header
             HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -254,7 +257,6 @@ struct MeshView: View {
             .padding(.bottom, 8)
 
             // Device rows card
-            let devMap = devicesByID
             VStack(spacing: 0) {
                 ForEach(Array(nodes.enumerated()), id: \.element.id) { index, node in
                     let device = node.deviceID.flatMap { devMap[$0] }

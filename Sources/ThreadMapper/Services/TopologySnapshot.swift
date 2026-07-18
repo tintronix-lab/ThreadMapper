@@ -55,14 +55,12 @@ extension TopologySnapshot {
     }
 
     static func loadBaseline() -> TopologySnapshot? {
-        guard let data = try? Data(contentsOf: storeURL) else { return nil }
-        return try? JSONDecoder().decode(TopologySnapshot.self, from: data)
+        PersistedStore.load(TopologySnapshot.self, from: storeURL)
     }
 
+    @MainActor
     static func saveBaseline(_ snapshot: TopologySnapshot) {
-        if let data = try? JSONEncoder().encode(snapshot) {
-            try? data.write(to: storeURL, options: .atomic)
-        }
+        PersistedStore.save(snapshot, to: storeURL)
     }
 
     static func clearBaseline() {

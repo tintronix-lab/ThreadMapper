@@ -37,7 +37,7 @@ struct MeshTopologyBuilder {
             // Sorted best-signal-first so same-room tie-breaks favour the strongest device.
             let mainsPowered = candidates
                 .filter { $0.batteryPercentage == nil }
-                .sorted { ($0.rssi ?? -100) > ($1.rssi ?? -100) }
+                .sorted { ($0.rssi ?? SignalThresholds.offlineSentinel) > ($1.rssi ?? SignalThresholds.offlineSentinel) }
             var unroomedCount = 0
             for d in mainsPowered {
                 if let room = d.room {
@@ -62,7 +62,7 @@ struct MeshTopologyBuilder {
         let endDevices = candidates.filter { !routerIDs.contains($0.id) }
 
         // Strength proxy: higher rssi (closer to 0) ⇒ more central / better parent.
-        func strength(_ d: ThreadDevice) -> Int { d.rssi ?? -100 }
+        func strength(_ d: ThreadDevice) -> Int { d.rssi ?? SignalThresholds.offlineSentinel }
 
         // Honor a real parent when one is reported (future Matter Thread
         // diagnostics could populate `parentNodeID`); only accept a router/BR.

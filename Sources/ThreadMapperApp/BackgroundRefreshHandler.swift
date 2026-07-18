@@ -9,12 +9,15 @@ enum BackgroundRefreshHandler {
 
     static func register() {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: taskID, using: .main) { task in
-            guard let refreshTask = task as? BGAppRefreshTask else {
-                logger.error("Unexpected task type for \(taskID, privacy: .public); marking complete")
-                task.setTaskCompleted(success: false)
-                return
+            // register(using: .main) guarantees this closure runs on the main queue.
+            MainActor.assumeIsolated {
+                guard let refreshTask = task as? BGAppRefreshTask else {
+                    logger.error("Unexpected task type for \(taskID, privacy: .public); marking complete")
+                    task.setTaskCompleted(success: false)
+                    return
+                }
+                handleRefresh(task: refreshTask)
             }
-            handleRefresh(task: refreshTask)
         }
     }
 
@@ -28,6 +31,7 @@ enum BackgroundRefreshHandler {
         }
     }
 
+    @MainActor
     private static func handleRefresh(task: BGAppRefreshTask) {
         schedule()
 
@@ -85,10 +89,11 @@ private final class ReachabilityChecker: NSObject, HMHomeManagerDelegate {
         for (key, reachable) in current {
             guard let uuid = UUID(uuidString: key) else { continue }
             let name = names[key] ?? "Device"
+            let room = rooms[key]
             let wasReachable = previous[key] ?? true
             await MainActor.run {
                 if !reachable && wasReachable {
-                    NotificationService.shared.notifyDeviceOffline(name, room: rooms[key], deviceID: uuid)
+                    NotificationService.shared.notifyDeviceOffline(name, room: room, deviceID: uuid)
                 } else if reachable && !wasReachable {
                     NotificationService.shared.clearOfflineNotification(for: uuid)
                 }

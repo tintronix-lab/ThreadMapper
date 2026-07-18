@@ -33,7 +33,7 @@ final class SurveySessionManager {
         }
         samples.append(SurveySample(deviceID: deviceID, rssi: rssi, location: finalLocation))
         currentMeanRSSI = samples.map { Double($0.rssi) }.reduce(0, +) / Double(samples.count)
-        currentWeakIDs = samples.filter { $0.rssi < -80 }.map(\.deviceID)
+        currentWeakIDs = samples.filter { $0.rssi.isWeakRSSI }.map(\.deviceID)
     }
 
     func startSession() {
@@ -48,7 +48,7 @@ final class SurveySessionManager {
         locationTracker.stopTracking()
         guard !samples.isEmpty else { return nil }
         let meanRSSI = samples.map { Double($0.rssi) }.reduce(0, +) / Double(samples.count)
-        let weakIDs = samples.filter { $0.rssi < -80 }.map(\.deviceID)
+        let weakIDs = samples.filter { $0.rssi.isWeakRSSI }.map(\.deviceID)
         defer {
             samples.removeAll()
             currentMeanRSSI = nil

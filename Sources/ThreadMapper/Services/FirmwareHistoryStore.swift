@@ -73,13 +73,11 @@ final class FirmwareHistoryStore {
     }
 
     private func persist() {
-        guard let data = try? JSONEncoder().encode(changes) else { return }
-        try? data.write(to: storeURL, options: [.atomic, .completeFileProtection])
+        PersistedStore.save(changes, to: storeURL)
     }
 
     private func restore() {
-        guard let data = try? Data(contentsOf: storeURL),
-              let decoded = try? JSONDecoder().decode([FirmwareChange].self, from: data) else { return }
+        guard let decoded = PersistedStore.load([FirmwareChange].self, from: storeURL) else { return }
         changes = decoded
         // Rebuild last-known from the most recent change per device (array is newest-first).
         for change in decoded.reversed() {

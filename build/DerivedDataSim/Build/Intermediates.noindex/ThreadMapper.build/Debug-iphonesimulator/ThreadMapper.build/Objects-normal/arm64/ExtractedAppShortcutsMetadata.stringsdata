@@ -1,6 +1,6 @@
 {
-  "source" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/Sources\/ThreadMapper\/Intents\/NetworkHealthIntents.swift",
   "version" : 2,
+  "source" : "\/Users\/MAC\/Documents\/GitHub\/ThreadMapper\/Sources\/ThreadMapper\/Intents\/NetworkHealthIntents.swift",
   "tables" : {
     "AppShortcuts" : [
       {
@@ -9,24 +9,24 @@
           "What's my network health in ${applicationName}",
           "Network health in ${applicationName}"
         ],
-        "location" : {
-          "startingLine" : 53,
-          "startingColumn" : 0
-        },
-        "key" : "Check my Thread network in ${applicationName}",
         "appShortcutMetadata" : [
           {
-            "parameterDisplayRepresentations" : {
-
-            },
-            "actionIdentifier" : "GetNetworkHealthIntent",
+            "title" : "Check Thread Network Health",
             "index" : 0,
             "parameterTypes" : {
 
             },
-            "title" : "Check Thread Network Health"
+            "actionIdentifier" : "GetNetworkHealthIntent",
+            "parameterDisplayRepresentations" : {
+
+            }
           }
-        ]
+        ],
+        "key" : "Check my Thread network in ${applicationName}",
+        "location" : {
+          "startingColumn" : 0,
+          "startingLine" : 55
+        }
       },
       {
         "values" : [
@@ -34,24 +34,24 @@
           "Show offline devices in ${applicationName}",
           "Are any devices offline in ${applicationName}"
         ],
-        "location" : {
-          "startingLine" : 53,
-          "startingColumn" : 0
-        },
-        "key" : "Which devices are offline in ${applicationName}",
         "appShortcutMetadata" : [
           {
-            "parameterDisplayRepresentations" : {
-
-            },
-            "actionIdentifier" : "GetOfflineDevicesIntent",
             "index" : 1,
             "parameterTypes" : {
 
             },
-            "title" : "Show Offline Thread Devices"
+            "title" : "Show Offline Thread Devices",
+            "parameterDisplayRepresentations" : {
+
+            },
+            "actionIdentifier" : "GetOfflineDevicesIntent"
           }
-        ]
+        ],
+        "key" : "Which devices are offline in ${applicationName}",
+        "location" : {
+          "startingColumn" : 0,
+          "startingLine" : 55
+        }
       }
     ]
   }

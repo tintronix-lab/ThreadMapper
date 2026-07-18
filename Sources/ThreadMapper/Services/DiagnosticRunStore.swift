@@ -59,14 +59,11 @@ final class DiagnosticRunStore {
     }
 
     private func persist() {
-        guard let data = try? JSONEncoder().encode(runs) else { return }
-        try? data.write(to: storeURL, options: [.atomic, .completeFileProtection])
+        PersistedStore.save(runs, to: storeURL)
     }
 
     private func restore() {
-        guard let data = try? Data(contentsOf: storeURL),
-              let decoded = try? JSONDecoder().decode([DiagnosticRun].self, from: data)
-        else { return }
+        guard let decoded = PersistedStore.load([DiagnosticRun].self, from: storeURL) else { return }
         runs = decoded
     }
 }

@@ -118,15 +118,15 @@ final class ThreadDevice: Identifiable, Codable, Hashable, Equatable, @unchecked
     /// Derived reachability state from the raw rssi field.
     var reachability: Reachability? {
         guard let rssi else { return nil }
-        return rssi == -100 ? .offline : .quality(rssi)
+        return rssi == SignalThresholds.offlineSentinel ? .offline : .quality(rssi)
     }
 
     /// True when the device is confirmed unreachable (rssi sentinel -100).
-    var isOffline: Bool { rssi == -100 }
+    var isOffline: Bool { rssi == SignalThresholds.offlineSentinel }
 
     /// True when signal quality is poor but device is reachable.
     var isWeak: Bool {
-        if case .quality(let q) = reachability { return q < -80 }
+        if case .quality(let q) = reachability { return q.isWeakRSSI }
         return false
     }
 

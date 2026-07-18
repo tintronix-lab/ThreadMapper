@@ -14,6 +14,9 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5"
+    # Match Package.swift's StrictConcurrency opt-in in the shipping build.
+    # Swift 5 language mode → diagnostics are warnings, never build errors.
+    SWIFT_STRICT_CONCURRENCY: complete
     CODE_SIGN_STYLE: "Automatic"
     DEVELOPMENT_TEAM: QCSX955Y7P
 

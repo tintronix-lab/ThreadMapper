@@ -52,13 +52,11 @@ final class ActivityStore {
     }
 
     private func persist() {
-        guard let data = try? JSONEncoder().encode(events) else { return }
-        try? data.write(to: storeURL, options: [.atomic, .completeFileProtection])
+        PersistedStore.save(events, to: storeURL)
     }
 
     private func restore() {
-        guard let data = try? Data(contentsOf: storeURL),
-              let decoded = try? JSONDecoder().decode([ActivityEvent].self, from: data) else { return }
+        guard let decoded = PersistedStore.load([ActivityEvent].self, from: storeURL) else { return }
         let cutoff = Date().addingTimeInterval(-7 * 86400)   // keep 7 days
         events = decoded.filter { $0.timestamp > cutoff }
     }

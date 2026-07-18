@@ -49,7 +49,7 @@ struct DeviceListRow: View {
         .padding(.vertical, 4)
         .background(
             RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill((device.rssi ?? 0) < -80 ? Color.red.opacity(0.05) : Color.clear)
+                .fill(device.rssi?.isWeakRSSI == true ? Color.red.opacity(0.05) : Color.clear)
         )
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityDescription)

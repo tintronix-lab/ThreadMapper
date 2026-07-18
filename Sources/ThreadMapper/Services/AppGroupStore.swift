@@ -13,12 +13,13 @@ enum AppGroupStore {
     // Widget reload throttling — WidgetKit has a strict daily reload budget,
     // and the caller runs at ~1 Hz. Only reload when meaningful content
     // changed, and never more than once per `minReloadInterval`.
-    nonisolated(unsafe) private static var lastReloadAt: Date = .distantPast
-    nonisolated(unsafe) private static var lastContentHash: Int?
+    @MainActor private static var lastReloadAt: Date = .distantPast
+    @MainActor private static var lastContentHash: Int?
     private static let minReloadInterval: TimeInterval = 60
 
     // MARK: - Widget snapshot (written by main app, read by widget)
 
+    @MainActor
     static func writeSnapshot(_ snapshot: WidgetSnapshot) {
         guard let defaults = UserDefaults(suiteName: groupID),
               let data = try? JSONEncoder().encode(snapshot) else { return }
@@ -42,7 +43,7 @@ enum AppGroupStore {
     }
 
     // MARK: - Device reachability states (used by BGTask to detect offline changes)
-    // Keyed by device name → isReachable
+    // Keyed by device uniqueIdentifier (uuidString) → isReachable
 
     static func writeDeviceStates(_ states: [String: Bool]) {
         guard let defaults = UserDefaults(suiteName: groupID),

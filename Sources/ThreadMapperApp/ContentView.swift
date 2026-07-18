@@ -175,7 +175,7 @@ enum AppTab: CaseIterable, Hashable, Identifiable {
         }
     }
 
-    @ViewBuilder
+    @MainActor @ViewBuilder
     var destination: some View {
         switch self {
         case .dashboard: DashboardView()

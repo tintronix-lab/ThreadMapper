@@ -22,7 +22,7 @@ final class HealthHistoryStoreTests: XCTestCase {
         XCTAssertEqual(store.entries.first?.score, 90)
     }
 
-    func testClearAllEmptiesAndPersists() throws {
+    func testClearAllEmptiesAndPersists() async throws {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("\(UUID().uuidString)_hh.json")
         let store = HealthHistoryStore(storeURL: url)
@@ -31,6 +31,7 @@ final class HealthHistoryStoreTests: XCTestCase {
 
         store.clearAll()
         XCTAssertTrue(store.entries.isEmpty)
+        await PersistedStore.flush()   // writes land on a background actor
 
         let reloaded = HealthHistoryStore(storeURL: url)
         XCTAssertTrue(reloaded.entries.isEmpty)

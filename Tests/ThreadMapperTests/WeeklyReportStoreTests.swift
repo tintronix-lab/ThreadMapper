@@ -157,12 +157,13 @@ final class WeeklyReportStoreTests: XCTestCase {
         XCTAssertEqual(store.latestReport?.generatedAt, t2)
     }
 
-    func testGenerateIfNeededPersistsAcrossRestart() throws {
+    func testGenerateIfNeededPersistsAcrossRestart() async throws {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("\(UUID().uuidString)_wr.json")
         let store = WeeklyReportStore(storeURL: url)
         store.generateIfNeeded()
         let id = try XCTUnwrap(store.latestReport?.id)
+        await PersistedStore.flush()   // writes land on a background actor
 
         let reloaded = WeeklyReportStore(storeURL: url)
         XCTAssertEqual(reloaded.latestReport?.id, id)

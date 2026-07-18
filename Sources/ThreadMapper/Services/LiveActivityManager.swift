@@ -44,7 +44,7 @@ final class LiveActivityManager {
             alertMessage: message
         )
         if hasActiveActivity {
-            Task { @MainActor in
+            Task {
                 await self.currentActivity?.update(
                     .init(state: state, staleDate: .now.addingTimeInterval(7200))
                 )
@@ -69,7 +69,7 @@ final class LiveActivityManager {
             grade: grade, score: score, deviceCount: deviceCount,
             offlineCount: offlineCount, isScanning: false, alertMessage: message
         )
-        Task { @MainActor in
+        Task {
             await self.currentActivity?.update(
                 .init(state: state, staleDate: .now.addingTimeInterval(7200))
             )
@@ -84,7 +84,7 @@ final class LiveActivityManager {
             grade: grade, score: score, deviceCount: deviceCount,
             offlineCount: 0, isScanning: false, alertMessage: "All devices back online"
         )
-        Task { @MainActor in
+        Task {
             await self.currentActivity?.end(
                 .init(state: state, staleDate: nil),
                 dismissalPolicy: .after(.now.addingTimeInterval(5))
@@ -96,7 +96,7 @@ final class LiveActivityManager {
     /// Immediately dismiss the Live Activity (e.g. tapped the dismiss button).
     func endNow() {
         guard currentActivity != nil else { return }
-        Task { @MainActor in
+        Task {
             await self.currentActivity?.end(nil, dismissalPolicy: .immediate)
             self.currentActivity = nil
         }

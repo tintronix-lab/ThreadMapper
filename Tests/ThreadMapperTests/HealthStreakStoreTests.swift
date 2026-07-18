@@ -50,12 +50,13 @@ final class HealthStreakStoreTests: XCTestCase {
         XCTAssertEqual(store.totalADays, 1)
     }
 
-    func testPersistenceRoundTrip() {
+    func testPersistenceRoundTrip() async {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("\(UUID().uuidString)_streaks.json")
         let store = HealthStreakStore(storeURL: url)
         store.record(grade: "A", on: day(0))
         store.record(grade: "A", on: day(1))
+        await PersistedStore.flush()   // writes land on a background actor
         // A fresh store over the same file restores the streak.
         let reloaded = HealthStreakStore(storeURL: url)
         XCTAssertEqual(reloaded.currentStreak, 2)

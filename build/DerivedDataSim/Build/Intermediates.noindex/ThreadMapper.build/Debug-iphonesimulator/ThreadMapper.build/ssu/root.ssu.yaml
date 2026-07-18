@@ -8,6 +8,11 @@ nlu:
         title: Check Thread Network Health
       corpuses:
         training:
+        - locale: sv
+          utterances:
+          - '{${+prefix} }Check my Thread network in ${+applicationName}'
+          - '{${+prefix} }What''s my network health in ${+applicationName}'
+          - '{${+prefix} }Network health in ${+applicationName}'
         - locale: en
           utterances:
           - '{${+prefix} }Check my Thread network in ${+applicationName}'
@@ -18,6 +23,11 @@ nlu:
         title: Show Offline Thread Devices
       corpuses:
         training:
+        - locale: sv
+          utterances:
+          - '{${+prefix} }Which devices are offline in ${+applicationName}'
+          - '{${+prefix} }Show offline devices in ${+applicationName}'
+          - '{${+prefix} }Are any devices offline in ${+applicationName}'
         - locale: en
           utterances:
           - '{${+prefix} }Which devices are offline in ${+applicationName}'
@@ -27,6 +37,9 @@ nlu:
         name: +negative
       corpuses:
         training:
+        - locale: sv
+          utterances:
+          - '{${+prefix} }${+standardAppShortcutNegatives}'
         - locale: en
           utterances:
           - '{${+prefix} }${+standardAppShortcutNegatives}'
@@ -34,6 +47,9 @@ variables:
 - name: +applicationName
   type: ssu/expansion
   definitions:
+  - locale: sv
+    synomyms:
+    - ThreadMapper
   - locale: en
     synomyms:
     - ThreadMapper
@@ -43,9 +59,15 @@ variables:
   - locale: en
     synomyms:
       $ref: ssu://Resources/prefix/en.yaml
+  - locale: sv
+    synomyms:
+      $ref: ssu://Resources/prefix/sv.yaml
 - name: +standardAppShortcutNegatives
   type: ssu/expansion
   definitions:
   - locale: en
     synomyms:
       $ref: ssu://Resources/standardAppShortcutNegatives/en.yaml
+  - locale: sv
+    synomyms:
+      $ref: ssu://Resources/standardAppShortcutNegatives/sv.yaml

@@ -290,11 +290,20 @@ struct DashboardTrendSection: View {
 // MARK: - Room Coverage
 
 struct DashboardRoomCoverageSection: View {
-    let roomGroups: [(room: String, devices: [ThreadDevice])]
+    // Grouping lives here (not in DashboardView) so the parent's frequent
+    // presentation-state churn doesn't redo it — SwiftUI skips this body
+    // entirely while `devices` is unchanged.
+    let devices: [ThreadDevice]
     @Binding var selectedRoom: String?
     let isExpanded: Bool
     let onToggle: () -> Void
     @Environment(DeviceStatsStore.self) private var statsStore
+
+    private var roomGroups: [(room: String, devices: [ThreadDevice])] {
+        Dictionary(grouping: devices) { $0.room ?? "Unknown" }
+            .map { (room: $0.key, devices: $0.value) }
+            .sorted { $0.room < $1.room }
+    }
 
     var body: some View {
         Section {

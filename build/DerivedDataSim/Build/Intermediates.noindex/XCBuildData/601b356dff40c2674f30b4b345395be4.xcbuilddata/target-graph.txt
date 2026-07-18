@@ -1,4 +1,0 @@
-Target dependency graph (2 targets)
-Target 'ThreadMapper' in project 'ThreadMapper'
-➜ Explicit dependency on target 'ThreadMapper' in project 'ThreadMapper'
-Target 'ThreadMapper' in project 'ThreadMapper' (no dependencies)

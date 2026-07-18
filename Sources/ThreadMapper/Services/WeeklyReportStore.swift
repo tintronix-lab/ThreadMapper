@@ -126,13 +126,12 @@ final class WeeklyReportStore {
     }
 
     private func persist() {
-        guard let data = try? JSONEncoder().encode(latestReport) else { return }
-        try? data.write(to: storeURL, options: [.atomic, .completeFileProtection])
+        guard let report = latestReport else { return }
+        PersistedStore.save(report, to: storeURL)
     }
 
     private func restore() {
-        guard let data = try? Data(contentsOf: storeURL),
-              let report = try? JSONDecoder().decode(Report.self, from: data) else { return }
+        guard let report = PersistedStore.load(Report.self, from: storeURL) else { return }
         latestReport = report
     }
 }

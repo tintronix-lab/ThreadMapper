@@ -1,0 +1,6 @@
+Target dependency graph (3 targets)
+Target 'ThreadMapperTests' in project 'ThreadMapper'
+➜ Explicit dependency on target 'ThreadMapper' in project 'ThreadMapper'
+Target 'ThreadMapper' in project 'ThreadMapper'
+➜ Explicit dependency on target 'ThreadMapperWidget' in project 'ThreadMapper'
+Target 'ThreadMapperWidget' in project 'ThreadMapper' (no dependencies)

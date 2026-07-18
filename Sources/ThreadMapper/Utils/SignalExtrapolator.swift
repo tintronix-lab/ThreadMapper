@@ -21,7 +21,7 @@ struct SignalExtrapolator {
         if devices.count > 3 && routers.count == 1 {
             recs.append("Add a second router to improve mesh redundancy.")
         }
-        let weak = devices.filter { ($0.rssi ?? -50) < -80 }
+        let weak = devices.filter { $0.rssi?.isWeakRSSI == true }
         if !weak.isEmpty {
             recs.append("\(weak.count) devices have weak signal; move a router closer.")
         }

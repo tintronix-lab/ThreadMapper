@@ -51,6 +51,9 @@ struct DeviceDetailView: View {
                 noteText = notesStore.note(for: device.uniqueIdentifier.uuidString)
                 exportURL = surveyVM.exportCSV(for: device.name)
             }
+            .task(id: topologyFingerprint) {
+                meshPath = computeMeshPath()
+            }
             .task {
                 guard #available(iOS 26, *) else { return }
                 guard !isLoadingDeviceSummary, deviceAISummary == nil else { return }
@@ -222,7 +225,7 @@ struct DeviceDetailView: View {
                 .buttonStyle(.borderedProminent)
                 .tint(.red)
                 .padding(.top, 4)
-            } else if rssi < -80 {
+            } else if rssi.isWeakRSSI {
                 Button {
                     troubleshootProblem = .weakSignal
                 } label: {
@@ -650,7 +653,26 @@ struct DeviceDetailView: View {
         let isCurrentDevice: Bool
     }
 
-    private var meshPath: [HopEntry] {
+    /// Rebuilding the topology graph is O(devices²); cached here and refreshed
+    /// by .task(id:) only when the topology-relevant inputs actually change,
+    /// instead of on every render of this view.
+    @State private var meshPath: [HopEntry] = []
+
+    private var topologyFingerprint: Int {
+        var hasher = Hasher()
+        for d in meshViewModel.devices {
+            hasher.combine(d.id)
+            hasher.combine(d.name)
+            hasher.combine(d.isBorderRouter)
+            hasher.combine(d.isRouter)
+            hasher.combine(d.rssi)
+            hasher.combine(d.room)
+            hasher.combine(d.channel)
+        }
+        return hasher.finalize()
+    }
+
+    private func computeMeshPath() -> [HopEntry] {
         let (nodes, _) = MeshTopologyBuilder.buildGraph(from: meshViewModel.devices)
         let nodeByID = Dictionary(uniqueKeysWithValues: nodes.map { ($0.id, $0) })
 
@@ -679,7 +701,7 @@ struct DeviceDetailView: View {
 
     @ViewBuilder
     private var meshPathSection: some View {
-        let path = meshPath
+        let path = meshPath   // cached @State, refreshed by .task(id: topologyFingerprint)
         if path.count >= 2 {
             Section {
                 // Hop count row

@@ -59,13 +59,11 @@ import Observation
     var unlockedCount: Int { achievements.filter(\.isUnlocked).count }
 
     private func persist() {
-        guard let data = try? JSONEncoder().encode(achievements) else { return }
-        try? data.write(to: storeURL, options: [.atomic, .completeFileProtection])
+        PersistedStore.save(achievements, to: storeURL)
     }
 
     private func restore() {
-        guard let data = try? Data(contentsOf: storeURL),
-              let saved = try? JSONDecoder().decode([Achievement].self, from: data) else { return }
+        guard let saved = PersistedStore.load([Achievement].self, from: storeURL) else { return }
         let byID = Dictionary(uniqueKeysWithValues: saved.map { ($0.id, $0) })
         achievements = achievements.map { a in
             var updated = a

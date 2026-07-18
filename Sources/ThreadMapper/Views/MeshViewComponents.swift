@@ -154,12 +154,7 @@ struct SignalBarsView: View {
     enum Size { case small, medium }
     var size: Size = .small
 
-    private var barCount: Int {
-        if rssi > -50 { return 4 }
-        if rssi > -65 { return 3 }
-        if rssi > -80 { return 2 }
-        return 1
-    }
+    private var barCount: Int { rssi.rssiLinkQuality }
 
     var body: some View {
         let w: CGFloat     = size == .small ? 3 : 4

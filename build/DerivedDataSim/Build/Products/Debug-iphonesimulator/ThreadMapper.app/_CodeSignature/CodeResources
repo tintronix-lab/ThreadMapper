@@ -18,23 +18,11 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		XVDTCiMb/QC562fswNFvnJ0p4QM=
+		5eLAGSMCCBcsA63U5+PBZCKMKMY=
 		</data>
 		<key>Metadata.appintents/extract.actionsdata</key>
 		<data>
 		AvF2P9g4jNeuZIQsxddcm5hNP7A=
-		</data>
-		<key>Metadata.appintents/nlu/f1be21338640f46060b66b4c5c5d3ac8.version</key>
-		<data>
-		W6k8nbDP+T9StSHXQg5D9u2ieE8=
-		</data>
-		<key>Metadata.appintents/nlu/nlu.lzfse</key>
-		<data>
-		Qi8PaCWb28/jRY7pYcFlsSNTqs8=
-		</data>
-		<key>Metadata.appintents/root.ssu.yaml</key>
-		<data>
-		siBukx8Nt8bLtz/xYcfeYgUVqPc=
 		</data>
 		<key>Metadata.appintents/version.json</key>
 		<data>
@@ -44,21 +32,37 @@
 		<data>
 		n57qDP4tZfLD1rCS43W0B4LQjzE=
 		</data>
+		<key>PlugIns/ThreadMapperTests.xctest/Info.plist</key>
+		<data>
+		aqJ7npiMbURyatTM15N+c12XSPY=
+		</data>
+		<key>PlugIns/ThreadMapperTests.xctest/ThreadMapperTests</key>
+		<data>
+		aeuHWzSoStGKUjPMhzel9u1XOd8=
+		</data>
 		<key>PlugIns/ThreadMapperWidget.appex/Info.plist</key>
 		<data>
 		8xhzIj14DjFYQWY9g1dEuPk1EDY=
 		</data>
+		<key>PlugIns/ThreadMapperWidget.appex/Metadata.appintents/extract.actionsdata</key>
+		<data>
+		1hHeM3uWuaN/85oTkQMQx6VUCEY=
+		</data>
+		<key>PlugIns/ThreadMapperWidget.appex/Metadata.appintents/version.json</key>
+		<data>
+		PFbTXKE++oaNDMAe6pe4WaYJGCA=
+		</data>
 		<key>PlugIns/ThreadMapperWidget.appex/ThreadMapperWidget</key>
 		<data>
-		wxXz8/hKGJN1dx1Nm9YAFNkGEuQ=
+		jbzbqF1KTASrjWWLSgc8xllq2hQ=
 		</data>
 		<key>PlugIns/ThreadMapperWidget.appex/ThreadMapperWidget.debug.dylib</key>
 		<data>
-		iOS3LjlqfXy46/2wCb8+oqeeUqU=
+		3hUP8tSLXBwAl86IECwAdCWmnFU=
 		</data>
 		<key>PlugIns/ThreadMapperWidget.appex/_CodeSignature/CodeResources</key>
 		<data>
-		NR2Pisx7FiAP+bBPWXvJqeGxW5M=
+		03oGMiU6OKfxzfp3LvC2MlwrcNI=
 		</data>
 		<key>PlugIns/ThreadMapperWidget.appex/__preview.dylib</key>
 		<data>
@@ -70,12 +74,39 @@
 		</data>
 		<key>ThreadMapper.debug.dylib</key>
 		<data>
-		mujSrHO+lPE7yibnVcU4A/RIxJg=
+		JBr252orNja/O0E9aK4i4JqUIi4=
 		</data>
 		<key>__preview.dylib</key>
 		<data>
 		afFQwnBMjjShpV40HA4vCp2jFAk=
 		</data>
+		<key>sv.lproj/Localizable.strings</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			nJuRqI1TeMILUSSAPQUH2eu5So8=
+			</data>
+			<key>optional</key>
+			<true/>
+		</dict>
+		<key>sv.lproj/nlu.appintents/a0543e682c946539b2d6ae66e8cd394a.version</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			W6k8nbDP+T9StSHXQg5D9u2ieE8=
+			</data>
+			<key>optional</key>
+			<true/>
+		</dict>
+		<key>sv.lproj/nlu.appintents/nlu.lzfse</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			F+uUi5B/Uk3I0dvu86QANsam/9I=
+			</data>
+			<key>optional</key>
+			<true/>
+		</dict>
 	</dict>
 	<key>files2</key>
 	<dict>
@@ -107,32 +138,25 @@
 			Xs1RuxuD3S7aPjonVg0r/G2fVoCwa9RiITuqaRtGhjI=
 			</data>
 		</dict>
-		<key>Metadata.appintents/nlu/f1be21338640f46060b66b4c5c5d3ac8.version</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			bjQLnP+zepicpUTmu3gKLHiQHT+zNzh2hRGjBhevoB0=
-			</data>
-		</dict>
-		<key>Metadata.appintents/nlu/nlu.lzfse</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			XhCocMl5/AHHh5VGhTGMDpGITE4wsDhMFGRCnZuk0a4=
-			</data>
-		</dict>
-		<key>Metadata.appintents/root.ssu.yaml</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			B/W1HzY63jnsScwWP/WpOOV02FuvKf4itnJ7OUg4yhI=
-			</data>
-		</dict>
 		<key>Metadata.appintents/version.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
 			P7sdfoAmXiAQcQF3sPyVmNsG+gFrzxEnNkB8p2zt2yE=
+			</data>
+		</dict>
+		<key>PlugIns/ThreadMapperTests.xctest/Info.plist</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			WP8qeEAxOtf3b41l2UeFn31gVVl1jsDb/2wag9hVzgs=
+			</data>
+		</dict>
+		<key>PlugIns/ThreadMapperTests.xctest/ThreadMapperTests</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			rhehbxwULx/AbeTW14oUOBJFUc+2FG/mMi0i5rX4q+I=
 			</data>
 		</dict>
 		<key>PlugIns/ThreadMapperWidget.appex/Info.plist</key>
@@ -142,25 +166,39 @@
 			pjt4sLqLJAmZXd/LOT6s29jAgk1OFba1PI1mreGnsqc=
 			</data>
 		</dict>
+		<key>PlugIns/ThreadMapperWidget.appex/Metadata.appintents/extract.actionsdata</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			eIslto00dqbagUTtHSnUYN2h9L0WzxqeyQtTsAKtX9U=
+			</data>
+		</dict>
+		<key>PlugIns/ThreadMapperWidget.appex/Metadata.appintents/version.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			bGEMLTRvWVvXxahROmLgL3ZVf6XYsEamPvgqyAHzT5M=
+			</data>
+		</dict>
 		<key>PlugIns/ThreadMapperWidget.appex/ThreadMapperWidget</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			qjbkUSuIp8f8aiSuALnKG7jTVw7wbOX7EQIc+qnfQdU=
+			uePRCkLnKd6t5XtUremaaTXUSgcfyTES3MDgel5KyWU=
 			</data>
 		</dict>
 		<key>PlugIns/ThreadMapperWidget.appex/ThreadMapperWidget.debug.dylib</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			9AdTA/FV0hch+Bkl1tZ4/cnPqGXqILsLdlrGVlAq4Ik=
+			20N6tOijnBmGD+3slNz8l2SYIxI+RXmzGyTEQM18dWs=
 			</data>
 		</dict>
 		<key>PlugIns/ThreadMapperWidget.appex/_CodeSignature/CodeResources</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			JkVNmRYH8f2lM9TZiqy3sY2Mky0evBDbzR/fX13T1sQ=
+			hCM5dnFjjtn3IACTwQIWZvZDT7bQKDjJ7MZuDm5WVhA=
 			</data>
 		</dict>
 		<key>PlugIns/ThreadMapperWidget.appex/__preview.dylib</key>
@@ -181,7 +219,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			BF7lhL5o/5AJw6lzd8GZOkqTfloFXGK9Z8iG5M6TO/Q=
+			dxzsOs2TYzSiY0SUkPowGgxqevmeqIozDpmMA6pBlbw=
 			</data>
 		</dict>
 		<key>__preview.dylib</key>
@@ -190,6 +228,33 @@
 			<data>
 			GziXRHjAkblNLMkiz5MxCOLfqtoZg0ZeLoRJm2wOeE4=
 			</data>
+		</dict>
+		<key>sv.lproj/Localizable.strings</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			UHuWcStpDxaw+CwF0Zm9pMrs2hCz8zHdA8r4DRincFE=
+			</data>
+			<key>optional</key>
+			<true/>
+		</dict>
+		<key>sv.lproj/nlu.appintents/a0543e682c946539b2d6ae66e8cd394a.version</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			bjQLnP+zepicpUTmu3gKLHiQHT+zNzh2hRGjBhevoB0=
+			</data>
+			<key>optional</key>
+			<true/>
+		</dict>
+		<key>sv.lproj/nlu.appintents/nlu.lzfse</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			8/iXslKaVbU92s2zGCzCLsB/86ZSdpWqENCia/8b7u8=
+			</data>
+			<key>optional</key>
+			<true/>
 		</dict>
 	</dict>
 	<key>rules</key>

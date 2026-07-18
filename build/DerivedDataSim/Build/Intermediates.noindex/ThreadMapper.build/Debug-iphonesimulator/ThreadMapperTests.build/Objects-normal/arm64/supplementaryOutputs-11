@@ -1,0 +1,23 @@
+{
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Tests/ThreadMapperTests/DiscoveryServiceTests.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DiscoveryServiceTests.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DiscoveryServiceTests.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DiscoveryServiceTests.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DiscoveryServiceTests.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DiscoveryServiceTests.swiftdeps"
+  },
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Tests/ThreadMapperTests/GraphLayoutTests.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/GraphLayoutTests.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/GraphLayoutTests.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/GraphLayoutTests.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/GraphLayoutTests.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/GraphLayoutTests.swiftdeps"
+  },
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Tests/ThreadMapperTests/HealthHistoryStoreTests.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/HealthHistoryStoreTests.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/HealthHistoryStoreTests.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/HealthHistoryStoreTests.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/HealthHistoryStoreTests.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/HealthHistoryStoreTests.swiftdeps"
+  }
+}

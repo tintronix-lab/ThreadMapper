@@ -1,0 +1,23 @@
+{
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Tests/ThreadMapperTests/DeviceNotesStoreTests.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DeviceNotesStoreTests.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DeviceNotesStoreTests.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DeviceNotesStoreTests.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DeviceNotesStoreTests.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DeviceNotesStoreTests.swiftdeps"
+  },
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Tests/ThreadMapperTests/DeviceOverrideStoreTests.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DeviceOverrideStoreTests.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DeviceOverrideStoreTests.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DeviceOverrideStoreTests.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DeviceOverrideStoreTests.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DeviceOverrideStoreTests.swiftdeps"
+  },
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Tests/ThreadMapperTests/DeviceStatsStoreTests.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DeviceStatsStoreTests.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DeviceStatsStoreTests.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DeviceStatsStoreTests.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DeviceStatsStoreTests.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/DeviceStatsStoreTests.swiftdeps"
+  }
+}

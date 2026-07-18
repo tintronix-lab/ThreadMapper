@@ -252,7 +252,7 @@
     "mangledTypeName": "12ThreadMapper0aB9ShortcutsV",
     "kind": "struct",
     "file": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Intents/NetworkHealthIntents.swift",
-    "line": 52,
+    "line": 54,
     "conformances": [
       "AppIntents.AppShortcutsProvider",
       "Swift.Sendable",
@@ -286,7 +286,7 @@
         "isStatic": "true",
         "isComputed": "true",
         "file": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Intents/NetworkHealthIntents.swift",
-        "line": 53,
+        "line": 55,
         "valueKind": "Builder",
         "value": {
           "type": "AppIntents.AppShortcutsBuilder",

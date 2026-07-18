@@ -1,0 +1,23 @@
+{
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Tests/ThreadMapperTests/SignalExtrapolatorTests.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/SignalExtrapolatorTests.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/SignalExtrapolatorTests.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/SignalExtrapolatorTests.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/SignalExtrapolatorTests.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/SignalExtrapolatorTests.swiftdeps"
+  },
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Tests/ThreadMapperTests/SurveyHeatmapPresenterTests.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/SurveyHeatmapPresenterTests.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/SurveyHeatmapPresenterTests.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/SurveyHeatmapPresenterTests.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/SurveyHeatmapPresenterTests.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/SurveyHeatmapPresenterTests.swiftdeps"
+  },
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Tests/ThreadMapperTests/SurveySessionManagerTests.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/SurveySessionManagerTests.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/SurveySessionManagerTests.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/SurveySessionManagerTests.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/SurveySessionManagerTests.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapperTests.build/Objects-normal/arm64/SurveySessionManagerTests.swiftdeps"
+  }
+}

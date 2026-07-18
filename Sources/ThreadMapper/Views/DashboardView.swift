@@ -31,12 +31,6 @@ struct DashboardView: View {
 
     private var health: NetworkHealthScore { viewModel.health }
 
-    private var roomGroups: [(room: String, devices: [ThreadDevice])] {
-        Dictionary(grouping: viewModel.devices) { $0.room ?? "Unknown" }
-            .map { (room: $0.key, devices: $0.value) }
-            .sorted { $0.room < $1.room }
-    }
-
     private var filteredDevices: [ThreadDevice] {
         guard let room = selectedRoom else { return viewModel.devices }
         return viewModel.devices.filter { $0.room == room }
@@ -65,9 +59,9 @@ struct DashboardView: View {
                     isScanning: viewModel.isScanning,
                     onSelectDevice: { selectedDevice = $0 }
                 )
-                if !roomGroups.isEmpty {
+                if !viewModel.devices.isEmpty {
                     DashboardRoomCoverageSection(
-                        roomGroups: roomGroups,
+                        devices: viewModel.devices,
                         selectedRoom: $selectedRoom,
                         isExpanded: roomCoverageExpanded,
                         onToggle: {
@@ -260,6 +254,9 @@ struct DashboardView: View {
 
     private func buildPlacementSuggestions() -> [String] {
         var suggestions: [String] = []
+        let roomGroups = Dictionary(grouping: viewModel.devices) { $0.room ?? "Unknown" }
+            .map { (room: $0.key, devices: $0.value) }
+            .sorted { $0.room < $1.room }
         for group in roomGroups {
             let avgRSSIs = group.devices.compactMap { statsStore.stats(for: $0.uniqueIdentifier)?.avgRSSI }
             guard !avgRSSIs.isEmpty else { continue }

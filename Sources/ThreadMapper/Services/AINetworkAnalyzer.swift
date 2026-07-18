@@ -394,7 +394,7 @@ struct AINetworkAnalyzer {
             if let count = frequentOffline[device.id], count >= 2 {
                 risk.append("went offline \(count) times recently")
             }
-            if let rssi = device.rssi, rssi < -80 {
+            if let rssi = device.rssi, rssi.isWeakRSSI {
                 risk.append("weak signal (\(rssi) dBm)")
             }
             if let hops = report?.deviceHops.first(where: { $0.device.id == device.id }), hops.hopCount >= 4 {
@@ -501,7 +501,7 @@ struct AINetworkAnalyzer {
                 lines.append("Far devices (4+ hops): \(farDevices.map { "\($0.device.name) in \($0.device.room ?? "unknown room")" }.joined(separator: ", ")).")
             }
         }
-        let weakRooms = devices.filter { ($0.rssi ?? 0) < -80 && !$0.isOffline }
+        let weakRooms = devices.filter { $0.rssi?.isWeakRSSI == true && !$0.isOffline }
             .compactMap(\.room)
         let uniqueWeakRooms = Array(Set(weakRooms)).sorted()
         if !uniqueWeakRooms.isEmpty {
