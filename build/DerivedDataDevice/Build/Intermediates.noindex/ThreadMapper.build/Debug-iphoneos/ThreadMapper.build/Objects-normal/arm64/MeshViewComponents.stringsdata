@@ -1,0 +1,200 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/MeshViewComponents.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "View",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 23
+        }
+      },
+      {
+        "comment": "",
+        "key": "Room",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 33
+        }
+      },
+      {
+        "comment": "",
+        "key": "All Rooms",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 34
+        }
+      },
+      {
+        "comment": "",
+        "key": "Channel",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 49
+        }
+      },
+      {
+        "comment": "",
+        "key": "All Channels",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 50
+        }
+      },
+      {
+        "comment": "",
+        "key": "CH %lld",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 52
+        }
+      },
+      {
+        "comment": "",
+        "key": "Resilience Simulator",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 83
+        }
+      },
+      {
+        "comment": "",
+        "key": "Channel Scanner",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 90
+        }
+      },
+      {
+        "comment": "",
+        "key": "BR Health Monitor",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 96
+        }
+      },
+      {
+        "comment": "",
+        "key": "Export Map",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 104
+        }
+      },
+      {
+        "comment": "",
+        "key": "CH %lld",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 210
+        }
+      },
+      {
+        "comment": "",
+        "key": "No signal data",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 318
+        }
+      },
+      {
+        "comment": "",
+        "key": "·",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 323
+        }
+      },
+      {
+        "comment": "",
+        "key": "CH %lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 324
+        }
+      },
+      {
+        "comment": "",
+        "key": "·",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 329
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld hop](inflect: true)",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 330
+        }
+      },
+      {
+        "comment": "",
+        "key": "·",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 335
+        }
+      },
+      {
+        "comment": "",
+        "key": "Offline",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 314
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld%%",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 354
+        }
+      },
+      {
+        "comment": "",
+        "key": "Offline",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 387
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld hop](inflect: true) from hub",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 389
+        }
+      },
+      {
+        "comment": "",
+        "key": "View Details",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 371
+        }
+      },
+      {
+        "comment": "",
+        "key": "Copy Name",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 376
+        }
+      },
+      {
+        "comment": "",
+        "key": "Copy Signal Quality",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 382
+        }
+      }
+    ]
+  },
+  "version": 1
+}

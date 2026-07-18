@@ -1,0 +1,4 @@
+module ThreadMapper {
+header "ThreadMapper-Swift.h"
+export *
+}

@@ -39,7 +39,7 @@ struct ActivityEvent: Identifiable, Codable {
             }
         }
 
-        var label: String {
+        var label: LocalizedStringResource {
             switch self {
             case .deviceOffline:       return "Device Offline"
             case .deviceOnline:        return "Device Online"

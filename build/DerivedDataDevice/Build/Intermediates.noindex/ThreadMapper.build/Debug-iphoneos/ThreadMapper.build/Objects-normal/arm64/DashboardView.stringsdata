@@ -1,0 +1,96 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/DashboardView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Dashboard",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 94
+        }
+      },
+      {
+        "comment": "",
+        "key": "very weak",
+        "location": {
+          "startingColumn": 37,
+          "startingLine": 269
+        }
+      },
+      {
+        "comment": "",
+        "key": "weak",
+        "location": {
+          "startingColumn": 37,
+          "startingLine": 270
+        }
+      },
+      {
+        "comment": "",
+        "key": "Response quality in %@ is %@ (%@) — consider adding a Thread router nearby",
+        "location": {
+          "startingColumn": 50,
+          "startingLine": 271
+        }
+      },
+      {
+        "comment": "",
+        "key": "Rescan",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 107
+        }
+      },
+      {
+        "comment": "",
+        "key": "Network Diagnostics",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 115
+        }
+      },
+      {
+        "comment": "",
+        "key": "Commissioning Readiness",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 121
+        }
+      },
+      {
+        "comment": "",
+        "key": "Smart Home Advisor",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 126
+        }
+      },
+      {
+        "comment": "",
+        "key": "AI Insights",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 131
+        }
+      },
+      {
+        "comment": "",
+        "key": "Share Health Card",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 136
+        }
+      },
+      {
+        "comment": "",
+        "key": "Weekly Report",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 143
+        }
+      }
+    ]
+  },
+  "version": 1
+}

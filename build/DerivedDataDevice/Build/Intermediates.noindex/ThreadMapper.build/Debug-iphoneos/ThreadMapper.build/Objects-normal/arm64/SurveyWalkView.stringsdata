@@ -1,0 +1,264 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/SurveyWalkView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Survey",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 28
+        }
+      },
+      {
+        "comment": "",
+        "key": "Heatmap",
+        "location": {
+          "startingColumn": 17,
+          "startingLine": 230
+        }
+      },
+      {
+        "comment": "",
+        "key": "Weak Links",
+        "location": {
+          "startingColumn": 17,
+          "startingLine": 289
+        }
+      },
+      {
+        "comment": "",
+        "key": "Room Coverage",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 59
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld room](inflect: true)",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 61
+        }
+      },
+      {
+        "comment": "",
+        "key": "· %lld samples",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 87
+        }
+      },
+      {
+        "comment": "",
+        "key": "Reset",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 134
+        }
+      },
+      {
+        "comment": "",
+        "key": "Stop Walk",
+        "location": {
+          "startingColumn": 45,
+          "startingLine": 115
+        }
+      },
+      {
+        "comment": "",
+        "key": "Start Free Walk",
+        "location": {
+          "startingColumn": 59,
+          "startingLine": 115
+        }
+      },
+      {
+        "comment": "",
+        "key": "Recording — %lld samples",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 124
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld device](inflect: true)",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 128
+        }
+      },
+      {
+        "comment": "",
+        "key": "Free Walk",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 141
+        }
+      },
+      {
+        "comment": "",
+        "key": "Records GPS-tagged samples as you walk. Use Guided Survey above for room-based results.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 143
+        }
+      },
+      {
+        "comment": "",
+        "key": "No Thread devices — connect via HomeKit first",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 151
+        }
+      },
+      {
+        "comment": "",
+        "key": "Measuring…",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 184
+        }
+      },
+      {
+        "comment": "",
+        "key": "response quality",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 179
+        }
+      },
+      {
+        "comment": "",
+        "key": "Updated %@ ago",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 201
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld samples",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 210
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld weak",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 211
+        }
+      },
+      {
+        "comment": "",
+        "key": "Live Signal",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 219
+        }
+      },
+      {
+        "comment": "",
+        "key": "Via HomeKit latency",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 221
+        }
+      },
+      {
+        "comment": "",
+        "key": "No survey data yet",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 238
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld cell](inflect: true)",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 246
+        }
+      },
+      {
+        "comment": "",
+        "key": "Show Heatmap",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 231
+        }
+      },
+      {
+        "comment": "",
+        "key": "Radius",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 255
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld m",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 259
+        }
+      },
+      {
+        "comment": "",
+        "key": "Resolution",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 269
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld m",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 273
+        }
+      },
+      {
+        "comment": "",
+        "key": "Export CSV",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 320
+        }
+      },
+      {
+        "comment": "",
+        "key": "None — threshold response quality < −80",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 291
+        }
+      },
+      {
+        "comment": "",
+        "key": "%@ signal",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 305
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld weak spot](inflect: true) detected — consider adding a Thread router",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 333
+        }
+      }
+    ]
+  },
+  "version": 1
+}

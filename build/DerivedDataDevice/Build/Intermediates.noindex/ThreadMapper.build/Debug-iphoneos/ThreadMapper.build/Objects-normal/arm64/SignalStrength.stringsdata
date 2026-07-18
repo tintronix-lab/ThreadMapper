@@ -1,0 +1,40 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Utils/SignalStrength.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Excellent",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 17
+        }
+      },
+      {
+        "comment": "",
+        "key": "Good",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 18
+        }
+      },
+      {
+        "comment": "",
+        "key": "Fair",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 19
+        }
+      },
+      {
+        "comment": "",
+        "key": "Weak",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 20
+        }
+      }
+    ]
+  },
+  "version": 1
+}

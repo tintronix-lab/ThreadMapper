@@ -13,7 +13,7 @@ extension Int {
         self < -80 ? "wifi.exclamationmark" : "wifi"
     }
 
-    var rssiQualityLabel: String {
+    var rssiQualityLabel: LocalizedStringResource {
         if self > -50 { return "Excellent" }
         if self > -65 { return "Good" }
         if self > -80 { return "Fair" }

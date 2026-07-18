@@ -1,0 +1,24 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/UserManualView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "User Manual",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 508
+        }
+      },
+      {
+        "comment": "",
+        "key": "•",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 544
+        }
+      }
+    ]
+  },
+  "version": 1
+}

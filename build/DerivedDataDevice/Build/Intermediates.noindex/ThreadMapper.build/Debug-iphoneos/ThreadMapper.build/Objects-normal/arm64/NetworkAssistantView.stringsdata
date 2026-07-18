@@ -1,0 +1,80 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/NetworkAssistantView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "AI: %@",
+        "location": {
+          "startingColumn": 44,
+          "startingLine": 52
+        }
+      },
+      {
+        "comment": "",
+        "key": "Network Assistant",
+        "location": {
+          "startingColumn": 66,
+          "startingLine": 52
+        }
+      },
+      {
+        "comment": "",
+        "key": "Ask anything about your network",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 71
+        }
+      },
+      {
+        "comment": "",
+        "key": "I know your current mesh topology, signal levels, and device history.",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 73
+        }
+      },
+      {
+        "comment": "",
+        "key": "Suggested questions",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 82
+        }
+      },
+      {
+        "comment": "",
+        "key": "Ask about your network…",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 160
+        }
+      },
+      {
+        "comment": "",
+        "key": "Network Assistant",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 397
+        }
+      },
+      {
+        "comment": "",
+        "key": "iOS 26 Required",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 389
+        }
+      },
+      {
+        "comment": "",
+        "key": "Network Assistant requires iOS 26 or later with Apple Intelligence.",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 390
+        }
+      }
+    ]
+  },
+  "version": 1
+}

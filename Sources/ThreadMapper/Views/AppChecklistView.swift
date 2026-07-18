@@ -10,7 +10,7 @@ struct AppChecklistView: View {
                 Section("Setup") {
                     checkRow(
                         label: "Thread Devices",
-                        value: meshVM.devices.isEmpty ? "None found" : "\(meshVM.devices.count) found",
+                        value: meshVM.devices.isEmpty ? "None found" : "^[\(meshVM.devices.count) device](inflect: true) found",
                         ok: !meshVM.devices.isEmpty
                     )
                     checkRow(
@@ -28,12 +28,12 @@ struct AppChecklistView: View {
                 Section("Signal Health") {
                     checkRow(
                         label: "Weak devices",
-                        value: weakCount == 0 ? "None" : "\(weakCount) device\(weakCount == 1 ? "" : "s")",
+                        value: weakCount == 0 ? "None" : "^[\(weakCount) device](inflect: true)",
                         ok: weakCount == 0
                     )
                     checkRow(
                         label: "Low battery",
-                        value: lowBatteryCount == 0 ? "None" : "\(lowBatteryCount) device\(lowBatteryCount == 1 ? "" : "s")",
+                        value: lowBatteryCount == 0 ? "None" : "^[\(lowBatteryCount) device](inflect: true)",
                         ok: lowBatteryCount == 0
                     )
                 }
@@ -46,7 +46,7 @@ struct AppChecklistView: View {
                     )
                     checkRow(
                         label: "Weak links recorded",
-                        value: surveyVM.hasWeakDevices ? "\(surveyVM.weakDevices.count)" : "None",
+                        value: surveyVM.hasWeakDevices ? "^[\(surveyVM.weakDevices.count) device](inflect: true)" : "None",
                         ok: !surveyVM.hasWeakDevices
                     )
                 }
@@ -81,7 +81,7 @@ struct AppChecklistView: View {
     }
 
     @ViewBuilder
-    private func checkRow(label: String, value: String, ok: Bool) -> some View {
+    private func checkRow(label: LocalizedStringKey, value: LocalizedStringKey, ok: Bool) -> some View {
         HStack {
             Image(systemName: ok ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
                 .foregroundStyle(ok ? .green : .orange)

@@ -1,8 +1,13 @@
 import SwiftUI
+import UserNotifications
 
 struct SettingsView: View {
     @AppStorage("notifyOffline")        private var notifyOffline = true
     @AppStorage("notifyTopology")       private var notifyTopology = true
+    @AppStorage("notifyHealthDrop")     private var notifyHealthDrop = true
+    @AppStorage("notifyWeeklyReport")   private var notifyWeeklyReport = true
+    @AppStorage("notifyNewDevice")      private var notifyNewDevice = true
+    @AppStorage("notifyProactiveAI")    private var notifyProactiveAI = true
     @AppStorage("offlineGracePeriod")   private var offlineGracePeriod = 60.0
     @AppStorage("demoMode")             private var demoMode = false
     @AppStorage("quietHoursEnabled")    private var quietHoursEnabled = false
@@ -16,6 +21,7 @@ struct SettingsView: View {
     @Environment(DeviceStatsStore.self)   private var statsStore
     @Environment(HealthHistoryStore.self) private var historyStore
     @Environment(ActivityStore.self)      private var activityStore
+    @State private var notificationService = NotificationService.shared
 
     @State private var showClearStatsConfirm    = false
     @State private var showClearHistoryConfirm  = false
@@ -36,7 +42,6 @@ struct SettingsView: View {
             Form {
                 notificationsSection
                 quietHoursSection
-                alertsSection
                 borderRouterSection
                 dataSection
                 toolsSection
@@ -46,6 +51,7 @@ struct SettingsView: View {
                 #endif
             }
             .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.large)
             #if DEBUG
             .sheet(isPresented: $showPaywallPreview) { PaywallView() }
             #endif
@@ -75,10 +81,57 @@ struct SettingsView: View {
 
     @ViewBuilder
     private var notificationsSection: some View {
-        Section("Notifications") {
+        Section {
+            if !notificationService.isAuthorized {
+                Button {
+                    UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+                } label: {
+                    Label("Enable in iOS Settings", systemImage: "bell.slash.fill")
+                        .foregroundStyle(.orange)
+                }
+            }
             Toggle("Offline device alerts", isOn: $notifyOffline)
+                .disabled(!notificationService.isAuthorized)
+            Picker("Offline grace period", selection: $offlineGracePeriod) {
+                ForEach(gracePeriodOptions, id: \.seconds) { opt in
+                    Text(opt.label).tag(opt.seconds)
+                }
+            }
+            .disabled(!notifyOffline || !notificationService.isAuthorized)
             Toggle("Network topology changes", isOn: $notifyTopology)
+                .disabled(!notificationService.isAuthorized)
+            Toggle("Mesh health grade changes", isOn: $notifyHealthDrop)
+                .disabled(!notificationService.isAuthorized)
+            Toggle("New device detected", isOn: $notifyNewDevice)
+                .disabled(!notificationService.isAuthorized)
+            Toggle("Proactive AI insights", isOn: $notifyProactiveAI)
+                .disabled(!notificationService.isAuthorized)
+            Toggle("Weekly network report", isOn: $notifyWeeklyReport)
+                .disabled(!notificationService.isAuthorized)
+                .onChange(of: notifyWeeklyReport) { _, enabled in
+                    if enabled {
+                        Task {
+                            await NotificationService.shared.scheduleWeeklyReportWithAIHeadline(
+                                devices: [],
+                                health: NetworkHealthScore.compute(devices: []),
+                                historyEntries: historyStore.entries
+                            )
+                        }
+                    } else {
+                        UNUserNotificationCenter.current()
+                            .removePendingNotificationRequests(withIdentifiers: ["weekly-report"])
+                    }
+                }
+        } header: {
+            Text("Notifications")
+        } footer: {
+            if notificationService.isAuthorized {
+                Text("Grade drop alerts fire when your network health falls by one letter grade or more. Offline alerts wait for the grace period before firing. Weekly report arrives Sunday mornings.")
+            } else {
+                Text("ThreadMapper needs notification permission to alert you about device and network events.")
+            }
         }
+        .task { await notificationService.refreshAuthStatus() }
     }
 
     @ViewBuilder
@@ -117,21 +170,6 @@ struct SettingsView: View {
     }
 
     @ViewBuilder
-    private var alertsSection: some View {
-        Section {
-            Picker("Offline grace period", selection: $offlineGracePeriod) {
-                ForEach(gracePeriodOptions, id: \.seconds) { opt in
-                    Text(opt.label).tag(opt.seconds)
-                }
-            }
-        } header: {
-            Text("Alerts")
-        } footer: {
-            Text("How long a device must be unreachable before an offline alert fires.")
-        }
-    }
-
-    @ViewBuilder
     private var borderRouterSection: some View {
         Section {
             TextField("http://192.168.1.50:8081", text: $borderRouterURL)
@@ -157,9 +195,9 @@ struct SettingsView: View {
                 .disabled(brTesting)
             }
         } header: {
-            Text("Border Router (advanced)")
+            Text("Border Router")
         } footer: {
-            Text("Connect an OpenThread Border Router's REST API to read real Thread network facts (channel, PAN ID) and improve link quality readings. Changes apply immediately. Apple/Google border routers don't expose this; OTBR-based ones (e.g. Home Assistant) do.")
+            Text("Advanced: connect an OpenThread Border Router's REST API to read real Thread network facts (channel, PAN ID) and improve link quality readings. Changes apply immediately. Apple/Google border routers don't expose this; OTBR-based ones (e.g. Home Assistant) do.")
         }
     }
 
@@ -237,6 +275,12 @@ struct SettingsView: View {
                 UserManualView()
             } label: {
                 Label("User Manual", systemImage: "book.pages")
+            }
+            Button {
+                UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+            } label: {
+                Label("Language", systemImage: "globe")
+                    .foregroundStyle(.primary)
             }
             LabeledContent("Version") {
                 Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—")

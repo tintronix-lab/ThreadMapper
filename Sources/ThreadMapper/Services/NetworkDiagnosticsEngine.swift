@@ -11,7 +11,7 @@ struct NetworkDiagnosticsEngine {
             case critical = 0, high = 1, medium = 2
             static func < (a: Priority, b: Priority) -> Bool { a.rawValue < b.rawValue }
 
-            var label: String {
+            var label: LocalizedStringResource {
                 switch self { case .critical: "Critical"; case .high: "High"; case .medium: "Medium" }
             }
             var color: Color {
@@ -84,7 +84,7 @@ struct NetworkDiagnosticsEngine {
             case medium  // near a common Wi-Fi channel
             case low     // in a cleaner part of the 2.4 GHz band
 
-            var label: String {
+            var label: LocalizedStringResource {
                 switch self { case .high: "High"; case .medium: "Medium"; case .low: "Low" }
             }
             var color: Color {
@@ -141,7 +141,7 @@ struct NetworkDiagnosticsEngine {
             default: return .red
             }
         }
-        var label: String {
+        var label: LocalizedStringResource {
             switch score {
             case 80...: return "Excellent"
             case 60..<80: return "Good"
@@ -312,7 +312,7 @@ struct NetworkDiagnosticsEngine {
             let tail = offline.count > 3 ? " and \(offline.count - 3) more" : ""
             recs.append(.init(
                 priority: .critical, category: .coverage,
-                title: "\(offline.count) Device\(offline.count == 1 ? "" : "s") Offline",
+                title: String(localized: "^[\(offline.count) Device](inflect: true) Offline"),
                 detail: "\(names)\(tail) cannot be reached. Check power supply and mesh reachability.",
                 icon: "network.slash",
                 fixSteps: [
@@ -346,7 +346,7 @@ struct NetworkDiagnosticsEngine {
             let names = deepDevices.prefix(2).map(\.device.name).joined(separator: ", ")
             recs.append(.init(
                 priority: .medium, category: .performance,
-                title: "\(deepDevices.count) Device\(deepDevices.count == 1 ? "" : "s") at 4+ Hops",
+                title: String(localized: "^[\(deepDevices.count) Device](inflect: true) at 4+ Hops"),
                 detail: "\(names) — deep hop counts increase latency and reduce mesh reliability. Add an intermediate router to shorten the path.",
                 icon: "point.3.connected.trianglepath.dotted",
                 fixSteps: [
@@ -438,7 +438,7 @@ struct NetworkDiagnosticsEngine {
             let tail = signalTrendAlerts.count > 2 ? " and \(signalTrendAlerts.count - 2) more" : ""
             recs.append(.init(
                 priority: .high, category: .performance,
-                title: "\(signalTrendAlerts.count) Device\(signalTrendAlerts.count == 1 ? "" : "s") Signal Degrading",
+                title: String(localized: "^[\(signalTrendAlerts.count) Device](inflect: true) Signal Degrading"),
                 detail: "\(names)\(tail) — signal dropped 8+ dBm in the last 30 minutes. Check for new interference or obstructions.",
                 icon: "chart.line.downtrend.xyaxis",
                 fixSteps: [
@@ -488,11 +488,10 @@ struct NetworkDiagnosticsEngine {
         // Network partition recommendation
         if !networkPartitions.isEmpty {
             let totalIsolated = networkPartitions.reduce(0) { $0 + $1.devices.count }
-            let clusterWord = networkPartitions.count == 1 ? "cluster" : "clusters"
             recs.append(.init(
                 priority: .critical, category: .redundancy,
-                title: "Thread Network Fragmented — \(totalIsolated) Device\(totalIsolated == 1 ? "" : "s") Isolated",
-                detail: "\(networkPartitions.count) isolated \(clusterWord) detected with no path to any border router. Affected devices are completely unreachable.",
+                title: String(localized: "Thread Network Fragmented — ^[\(totalIsolated) Device](inflect: true) Isolated"),
+                detail: String(localized: "^[\(networkPartitions.count) isolated cluster](inflect: true) detected with no path to any border router. Affected devices are completely unreachable."),
                 icon: "exclamationmark.triangle.fill",
                 fixSteps: [
                     "Check if the router(s) these clusters depended on are powered off or offline.",

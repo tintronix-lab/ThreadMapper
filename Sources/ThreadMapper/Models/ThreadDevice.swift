@@ -41,7 +41,7 @@ enum DeviceProtocol: String, CaseIterable {
         }
     }
 
-    var shortLabel: String {
+    var shortLabel: LocalizedStringResource {
         switch self {
         case .threadBorderRouter: return "Border Router"
         case .threadNative:       return "Thread"
@@ -52,7 +52,7 @@ enum DeviceProtocol: String, CaseIterable {
         }
     }
 
-    var detail: String {
+    var detail: LocalizedStringResource {
         switch self {
         case .threadBorderRouter: return "Acts as a gateway between Thread mesh and your Wi-Fi network."
         case .threadNative:       return "Communicates natively over the Thread mesh protocol."

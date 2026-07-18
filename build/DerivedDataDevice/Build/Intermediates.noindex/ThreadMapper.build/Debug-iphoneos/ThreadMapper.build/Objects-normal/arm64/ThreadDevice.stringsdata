@@ -1,0 +1,104 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Models/ThreadDevice.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Border Router",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 46
+        }
+      },
+      {
+        "comment": "",
+        "key": "Thread",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 47
+        }
+      },
+      {
+        "comment": "",
+        "key": "Matter Bridge",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 48
+        }
+      },
+      {
+        "comment": "",
+        "key": "Zigbee",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 49
+        }
+      },
+      {
+        "comment": "",
+        "key": "HomeKit",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 50
+        }
+      },
+      {
+        "comment": "",
+        "key": "Unknown",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 51
+        }
+      },
+      {
+        "comment": "",
+        "key": "Acts as a gateway between Thread mesh and your Wi-Fi network.",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 57
+        }
+      },
+      {
+        "comment": "",
+        "key": "Communicates natively over the Thread mesh protocol.",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 58
+        }
+      },
+      {
+        "comment": "",
+        "key": "Bridges Matter or multiple protocols to your Thread network.",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 59
+        }
+      },
+      {
+        "comment": "",
+        "key": "Uses Zigbee, not Thread. Devices behind this hub aren't on your Thread mesh.",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 60
+        }
+      },
+      {
+        "comment": "",
+        "key": "Connects via Wi-Fi or Bluetooth — not part of the Thread mesh.",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 61
+        }
+      },
+      {
+        "comment": "",
+        "key": "Protocol could not be determined from available data.",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 62
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -171,7 +171,7 @@ final class SurveyViewModel {
 
     // Convenience wrapper used by SurveyWalkView
     func signalQuality(for rssi: Int) -> (label: String, color: Color) {
-        (rssi.rssiQualityLabel, rssi.rssiColor)
+        (String(localized: rssi.rssiQualityLabel), rssi.rssiColor)
     }
 
     func deleteSavedPoints(at offsets: IndexSet) {

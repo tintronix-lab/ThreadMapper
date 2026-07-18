@@ -9,8 +9,8 @@ struct CommissioningReadinessView: View {
 
     private struct CommissioningCheck: Identifiable {
         let id = UUID()
-        let title: String
-        let detail: String
+        let title: LocalizedStringResource
+        let detail: LocalizedStringResource
         let status: Status
         let icon: String
 
@@ -23,7 +23,7 @@ struct CommissioningReadinessView: View {
             var icon: String {
                 switch self { case .pass: "checkmark.circle.fill"; case .warning: "exclamationmark.triangle.fill"; case .fail: "xmark.circle.fill" }
             }
-            var label: String {
+            var label: LocalizedStringResource {
                 switch self { case .pass: "Pass"; case .warning: "Warning"; case .fail: "Fail" }
             }
         }
@@ -92,7 +92,7 @@ struct CommissioningReadinessView: View {
         }
     }
 
-    private var overallHeadline: String {
+    private var overallHeadline: LocalizedStringResource {
         switch overallStatus {
         case .pass:    return "Ready to Commission"
         case .warning: return "Ready with Caveats"
@@ -100,13 +100,13 @@ struct CommissioningReadinessView: View {
         }
     }
 
-    private var overallSubheadline: String {
+    private var overallSubheadline: LocalizedStringResource {
         let fails = checks.filter { $0.status == .fail }.count
         let warns = checks.filter { $0.status == .warning }.count
         switch overallStatus {
         case .pass:    return "Your Thread network passed all checks. You can safely add a new device."
-        case .warning: return "\(warns) warning\(warns == 1 ? "" : "s") found. New devices should work, but consider resolving these for the best experience."
-        case .fail:    return "\(fails) critical issue\(fails == 1 ? "" : "s") must be resolved before commissioning."
+        case .warning: return "^[\(warns) warning](inflect: true) found. New devices should work, but consider resolving these for the best experience."
+        case .fail:    return "^[\(fails) critical issue](inflect: true) must be resolved before commissioning."
         }
     }
 
@@ -192,7 +192,7 @@ struct CommissioningReadinessView: View {
                 title: "Border Router Present",
                 detail: borderRouters.isEmpty
                     ? "No border router detected. Add a HomePod mini, HomePod, or Apple TV 4K to enable Thread commissioning."
-                    : "\(borderRouters.count) border router\(borderRouters.count == 1 ? "" : "s") found: \(borderRouters.prefix(2).map(\.name).joined(separator: ", "))\(borderRouters.count > 2 ? "…" : "").",
+                    : "^[\(borderRouters.count) border router](inflect: true) found: \(borderRouters.prefix(2).map(\.name).joined(separator: ", "))\(borderRouters.count > 2 ? "…" : "").",
                 status: borderRouters.isEmpty ? .fail : .pass,
                 icon: "antenna.radiowaves.left.and.right"
             ),
@@ -211,8 +211,8 @@ struct CommissioningReadinessView: View {
             CommissioningCheck(
                 title: "Mesh Reachability",
                 detail: offline.isEmpty
-                    ? "All \(devices.count) device\(devices.count == 1 ? "" : "s") are online and reachable."
-                    : "\(offline.count) device\(offline.count == 1 ? "" : "s") offline: \(offline.prefix(2).map(\.name).joined(separator: ", "))\(offline.count > 2 ? "…" : ""). Offline devices can fragment the mesh.",
+                    ? "All ^[\(devices.count) device](inflect: true) are online and reachable."
+                    : "^[\(offline.count) device](inflect: true) offline: \(offline.prefix(2).map(\.name).joined(separator: ", "))\(offline.count > 2 ? "…" : ""). Offline devices can fragment the mesh.",
                 status: offline.isEmpty ? .pass : (offline.count <= 2 ? .warning : .fail),
                 icon: "wifi"
             ),
@@ -221,9 +221,9 @@ struct CommissioningReadinessView: View {
             CommissioningCheck(
                 title: "Routing Capacity",
                 detail: routers.count >= 3
-                    ? "\(routers.count) routing devices provide good mesh capacity for new devices."
+                    ? "^[\(routers.count) routing device](inflect: true) provide good mesh capacity for new devices."
                     : routers.count >= 1
-                        ? "\(routers.count) routing device\(routers.count == 1 ? "" : "s") available. More mains-powered Thread devices improve coverage."
+                        ? "^[\(routers.count) routing device](inflect: true) available. More mains-powered Thread devices improve coverage."
                         : "No Thread routers detected. New devices will have limited routing options.",
                 status: routers.count >= 3 ? .pass : (routers.count >= 1 ? .warning : .fail),
                 icon: "point.3.connected.trianglepath.dotted"
@@ -233,8 +233,8 @@ struct CommissioningReadinessView: View {
             CommissioningCheck(
                 title: "Thread Channel",
                 detail: conflictChannels.isEmpty
-                    ? "Thread channel\(report.channelStats.count == 1 ? "" : "s") have low Wi-Fi interference risk."
-                    : "Channel\(conflictChannels.count == 1 ? "" : "s") \(conflictChannels.map { "CH\($0.channel)" }.joined(separator: ", ")) overlap with 2.4 GHz Wi-Fi. Consider switching to CH 15, 20, or 25.",
+                    ? "^[\(report.channelStats.count) Thread channel](inflect: true) have low Wi-Fi interference risk."
+                    : "^[\(conflictChannels.count) channel](inflect: true) \(conflictChannels.map { "CH\($0.channel)" }.joined(separator: ", ")) overlap with 2.4 GHz Wi-Fi. Consider switching to CH 15, 20, or 25.",
                 status: conflictChannels.isEmpty ? .pass : .warning,
                 icon: "waveform.badge.exclamationmark"
             ),
@@ -244,7 +244,7 @@ struct CommissioningReadinessView: View {
                 title: "Mesh Depth",
                 detail: deepDevices.isEmpty
                     ? "All reachable devices are within 3 hops of a border router."
-                    : "\(deepDevices.count) device\(deepDevices.count == 1 ? "" : "s") at 4+ hops. New devices added near them may also land deep in the mesh.",
+                    : "^[\(deepDevices.count) device](inflect: true) at 4+ hops. New devices added near them may also land deep in the mesh.",
                 status: deepDevices.isEmpty ? .pass : .warning,
                 icon: "arrow.up.forward.circle"
             ),

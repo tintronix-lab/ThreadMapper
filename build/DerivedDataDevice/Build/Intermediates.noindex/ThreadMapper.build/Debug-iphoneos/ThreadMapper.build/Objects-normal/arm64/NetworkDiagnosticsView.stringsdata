@@ -1,0 +1,880 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/NetworkDiagnosticsView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Network Diagnostics",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 40
+        }
+      },
+      {
+        "comment": "",
+        "key": "Done",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 44
+        }
+      },
+      {
+        "comment": "",
+        "key": "Refresh",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 50
+        }
+      },
+      {
+        "comment": "",
+        "key": "Baseline Saved",
+        "location": {
+          "startingColumn": 57,
+          "startingLine": 66
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save as Baseline",
+        "location": {
+          "startingColumn": 56,
+          "startingLine": 67
+        }
+      },
+      {
+        "comment": "",
+        "key": "Update Baseline",
+        "location": {
+          "startingColumn": 77,
+          "startingLine": 67
+        }
+      },
+      {
+        "comment": "",
+        "key": "Clear Baseline",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 79
+        }
+      },
+      {
+        "comment": "",
+        "key": "Analyzing your Thread network…",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 94
+        }
+      },
+      {
+        "comment": "",
+        "key": "No Devices Found",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 106
+        }
+      },
+      {
+        "comment": "",
+        "key": "Return to the dashboard and tap Rescan to discover your Thread network.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 108
+        }
+      },
+      {
+        "comment": "",
+        "key": "Summary",
+        "location": {
+          "startingColumn": 17,
+          "startingLine": 170
+        }
+      },
+      {
+        "comment": "",
+        "key": "Overall mesh fitness: ",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 226
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld/100",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 229
+        }
+      },
+      {
+        "comment": "",
+        "key": "Mesh Quality Scorecard",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 243
+        }
+      },
+      {
+        "comment": "",
+        "key": "Each dimension is scored independently. Tap a finding below for remediation steps.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 245
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 265
+        }
+      },
+      {
+        "comment": "",
+        "key": "/100",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 269
+        }
+      },
+      {
+        "comment": "",
+        "key": "Network Looks Healthy",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 301
+        }
+      },
+      {
+        "comment": "",
+        "key": "No issues detected. All routers are redundant, signal strength is good, and no channel conflicts were found.",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 303
+        }
+      },
+      {
+        "comment": "",
+        "key": "Recommendations",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 310
+        }
+      },
+      {
+        "comment": "",
+        "key": "Recommendations (%lld)",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 329
+        }
+      },
+      {
+        "comment": "",
+        "key": "Tap a recommendation to see step-by-step fix instructions.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 331
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld.",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 370
+        }
+      },
+      {
+        "comment": "",
+        "key": "Router: %@",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 420
+        }
+      },
+      {
+        "comment": "",
+        "key": "No router in this room",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 425
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld/%lld online",
+        "location": {
+          "startingColumn": 33,
+          "startingLine": 406
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld dBm",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 413
+        }
+      },
+      {
+        "comment": "",
+        "key": "Room Coverage",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 434
+        }
+      },
+      {
+        "comment": "",
+        "key": "Grade reflects signal strength and device availability. Rooms without a router rely on hops from another location.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 436
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld pts",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 487
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld dBm",
+        "location": {
+          "startingColumn": 46,
+          "startingLine": 474
+        }
+      },
+      {
+        "comment": "",
+        "key": "Room Signal History",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 495
+        }
+      },
+      {
+        "comment": "",
+        "key": "Aggregated RSSI from all devices per room over the last 30 minutes. Tap a room to reveal the sparkline.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 497
+        }
+      },
+      {
+        "comment": "",
+        "key": "CH %lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 560
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 569
+        }
+      },
+      {
+        "comment": "",
+        "key": "Direct",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 571
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 575
+        }
+      },
+      {
+        "comment": "",
+        "key": "Total Served",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 577
+        }
+      },
+      {
+        "comment": "",
+        "key": "Border Router Comparison",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 591
+        }
+      },
+      {
+        "comment": "",
+        "key": "Direct = devices routed immediately through this BR. Total = all devices whose traffic passes through it upstream.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 593
+        }
+      },
+      {
+        "comment": "",
+        "key": "via %@",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 618
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 644
+        }
+      },
+      {
+        "comment": "",
+        "key": "Mesh Depth",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 654
+        }
+      },
+      {
+        "comment": "",
+        "key": "Hop count = routing steps from border router. Each additional hop adds latency. Aim for 3 hops or fewer.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 656
+        }
+      },
+      {
+        "comment": "",
+        "key": "Sole router in %@",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 672
+        }
+      },
+      {
+        "comment": "",
+        "key": "Single-Point Routers",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 680
+        }
+      },
+      {
+        "comment": "",
+        "key": "These routers have no backup in their area. If one fails, the end devices connected to it lose mesh access.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 682
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 741
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld device](inflect: true) isolated",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 727
+        }
+      },
+      {
+        "comment": "",
+        "key": "No routing path found",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 735
+        }
+      },
+      {
+        "comment": "",
+        "key": "Missing link: %@",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 731
+        }
+      },
+      {
+        "comment": "",
+        "key": "Isolated Clusters — ^[%lld device](inflect: true)",
+        "location": {
+          "startingColumn": 19,
+          "startingLine": 749
+        }
+      },
+      {
+        "comment": "",
+        "key": "These devices have no path to any border router. They cannot be controlled remotely until the missing routing link is restored.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 752
+        }
+      },
+      {
+        "comment": "",
+        "key": "No Changes Since Baseline",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 790
+        }
+      },
+      {
+        "comment": "",
+        "key": "Network topology matches the saved snapshot exactly.",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 792
+        }
+      },
+      {
+        "comment": "",
+        "key": "Changes Since Baseline",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 801
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld regression](inflect: true)",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 804
+        }
+      },
+      {
+        "comment": "",
+        "key": "Baseline captured %@ ago — ^[%lld change](inflect: true) detected.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 810
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld dBm",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 830
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld dBm",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 837
+        }
+      },
+      {
+        "comment": "",
+        "key": "−%lld",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 845
+        }
+      },
+      {
+        "comment": "",
+        "key": "dBm",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 848
+        }
+      },
+      {
+        "comment": "",
+        "key": "Signal Degradation",
+        "location": {
+          "startingColumn": 19,
+          "startingLine": 856
+        }
+      },
+      {
+        "comment": "",
+        "key": "Devices whose average signal dropped 8+ dBm over the last 30 minutes. This can indicate new interference, physical obstruction, or a device in need of attention.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 858
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 891
+        }
+      },
+      {
+        "comment": "",
+        "key": "Failure would isolate ^[%lld device](inflect: true)",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 880
+        }
+      },
+      {
+        "comment": "",
+        "key": "Failure Impact",
+        "location": {
+          "startingColumn": 19,
+          "startingLine": 898
+        }
+      },
+      {
+        "comment": "",
+        "key": "How many end devices would lose internet access if each routing device were to fail. Add a second router nearby to eliminate single points of failure.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 900
+        }
+      },
+      {
+        "comment": "",
+        "key": "CH",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 918
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 921
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld device](inflect: true): %@%@",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 939
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld MHz",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 929
+        }
+      },
+      {
+        "comment": "",
+        "key": " interference risk",
+        "location": {
+          "startingColumn": 72,
+          "startingLine": 935
+        }
+      },
+      {
+        "comment": "",
+        "key": "Thread Channel Analysis",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 948
+        }
+      },
+      {
+        "comment": "",
+        "key": "Thread uses 2.4 GHz channels 11–26. Channels 15, 20, and 25 have the lowest overlap with Wi-Fi 2.4 GHz. Channels 11–14, 17–19, and 22–24 overlap with Wi-Fi non-overlapping channels 1, 6, and 11.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 950
+        }
+      },
+      {
+        "comment": "",
+        "key": "Thread Network Identity",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 989
+        }
+      },
+      {
+        "comment": "",
+        "key": "LIVE",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 993
+        }
+      },
+      {
+        "comment": "",
+        "key": "Live data from your OpenThread Border Router. The Extended PAN ID uniquely identifies this Thread network — useful for verifying commissioning targets.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 998
+        }
+      },
+      {
+        "comment": "",
+        "key": "Target",
+        "location": {
+          "startingColumn": 40,
+          "startingLine": 1072
+        }
+      },
+      {
+        "comment": "",
+        "key": "Run",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 1066
+        }
+      },
+      {
+        "comment": "",
+        "key": "Score",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 1067
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 1083
+        }
+      },
+      {
+        "comment": "",
+        "key": "+%lld",
+        "location": {
+          "startingColumn": 47,
+          "startingLine": 1127
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 61,
+          "startingLine": 1127
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 1098
+        }
+      },
+      {
+        "comment": "",
+        "key": "ago",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 1107
+        }
+      },
+      {
+        "comment": "",
+        "key": "Diagnostic History",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 1139
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld run](inflect: true)",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 1141
+        }
+      },
+      {
+        "comment": "",
+        "key": "Score = 100 minus issue penalties (−20 per critical, −10 per high, −5 per medium, −15 per isolated device). Green line = 80 target. Saved automatically on each refresh.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 1146
+        }
+      },
+      {
+        "comment": "",
+        "key": "ThreadMapper Diagnostic Report",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 1179
+        }
+      },
+      {
+        "comment": "",
+        "key": "Network diagnostic report from ThreadMapper",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 1180
+        }
+      },
+      {
+        "comment": "",
+        "key": "Unreachable",
+        "location": {
+          "startingColumn": 55,
+          "startingLine": 1249
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld hop](inflect: true)",
+        "location": {
+          "startingColumn": 90,
+          "startingLine": 1249
+        }
+      },
+      {
+        "comment": "",
+        "key": "  %@: ^[%lld device](inflect: true)",
+        "location": {
+          "startingColumn": 44,
+          "startingLine": 1250
+        }
+      },
+      {
+        "comment": "",
+        "key": "  CH %lld (%lld MHz) — %@ interference risk, ^[%lld device](inflect: true)",
+        "location": {
+          "startingColumn": 48,
+          "startingLine": 1258
+        }
+      },
+      {
+        "comment": "",
+        "key": "  %@ → ^[%lld device](inflect: true) isolated if removed",
+        "location": {
+          "startingColumn": 48,
+          "startingLine": 1276
+        }
+      },
+      {
+        "comment": "",
+        "key": "  Cluster %lld: ^[%lld device](inflect: true) — missing link: %@",
+        "location": {
+          "startingColumn": 48,
+          "startingLine": 1299
+        }
+      },
+      {
+        "comment": "",
+        "key": "Share Diagnostic Report",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 1182
+        }
+      },
+      {
+        "comment": "",
+        "key": "Exports a plain-text summary of this diagnostic run — useful for sharing with support forums or keeping a network health snapshot.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 1186
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld Zigbee bridge](inflect: true) detected — devices behind these hubs are not on your Thread mesh",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 1395
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld device](inflect: true) connected via HomeKit only — consider Thread-native replacements for better mesh coverage",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 1401
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 1387
+        }
+      },
+      {
+        "comment": "",
+        "key": "Protocol Compatibility",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 1408
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld of %lld Thread",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 1411
+        }
+      },
+      {
+        "comment": "",
+        "key": "Recent Updates",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 1450
+        }
+      },
+      {
+        "comment": "",
+        "key": "%@ → %@",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 1461
+        }
+      },
+      {
+        "comment": "",
+        "key": "Firmware Versions",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 1480
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld of %lld reported",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 1482
+        }
+      },
+      {
+        "comment": "",
+        "key": "Firmware versions are reported by HomeKit and may not reflect the latest available update from each manufacturer.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 1487
+        }
+      }
+    ]
+  },
+  "version": 1
+}

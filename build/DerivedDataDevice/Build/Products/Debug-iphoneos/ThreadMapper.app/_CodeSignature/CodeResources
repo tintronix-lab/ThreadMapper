@@ -4,49 +4,221 @@
 <dict>
 	<key>files</key>
 	<dict>
+		<key>AppIcon60x60@2x.png</key>
+		<data>
+		clV6UQkqPcUWOA2lgQjRKPjOPcU=
+		</data>
+		<key>AppIcon76x76@2x~ipad.png</key>
+		<data>
+		ciJ3p8V4yp22t5nLwB+8isWGZyQ=
+		</data>
+		<key>Assets.car</key>
+		<data>
+		AMuESUmaCyuJHibNhZ1VA0rzRyc=
+		</data>
 		<key>Info.plist</key>
 		<data>
-		NlGhL0Lif4aTgOWD2rYHIY/Vpfw=
+		OPwSmBDhr1OWUDHbGBlNBZYUNsE=
+		</data>
+		<key>Metadata.appintents/extract.actionsdata</key>
+		<data>
+		AvF2P9g4jNeuZIQsxddcm5hNP7A=
+		</data>
+		<key>Metadata.appintents/version.json</key>
+		<data>
+		PFbTXKE++oaNDMAe6pe4WaYJGCA=
 		</data>
 		<key>PkgInfo</key>
 		<data>
 		n57qDP4tZfLD1rCS43W0B4LQjzE=
 		</data>
+		<key>PlugIns/ThreadMapperWidget.appex/Info.plist</key>
+		<data>
+		t5/mYCu8k7+IvqDLn37lwTLStB8=
+		</data>
+		<key>PlugIns/ThreadMapperWidget.appex/Metadata.appintents/extract.actionsdata</key>
+		<data>
+		1hHeM3uWuaN/85oTkQMQx6VUCEY=
+		</data>
+		<key>PlugIns/ThreadMapperWidget.appex/Metadata.appintents/version.json</key>
+		<data>
+		PFbTXKE++oaNDMAe6pe4WaYJGCA=
+		</data>
+		<key>PlugIns/ThreadMapperWidget.appex/ThreadMapperWidget</key>
+		<data>
+		VPCiVGvcLbcP/GqEGoaWiOxZNT8=
+		</data>
+		<key>PlugIns/ThreadMapperWidget.appex/ThreadMapperWidget.debug.dylib</key>
+		<data>
+		ZEVxCdZcwI4b7qSDxk0yYVOgOIU=
+		</data>
+		<key>PlugIns/ThreadMapperWidget.appex/_CodeSignature/CodeResources</key>
+		<data>
+		dBYdU2bHzOzB2z79BJacUMy+YiU=
+		</data>
+		<key>PlugIns/ThreadMapperWidget.appex/__preview.dylib</key>
+		<data>
+		OWrk4eDOd/H86KZGu4LTm7M+K3s=
+		</data>
+		<key>PlugIns/ThreadMapperWidget.appex/embedded.mobileprovision</key>
+		<data>
+		P3bfEIXLqRMQBmfZZ81+mTUOm68=
+		</data>
+		<key>PrivacyInfo.xcprivacy</key>
+		<data>
+		rh/bmaQ7SJ/a+1q/VLGDxnT8+tM=
+		</data>
 		<key>ThreadMapper.debug.dylib</key>
 		<data>
-		m3Kfhp+BfKcK025UdGaFNxoAuGE=
+		31/WQKjUoVFMUI+fSwWUn68vtfw=
 		</data>
 		<key>__preview.dylib</key>
 		<data>
-		LgILg5/M28jXWEitzxIS1shY1Oc=
+		Kvag8LtNZK/4M5V9pN8OZ83Qx9Y=
 		</data>
 		<key>embedded.mobileprovision</key>
 		<data>
-		wj5gLThJhL+VK6MseDMj3m2vXJY=
+		+Uf8FPdxzy9gqsEabuLl4+J0Frk=
 		</data>
+		<key>sv.lproj/Localizable.strings</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			nJuRqI1TeMILUSSAPQUH2eu5So8=
+			</data>
+			<key>optional</key>
+			<true/>
+		</dict>
 	</dict>
 	<key>files2</key>
 	<dict>
+		<key>AppIcon60x60@2x.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			6Qr0SxYFgj9UDmudwrsvo+c47b2Yg2Q9y/0HOz5jRpE=
+			</data>
+		</dict>
+		<key>AppIcon76x76@2x~ipad.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			25J8jaNNuDaB6x/ixD8wjFGIBT/u+dV9MYo8qkold/c=
+			</data>
+		</dict>
+		<key>Assets.car</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			TTTIgRVWPtKf82/9B0kcpRHD3f2mkIrgv7dt6aD2LD8=
+			</data>
+		</dict>
+		<key>Metadata.appintents/extract.actionsdata</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Xs1RuxuD3S7aPjonVg0r/G2fVoCwa9RiITuqaRtGhjI=
+			</data>
+		</dict>
+		<key>Metadata.appintents/version.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			bGEMLTRvWVvXxahROmLgL3ZVf6XYsEamPvgqyAHzT5M=
+			</data>
+		</dict>
+		<key>PlugIns/ThreadMapperWidget.appex/Info.plist</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Q/QASrV2ift40+pC7mrkG7gnt8PahfAT00Ag5X0rReg=
+			</data>
+		</dict>
+		<key>PlugIns/ThreadMapperWidget.appex/Metadata.appintents/extract.actionsdata</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			eIslto00dqbagUTtHSnUYN2h9L0WzxqeyQtTsAKtX9U=
+			</data>
+		</dict>
+		<key>PlugIns/ThreadMapperWidget.appex/Metadata.appintents/version.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			bGEMLTRvWVvXxahROmLgL3ZVf6XYsEamPvgqyAHzT5M=
+			</data>
+		</dict>
+		<key>PlugIns/ThreadMapperWidget.appex/ThreadMapperWidget</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			KeERgdwFDYS4KltQtnn7IRqIdwFQZbQ7/SORVDtNNTY=
+			</data>
+		</dict>
+		<key>PlugIns/ThreadMapperWidget.appex/ThreadMapperWidget.debug.dylib</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			dFVcnxHvzrIR4h9jDp3b7kO67sOfz/Sn15oXewtTvfw=
+			</data>
+		</dict>
+		<key>PlugIns/ThreadMapperWidget.appex/_CodeSignature/CodeResources</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			M13L8AycNy142HgCOrHTsrqBLhgwFlRPREtJjAVlYgc=
+			</data>
+		</dict>
+		<key>PlugIns/ThreadMapperWidget.appex/__preview.dylib</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			/mQtpcYJKZ0DlKkJycxBq0Co8mSD4xFqRC2u6jvQfRo=
+			</data>
+		</dict>
+		<key>PlugIns/ThreadMapperWidget.appex/embedded.mobileprovision</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Mtb4XHHTS4dqt+fsBGt/ZJMS7Fn0dmVCnRxdqOuo9zc=
+			</data>
+		</dict>
+		<key>PrivacyInfo.xcprivacy</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			NXcvPuqN/2V4QxLQE2IH0oElA+LN0vtFQO4zq3Q8fQA=
+			</data>
+		</dict>
 		<key>ThreadMapper.debug.dylib</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			VffujpkgXur89h8x31KAkCPkVCw/UTwLAlREn0VtxnA=
+			EPM2uaR12vGC0WWjnTK7iyi/jCGux+kMu021vfE2/U4=
 			</data>
 		</dict>
 		<key>__preview.dylib</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			bk19RE+tEXb3lYWvatZwLvaU4HcXRbsh/CMWvoETkc8=
+			6gsoQe0i3xzAaIpzKxjFgVkddyoyGvtuCk/4yLALXRQ=
 			</data>
 		</dict>
 		<key>embedded.mobileprovision</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			4AiDpRa3hqryFvL7+fCpEI2ljleDjLeSvCUyqlsOqIg=
+			1f+CEHx89GBeFoMInT2qeBtH6MySynMcwA+7sAMe2mA=
 			</data>
+		</dict>
+		<key>sv.lproj/Localizable.strings</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			UHuWcStpDxaw+CwF0Zm9pMrs2hCz8zHdA8r4DRincFE=
+			</data>
+			<key>optional</key>
+			<true/>
 		</dict>
 	</dict>
 	<key>rules</key>

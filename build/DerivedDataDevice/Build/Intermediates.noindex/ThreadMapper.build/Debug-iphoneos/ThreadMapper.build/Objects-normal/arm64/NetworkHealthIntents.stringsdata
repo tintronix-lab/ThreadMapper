@@ -1,0 +1,104 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Intents/NetworkHealthIntents.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Check Thread Network Health",
+        "location": {
+          "startingColumn": 49,
+          "startingLine": 7
+        }
+      },
+      {
+        "comment": "",
+        "key": "Get the current health grade and score for your Thread network.",
+        "location": {
+          "startingColumn": 9,
+          "startingLine": 9
+        }
+      },
+      {
+        "comment": "",
+        "key": "Network",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 10
+        }
+      },
+      {
+        "comment": "",
+        "key": "ThreadMapper hasn't scanned yet. Open the app to see your Thread network health.",
+        "location": {
+          "startingColumn": 76,
+          "startingLine": 17
+        }
+      },
+      {
+        "comment": "",
+        "key": "Show Offline Thread Devices",
+        "location": {
+          "startingColumn": 49,
+          "startingLine": 27
+        }
+      },
+      {
+        "comment": "",
+        "key": "List any Thread devices that are currently offline.",
+        "location": {
+          "startingColumn": 9,
+          "startingLine": 29
+        }
+      },
+      {
+        "comment": "",
+        "key": "Network",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 30
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld Thread device is offline: %@.",
+        "location": {
+          "startingColumn": 33,
+          "startingLine": 46
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld Thread devices are offline: %@.",
+        "location": {
+          "startingColumn": 33,
+          "startingLine": 47
+        }
+      },
+      {
+        "comment": "",
+        "key": "ThreadMapper hasn't scanned yet. Open the app to check your devices.",
+        "location": {
+          "startingColumn": 76,
+          "startingLine": 37
+        }
+      },
+      {
+        "comment": "",
+        "key": "Check Thread Health",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 63
+        }
+      },
+      {
+        "comment": "",
+        "key": "Offline Devices",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 73
+        }
+      }
+    ]
+  },
+  "version": 1
+}

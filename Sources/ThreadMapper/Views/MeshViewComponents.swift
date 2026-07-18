@@ -12,6 +12,10 @@ extension ShapeStyle where Self == Color {
 /// bindings for every property through MeshView.
 struct MeshFilterBar: View {
     @Binding var viewMode: MeshViewMode
+    @Binding var showSimulator: Bool
+    @Binding var showScanner: Bool
+    @Binding var showBRMonitor: Bool
+    var onExportMap: () -> Void = {}
     @Environment(MeshViewModel.self) private var viewModel
 
     var body: some View {
@@ -72,13 +76,47 @@ struct MeshFilterBar: View {
                 }
             }
 
+            Menu {
+                Button {
+                    showSimulator = true
+                } label: {
+                    Label("Resilience Simulator", systemImage: "shield.lefthalf.filled.trianglebadge.exclamationmark")
+                }
+                .disabled(viewModel.nodes.filter { $0.kind == .borderRouter || $0.kind == .router }.isEmpty)
+
+                Button {
+                    showScanner = true
+                } label: {
+                    Label("Channel Scanner", systemImage: "waveform.path")
+                }
+
+                Button {
+                    showBRMonitor = true
+                } label: {
+                    Label("BR Health Monitor", systemImage: "antenna.radiowaves.left.and.right")
+                }
+
+                if viewMode == .map {
+                    Divider()
+                    Button {
+                        onExportMap()
+                    } label: {
+                        Label("Export Map", systemImage: "square.and.arrow.up")
+                    }
+                    .disabled(viewModel.nodes.isEmpty)
+                }
+            } label: {
+                Image(systemName: "wrench.and.screwdriver")
+                    .font(.caption2)
+            }
+
             Button {
                 Task { await viewModel.startScan() }
             } label: {
                 if viewModel.isScanning {
                     ProgressView().controlSize(.mini)
                 } else {
-                    Image(systemName: "antenna.radiowaves.left.and.right")
+                    Image(systemName: "arrow.clockwise")
                         .font(.caption2)
                 }
             }
@@ -198,6 +236,7 @@ struct MeshDeviceRowView: View {
     let node: MeshNode
     let device: ThreadDevice?
     var hopCount: Int? = nil
+    var anomaly: DeviceAnomaly? = nil
     let onSelect: (ThreadDevice) -> Void
 
     private func roleColor(_ kind: MeshNodeKind) -> Color {
@@ -288,9 +327,18 @@ struct MeshDeviceRowView: View {
                         }
                         if let hop = hopCount, node.kind == .endDevice || node.kind == .router {
                             Text("·").foregroundStyle(.tertiary)
-                            Text("\(hop) hop\(hop == 1 ? "" : "s")")
+                            Text("^[\(hop) hop](inflect: true)")
                                 .font(.caption2.weight(hop >= 4 ? .semibold : .regular))
                                 .foregroundStyle(hop <= 2 ? Color.secondary : hop == 3 ? Color.orange : Color.red)
+                        }
+                        if let anomaly, anomaly.trajectory != .stable {
+                            Text("·").foregroundStyle(.tertiary)
+                            Image(systemName: anomaly.trajectory.sfSymbol)
+                                .font(.caption2)
+                                .foregroundStyle(anomaly.trajectory == .critical ? .red : .orange)
+                            Text(anomaly.trajectory.label)
+                                .font(.caption2.weight(.medium))
+                                .foregroundStyle(anomaly.trajectory == .critical ? .red : .orange)
                         }
                     }
                 }
@@ -317,5 +365,30 @@ struct MeshDeviceRowView: View {
             .padding(.vertical, 11)
         }
         .buttonStyle(.plain)
+        .contextMenu {
+            if let device {
+                Button { onSelect(device) } label: {
+                    Label("View Details", systemImage: "info.circle")
+                }
+                Button {
+                    UIPasteboard.general.string = device.name
+                } label: {
+                    Label("Copy Name", systemImage: "doc.on.doc")
+                }
+                if let rssi = device.rssi {
+                    Button {
+                        UIPasteboard.general.string = "\(device.name): \(rssi.rssiQualityLabel)"
+                    } label: {
+                        Label("Copy Signal Quality", systemImage: "antenna.radiowaves.left.and.right")
+                    }
+                }
+                Divider()
+                if device.isOffline {
+                    Label("Offline", systemImage: "wifi.slash").foregroundStyle(.red)
+                } else if let hop = hopCount {
+                    Label("^[\(hop) hop](inflect: true) from hub", systemImage: "point.3.connected.trianglepath.dotted")
+                }
+            }
+        }
     }
 }

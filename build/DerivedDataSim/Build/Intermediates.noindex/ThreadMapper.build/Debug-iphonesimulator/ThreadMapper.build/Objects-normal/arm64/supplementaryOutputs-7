@@ -27,6 +27,13 @@
     "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/ThreadNodeDiagnostics.o",
     "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/ThreadNodeDiagnostics.swiftdeps"
   },
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Services/SurveySessionManager.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/SurveySessionManager.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/SurveySessionManager.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/SurveySessionManager.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/SurveySessionManager.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/SurveySessionManager.swiftdeps"
+  },
   "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Services/ThreadCredentialsService.swift" : {
     "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/ThreadCredentialsService.swiftconstvalues",
     "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/ThreadCredentialsService.d",
@@ -34,12 +41,19 @@
     "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/ThreadCredentialsService.o",
     "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/ThreadCredentialsService.swiftdeps"
   },
-  "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Utils/ThreadMapperError.swift" : {
-    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/ThreadMapperError.swiftconstvalues",
-    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/ThreadMapperError.d",
-    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/ThreadMapperError.dia",
-    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/ThreadMapperError.o",
-    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/ThreadMapperError.swiftdeps"
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/ViewModels/SurveyViewModel.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/SurveyViewModel.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/SurveyViewModel.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/SurveyViewModel.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/SurveyViewModel.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/SurveyViewModel.swiftdeps"
+  },
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/SurveyWalkView.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/SurveyWalkView.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/SurveyWalkView.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/SurveyWalkView.dia",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/SurveyWalkView.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/SurveyWalkView.swiftdeps"
   },
   "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapperApp/ThreadMapperApp.swift" : {
     "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataSim/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphonesimulator/ThreadMapper.build/Objects-normal/arm64/ThreadMapperApp.swiftconstvalues",

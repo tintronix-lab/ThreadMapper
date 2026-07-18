@@ -1,82 +1,124 @@
-# ThreadMapper — Optimization Work Plan
+# ThreadMapper — Active Backlog
 
-**Date:** 2026-07-09 · **Author role:** Principal iOS Engineer (pre-App-Store technical review)
-**Scope:** full Swift package + app/widget targets (~9,100 LOC, iOS 17+, SwiftUI + HomeKit/Matter)
-**Method:** `ios-codebase-optimizer` — Discover → Inspect → Improve → Refactor → Modernize → UX → Loop
-
-> Companion to `REVIEW.md` (the living review log). This document is the forward-looking, prioritized backlog and records what shipped in this pass.
+**Last updated:** 2026-07-18 (AI roadmap brainstorm added)  
+**Engineering log:** `REVIEW.md` (full iteration history, Iterations 1–26+)
 
 ---
 
-## Current state (assessment)
+## Shipped (summary — see REVIEW.md for details)
 
-The codebase is in good shape and has already absorbed the highest-severity items from the original review. Verified as **already fixed** in the current tree:
-
-- **Widget reload storm** — snapshot writes are diffed and throttled in `AppGroupStore`; the 1 Hz loop no longer calls `reloadAllTimelines()` every tick.
-- **Metadata propagation (H2)** — `MeshViewModel` now merges HomeKit updates in place per `@Observable` property (name, room, channel, battery, roles) instead of relying on `ThreadDevice.==`.
-- **Idle backoff** — the poll loop sleeps while backgrounded (`isAppActive`).
-- **Helper duplication** — `gradeColor`/`roomIcon` consolidated into `Shared/TMStyle`; the widget forwards to it.
-- **Health-score churn (D4)** — `health` is reassigned only when it actually changes.
-
-What remains is mostly **maintainability, testability, and identity-correctness** debt — no longer crash-class, but worth clearing before scaling past a single home.
-
----
-
-## Shipped this pass (safe, behavior-preserving)
-
-Low-risk changes requiring no design decisions. All preserve existing behavior; each clears a real (opt-in-enabled) SwiftLint warning or removes dead code.
-
-| # | Change | File |
-|---|--------|------|
-| S1 | Removed dead `rebuildGraph()` (never called; `applyFilters()` is the live path) | `ViewModels/MeshViewModel.swift` |
-| S2 | `task as!` → safe `guard let` with completion on mismatch | `ThreadMapperApp/BackgroundRefreshHandler.swift` |
-| S3 | `values.min()!/.max()!` → guarded bindings | `Services/DeviceStatsStore.swift` |
-| S4 | `historyEntries.last!/.first!` → `if let` bindings | `Services/WeeklyReportStore.swift` |
-| S5 | `lats/lngs.min()!/.max()!` → guarded bindings | `Views/SurveyWalkView.swift`, `Views/SurveyMapView.swift` |
-
-**Verify in Xcode:** `make ci` (swiftlint + build + test). Expected: fewer `force_unwrapping`/`force_cast` warnings, no behavior change, tests still green.
-
----
-
-## Backlog (prioritized)
-
-### P1 — Correctness & identity
-
-1. ~~**Kill name-keyed identity.**~~ **Done ✓** Switch join/leave detection and device-state maps to `uniqueIdentifier`; carry display name alongside.
-2. **Multi-home safety.** Stores keyed by device name/UUID assume one home; `accessoryCache` merges homes. Namespace persisted keys by `HMHome.uniqueIdentifier` before promoting multi-home as a feature. *(deferred — needs migration strategy)*
-
-### P2 — Maintainability & testability
-
-3. ~~**Decompose the `MeshViewModel` poll loop.**~~ **Done ✓** Extracted pure functions; loop kept as orchestrator.
-4. ~~**Break up the large views.**~~ **Done ✓** Subviews extracted from `DashboardView`, `MeshView`, `MeshGraphView`, `SurveyWalkView`.
-5. **Reduce singletons for testability.** ~11 `static let shared` stores. Introduce a lightweight DI container so views and the view model can be tested with fakes. *(deferred pre-submission)*
-6. ~~**Dead-code sweep.**~~ **Done ✓** Removed `RoomFilterView`, `Utils/ThreadMapperError`, and stale verification scripts.
-
-### P3 — Performance
-
-7. ~~**Gate the 1 Hz MainActor work.**~~ **Done ✓** Only recomputes aggregates + snapshot when devices/health actually change.
-8. ~~**Force-directed layout off the main thread.**~~ **Done ✓** Layout runs on background task; positions published to main actor.
-
-### P4 — Modernization (verify deployment target first)
-
-9. ~~**Swift Concurrency correctness.**~~ **Done ✓** (Iteration 16) `@MainActor` on `MeshViewModel`; `@unchecked Sendable` on `ThreadDevice`, `DemoDiscoveryService`, `MatterDiscoveryService`; `nonisolated(unsafe)` on two `AppGroupStore` static vars and `SurveyViewModel.isoFormatter`; `StrictConcurrency` enabled in `Package.swift`. Zero warnings under `SWIFT_STRICT_CONCURRENCY=complete`.
-10. ~~**Persistence consolidation.**~~ **Evaluated — hold.** Stores are 62–88 lines each with heterogeneous restore logic. A `JSONStore<T>` generic would save ~35 lines across 3 debounced stores at the cost of new indirection. Not worth it at current scale; revisit if a SwiftData migration is undertaken.
-
-### P5 — UX & accessibility
-
-11. ~~**Dynamic Type.**~~ **Done ✓** (Iteration 14) 25 hardcoded font sizes replaced with scaled text styles across 5 files.
-12. ~~**Contextual permissions.**~~ **Done ✓** Location requested at survey start, not app launch.
-13. **iPad/landscape.** Reconsider portrait-only + `UIRequiresFullScreen`. *(deferred — needs layout design decisions)*
-14. ~~**Data honesty copy.**~~ **Done ✓** Latency-derived values consistently labeled "Response Quality" across all views.
+| Iteration | What shipped |
+|---|---|
+| 1–13 | Core architecture, MVVM, concurrency, widget, force-unwrap sweep, dead-code, test suite |
+| 14 | Dynamic Type audit — 25 hardcoded font sizes → scaled styles (P5.1) |
+| 15 | Confetti on grade improvement (#53), Spotlight device indexing (#57), correctness fixes |
+| 16 | Swift strict-concurrency audit, zero warnings under `complete`, widget "just now" floor (P4.1) |
+| 17 | Pre-submission audit — privacy manifest, IAP error handling, GradeRingView a11y, background modes |
+| 18 | Troubleshooter expanded, Activity Feed search, in-app User Manual |
+| 19 | NetworkDiagnosticsEngine (full), NetworkDiagnosticsView, DiagnosticRunStore |
+| 20 | Hop-count indicators, DeviceDetailView vendor/history/BR-comparison, OTBR neighbor table, Share report |
+| 21 | Device History / Commissioning Timeline, Thread Channel Analysis |
+| 22 | Topology Baseline Comparison, Failure Impact Analysis, Signal Degradation tracking, OTBR Dataset Inspector |
+| 23 | Network Timeline, expandable fix instructions, Room Signal History sparklines, Partition Detection, Diagnostic Run History, Mesh Quality Scorecard |
+| 24 | Firmware tracking (FirmwareHistoryStore + DeviceDetailView + NetworkDiagnosticsView), Device Protocol Compatibility (DeviceProtocol enum, compatibility sections) |
+| 25 | iPad NavigationSplitView + landscape orientation — AppTab enum, iPadLayout/iPhoneLayout, Info.plist (P5.3) |
+| 26 | Firmware section always visible, HomeKit characteristic fallback for firmware version |
+| 27 | Smart Home Advisor — PlacementSuggestion / AutomationSuggestion / SceneRecommendation engine + view |
+| 28 | AI Insights — FoundationModels-powered MeshSummary + PredictiveAnalysis (iOS 26 only) |
+| 29 | Notification deep linking, pull-to-refresh (Dashboard + Mesh), accessoryInline widget, Activity feed export |
+| 30 | MeshView list-mode search — live filter by device name with empty state + clear button |
+| 31 | Resilience Simulator — "What If" BFS impact analysis for border routers + relays; shield button in Mesh filter bar opens sheet with severity-grouped node list + per-node impact detail |
+| 32 | Channel Interference Scanner — Canvas spectrum bar chart (ch 11–26 coloured by Wi-Fi overlap risk, Wi-Fi band zone shading, in-use markers, ★ recommended channel); Tools menu in Mesh filter bar replaces single shield button |
+| 33 | BR Health Monitor — per-BR card with online/offline badge, RSSI sparkline (DeviceStatsStore), last-seen timestamp, "Only BR" + critical-offline warnings; added to Mesh Tools menu |
+| 34 | New Device Alert — KnownDeviceRegistry (UserDefaults-persisted Set<UUID>); first-tick marks all devices known; subsequent joins checked cross-session; fires "New Thread Device Detected" push notification; toggle in Settings |
+| 35 | Battery Life Estimator — days-remaining estimate for sleepy end devices in DeviceDetailView battery section; linear model (90-day typical profile); footer caveat; colour-coded urgency |
+| 36 | Anomaly Detection Engine — `AnomalyDetector` computes per-device `DeviceTrajectory` (.stable/.declining/.critical) from `DeviceStatsStore` rolling baseline vs recent window; trajectory arrows in Mesh device rows; `DashboardAnomalyBanner` surfaces degrading devices |
+| 37 | Conversational Network Assistant — `NetworkAssistantView` full chat UI with FoundationModels `LanguageModelSession`; context-injected system prompt with live mesh state + anomalies; suggested question chips; typing indicator; accessible from AI Insights |
+| 38 | Structured @Generable Output — `OptimizationPlan` + `ActionableInsight` typed structs replace prose; ranked action cards with impact level + estimated % improvement; `RootCauseHypothesis` for correlated multi-device issues |
+| 39 | Root Cause Correlation — `AINetworkAnalyzer.rootCauseAnalysis` fires when ≥2 devices are degrading simultaneously; `RootCauseCard` section in AI Insights shows root cause, affected devices, confidence, fix |
+| 40 | Proactive Push Insights — `notifyProactiveInsight` in `NotificationService`; `MeshViewModel.fireProactiveAnomalyAlert` fires push when new critical anomalies appear; "Proactive AI insights" toggle in Settings |
+| 41 | MeshView Map Export — `ImageRenderer` captures `MeshGraphView` Canvas at 2× scale (1024×768 pt); "Export Map" item in Mesh Tools menu (map mode only); `MeshMapShareSheet` previews image + `ShareLink` share button |
+| 42 | Per-Device AI Assistant — "Ask AI about this device" section in DeviceDetailView; `NetworkAssistantView` accepts `focusDevice` parameter; session pre-seeded with device RSSI, battery, anomaly trajectory, role; auto-asks opening question |
+| 43 | AI Weekly Digest — `scheduleWeeklyReportWithAIHeadline` generates an AI-written one-sentence summary using `HealthHistoryStore` trend data; used when toggling the weekly report in Settings; falls back to generic copy if AI unavailable |
+| 44 | Live Activities — `ThreadNetworkActivityAttributes` (Shared); `LiveActivityManager` starts an ActivityKit Live Activity when a device goes offline after grace period; Dynamic Island shows grade letter (compact leading), offline count (compact trailing), full health in expanded; Lock Screen banner with grade circle + device/offline counts; activity ends 10 s after all devices come back online; `NSSupportsLiveActivities` added to Info.plist |
+| 45 | Control Center — `ScanNetworkControl` (`ControlWidget`, iOS 18+) with `OpenThreadMapperIntent` (`openAppWhenRun = true`); "Thread Network" button in Control Center opens ThreadMapper; added to `ThreadMapperWidgetBundle` behind `if #available(iOS 18.0, *)` |
+| 46 | Positive Notifications — `notifyGradeImproved(from:to:)` fires when grade letter improves (gated on "Mesh health grade changes" toggle — same as drops); `notifyAllDevicesOnline(count:)` fires when last offline device recovers (gated on "Offline alerts" toggle); `hadOfflineDevices` flag prevents spurious "all online" fires; Settings label updated to "Mesh health grade changes" |
+| 47 | Device Reliability Score — `reliabilitySection` in `DeviceDetailView`; filters `ActivityStore.events` by device UUID + kind (offline/BR-offline) for last 30 days; shows colour-coded reliability label (Excellent→Needs Attention), 30-day offline event count, and online streak (days since last offline event) |
+| 48 | Shareable Network Health Card — `NetworkHealthCardView` (375×667 pt gradient card with grade hero, score bar, device/offline stat badges, branding); `ImageRenderer` renders at 2× scale from Dashboard "Share Health Card" toolbar button; `HealthCardShareSheet` previews image + `ShareLink` |
+| 49 | AI Device Health Summary — auto-generated 2-sentence plain-English assessment per device; loads on `DeviceDetailView` appear via `AINetworkAnalyzer.deviceSummary(device:anomaly:stats:offlineCount:)`; shows in "AI Device Summary" section (sparkles header) above the AI chat button; iOS 26+, gated with `#available` |
+| 50 | AI Activity Digest — `AINetworkAnalyzer.activityDigest(events:devices:)` summarises the 10 most recent events in 2 sentences; appears as a purple sparkles section at the top of `ActivityFeedView` when ≥3 events exist; reloads when event count changes; iOS 26+ |
+| 51 | Mesh Expansion Advisor — `@Generable MeshExpansionPlan` (max 2 `ExpansionSpot`s with location, deviceType, reason, expectedBenefit); `AINetworkAnalyzer.meshExpansionPlan(devices:health:report:)` uses room coverage gaps, high-hop devices, and weak-signal rooms; shown in new "Mesh Expansion Advisor" section in `AIInsightsView`; runs in parallel with other analyses |
+| 52 | AI Streaming Chat — `NetworkAssistantView` now uses `session.streamResponse(to:)` instead of `respond(to:)`; tokens stream into a live `StreamingBubbleView` (blinking cursor, scrolls as text grows) replacing the dots `ThinkingBubbleView`; on completion the final `ChatMessage` is appended and the streaming view clears; `Snapshot.content` used to access `String.PartiallyGenerated` from `ResponseStream<String>` |
+| 53 | Interactive Widget — `RefreshWidgetIntent` (`AppIntent`, `openAppWhenRun = true`) added to widget bundle; `Button(intent: RefreshWidgetIntent())` arrow-clockwise icon in medium widget's "Updated" row lets users tap to open app and refresh from Home Screen; existing `widgetURL` tap still works for the rest of the widget |
 
 ---
 
-## How to run each iteration
+## Open Items
 
-1. Pick the top unblocked item.
-2. Make the change in small, verifiable commits.
-3. `make ci` (or `make ci-xcode` for the simulator test action) after each batch.
-4. Log the outcome as a new iteration entry in `REVIEW.md`.
-5. Re-scan for opportunities the change created; repeat.
+### P0 — Active (implement next)
 
-**Environment note:** this pass was prepared in a Linux sandbox with no Swift/Xcode toolchain, so changes were validated by static analysis and guard-invariant reasoning rather than a compiler. Run `make ci` locally to confirm before committing.
+| # | Item | Notes |
+|---|------|-------|
+| ✓ | Channel Interference Scanner | **DONE** — Iter 32 |
+| ✓ | Border Router Health Monitor | **DONE** — Iter 33 |
+| ✓ | MeshView map export | **DONE** — Iter 41 |
+| ✓ | Widget deep link — tapping widget opens Dashboard | **DONE** — already implemented (`widgetURL` + `onOpenURL`) |
+| ✓ | Siri App Shortcut "Check my Thread network" | **DONE** — `NetworkHealthIntents.swift` (pre-existing) |
+
+### P1 — Deferred (needs design before implementing)
+
+| # | Item | Blocker |
+|---|------|---------|
+| ✓ | New Device Alert | **DONE** — Iter 34 |
+| ✓ | Battery Life Estimator | **DONE** — Iter 35 |
+| P1.2 | Multi-home store key namespacing | Needs migration strategy — `HMHome.uniqueIdentifier` prefix on all persisted keys; existing data must be promoted silently on upgrade |
+| P2.5 | Singleton DI container | Low risk with current test suite; revisit if test coverage expands significantly |
+
+### Already shipped (tools brainstorm cross-reference)
+
+| Tool idea | Shipped as |
+|---|---|
+| Coverage Heatmap / Walk Mode | Iter 21 — `SurveyWalkView`, `GuidedSurveyView`, `SurveyHeatmapPresenter` |
+| Resilience Simulator | Iter 31 — `ResilienceSimulator` + `ResilienceSimulatorView` |
+| Long-term Trend Charts | Iter 23 — `NetworkTimelineView`, `HealthHistoryStore`, room sparklines |
+| Commissioning Assistant | `CommissioningReadinessView` |
+| Network Report Export | Iter 20 — Share report in `NetworkDiagnosticsView` |
+| Scheduled Network Audit | `WeeklyReportStore` + `WeeklyReportView` |
+
+### P2 — Out of scope (App Store Connect, not code)
+
+- App Store Connect Pro product setup (requires Apple Developer Portal)
+- Localization / internationalisation strings
+
+---
+
+## AI Roadmap
+
+The app is strong on **reactive AI** (explain what happened) and **structured generation**. The gaps are in **predictive AI**, **conversational guidance**, and **ambient/proactive intelligence**. Items below are ordered roughly by implementation difficulty and data-pipeline readiness.
+
+### Tier A — Highest ROI, data pipeline already exists
+
+| # | Feature | Implementation notes |
+|---|---------|----------------------|
+| AI-A1 | **Predictive failure prevention** | Extrapolate per-device RSSI / packet-loss trend forward using linear/exponential model in `AnomalyDetector`; surface "~2–3 days to failure" estimate + AI-narrated sentence. All data is in `DeviceStatsStore`. No new data pipeline needed. |
+| AI-A2 | **Conversational diagnostic sessions** | Replace / augment the static `TroubleshooterView` decision tree with a multi-turn `LanguageModelSession`; AI asks clarifying questions ("Near a microwave?") and injects answers back as context each turn. Builds on existing `NetworkAssistantView` chat pattern. |
+| AI-A3 | **Contextual metric explanation ("Explain This")** | Long-press any metric value (RSSI, hop count, link quality, LQI) in `DeviceDetailView` to get an AI-generated popover explaining that specific value relative to the user's network average. Zero new infrastructure — one `AINetworkAnalyzer` call with device + metric context. |
+
+### Tier B — High value, moderate new work
+
+| # | Feature | Implementation notes |
+|---|---------|----------------------|
+| AI-B1 | **AI commissioning coach** | When `KnownDeviceRegistry` fires a new-device notification, generate an AI briefing in `ActivityFeedView`: device role (BR / FTD / MTD), how it fits current topology, one recommended action. Extends the Iter 34 new-device alert. |
+| AI-B2 | **Natural language device/topology queries** | NL search bar in `MeshView` and `DeviceDetailView` device list; AI parses intent → applies filter to the existing device list (`DeviceFilterView` infrastructure). Query examples: "show bedroom devices with >3 hops", "which BR has the weakest RSSI". |
+| AI-B3 | **Resilience Simulator AI narration** | Add AI-generated scenario summary to `ResilienceSimulatorView`: converts raw BFS impact scores into a human story ("Losing this BR isolates 4 bedroom devices; the next-best BR covers 2 of them"). One `AINetworkAnalyzer` call with the existing `SimulationResult`. |
+| AI-B4 | **Predictive maintenance calendar** | Combine `FirmwareHistoryStore` age, `DeviceStatsStore` health trends, battery estimates, and `ActivityStore` offline frequency to generate a prioritised weekly/monthly task list. Render as a timeline in a new `MaintenanceCalendarView` (similar structure to `NetworkTimelineView`). |
+
+### Tier C — Longer-term / needs more design
+
+| # | Feature | Implementation notes |
+|---|---------|----------------------|
+| AI-C1 | **AI network journal / changelog** | Weekly plain-English narrative of what changed on the network (devices joined/left, firmware updates, signal changes, anomalies resolved). Deeper than the AI Weekly Digest headline — paragraph-length, stored alongside `WeeklyReportStore`. |
+| AI-C2 | **AI device naming suggestions** | When `KnownDeviceRegistry` detects a new unnamed device, AI suggests a friendly name from vendor + role + signal-inferred location. One-tap accept chip in the new-device alert or `DeviceDetailView`. |
+| AI-C3 | **Topology placement assistant (interactive)** | User taps blank area on mesh map or selects a room → AI explains which role a new device should play there, which existing node it should route through, and expected hop count. More specific than the Mesh Expansion Advisor. |
+| AI-C4 | **Siri deep integration** | Extend existing App Intents with parameter-accepting variants: "Check the status of my kitchen sensor", "Is my border router online?" — AI generates the spoken response via `LanguageModelSession`. Fully on-device, no network required. |
+| AI-C5 | **Cross-session device memory** | Persist per-device AI observations across sessions (lightweight JSON blobs keyed by device UUID in a new `AIMemoryStore`). When reopening a device chat, assistant proactively references recurring patterns ("This device had packet loss in June — I'm seeing it again"). |

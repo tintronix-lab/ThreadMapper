@@ -25,8 +25,8 @@ struct SurveyWalkView: View {
                 freeWalkSection
                 weakLinksSection
             }
-            .navigationTitle("Survey Walk")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Survey")
+            .navigationBarTitleDisplayMode(.large)
             .onAppear {
                 refreshHeatmap()
                 startSampling()
@@ -58,7 +58,7 @@ struct SurveyWalkView: View {
                 HStack {
                     Text("Room Coverage")
                     Spacer()
-                    Text("\(stats.count) room\(stats.count == 1 ? "" : "s")")
+                    Text("^[\(stats.count) room](inflect: true)")
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                 }
@@ -125,7 +125,7 @@ struct SurveyWalkView: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                     Spacer()
-                    Text("\(meshVM.devices.count) device\(meshVM.devices.count == 1 ? "" : "s")")
+                    Text("^[\(meshVM.devices.count) device](inflect: true)")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
@@ -243,7 +243,7 @@ struct SurveyWalkView: View {
                         .frame(height: 140)
                         .padding(.vertical, 2)
 
-                    Text("\(heatmapPoints.count) cell\(heatmapPoints.count == 1 ? "" : "s")")
+                    Text("^[\(heatmapPoints.count) cell](inflect: true)")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
 
@@ -330,7 +330,7 @@ struct SurveyWalkView: View {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(.orange)
                     .imageScale(.small)
-                Text("\(spots.count) weak spot\(spots.count == 1 ? "" : "s") detected — consider adding a Thread router")
+                Text("^[\(spots.count) weak spot](inflect: true) detected — consider adding a Thread router")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }

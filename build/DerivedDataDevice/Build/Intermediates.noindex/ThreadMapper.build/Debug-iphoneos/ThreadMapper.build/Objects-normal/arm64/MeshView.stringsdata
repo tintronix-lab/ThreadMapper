@@ -1,0 +1,136 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/MeshView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "No devices match \"%@\"",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 133
+        }
+      },
+      {
+        "comment": "",
+        "key": "Clear Search",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 136
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld border router](inflect: true)",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 211
+        }
+      },
+      {
+        "comment": "",
+        "key": "Thread Backbone",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 207
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld device](inflect: true)",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 248
+        }
+      },
+      {
+        "comment": "",
+        "key": "Scanning Thread network…",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 327
+        }
+      },
+      {
+        "comment": "",
+        "key": "No Thread devices found",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 341
+        }
+      },
+      {
+        "comment": "",
+        "key": "Add Thread accessories in the Home app,\nthen tap Scan.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 343
+        }
+      },
+      {
+        "comment": "",
+        "key": "Search devices",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 402
+        }
+      },
+      {
+        "comment": "",
+        "key": "· CH %lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 434
+        }
+      },
+      {
+        "comment": "",
+        "key": "· PAN %@",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 439
+        }
+      },
+      {
+        "comment": "",
+        "key": "Retry",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 468
+        }
+      },
+      {
+        "comment": "",
+        "key": "Export Map",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 516
+        }
+      },
+      {
+        "comment": "",
+        "key": "Thread Mesh Map",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 502
+        }
+      },
+      {
+        "comment": "",
+        "key": "Share Map",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 506
+        }
+      },
+      {
+        "comment": "",
+        "key": "Done",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 520
+        }
+      }
+    ]
+  },
+  "version": 1
+}

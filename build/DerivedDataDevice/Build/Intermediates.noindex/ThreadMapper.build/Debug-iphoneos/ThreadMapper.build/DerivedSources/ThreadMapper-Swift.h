@@ -349,6 +349,7 @@ extern "C" {
 @import CoreLocation;
 @import Foundation;
 @import ObjectiveC;
+@import UserNotifications;
 #endif
 
 #endif // defined(__OBJC__)
@@ -381,6 +382,20 @@ SWIFT_CLASS("_TtC12ThreadMapper15LocationTracker")
 @interface LocationTracker (SWIFT_EXTENSION(ThreadMapper)) <CLLocationManagerDelegate>
 - (void)locationManager:(CLLocationManager * _Nonnull)manager didUpdateLocations:(NSArray<CLLocation *> * _Nonnull)locations;
 - (void)locationManagerDidChangeAuthorization:(CLLocationManager * _Nonnull)manager;
+@end
+
+SWIFT_CLASS("_TtC12ThreadMapper19NotificationService")
+@interface NotificationService : NSObject
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
+
+@class UNUserNotificationCenter;
+@class UNNotificationResponse;
+@class UNNotification;
+@interface NotificationService (SWIFT_EXTENSION(ThreadMapper)) <UNUserNotificationCenterDelegate>
+- (void)userNotificationCenter:(UNUserNotificationCenter * _Nonnull)center didReceiveNotificationResponse:(UNNotificationResponse * _Nonnull)response withCompletionHandler:(void (^ _Nonnull)(void))completionHandler;
+- (void)userNotificationCenter:(UNUserNotificationCenter * _Nonnull)center willPresentNotification:(UNNotification * _Nonnull)notification withCompletionHandler:(void (^ _Nonnull)(UNNotificationPresentationOptions))completionHandler;
 @end
 
 #endif // defined(__OBJC__)

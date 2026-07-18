@@ -9,11 +9,16 @@ final class MeshViewModel {
     var selectedDevice: ThreadDevice?
     var selectedNode: MeshNode?
     var isScanning = false
+    /// Set by notification deep links; `DashboardView` observes and opens the device detail sheet.
+    var pendingDeviceID: UUID? = nil
     var scanError: String?
 
     /// Latest health score, computed once per poll tick.
     /// Views read this instead of recomputing in `body`.
     private(set) var health = NetworkHealthScore.compute(devices: [])
+
+    /// Per-device signal anomalies, updated on every RSSI measurement tick.
+    private(set) var anomalies: [UUID: DeviceAnomaly] = [:]
 
     /// Set from the scene phase — the poll loop idles while backgrounded
     /// instead of burning CPU until the OS suspends the process.
@@ -60,6 +65,8 @@ final class MeshViewModel {
     @ObservationIgnored private var offlineDeviceIDs: Set<UUID> = []
     @ObservationIgnored private var pendingOfflineTasks: [UUID: Task<Void, Never>] = [:]
     @ObservationIgnored private var previousHealthScore: Int? = nil
+    @ObservationIgnored private var previousGrade: String? = nil
+    @ObservationIgnored private var hadOfflineDevices = false
     /// Fingerprint of the last-written aggregate snapshot — used to skip
     /// redundant AppGroupStore writes when nothing has changed between ticks.
     @ObservationIgnored private var lastSnapshotFingerprint: SnapshotFingerprint? = nil
@@ -160,6 +167,7 @@ final class MeshViewModel {
                         if agg.brCount >= 2 && agg.routerCount >= 4 { AchievementStore.shared.unlock("resilienceA") }
                     }
                     self.recordHealthDelta(health: newHealth)
+                    if rssiJustMeasured { self.updateAnomalies() }
                 }
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
             }
@@ -168,6 +176,37 @@ final class MeshViewModel {
 
     deinit {
         keepAliveTask?.cancel()
+    }
+
+    // MARK: - Anomaly detection
+
+    private func updateAnomalies() {
+        let ids = devices.map { $0.uniqueIdentifier }
+        let newAnomalies = AnomalyDetector.analyzeAll(
+            readingsByKey: DeviceStatsStore.shared.readings,
+            deviceIDs: ids
+        )
+        anomalies = newAnomalies
+        fireProactiveAnomalyAlert(anomalies: newAnomalies)
+    }
+
+    @ObservationIgnored private var lastAlertedCriticalIDs: Set<UUID> = []
+
+    private func fireProactiveAnomalyAlert(anomalies: [UUID: DeviceAnomaly]) {
+        guard UserDefaults.standard.object(forKey: "notifyProactiveAI") as? Bool ?? true else { return }
+        let criticalIDs = Set(anomalies.values.filter { $0.trajectory == .critical }.map(\.deviceID))
+        let newCritical = criticalIDs.subtracting(lastAlertedCriticalIDs)
+        guard !newCritical.isEmpty else { return }
+        lastAlertedCriticalIDs = criticalIDs
+        let names = newCritical.compactMap { id in devices.first(where: { $0.uniqueIdentifier == id })?.name }
+        guard !names.isEmpty else { return }
+        let headline = names.count == 1
+            ? "\(names[0]) signal is dropping fast"
+            : "\(names.count) devices showing signal degradation"
+        NotificationService.shared.notifyProactiveInsight(
+            headline: headline,
+            detail: "Open ThreadMapper to view anomaly details and get recommendations."
+        )
     }
 
     // MARK: - Poll loop phases
@@ -233,7 +272,11 @@ final class MeshViewModel {
             knownDeviceIDs = currentIDs
             knownDeviceNamesByID = currentNamesByID
         }
-        guard !knownDeviceIDs.isEmpty else { return false }
+        guard !knownDeviceIDs.isEmpty else {
+            // First tick — mark all visible devices as known without firing notifications.
+            KnownDeviceRegistry.markAllKnown(Array(currentIDs))
+            return false
+        }
 
         let joinedIDs = currentIDs.subtracting(knownDeviceIDs)
         let leftIDs   = knownDeviceIDs.subtracting(currentIDs)
@@ -251,6 +294,13 @@ final class MeshViewModel {
             recentTopologyChanges.filter { $0.timestamp > cutoff }.prefix(20)
         )
         NotificationService.shared.notifyTopologyChange(joined: joined, left: left)
+
+        // Fire first-seen notification for devices never seen before across sessions.
+        for id in joinedIDs where !KnownDeviceRegistry.contains(id) {
+            let name = currentNamesByID[id] ?? "Unknown"
+            NotificationService.shared.notifyFirstSeenDevice(name: name, id: id)
+        }
+        KnownDeviceRegistry.markAllKnown(Array(joinedIDs))
 
         for id in joinedIDs {
             let name = currentNamesByID[id] ?? "Unknown"
@@ -273,6 +323,7 @@ final class MeshViewModel {
             let room = device.room
             if device.isOffline && !offlineDeviceIDs.contains(uuid) {
                 offlineDeviceIDs.insert(uuid)
+                hadOfflineDevices = true
                 let gracePeriod = effectiveGracePeriod
                 let isBR = device.isBorderRouter
                 let t = Task {
@@ -281,6 +332,13 @@ final class MeshViewModel {
                     await MainActor.run {
                         if self.offlineDeviceIDs.contains(uuid) {
                             NotificationService.shared.notifyDeviceOffline(name, room: room, deviceID: uuid)
+                            LiveActivityManager.shared.alertDeviceOffline(
+                                name: name,
+                                grade: self.health.grade,
+                                score: self.health.score,
+                                deviceCount: self.devices.count,
+                                offlineCount: self.offlineDeviceIDs.count
+                            )
                             let kind: ActivityEvent.Kind = isBR ? .borderRouterOffline : .deviceOffline
                             let loc = room.map { " in \($0)" } ?? ""
                             let dur = Int(gracePeriod / 60) > 0 ? "\(Int(gracePeriod / 60))m" : "\(Int(gracePeriod))s"
@@ -296,6 +354,20 @@ final class MeshViewModel {
                 pendingOfflineTasks[uuid] = nil
                 offlineDeviceIDs.remove(uuid)
                 NotificationService.shared.clearOfflineNotification(for: uuid)
+                if offlineDeviceIDs.isEmpty {
+                    LiveActivityManager.shared.endIfAllOnline(
+                        grade: health.grade, score: health.score, deviceCount: devices.count
+                    )
+                    if hadOfflineDevices {
+                        hadOfflineDevices = false
+                        NotificationService.shared.notifyAllDevicesOnline(count: devices.count)
+                    }
+                } else {
+                    LiveActivityManager.shared.updateStatus(
+                        grade: health.grade, score: health.score,
+                        deviceCount: devices.count, offlineCount: offlineDeviceIDs.count
+                    )
+                }
                 let loc = room.map { " in \($0)" } ?? ""
                 ActivityStore.shared.record(kind: .deviceOnline, deviceID: uuid, deviceName: name, room: room,
                     detail: "\(name)\(loc) is back online")
@@ -335,9 +407,10 @@ final class MeshViewModel {
                                             offlineCount: b.offline, weakCount: b.weak)
             }
             .sorted { $0.name < $1.name }
+        let summaryBase = String(localized: health.summary)
         let summary = agg.offlineNames.isEmpty
-            ? health.summary
-            : "\(health.summary) — \(agg.offlineCount) device\(agg.offlineCount == 1 ? "" : "s") offline"
+            ? summaryBase
+            : String(localized: "\(summaryBase) — ^[\(agg.offlineCount) device](inflect: true) offline")
         return WidgetSnapshot(
             grade: health.grade, score: health.score, summary: summary,
             deviceCount: devices.count, offlineCount: agg.offlineCount, weakCount: agg.weakCount,
@@ -347,7 +420,7 @@ final class MeshViewModel {
 
     /// Emits a health activity event when the score shifts by 15+ points.
     @MainActor private func recordHealthDelta(health: NetworkHealthScore) {
-        defer { previousHealthScore = health.score }
+        defer { previousHealthScore = health.score; previousGrade = health.grade }
         guard let prev = previousHealthScore else { return }
         let delta = health.score - prev
         if delta <= -15 {
@@ -357,6 +430,11 @@ final class MeshViewModel {
             ActivityStore.shared.record(kind: .healthImproved,
                 detail: "Network health improved from \(prev) to \(health.score) — Grade \(health.grade)")
         }
+        // Keep Live Activity grade/score current whenever health changes.
+        LiveActivityManager.shared.updateStatus(
+            grade: health.grade, score: health.score,
+            deviceCount: devices.count, offlineCount: offlineDeviceIDs.count
+        )
     }
 
     // MARK: - Public interface

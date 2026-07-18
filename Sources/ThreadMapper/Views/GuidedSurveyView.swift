@@ -245,7 +245,7 @@ struct GuidedSurveyView: View {
             VStack(spacing: 6) {
                 Text("Survey Complete")
                     .font(.title.weight(.bold))
-                Text("\(completedRooms.count) of \(rooms.count) room\(rooms.count == 1 ? "" : "s") surveyed")
+                Text("\(completedRooms.count) of \(rooms.count) ^[room](inflect: true) surveyed")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -276,7 +276,7 @@ struct GuidedSurveyView: View {
                                 .foregroundStyle(.red)
                                 .frame(width: 20)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("\(weakNames.count) weak device\(weakNames.count == 1 ? "" : "s") detected")
+                                Text("^[\(weakNames.count) weak device](inflect: true) detected")
                                     .font(.caption.weight(.semibold))
                                     .foregroundStyle(.primary)
                                 Text(weakNames.joined(separator: ", "))

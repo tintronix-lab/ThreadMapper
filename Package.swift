@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "ThreadMapper",
+    defaultLocalization: "en",
     platforms: [.iOS(.v17), .macOS(.v14)],
     products: [
         .library(name: "ThreadMapper", targets: ["ThreadMapper"]),

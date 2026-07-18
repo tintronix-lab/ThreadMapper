@@ -1,0 +1,80 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Services/TopologySnapshot.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "New device",
+        "location": {
+          "startingColumn": 58,
+          "startingLine": 111
+        }
+      },
+      {
+        "comment": "",
+        "key": "No longer seen",
+        "location": {
+          "startingColumn": 58,
+          "startingLine": 112
+        }
+      },
+      {
+        "comment": "",
+        "key": "Went offline",
+        "location": {
+          "startingColumn": 58,
+          "startingLine": 113
+        }
+      },
+      {
+        "comment": "",
+        "key": "Back online",
+        "location": {
+          "startingColumn": 58,
+          "startingLine": 114
+        }
+      },
+      {
+        "comment": "",
+        "key": "Lost mesh path",
+        "location": {
+          "startingColumn": 58,
+          "startingLine": 115
+        }
+      },
+      {
+        "comment": "",
+        "key": "Path restored",
+        "location": {
+          "startingColumn": 58,
+          "startingLine": 116
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld → %lld hops",
+        "location": {
+          "startingColumn": 58,
+          "startingLine": 117
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld → %lld hops",
+        "location": {
+          "startingColumn": 58,
+          "startingLine": 118
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld → %lld dBm",
+        "location": {
+          "startingColumn": 58,
+          "startingLine": 119
+        }
+      }
+    ]
+  },
+  "version": 1
+}

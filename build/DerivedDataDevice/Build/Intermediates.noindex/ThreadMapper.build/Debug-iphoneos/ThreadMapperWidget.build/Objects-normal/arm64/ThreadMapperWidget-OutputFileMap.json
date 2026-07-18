@@ -1,0 +1,49 @@
+{
+  "" : {
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadMapperWidget-primary.dia",
+    "emit-module-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadMapperWidget-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadMapperWidget-primary-emit-module.dia",
+    "pch" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadMapperWidget-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadMapperWidget-primary.swiftdeps"
+  },
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/Shared/TMStyle.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/TMStyle.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/TMStyle.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/TMStyle.dia",
+    "index-unit-output-path" : "/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/TMStyle.o",
+    "llvm-bc" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/TMStyle.bc",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/TMStyle.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/TMStyle.swiftdeps",
+    "swiftmodule" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/TMStyle~partial.swiftmodule"
+  },
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/Shared/ThreadNetworkActivityAttributes.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadNetworkActivityAttributes.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadNetworkActivityAttributes.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadNetworkActivityAttributes.dia",
+    "index-unit-output-path" : "/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadNetworkActivityAttributes.o",
+    "llvm-bc" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadNetworkActivityAttributes.bc",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadNetworkActivityAttributes.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadNetworkActivityAttributes.swiftdeps",
+    "swiftmodule" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadNetworkActivityAttributes~partial.swiftmodule"
+  },
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/Shared/WidgetSnapshot.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/WidgetSnapshot.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/WidgetSnapshot.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/WidgetSnapshot.dia",
+    "index-unit-output-path" : "/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/WidgetSnapshot.o",
+    "llvm-bc" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/WidgetSnapshot.bc",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/WidgetSnapshot.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/WidgetSnapshot.swiftdeps",
+    "swiftmodule" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/WidgetSnapshot~partial.swiftmodule"
+  },
+  "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapperWidget/ThreadMapperWidget.swift" : {
+    "const-values" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadMapperWidget.swiftconstvalues",
+    "dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadMapperWidget.d",
+    "diagnostics" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadMapperWidget.dia",
+    "index-unit-output-path" : "/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadMapperWidget.o",
+    "llvm-bc" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadMapperWidget.bc",
+    "object" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadMapperWidget.o",
+    "swift-dependencies" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadMapperWidget.swiftdeps",
+    "swiftmodule" : "/Users/MAC/Documents/GitHub/ThreadMapper/build/DerivedDataDevice/Build/Intermediates.noindex/ThreadMapper.build/Debug-iphoneos/ThreadMapperWidget.build/Objects-normal/arm64/ThreadMapperWidget~partial.swiftmodule"
+  }
+}

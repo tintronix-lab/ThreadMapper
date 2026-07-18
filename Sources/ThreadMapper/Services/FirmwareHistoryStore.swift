@@ -13,6 +13,7 @@ struct FirmwareChange: Codable, Identifiable {
 
 /// Tracks firmware version changes per device across app launches.
 /// Records a new entry only when a version string differs from the last known version.
+@MainActor
 @Observable
 final class FirmwareHistoryStore {
     static let shared = FirmwareHistoryStore()

@@ -5,6 +5,10 @@ struct ContentView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @AppStorage("demoMode") private var demoMode = false
     @Environment(\.scenePhase) private var scenePhase
+    @State private var notificationService = NotificationService.shared
+    // Tab state lives here so deep links from NotificationService can drive navigation.
+    @State private var tabSelection: AppTab = .dashboard
+    @State private var sidebarSelection: AppTab? = .dashboard
     @State private var meshVM = MeshViewModel(
         discovery: UserDefaults.standard.bool(forKey: "demoMode")
             ? DemoDiscoveryService()
@@ -38,7 +42,7 @@ struct ContentView: View {
                 set: { hasSeenOnboarding = !$0 }
             ))
         } else {
-            MainTabView()
+            MainTabView(tabSelection: $tabSelection, sidebarSelection: $sidebarSelection)
                 .environment(meshVM)
                 .environment(surveyVM)
                 .environment(statsStore)
@@ -53,13 +57,53 @@ struct ContentView: View {
                     WeeklyReportStore.shared.generateIfNeeded()
                 }
                 .onChange(of: scenePhase) { _, phase in
-                    // Pause the poll loop while backgrounded (BGTask covers
-                    // offline detection); resume immediately on foreground.
                     meshVM.isAppActive = (phase == .active)
+                    if phase == .background || phase == .inactive {
+                        UserDefaults.standard.synchronize()
+                    }
                 }
                 .onChange(of: borderRouterURL) { _, _ in
-                    // Apply the new border router URL immediately — no restart needed.
                     meshVM.updateDiagnosticsProvider(ContentView.makeDiagnosticsProvider())
+                }
+                .onChange(of: notificationService.pendingDeepLink) { _, link in
+                    guard let link else { return }
+                    switch link {
+                    case .deviceDetail(let uuid):
+                        tabSelection = .dashboard
+                        sidebarSelection = .dashboard
+                        meshVM.pendingDeviceID = uuid
+                    case .dashboard:
+                        tabSelection = .dashboard
+                        sidebarSelection = .dashboard
+                    case .activity:
+                        tabSelection = .activity
+                        sidebarSelection = .activity
+                    }
+                    notificationService.pendingDeepLink = nil
+                }
+                .onOpenURL { url in
+                    guard url.scheme == "threadmapper" else { return }
+                    switch url.host {
+                    case "dashboard":
+                        tabSelection = .dashboard
+                        sidebarSelection = .dashboard
+                    case "mesh":
+                        tabSelection = .mesh
+                        sidebarSelection = .mesh
+                    case "activity":
+                        tabSelection = .activity
+                        sidebarSelection = .activity
+                    case "device":
+                        tabSelection = .dashboard
+                        sidebarSelection = .dashboard
+                        if let uuidStr = url.pathComponents.dropFirst().first,
+                           let uuid = UUID(uuidString: uuidStr) {
+                            meshVM.pendingDeviceID = uuid
+                        }
+                    case "dismiss-live-activity":
+                        LiveActivityManager.shared.endNow()
+                    default: break
+                    }
                 }
         }
     }
@@ -67,10 +111,8 @@ struct ContentView: View {
 
 struct MainTabView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
-    // iPad sidebar uses optional selection (iOS List requirement)
-    @State private var sidebarSelection: AppTab? = .dashboard
-    // iPhone TabView uses non-optional selection
-    @State private var tabSelection: AppTab = .dashboard
+    @Binding var tabSelection: AppTab
+    @Binding var sidebarSelection: AppTab?
 
     var body: some View {
         if sizeClass == .regular {
@@ -125,7 +167,7 @@ enum AppTab: CaseIterable, Hashable, Identifiable {
 
     var icon: String {
         switch self {
-        case .dashboard: return "square.grid.2x2"
+        case .dashboard: return "house.fill"
         case .mesh:      return "network"
         case .survey:    return "figure.walk"
         case .activity:  return "clock.arrow.circlepath"

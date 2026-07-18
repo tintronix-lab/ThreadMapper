@@ -62,15 +62,15 @@ struct DeviceListRow: View {
             .imageScale(.small)
     }
 
-    private var typeLabel: String {
+    private var typeLabel: LocalizedStringResource {
         if device.isBorderRouter { return "Border Router" }
         if device.isRouter { return "Router" }
-        return device.deviceType
+        return "\(device.deviceType)"
     }
 
     private var accessibilityDescription: String {
-        var parts = [device.name, typeLabel]
-        if let rssi = device.rssi { parts.append("\(rssi.rssiQualityLabel) signal quality") }
+        var parts: [String] = [device.name, String(localized: typeLabel)]
+        if let rssi = device.rssi { parts.append("\(String(localized: rssi.rssiQualityLabel)) signal quality") }
         if let room = device.room { parts.append("in \(room)") }
         if let batt = device.batteryPercentage { parts.append("battery \(batt)%") }
         return parts.joined(separator: ", ")

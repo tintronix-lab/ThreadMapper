@@ -58,6 +58,24 @@ struct DeviceFilterView: View {
                             DeviceListRow(device: device)
                         }
                         .buttonStyle(.plain)
+                        .contextMenu {
+                            Button { selectedDevice = device } label: {
+                                Label("View Details", systemImage: "info.circle")
+                            }
+                            Button {
+                                UIPasteboard.general.string = device.name
+                            } label: {
+                                Label("Copy Name", systemImage: "doc.on.doc")
+                            }
+                            Divider()
+                            if device.isOffline {
+                                Label("Offline", systemImage: "wifi.slash")
+                                    .foregroundStyle(.red)
+                            } else {
+                                Label("Online", systemImage: "wifi")
+                                    .foregroundStyle(.green)
+                            }
+                        }
                     }
                 }
             }

@@ -91,6 +91,7 @@ extension MeshGraphView {
             return sqrt(dx * dx + dy * dy) <= nodeRadius(node.kind) + extraTap
         }) {
             withAnimation(.easeInOut(duration: 0.15)) { selectedNodeID = hit.id }
+            UISelectionFeedbackGenerator().selectionChanged()
             onSelectNode(hit)
             // onSelectDevice is not called here — use the HUD "Details →" button instead,
             // so tapping a node shows info first without immediately navigating away.

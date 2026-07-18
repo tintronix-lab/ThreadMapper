@@ -1056,3 +1056,78 @@ Removed the `if fwVersion != nil || !history.isEmpty` outer guard. The section a
 
 **Device build process clarified:**
 The `.swiftpm/xcode/package.xcworkspace` builds only the Swift library target (produces `.o`/`.swiftmodule`, never a `.app`). Device installation requires either: (a) Xcode's own build system via AppleScript `run`, or (b) `xcodegen generate` → `xcodebuild -project ThreadMapper.xcodeproj` → `devicectl install`. All subsequent device pushes use path (b) to guarantee the binary reflects current source.
+
+---
+
+## Phase 8 — Iteration 27 (2026-07-14: Smart Home Advisor + AI Insights)
+
+See WORKPLAN.md for full summary. `SmartHomeAdvisorView` + `SmartHomeAdvisor` engine (placement/automation/scene suggestions); `AIInsightsView` + `AINetworkAnalyzer` (FoundationModels-powered MeshSummary + PredictiveAnalysis, iOS 26+). Fixed expand/collapse UUID instability by caching suggestion arrays in `@State`.
+
+---
+
+## Phase 8 — Iteration 28 (2026-07-16: backlog merge + UX polish)
+
+**Goal:** Merge REVIEW.md and WORKPLAN.md into a single unified backlog, then ship a batch of UX polish items.
+
+**WORKPLAN.md restructured** into a concise active backlog (shipped summary table + open items), replacing the verbose boilerplate framework with actionable tickets.
+
+**Haptic feedback (4 locations):**
+- Grade improvement → `UIImpactFeedbackGenerator(style: .heavy)` alongside confetti
+- Grade drop → `UINotificationFeedbackGenerator().notificationOccurred(.warning)`
+- Diagnostic run complete → `UINotificationFeedbackGenerator().notificationOccurred(.success)`
+- Mesh graph node tap → `UISelectionFeedbackGenerator().selectionChanged()`
+
+**Health drop notification:**
+- `NotificationService.notifyHealthDrop(from:to:)` — fires on grade regression
+- `notifyHealthDrop` AppStorage key; user toggle in Settings → Notifications
+
+**Notification system expansion:**
+- `notifyWeeklyReport` AppStorage key; toggle in Settings gated to `scheduleWeeklyReport()`; disabling immediately removes the pending notification
+- Notification permission status banner at top of the Notifications section — shows "Enable in iOS Settings" button when `!isAuthorized`; all toggles disabled while unauthorized
+
+**App Store review prompt:**
+- `@Environment(\.requestReview)` added to `DashboardView`
+- `gradeImprovementCount` AppStorage counter increments on each grade improvement
+- `requestReview()` called when count ≥ 2 — targets happy users who have seen the network improve, avoids prompting brand-new installs
+
+**Context menus on device rows (long-press):**
+- `DashboardSections`: "View Details", "Copy Name", "Copy Name & Room", status label
+- `DeviceFilterView`: "View Details", "Copy Name", status label
+- `MeshViewComponents.MeshDeviceRowView`: "View Details", "Copy Name", "Copy Signal Quality", hop count label
+
+**Share AI analysis:**
+- `AIInsightsView` toolbar gains a `ShareLink` when a completed summary is available
+- `shareText` computed property formats headline, explanation, top action, predictive alerts, and outlook into a plain-text digest
+
+**Files changed:**
+`DashboardView.swift`, `NotificationService.swift`, `SettingsView.swift`, `NetworkDiagnosticsView.swift`, `MeshGraphView+Layout.swift`, `DashboardSections.swift`, `DeviceFilterView.swift`, `MeshViewComponents.swift`, `AIInsightsView.swift`, `WORKPLAN.md`
+
+---
+
+## Phase 8 — Iteration 29 (2026-07-16: notification deep linking + UX polish)
+
+**Notification deep linking:**
+- `NotificationService` now extends `NSObject` and conforms to `UNUserNotificationCenterDelegate` (set in `init()`)
+- `userNotificationCenter(_:didReceive:withCompletionHandler:)` parses notification identifiers:
+  - `"offline-{UUID}"` → `.deviceDetail(uuid)`
+  - `"health-drop-*"` → `.dashboard`
+  - `"topology-*"` / `"weekly-report"` → `.activity`
+- `NotificationDeepLink` enum published as `pendingDeepLink` on `NotificationService`
+- `userNotificationCenter(_:willPresent:withCompletionHandler:)` shows banners while in foreground
+- `MeshViewModel.pendingDeviceID: UUID?` — set by deep link; cleared after `DashboardView` uses it
+- Tab state (`tabSelection`, `sidebarSelection`) moved from `MainTabView` to `ContentView` so `onChange(of: pendingDeepLink)` can drive tab switching
+- `DashboardView.onChange(of: viewModel.pendingDeviceID)` finds the device and opens its detail sheet
+
+**Pull-to-refresh:**
+- `DashboardView` `List` gains `.refreshable { await viewModel.startScan() }`
+- `MeshView` `ScrollView` (list mode) gains `.refreshable { await viewModel.startScan() }`
+
+**`accessoryInline` widget:**
+- Added `.accessoryInline` to `ThreadMapperWidget.supportedFamilies`
+- `InlineWidgetView` — single line: "Thread A · 8 online" or "Grade B · 2 offline" with matching SF Symbol
+
+**Activity feed export:**
+- `ActivityFeedView` toolbar (secondary) gains a `ShareLink` exporting grouped events as a timestamped plain-text digest
+
+**Files changed:**
+`NotificationService.swift`, `MeshViewModel.swift`, `ContentView.swift`, `DashboardView.swift`, `MeshView.swift`, `ThreadMapperWidget.swift`, `ActivityFeedView.swift`

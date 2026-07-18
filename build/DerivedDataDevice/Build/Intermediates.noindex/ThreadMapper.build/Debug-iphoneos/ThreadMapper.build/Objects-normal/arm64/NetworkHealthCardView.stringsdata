@@ -1,0 +1,96 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/NetworkHealthCardView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Thread Network",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 21
+        }
+      },
+      {
+        "comment": "",
+        "key": "Score %lld / 100",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 56
+        }
+      },
+      {
+        "comment": "",
+        "key": "Device",
+        "location": {
+          "startingColumn": 51,
+          "startingLine": 68
+        }
+      },
+      {
+        "comment": "",
+        "key": "Devices",
+        "location": {
+          "startingColumn": 62,
+          "startingLine": 68
+        }
+      },
+      {
+        "comment": "",
+        "key": "Online",
+        "location": {
+          "startingColumn": 52,
+          "startingLine": 73
+        }
+      },
+      {
+        "comment": "",
+        "key": "Offline",
+        "location": {
+          "startingColumn": 63,
+          "startingLine": 73
+        }
+      },
+      {
+        "comment": "",
+        "key": "ThreadMapper",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 84
+        }
+      },
+      {
+        "comment": "",
+        "key": "Health Card",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 145
+        }
+      },
+      {
+        "comment": "",
+        "key": "Thread Network Health",
+        "location": {
+          "startingColumn": 78,
+          "startingLine": 134
+        }
+      },
+      {
+        "comment": "",
+        "key": "Share Health Card",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 135
+        }
+      },
+      {
+        "comment": "",
+        "key": "Done",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 149
+        }
+      }
+    ]
+  },
+  "version": 1
+}

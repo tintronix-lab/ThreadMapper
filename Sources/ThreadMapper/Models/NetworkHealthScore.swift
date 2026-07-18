@@ -6,14 +6,14 @@ struct NetworkHealthScore: Equatable {
     let score: Int        // 0–100
     let grade: String     // A B C D F
     let color: Color
-    let summary: String
+    let summary: LocalizedStringResource
     let issues: [Issue]
-    let tips: [String]
+    let tips: [LocalizedStringResource]
 
     struct Issue: Identifiable, Equatable {
         // Stable ID derived from content so ForEach doesn't recreate rows on every poll tick.
         var id: String { "\(icon)|\(message)" }
-        let message: String
+        let message: LocalizedStringResource
         let icon: String
         let isCritical: Bool
         let affectedDevices: [ThreadDevice]
@@ -31,7 +31,7 @@ struct NetworkHealthScore: Equatable {
 
         var score = 100
         var issues: [Issue] = []
-        var tips: [String] = []
+        var tips: [LocalizedStringResource] = []
 
         // Single pass — collect all per-device buckets at once instead of 5 separate filters.
         var borderRouters: [ThreadDevice] = []
@@ -67,20 +67,20 @@ struct NetworkHealthScore: Equatable {
         // Offline devices
         if !offline.isEmpty {
             score -= min(30, offline.count * 12)
-            issues.append(Issue(message: "\(offline.count) device\(offline.count == 1 ? "" : "s") offline", icon: "network.slash", isCritical: true, affectedDevices: offline))
+            issues.append(Issue(message: "^[\(offline.count) device](inflect: true) offline", icon: "network.slash", isCritical: true, affectedDevices: offline))
         }
 
         // Weak signal
         if !weak.isEmpty {
             score -= min(25, weak.count * 7)
-            issues.append(Issue(message: "\(weak.count) device\(weak.count == 1 ? "" : "s") with weak signal", icon: "wifi.exclamationmark", isCritical: weak.count > 2, affectedDevices: weak))
+            issues.append(Issue(message: "^[\(weak.count) device](inflect: true) with weak signal", icon: "wifi.exclamationmark", isCritical: weak.count > 2, affectedDevices: weak))
             if weak.count > 1 { tips.append("Add a Thread router between weak devices and the border router") }
         }
 
         // Low battery
         if !lowBatt.isEmpty {
             score -= 5
-            issues.append(Issue(message: "\(lowBatt.count) device\(lowBatt.count == 1 ? "" : "s") battery < 15%", icon: "battery.25percent", isCritical: false, affectedDevices: lowBatt))
+            issues.append(Issue(message: "^[\(lowBatt.count) device](inflect: true) battery < 15%", icon: "battery.25percent", isCritical: false, affectedDevices: lowBatt))
             tips.append("Replace or charge batteries in low-power devices")
         }
 
@@ -101,7 +101,7 @@ struct NetworkHealthScore: Equatable {
 
         score = max(0, score)
 
-        let (grade, color, summary): (String, Color, String)
+        let (grade, color, summary): (String, Color, LocalizedStringResource)
         switch score {
         case 90...:
             (grade, color, summary) = ("A", .green, "Excellent — network is healthy")

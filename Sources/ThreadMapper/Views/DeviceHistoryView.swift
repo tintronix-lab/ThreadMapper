@@ -93,7 +93,7 @@ struct DeviceHistoryView: View {
             }
         }
         .navigationTitle("Device History")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarTitleDisplayMode(.large)
     }
 
     // MARK: - Summary

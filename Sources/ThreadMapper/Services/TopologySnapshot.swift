@@ -106,7 +106,7 @@ struct SnapshotDiff {
             }
         }
 
-        var label: String {
+        var label: LocalizedStringResource {
             switch self {
             case .newDevice:                      return "New device"
             case .deviceRemoved:                  return "No longer seen"

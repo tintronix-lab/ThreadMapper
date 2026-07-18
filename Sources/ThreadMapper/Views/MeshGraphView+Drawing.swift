@@ -27,9 +27,8 @@ extension MeshGraphView {
             ctx.stroke(path, with: .color(zoneColor.opacity(0.50)), lineWidth: 1)
 
             let deviceCount = roomDeviceCount[room] ?? 0
-            let labelText = "\(room)  ·  \(deviceCount) device\(deviceCount == 1 ? "" : "s")"
             let label = ctx.resolve(
-                Text(labelText)
+                (Text("\(room)  ·  ") + Text("^[\(deviceCount) device](inflect: true)"))
                     .font(.system(size: canvasRoomLabel, weight: .semibold))
                     .foregroundStyle(zoneColor)
             )
@@ -209,7 +208,7 @@ extension MeshGraphView {
         var parts: [String] = [node.kind.rawValue]
         if let room = node.room { parts.append(room) }
         if let rssi = device?.rssi {
-            parts.append(rssi.rssiQualityLabel + " signal")
+            parts.append(String(localized: rssi.rssiQualityLabel) + " signal")
         } else if device?.isOffline == true {
             parts.append("offline")
         }

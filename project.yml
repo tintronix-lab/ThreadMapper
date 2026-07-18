@@ -5,6 +5,11 @@ options:
     iOS: "17.0"
   minimumXcodeGenVersion: "2.20"
   xcodeVersion: "15.0"
+  developmentLanguage: en
+  knownRegions:
+    - Base
+    - en
+    - sv
 
 settings:
   base:

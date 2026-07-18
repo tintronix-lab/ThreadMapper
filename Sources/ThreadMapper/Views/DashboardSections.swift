@@ -1,5 +1,8 @@
 import SwiftUI
 import Charts
+import OSLog
+
+private let log = Logger(subsystem: "com.tintronixlab.ThreadMapper", category: "DashboardSections")
 
 // MARK: - Topology Banner
 
@@ -31,6 +34,68 @@ struct DashboardTopologyBanner: View {
                     }
                 }
                 .padding(.vertical, 4)
+            }
+        }
+    }
+}
+
+// MARK: - Anomaly Banner
+
+struct DashboardAnomalyBanner: View {
+    let anomalies: [UUID: DeviceAnomaly]
+    let devices: [ThreadDevice]
+
+    private var criticalDevices: [ThreadDevice] {
+        devices.filter { anomalies[$0.uniqueIdentifier]?.trajectory == .critical }
+    }
+    private var decliningDevices: [ThreadDevice] {
+        devices.filter { anomalies[$0.uniqueIdentifier]?.trajectory == .declining }
+    }
+
+    var body: some View {
+        let critCount = criticalDevices.count
+        let declCount = decliningDevices.count
+        guard critCount + declCount > 0 else { return AnyView(EmptyView()) }
+
+        let isCritical = critCount > 0
+        let color: Color = isCritical ? .red : .orange
+        let icon = isCritical ? "exclamationmark.triangle.fill" : "arrow.down.right.circle.fill"
+        let names: [String] = (criticalDevices + decliningDevices).prefix(2).map(\.name)
+
+        return AnyView(
+            Section {
+                HStack(spacing: 10) {
+                    Image(systemName: icon).foregroundStyle(color).imageScale(.medium)
+                    VStack(alignment: .leading, spacing: 2) {
+                        anomalyLabel(critCount: critCount, declCount: declCount, names: names)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(color)
+                        Text("Check the Mesh tab for trajectory details.")
+                            .font(.caption2).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                }
+                .padding(.vertical, 4)
+            }
+        )
+    }
+
+    private func anomalyLabel(critCount: Int, declCount: Int, names: [String]) -> Text {
+        if critCount > 0 && declCount > 0 {
+            let total = critCount + declCount
+            let tail = total > 2 ? "…" : ""
+            return Text("^[\(total) device](inflect: true) degrading — \(names.joined(separator: ", "))\(tail)")
+        } else if critCount > 0 {
+            if critCount == 1 {
+                return Text("\(names[0]) showing critical signal drop")
+            } else {
+                return Text("^[\(critCount) device](inflect: true) showing critical signal drop")
+            }
+        } else {
+            if declCount == 1 {
+                return Text("\(names[0]) signal declining")
+            } else {
+                return Text("^[\(declCount) device](inflect: true) signal declining")
             }
         }
     }
@@ -69,11 +134,11 @@ struct DashboardHealthSection: View {
                         HStack(spacing: 6) {
                             statCard(icon: "cpu.fill", value: "\(devices.count)",
                                 label: "Devices", tint: .accentColor,
-                                spec: DeviceFilterSpec(title: "All Devices", category: .all))
+                                spec: DeviceFilterSpec(title: String(localized: "All Devices"), category: .all))
                             statCard(icon: "antenna.radiowaves.left.and.right",
                                 value: "\(routers.count)",
                                 label: "Routers", tint: .indigo,
-                                spec: DeviceFilterSpec(title: "Routers", category: .routers))
+                                spec: DeviceFilterSpec(title: String(localized: "Routers"), category: .routers))
                         }
                         HStack(spacing: 6) {
                             statCard(
@@ -81,13 +146,13 @@ struct DashboardHealthSection: View {
                                 value: "\(offline.count)",
                                 label: "Offline",
                                 tint: offline.count > 0 ? .red : .green,
-                                spec: DeviceFilterSpec(title: "Offline Devices", category: .offline))
+                                spec: DeviceFilterSpec(title: String(localized: "Offline Devices"), category: .offline))
                             statCard(
                                 icon: weak.count > 0 ? "wifi.exclamationmark" : "checkmark.circle.fill",
                                 value: "\(weak.count)",
                                 label: "Weak",
                                 tint: weak.count > 0 ? .orange : .green,
-                                spec: DeviceFilterSpec(title: "Weak Signal Devices", category: .weak))
+                                spec: DeviceFilterSpec(title: String(localized: "Weak Signal Devices"), category: .weak))
                         }
                     }
                 }
@@ -227,34 +292,37 @@ struct DashboardTrendSection: View {
 struct DashboardRoomCoverageSection: View {
     let roomGroups: [(room: String, devices: [ThreadDevice])]
     @Binding var selectedRoom: String?
-    @Binding var isExpanded: Bool
+    let isExpanded: Bool
+    let onToggle: () -> Void
     @Environment(DeviceStatsStore.self) private var statsStore
 
     var body: some View {
         Section {
-            if isExpanded {
-                ForEach(roomGroups, id: \.room) { group in
-                    roomRow(group.room, group.devices)
+            Button {
+                onToggle()
+                log.debug("roomCoverage toggled → \(isExpanded)")
+            } label: {
+                HStack {
+                    Text("Room Coverage")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    Image(systemName: "chevron.down")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .rotationEffect(.degrees(isExpanded ? 0 : -90))
+                        .animation(.easeInOut(duration: 0.2), value: isExpanded)
                 }
             }
-        } header: {
-            HStack {
-                Button {
-                    withAnimation(.easeInOut(duration: 0.25)) { isExpanded.toggle() }
-                } label: {
-                    HStack(spacing: 4) {
-                        Text("Room Coverage")
-                        Image(systemName: "chevron.down")
-                            .font(.caption2.weight(.semibold))
-                            .rotationEffect(.degrees(isExpanded ? 0 : -90))
-                            .animation(.easeInOut(duration: 0.25), value: isExpanded)
-                    }
-                }
-                .buttonStyle(.plain)
-                Spacer()
+            .buttonStyle(.plain)
+
+            if isExpanded {
                 if selectedRoom != nil {
                     Button("Show All") { selectedRoom = nil }
-                        .font(.caption)
+                        .foregroundStyle(.tint)
+                }
+                ForEach(roomGroups, id: \.room) { group in
+                    roomRow(group.room, group.devices)
                 }
             }
         }
@@ -281,7 +349,7 @@ struct DashboardRoomCoverageSection: View {
                         .font(.subheadline.weight(selectedRoom == room ? .semibold : .regular))
                         .foregroundStyle(.primary)
                     HStack(spacing: 6) {
-                        Text("\(devices.count) device\(devices.count == 1 ? "" : "s")")
+                        Text("^[\(devices.count) device](inflect: true)")
                             .font(.caption2).foregroundStyle(.secondary)
                         if weak > 0 { Text("· \(weak) weak").font(.caption2).foregroundStyle(.orange) }
                         if offline > 0 { Text("· \(offline) offline").font(.caption2).foregroundStyle(.red) }
@@ -311,12 +379,37 @@ struct DashboardRoomCoverageSection: View {
 struct DashboardDeviceSection: View {
     let filteredDevices: [ThreadDevice]
     @Binding var selectedRoom: String?
-    @Binding var isExpanded: Bool
+    let isExpanded: Bool
+    let onToggle: () -> Void
     let isScanning: Bool
     let onSelectDevice: (ThreadDevice) -> Void
 
     var body: some View {
         Section {
+            Button {
+                onToggle()
+                log.debug("allDevices toggled → \(isExpanded)")
+            } label: {
+                HStack {
+                    Text(selectedRoom ?? "All Devices")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    if selectedRoom != nil {
+                        Text("Clear Filter")
+                            .font(.caption)
+                            .foregroundStyle(.tint)
+                            .padding(.trailing, 4)
+                    }
+                    Image(systemName: "chevron.down")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .rotationEffect(.degrees(isExpanded ? 0 : -90))
+                        .animation(.easeInOut(duration: 0.2), value: isExpanded)
+                }
+            }
+            .buttonStyle(.plain)
+
             if isExpanded {
                 if filteredDevices.isEmpty {
                     if isScanning {
@@ -346,27 +439,32 @@ struct DashboardDeviceSection: View {
                             DeviceListRow(device: device)
                         }
                         .buttonStyle(.plain)
+                        .contextMenu {
+                            Button { onSelectDevice(device) } label: {
+                                Label("View Details", systemImage: "info.circle")
+                            }
+                            Button {
+                                UIPasteboard.general.string = device.name
+                            } label: {
+                                Label("Copy Name", systemImage: "doc.on.doc")
+                            }
+                            if let room = device.room {
+                                Button {
+                                    UIPasteboard.general.string = "\(device.name) · \(room)"
+                                } label: {
+                                    Label("Copy Name & Room", systemImage: "doc.on.clipboard")
+                                }
+                            }
+                            Divider()
+                            if device.isOffline {
+                                Label("Offline", systemImage: "wifi.slash")
+                                    .foregroundStyle(.red)
+                            } else {
+                                Label("Online", systemImage: "wifi")
+                                    .foregroundStyle(.green)
+                            }
+                        }
                     }
-                }
-            }
-        } header: {
-            HStack {
-                Button {
-                    withAnimation(.easeInOut(duration: 0.25)) { isExpanded.toggle() }
-                } label: {
-                    HStack(spacing: 4) {
-                        Text(selectedRoom ?? "All Devices")
-                        Image(systemName: "chevron.down")
-                            .font(.caption2.weight(.semibold))
-                            .rotationEffect(.degrees(isExpanded ? 0 : -90))
-                            .animation(.easeInOut(duration: 0.25), value: isExpanded)
-                    }
-                }
-                .buttonStyle(.plain)
-                Spacer()
-                if selectedRoom != nil {
-                    Button("Clear Filter") { selectedRoom = nil }
-                        .font(.caption)
                 }
             }
         }
@@ -376,7 +474,7 @@ struct DashboardDeviceSection: View {
 // MARK: - Tips
 
 struct DashboardTipsSection: View {
-    let tips: [String]
+    let tips: [LocalizedStringResource]
     var body: some View {
         Section {
             ForEach(Array(tips.enumerated()), id: \.offset) { index, tip in
@@ -454,7 +552,7 @@ struct DashboardIssuesSection: View {
         if !issue.affectedDevices.isEmpty {
             Button {
                 navPath.append(DeviceFilterSpec(
-                    title: issue.message,
+                    title: String(localized: issue.message),
                     category: .ids(issue.affectedDevices.map(\.uniqueIdentifier))
                 ))
             } label: {
@@ -622,7 +720,7 @@ struct GradeRingView: View {
         .frame(width: 92, height: 92)
         .shadow(color: health.color.opacity(0.25), radius: 8, x: 0, y: 3)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Network health grade \(health.grade), score \(health.score) out of 100")
+        .accessibilityLabel(Text("Network health grade \(health.grade), score \(health.score) out of 100"))
     }
 }
 
@@ -637,7 +735,7 @@ struct DashboardResilienceSection: View {
         let borderRouterCount: Int
         let routerCount: Int
         let grade: String
-        let summary: String
+        let summary: LocalizedStringResource
         let color: Color
         let criticalNames: [String]
     }
@@ -657,7 +755,7 @@ struct DashboardResilienceSection: View {
         case (1..., 1...): grade = "D"
         default:           grade = "F"
         }
-        let summary: String
+        let summary: LocalizedStringResource
         switch grade {
         case "A": summary = "Excellent redundancy — true mesh failover"
         case "B": summary = "Good resilience — dual border routers"
@@ -691,9 +789,9 @@ struct DashboardResilienceSection: View {
                         .font(.subheadline)
                         .fixedSize(horizontal: false, vertical: true)
                     HStack(spacing: 12) {
-                        Label("\(r.borderRouterCount) Border Router\(r.borderRouterCount == 1 ? "" : "s")",
+                        Label("^[\(r.borderRouterCount) Border Router](inflect: true)",
                               systemImage: "antenna.radiowaves.left.and.right")
-                        Label("\(r.routerCount) Total Router\(r.routerCount == 1 ? "" : "s")",
+                        Label("^[\(r.routerCount) Total Router](inflect: true)",
                               systemImage: "point.3.connected.trianglepath.dotted")
                     }
                     .font(.caption2)

@@ -95,12 +95,12 @@ final class WeeklyReportStore {
             sentences.append("No offline events — solid stability all week.")
         } else if let device = worstDevice {
             let n = deviceCounts[device] ?? 0
-            sentences.append("\(device) caused the most disruption with \(n) offline event\(n == 1 ? "" : "s").")
+            sentences.append(String(localized: "\(device) caused the most disruption with \(n) offline \(n == 1 ? "event" : "events")."))
         }
         if currentStreak >= 3 {
             sentences.append("You're on a \(currentStreak)-day Grade A streak — excellent!")
         } else if totalADays > 0 {
-            sentences.append("You've reached Grade A on \(totalADays) day\(totalADays == 1 ? "" : "s") total.")
+            sentences.append(String(localized: "You've reached Grade A on \(totalADays) \(totalADays == 1 ? "day" : "days") total."))
         }
         if let first = historyEntries.first, let last = historyEntries.last, historyEntries.count >= 2 {
             let delta = last.score - first.score

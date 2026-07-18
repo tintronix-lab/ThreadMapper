@@ -42,7 +42,9 @@ struct GetOfflineDevicesIntent: AppIntent {
         }
         let names = snapshot.offlineDeviceNames.joined(separator: ", ")
         let count = snapshot.offlineDeviceNames.count
-        let msg = "\(count) Thread device\(count == 1 ? " is" : "s are") offline: \(names)."
+        let msg = count == 1
+            ? String(localized: "\(count) Thread device is offline: \(names).")
+            : String(localized: "\(count) Thread devices are offline: \(names).")
         return .result(value: msg, dialog: IntentDialog(stringLiteral: msg))
     }
 }

@@ -1,0 +1,48 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/DeviceListRow.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "· %@",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 20
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld%%",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 26
+        }
+      },
+      {
+        "comment": "",
+        "key": "Border Router",
+        "location": {
+          "startingColumn": 43,
+          "startingLine": 66
+        }
+      },
+      {
+        "comment": "",
+        "key": "Router",
+        "location": {
+          "startingColumn": 37,
+          "startingLine": 67
+        }
+      },
+      {
+        "comment": "",
+        "key": "%@",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 68
+        }
+      }
+    ]
+  },
+  "version": 1
+}

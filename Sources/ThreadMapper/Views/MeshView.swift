@@ -8,6 +8,12 @@ enum MeshViewMode: Hashable {
 struct MeshView: View {
     @Environment(MeshViewModel.self) private var viewModel
     @State private var viewMode: MeshViewMode = .map
+    @State private var searchText = ""
+    @State private var showResilienceSimulator = false
+    @State private var showChannelScanner = false
+    @State private var showBRMonitor = false
+    @State private var isExportingMap = false
+    @State private var exportedMapImage: UIImage? = nil
 
     private var selectedDeviceBinding: Binding<ThreadDevice?> {
         Binding(get: { viewModel.selectedDevice }, set: { viewModel.selectedDevice = $0 })
@@ -32,7 +38,9 @@ struct MeshView: View {
     // Nodes grouped by room; gateway excluded; sorted border router → relay → device within each room.
     private var roomGroups: [(room: String, nodes: [MeshNode])] {
         let visible = viewModel.nodes.filter { $0.kind != .gateway }
-        let grouped = Dictionary(grouping: visible) { $0.room ?? "Unassigned" }
+        let q = searchText.trimmingCharacters(in: .whitespaces).lowercased()
+        let matches = q.isEmpty ? visible : visible.filter { $0.name.lowercased().contains(q) }
+        let grouped = Dictionary(grouping: matches) { $0.room ?? "Unassigned" }
         return grouped
             .sorted { $0.key < $1.key }
             .map { key, val in
@@ -47,6 +55,20 @@ struct MeshView: View {
                 DeviceDetailView(device: device)
                     .presentationDetents([.large])
             }
+            .sheet(isPresented: $showResilienceSimulator) {
+                ResilienceSimulatorView()
+            }
+            .sheet(isPresented: $showChannelScanner) {
+                ChannelScannerView()
+            }
+            .sheet(isPresented: $showBRMonitor) {
+                BRHealthMonitorView()
+            }
+            .sheet(isPresented: $isExportingMap) {
+                if let img = exportedMapImage {
+                    MeshMapShareSheet(image: img)
+                }
+            }
             .safeAreaInset(edge: .top, spacing: 0) {
                 topBar
             }
@@ -54,6 +76,9 @@ struct MeshView: View {
                 if !viewModel.isScanning {
                     Task { await viewModel.startScan() }
                 }
+            }
+            .onChange(of: viewMode) { _, mode in
+                if mode == .map { searchText = "" }
             }
     }
 
@@ -100,11 +125,29 @@ struct MeshView: View {
                         .padding(.bottom, 16)
                 }
 
-                ForEach(roomGroups, id: \.room) { group in
-                    roomSection(room: group.room, nodes: group.nodes)
+                if roomGroups.isEmpty && !searchText.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.title2)
+                            .foregroundStyle(.tertiary)
+                        Text("No devices match \"\(searchText)\"")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Button("Clear Search") { searchText = "" }
+                            .font(.subheadline)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 60)
+                } else {
+                    ForEach(roomGroups, id: \.room) { group in
+                        roomSection(room: group.room, nodes: group.nodes)
+                    }
                 }
             }
             .padding(.bottom, 24)
+        }
+        .refreshable {
+            await viewModel.startScan()
         }
     }
 
@@ -165,7 +208,7 @@ struct MeshView: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
                 Spacer()
-                Text("\(borderRouters.count) border router\(borderRouters.count == 1 ? "" : "s")")
+                Text("^[\(borderRouters.count) border router](inflect: true)")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
@@ -196,13 +239,13 @@ struct MeshView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Room header
             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Image(systemName: "house")
+                Image(systemName: TMStyle.roomIcon(room))
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
                 Text(room)
                     .font(.subheadline.weight(.semibold))
                 Spacer()
-                Text("\(nodes.count) device\(nodes.count == 1 ? "" : "s")")
+                Text("^[\(nodes.count) device](inflect: true)")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -254,7 +297,12 @@ struct MeshView: View {
     // MARK: - Device row
 
     private func deviceRow(node: MeshNode, device: ThreadDevice?) -> some View {
-        MeshDeviceRowView(node: node, device: device, hopCount: hopCountByNodeID[node.id]) { d in
+        MeshDeviceRowView(
+            node: node,
+            device: device,
+            hopCount: hopCountByNodeID[node.id],
+            anomaly: device.flatMap { viewModel.anomalies[$0.uniqueIdentifier] }
+        ) { d in
             viewModel.selectedDevice = d
         }
     }
@@ -306,6 +354,7 @@ struct MeshView: View {
     private var topBar: some View {
         VStack(spacing: 0) {
             filterBar
+            if viewMode == .list { listSearchBar }
             if !viewModel.threadNetworks.isEmpty { threadNetworkBar }
             if let error = viewModel.scanError { errorBanner(message: error) }
         }
@@ -315,7 +364,57 @@ struct MeshView: View {
 
     @ViewBuilder
     private var filterBar: some View {
-        MeshFilterBar(viewMode: $viewMode)
+        MeshFilterBar(
+            viewMode: $viewMode,
+            showSimulator: $showResilienceSimulator,
+            showScanner: $showChannelScanner,
+            showBRMonitor: $showBRMonitor,
+            onExportMap: { exportMap() }
+        )
+    }
+
+    @MainActor
+    private func exportMap() {
+        let snapshot = MeshGraphView(
+            nodes: viewModel.nodes,
+            links: viewModel.links,
+            devices: viewModel.devices,
+            isLive: !viewModel.latestDiagnostics.isEmpty,
+            onSelectNode: { _ in },
+            onSelectDevice: { _ in }
+        )
+        .frame(width: 1024, height: 768)
+        .background(Color(UIColor.systemBackground))
+        let renderer = ImageRenderer(content: snapshot)
+        renderer.scale = 2.0
+        guard let image = renderer.uiImage else { return }
+        exportedMapImage = image
+        isExportingMap = true
+    }
+
+    // MARK: - List search bar
+
+    private var listSearchBar: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+            TextField("Search devices", text: $searchText)
+                .font(.subheadline)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+            if !searchText.isEmpty {
+                Button { searchText = "" } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.tertiary)
+                        .font(.caption)
+                }
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.ultraThinMaterial)
+        .overlay(Divider(), alignment: .bottom)
     }
 
     // MARK: - Thread network bar
@@ -378,6 +477,51 @@ struct MeshView: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .background(.red)
+    }
+}
+
+// MARK: - Share Sheet
+
+private struct MeshMapShareSheet: View {
+    let image: UIImage
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .padding(.horizontal)
+                    .shadow(color: .black.opacity(0.12), radius: 8, y: 4)
+
+                ShareLink(
+                    item: Image(uiImage: image),
+                    preview: SharePreview(
+                        "Thread Mesh Map",
+                        image: Image(uiImage: image)
+                    )
+                ) {
+                    Label("Share Map", systemImage: "square.and.arrow.up")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal)
+                }
+            }
+            .padding(.top, 24)
+            .navigationTitle("Export Map")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+        .presentationDetents([.medium])
     }
 }
 

@@ -1,0 +1,688 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/DeviceDetailView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Thread Network",
+        "location": {
+          "startingColumn": 17,
+          "startingLine": 294
+        }
+      },
+      {
+        "comment": "",
+        "key": "Device",
+        "location": {
+          "startingColumn": 17,
+          "startingLine": 414
+        }
+      },
+      {
+        "comment": "",
+        "key": "Survey",
+        "location": {
+          "startingColumn": 17,
+          "startingLine": 526
+        }
+      },
+      {
+        "comment": "",
+        "key": "Device History",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 914
+        }
+      },
+      {
+        "comment": "",
+        "key": "Notes",
+        "location": {
+          "startingColumn": 17,
+          "startingLine": 580
+        }
+      },
+      {
+        "comment": "",
+        "key": "Done",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 73
+        }
+      },
+      {
+        "comment": "",
+        "key": "Signal Intelligence",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 97
+        }
+      },
+      {
+        "comment": "",
+        "key": "Signal values are estimated from HomeKit response time — not measured radio RSSI.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 99
+        }
+      },
+      {
+        "comment": "",
+        "key": "Response Quality · estimated",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 121
+        }
+      },
+      {
+        "comment": "",
+        "key": "Grade",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 133
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld%% stable",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 136
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld readings · ~%@",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 195
+        }
+      },
+      {
+        "comment": "",
+        "key": "Clear",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 199
+        }
+      },
+      {
+        "comment": "",
+        "key": "Collecting readings — check back in a few seconds.",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 207
+        }
+      },
+      {
+        "comment": "",
+        "key": "Troubleshoot Offline Device",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 219
+        }
+      },
+      {
+        "comment": "",
+        "key": "Troubleshoot Weak Signal",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 229
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld pts spread",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 259
+        }
+      },
+      {
+        "comment": "",
+        "key": "Jitter",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 262
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 271
+        }
+      },
+      {
+        "comment": "",
+        "key": "RQ",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 274
+        }
+      },
+      {
+        "comment": "",
+        "key": "Channel",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 304
+        }
+      },
+      {
+        "comment": "",
+        "key": "Parent Node",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 312
+        }
+      },
+      {
+        "comment": "",
+        "key": "Sleepy End Device",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 315
+        }
+      },
+      {
+        "comment": "",
+        "key": "Thread CH %lld",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 305
+        }
+      },
+      {
+        "comment": "",
+        "key": "Devices behind this hub are not on the Thread mesh",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 356
+        }
+      },
+      {
+        "comment": "",
+        "key": "Protocol Compatibility",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 361
+        }
+      },
+      {
+        "comment": "",
+        "key": "Firmware Version",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 372
+        }
+      },
+      {
+        "comment": "",
+        "key": "Not reported by HomeKit",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 378
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld change](inflect: true)",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 390
+        }
+      },
+      {
+        "comment": "",
+        "key": "Version History",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 388
+        }
+      },
+      {
+        "comment": "",
+        "key": "Firmware",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 401
+        }
+      },
+      {
+        "comment": "",
+        "key": "Firmware version reported by HomeKit. Keep devices updated for the latest Thread and Matter improvements.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 404
+        }
+      },
+      {
+        "comment": "",
+        "key": "Manufacturer",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 416
+        }
+      },
+      {
+        "comment": "",
+        "key": "Product",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 419
+        }
+      },
+      {
+        "comment": "",
+        "key": "Type",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 421
+        }
+      },
+      {
+        "comment": "",
+        "key": "Room",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 423
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld%%",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 439
+        }
+      },
+      {
+        "comment": "",
+        "key": "Low — consider replacing",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 443
+        }
+      },
+      {
+        "comment": "",
+        "key": "Replace soon",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 487
+        }
+      },
+      {
+        "comment": "",
+        "key": "~^[%lld day](inflect: true)",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 488
+        }
+      },
+      {
+        "comment": "",
+        "key": "~%lld days",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 489
+        }
+      },
+      {
+        "comment": "",
+        "key": "~%lld days",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 490
+        }
+      },
+      {
+        "comment": "",
+        "key": "Est. remaining",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 463
+        }
+      },
+      {
+        "comment": "",
+        "key": "Battery",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 474
+        }
+      },
+      {
+        "comment": "",
+        "key": "Days remaining is an estimate based on typical Thread sensor battery profiles (~90 day total life). Actual life varies by device and usage.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 477
+        }
+      },
+      {
+        "comment": "",
+        "key": "Include in Thread mesh",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 505
+        }
+      },
+      {
+        "comment": "",
+        "key": "Disable if this bridge uses Zigbee, Z-Wave, or another non-Thread protocol. HomeKit classifies all bridges as border routers regardless of radio type.",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 506
+        }
+      },
+      {
+        "comment": "",
+        "key": "Thread Classification",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 513
+        }
+      },
+      {
+        "comment": "",
+        "key": "This device is hidden from the mesh map and topology. It still appears in lists and the dashboard.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 516
+        }
+      },
+      {
+        "comment": "",
+        "key": "No survey sessions recorded yet. Use the Survey tab to walk your space.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 549
+        }
+      },
+      {
+        "comment": "",
+        "key": "Survey History",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 554
+        }
+      },
+      {
+        "comment": "",
+        "key": "Export CSV for This Device",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 559
+        }
+      },
+      {
+        "comment": "",
+        "key": "Add a note about this device…",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 581
+        }
+      },
+      {
+        "comment": "",
+        "key": "Child device",
+        "location": {
+          "startingColumn": 53,
+          "startingLine": 607
+        }
+      },
+      {
+        "comment": "",
+        "key": "Router neighbor",
+        "location": {
+          "startingColumn": 70,
+          "startingLine": 607
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld dBm",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 617
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld dB margin",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 622
+        }
+      },
+      {
+        "comment": "",
+        "key": "Live Thread Neighbors",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 632
+        }
+      },
+      {
+        "comment": "",
+        "key": "OTBR",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 634
+        }
+      },
+      {
+        "comment": "",
+        "key": "Real neighbor data from your OpenThread Border Router. RLOC16 is each node's Thread routing address. Children route through this device; router neighbors are peers on the mesh backbone.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 639
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld hop](inflect: true) from border router",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 690
+        }
+      },
+      {
+        "comment": "",
+        "key": "Mesh Path to Internet",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 724
+        }
+      },
+      {
+        "comment": "",
+        "key": "Inferred routing path from this device to your border router. Fewer hops means lower latency and better reliability.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 726
+        }
+      },
+      {
+        "comment": "",
+        "key": "Generating AI analysis…",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 751
+        }
+      },
+      {
+        "comment": "",
+        "key": "AI Analysis",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 758
+        }
+      },
+      {
+        "comment": "",
+        "key": "AI Device Summary",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 768
+        }
+      },
+      {
+        "comment": "",
+        "key": "Ask AI about this device",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 785
+        }
+      },
+      {
+        "comment": "",
+        "key": "Get personalised advice and diagnostics",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 787
+        }
+      },
+      {
+        "comment": "",
+        "key": "AI Insights",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 799
+        }
+      },
+      {
+        "comment": "",
+        "key": "Vendor Notes",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 821
+        }
+      },
+      {
+        "comment": "",
+        "key": "30-day Reliability",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 877
+        }
+      },
+      {
+        "comment": "",
+        "key": "Offline Events (30 days)",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 883
+        }
+      },
+      {
+        "comment": "",
+        "key": "Online Streak",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 893
+        }
+      },
+      {
+        "comment": "",
+        "key": "Online Streak",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 888
+        }
+      },
+      {
+        "comment": "",
+        "key": "None",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 884
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 44,
+          "startingLine": 884
+        }
+      },
+      {
+        "comment": "",
+        "key": "< 1 day",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 889
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld day](inflect: true)",
+        "location": {
+          "startingColumn": 50,
+          "startingLine": 889
+        }
+      },
+      {
+        "comment": "",
+        "key": "No outages recorded",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 894
+        }
+      },
+      {
+        "comment": "",
+        "key": "Reliability",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 898
+        }
+      },
+      {
+        "comment": "",
+        "key": "Based on activity events recorded by ThreadMapper in the last 30 days.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 900
+        }
+      },
+      {
+        "comment": "",
+        "key": "First Seen",
+        "location": {
+          "startingColumn": 36,
+          "startingLine": 919
+        }
+      },
+      {
+        "comment": "",
+        "key": "Offline Events (7d)",
+        "location": {
+          "startingColumn": 36,
+          "startingLine": 926
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 927
+        }
+      },
+      {
+        "comment": "",
+        "key": "ago",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 944
+        }
+      }
+    ]
+  },
+  "version": 1
+}

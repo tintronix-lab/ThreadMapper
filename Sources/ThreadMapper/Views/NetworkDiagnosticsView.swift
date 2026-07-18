@@ -724,7 +724,7 @@ struct NetworkDiagnosticsView: View {
                                 .font(.system(size: 17))
                         }
                         VStack(alignment: .leading, spacing: 3) {
-                            Text("\(partition.devices.count) device\(partition.devices.count == 1 ? "" : "s") isolated")
+                            Text("^[\(partition.devices.count) device](inflect: true) isolated")
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundStyle(.red)
                             if let gateway = partition.gatewayDevice {
@@ -746,7 +746,7 @@ struct NetworkDiagnosticsView: View {
                 }
             }
         } header: {
-            Label("Isolated Clusters (\(totalIsolated) device\(totalIsolated == 1 ? "" : "s"))", systemImage: "wifi.slash")
+            Label("Isolated Clusters — ^[\(totalIsolated) device](inflect: true)", systemImage: "wifi.slash")
                 .foregroundStyle(.red)
         } footer: {
             Text("These devices have no path to any border router. They cannot be controlled remotely until the missing routing link is restored.")
@@ -801,13 +801,13 @@ struct NetworkDiagnosticsView: View {
                 Text("Changes Since Baseline")
                 Spacer()
                 if diff.regressions.count > 0 {
-                    Text("\(diff.regressions.count) regression\(diff.regressions.count == 1 ? "" : "s")")
+                    Text("^[\(diff.regressions.count) regression](inflect: true)")
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.red)
                 }
             }
         } footer: {
-            Text("Baseline captured \(diff.baselineAt, style: .relative) ago — \(diff.changes.count) change\(diff.changes.count == 1 ? "" : "s") detected.")
+            Text("Baseline captured \(diff.baselineAt, style: .relative) ago — ^[\(diff.changes.count) change](inflect: true) detected.")
                 .font(.caption)
         }
     }
@@ -877,7 +877,7 @@ struct NetworkDiagnosticsView: View {
                     VStack(alignment: .leading, spacing: 3) {
                         Text(node.device.name)
                             .font(.subheadline.weight(.semibold))
-                        Text("Failure would isolate \(node.isolatedCount) device\(node.isolatedCount == 1 ? "" : "s")")
+                        Text("Failure would isolate ^[\(node.isolatedCount) device](inflect: true)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         if !node.isolatedNames.isEmpty {
@@ -932,11 +932,11 @@ struct NetworkDiagnosticsView: View {
                             Image(systemName: stats.interferenceRisk.icon)
                                 .imageScale(.small)
                                 .foregroundStyle(stats.interferenceRisk.color)
-                            Text(stats.interferenceRisk.label + " interference risk")
+                            (Text(stats.interferenceRisk.label) + Text(" interference risk"))
                                 .font(.caption2)
                                 .foregroundStyle(stats.interferenceRisk.color)
                         }
-                        Text("\(stats.deviceCount) device\(stats.deviceCount == 1 ? "" : "s"): \(stats.deviceNames.prefix(3).joined(separator: ", "))\(stats.deviceNames.count > 3 ? "…" : "")")
+                        Text("^[\(stats.deviceCount) device](inflect: true): \(stats.deviceNames.prefix(3).joined(separator: ", "))\(stats.deviceNames.count > 3 ? "…" : "")")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
@@ -974,7 +974,7 @@ struct NetworkDiagnosticsView: View {
             }
             if let hours = info.keyRotationHours {
                 let days = hours / 24
-                let detail = days > 0 ? "\(days) day\(days == 1 ? "" : "s") (\(hours) h)" : "\(hours) h"
+                let detail = days > 0 ? "\(days) \(days == 1 ? "day" : "days") (\(hours) h)" : "\(hours) h"
                 otbrRow(label: "Key Rotation", value: detail, icon: "arrow.clockwise.circle")
             }
             if let role = info.role {
@@ -1138,7 +1138,7 @@ struct NetworkDiagnosticsView: View {
             HStack {
                 Text("Diagnostic History")
                 Spacer()
-                Text("\(runStore.runs.count) run\(runStore.runs.count == 1 ? "" : "s")")
+                Text("^[\(runStore.runs.count) run](inflect: true)")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
@@ -1223,7 +1223,7 @@ struct NetworkDiagnosticsView: View {
             lines.append("  ✓ No issues detected — network looks healthy.")
         } else {
             for rec in report.recommendations {
-                lines.append("  [\(rec.priority.label.uppercased())] \(rec.title)")
+                lines.append("  [\(String(localized: rec.priority.label).uppercased())] \(rec.title)")
                 lines.append("    \(rec.detail)")
             }
         }
@@ -1246,8 +1246,8 @@ struct NetworkDiagnosticsView: View {
         lines.append("MESH DEPTH")
         for hop in sortedHops {
             let count = grouped[hop]?.count ?? 0
-            let label = hop == 99 ? "Unreachable" : "\(hop) hop\(hop == 1 ? "" : "s")"
-            lines.append("  \(label): \(count) device\(count == 1 ? "" : "s")")
+            let label = hop == 99 ? String(localized: "Unreachable") : String(localized: "^[\(hop) hop](inflect: true)")
+            lines.append(String(localized: "  \(label): ^[\(count) device](inflect: true)"))
         }
         lines.append("")
 
@@ -1255,7 +1255,7 @@ struct NetworkDiagnosticsView: View {
         if !report.channelStats.isEmpty {
             lines.append("THREAD CHANNEL ANALYSIS")
             for ch in report.channelStats {
-                lines.append("  CH \(ch.channel) (\(ch.frequencyMHz) MHz) — \(ch.interferenceRisk.label) interference risk, \(ch.deviceCount) device\(ch.deviceCount == 1 ? "" : "s")")
+                lines.append(String(localized: "  CH \(ch.channel) (\(ch.frequencyMHz) MHz) — \(ch.interferenceRisk.label) interference risk, ^[\(ch.deviceCount) device](inflect: true)"))
             }
             lines.append("")
         }
@@ -1273,7 +1273,7 @@ struct NetworkDiagnosticsView: View {
         if !report.resilienceNodes.isEmpty {
             lines.append("FAILURE IMPACT ANALYSIS")
             for n in report.resilienceNodes {
-                lines.append("  \(n.device.name) → \(n.isolatedCount) device\(n.isolatedCount == 1 ? "" : "s") isolated if removed")
+                lines.append(String(localized: "  \(n.device.name) → ^[\(n.isolatedCount) device](inflect: true) isolated if removed"))
                 if !n.isolatedNames.isEmpty {
                     lines.append("    (\(n.isolatedNames.joined(separator: ", ")))")
                 }
@@ -1296,7 +1296,7 @@ struct NetworkDiagnosticsView: View {
             lines.append("ISOLATED CLUSTERS (\(totalIsolated) devices)")
             for (i, partition) in report.partitions.enumerated() {
                 let gateway = partition.gatewayDevice?.name ?? "unknown"
-                lines.append("  Cluster \(i + 1): \(partition.devices.count) device\(partition.devices.count == 1 ? "" : "s") — missing link: \(gateway)")
+                lines.append(String(localized: "  Cluster \(i + 1): ^[\(partition.devices.count) device](inflect: true) — missing link: \(gateway)"))
                 for d in partition.devices {
                     lines.append("    • \(d.name)\(d.room.map { " (\($0))" } ?? "")")
                 }
@@ -1324,6 +1324,7 @@ struct NetworkDiagnosticsView: View {
             otbrInfo = info
             runStore.record(result)
             isAnalyzing = false
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
         }
     }
 
@@ -1391,13 +1392,13 @@ struct NetworkDiagnosticsView: View {
                 }
             }
             if zigbeeBridgeCount > 0 {
-                Label("\(zigbeeBridgeCount) Zigbee bridge\(zigbeeBridgeCount == 1 ? "" : "s") detected — devices behind these hubs are not on your Thread mesh", systemImage: "exclamationmark.triangle")
+                Label("^[\(zigbeeBridgeCount) Zigbee bridge](inflect: true) detected — devices behind these hubs are not on your Thread mesh", systemImage: "exclamationmark.triangle")
                     .font(.caption)
                     .foregroundStyle(.orange)
                     .padding(.vertical, 2)
             }
             if nonThreadCount > 0 {
-                Label("\(nonThreadCount) device\(nonThreadCount == 1 ? "" : "s") connected via HomeKit only — consider Thread-native replacements for better mesh coverage", systemImage: "info.circle")
+                Label("^[\(nonThreadCount) device](inflect: true) connected via HomeKit only — consider Thread-native replacements for better mesh coverage", systemImage: "info.circle")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.vertical, 2)

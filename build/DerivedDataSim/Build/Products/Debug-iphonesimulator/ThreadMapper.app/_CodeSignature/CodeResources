@@ -18,7 +18,7 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		WUrQQbkBRx7KEop00GROShXNsh4=
+		XVDTCiMb/QC562fswNFvnJ0p4QM=
 		</data>
 		<key>Metadata.appintents/extract.actionsdata</key>
 		<data>
@@ -30,7 +30,7 @@
 		</data>
 		<key>Metadata.appintents/nlu/nlu.lzfse</key>
 		<data>
-		8F6b0MDSNlIsSi3P7YaWdYkqZrA=
+		Qi8PaCWb28/jRY7pYcFlsSNTqs8=
 		</data>
 		<key>Metadata.appintents/root.ssu.yaml</key>
 		<data>
@@ -38,7 +38,7 @@
 		</data>
 		<key>Metadata.appintents/version.json</key>
 		<data>
-		PFbTXKE++oaNDMAe6pe4WaYJGCA=
+		eX845NZBkIpwlA6oT14P97sPaYE=
 		</data>
 		<key>PkgInfo</key>
 		<data>
@@ -50,15 +50,15 @@
 		</data>
 		<key>PlugIns/ThreadMapperWidget.appex/ThreadMapperWidget</key>
 		<data>
-		8BcwyGj+nwO2sWvMek/8NzKIRqQ=
+		wxXz8/hKGJN1dx1Nm9YAFNkGEuQ=
 		</data>
 		<key>PlugIns/ThreadMapperWidget.appex/ThreadMapperWidget.debug.dylib</key>
 		<data>
-		Ha8ITfuBe4wOfykhrCEGeH/liW0=
+		iOS3LjlqfXy46/2wCb8+oqeeUqU=
 		</data>
 		<key>PlugIns/ThreadMapperWidget.appex/_CodeSignature/CodeResources</key>
 		<data>
-		qqIkpwnmhe8I2cU962kiKrJZHsU=
+		NR2Pisx7FiAP+bBPWXvJqeGxW5M=
 		</data>
 		<key>PlugIns/ThreadMapperWidget.appex/__preview.dylib</key>
 		<data>
@@ -70,7 +70,7 @@
 		</data>
 		<key>ThreadMapper.debug.dylib</key>
 		<data>
-		ququHUz/JsD5+kcvaZnpd9XkLk0=
+		mujSrHO+lPE7yibnVcU4A/RIxJg=
 		</data>
 		<key>__preview.dylib</key>
 		<data>
@@ -118,7 +118,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			Ugd4zwLzGkWw+gq7Kmmv8R+YOcX5zV9eF755ZS/4Wvc=
+			XhCocMl5/AHHh5VGhTGMDpGITE4wsDhMFGRCnZuk0a4=
 			</data>
 		</dict>
 		<key>Metadata.appintents/root.ssu.yaml</key>
@@ -132,7 +132,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			bGEMLTRvWVvXxahROmLgL3ZVf6XYsEamPvgqyAHzT5M=
+			P7sdfoAmXiAQcQF3sPyVmNsG+gFrzxEnNkB8p2zt2yE=
 			</data>
 		</dict>
 		<key>PlugIns/ThreadMapperWidget.appex/Info.plist</key>
@@ -146,21 +146,21 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			co8ReaIqnlI7vbveCRM1wmcEwaYxN0VCRCx29cZFTko=
+			qjbkUSuIp8f8aiSuALnKG7jTVw7wbOX7EQIc+qnfQdU=
 			</data>
 		</dict>
 		<key>PlugIns/ThreadMapperWidget.appex/ThreadMapperWidget.debug.dylib</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			UF2jQjDOpax+6s4EFbG3EmxjqUWNstWdycRHPsTKHSw=
+			9AdTA/FV0hch+Bkl1tZ4/cnPqGXqILsLdlrGVlAq4Ik=
 			</data>
 		</dict>
 		<key>PlugIns/ThreadMapperWidget.appex/_CodeSignature/CodeResources</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			H3OdwhMfpPJDE7Yq3YK30WQ612pimhhbMEbe4DfgW+4=
+			JkVNmRYH8f2lM9TZiqy3sY2Mky0evBDbzR/fX13T1sQ=
 			</data>
 		</dict>
 		<key>PlugIns/ThreadMapperWidget.appex/__preview.dylib</key>
@@ -181,7 +181,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			JfUK3ViyIzMiORiYDIDzznEVIEUYfqEh1WaKHkQFz3g=
+			BF7lhL5o/5AJw6lzd8GZOkqTfloFXGK9Z8iG5M6TO/Q=
 			</data>
 		</dict>
 		<key>__preview.dylib</key>

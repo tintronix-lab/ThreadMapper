@@ -2,11 +2,14 @@ import SwiftUI
 
 struct ActivityFeedView: View {
     @Environment(ActivityStore.self) private var store
+    @Environment(MeshViewModel.self) private var meshVM
     @State private var selectedDevice: ThreadDevice?
     @State private var searchText = ""
     @State private var kindFilter: ActivityEvent.Kind? = nil
     @State private var showDeviceHistory = false
     @State private var showTimeline = false
+    @State private var aiDigest: String? = nil
+    @State private var isLoadingDigest = false
 
     private var filtered: [ActivityEvent] {
         store.events.filter { event in
@@ -15,7 +18,7 @@ struct ActivityFeedView: View {
             guard !searchText.isEmpty else { return true }
             let q = searchText.lowercased()
             return event.detail.lowercased().contains(q)
-                || event.kind.label.lowercased().contains(q)
+                || String(localized: event.kind.label).lowercased().contains(q)
                 || (event.deviceName?.lowercased().contains(q) ?? false)
                 || (event.room?.lowercased().contains(q) ?? false)
         }
@@ -36,6 +39,28 @@ struct ActivityFeedView: View {
                     noResultsState
                 } else {
                     List {
+                        if #available(iOS 26, *), isLoadingDigest || aiDigest != nil {
+                            Section {
+                                if isLoadingDigest {
+                                    HStack(spacing: 10) {
+                                        ProgressView().controlSize(.small)
+                                        Text("Summarising activity…").font(.caption).foregroundStyle(.secondary)
+                                    }
+                                    .padding(.vertical, 4)
+                                } else if let digest = aiDigest {
+                                    HStack(alignment: .top, spacing: 10) {
+                                        Image(systemName: "apple.intelligence")
+                                            .foregroundStyle(.purple).font(.caption).padding(.top, 1)
+                                        Text(digest)
+                                            .font(.subheadline).foregroundStyle(.secondary)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                    .padding(.vertical, 4)
+                                }
+                            } header: {
+                                Label("AI Summary", systemImage: "sparkles")
+                            }
+                        }
                         ForEach(grouped, id: \.day) { group in
                             Section(dayHeader(group.day)) {
                                 ForEach(group.events) { event in
@@ -43,11 +68,30 @@ struct ActivityFeedView: View {
                                 }
                             }
                         }
+                        Section("Explore") {
+                            Button { showTimeline = true } label: {
+                                Label("Network Timeline", systemImage: "chart.xyaxis.line")
+                            }
+                            Button { showDeviceHistory = true } label: {
+                                Label("Device History", systemImage: "chart.bar.doc.horizontal")
+                            }
+                        }
                     }
                 }
             }
             .navigationTitle("Activity")
             .searchable(text: $searchText, prompt: "Search events")
+            .task(id: store.events.count) {
+                guard #available(iOS 26, *),
+                      store.events.count >= 3,
+                      !isLoadingDigest else { return }
+                isLoadingDigest = true
+                aiDigest = try? await AINetworkAnalyzer.activityDigest(
+                    events: Array(store.events.prefix(10)),
+                    devices: meshVM.devices
+                )
+                isLoadingDigest = false
+            }
             .navigationDestination(isPresented: $showDeviceHistory) {
                 DeviceHistoryView()
             }
@@ -55,20 +99,6 @@ struct ActivityFeedView: View {
                 NetworkTimelineView()
             }
             .toolbar {
-                ToolbarItem(placement: .secondaryAction) {
-                    Button {
-                        showTimeline = true
-                    } label: {
-                        Label("Network Timeline", systemImage: "chart.xyaxis.line")
-                    }
-                }
-                ToolbarItem(placement: .secondaryAction) {
-                    Button {
-                        showDeviceHistory = true
-                    } label: {
-                        Label("Device History", systemImage: "chart.bar.doc.horizontal")
-                    }
-                }
                 if !store.events.isEmpty {
                     ToolbarItem(placement: .primaryAction) {
                         Menu {
@@ -93,6 +123,10 @@ struct ActivityFeedView: View {
                                         Label(kind.label, systemImage: kindFilter == kind ? "checkmark" : kind.icon)
                                     }
                                 }
+                            }
+                            Divider()
+                            ShareLink(item: exportText) {
+                                Label("Export Activity Log", systemImage: "square.and.arrow.up")
                             }
                             Divider()
                             Button("Clear All Events", role: .destructive) {
@@ -141,11 +175,31 @@ struct ActivityFeedView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
+    // MARK: - Export
+
+    private var exportText: String {
+        var lines = [
+            "ThreadMapper Activity Log",
+            "Exported \(Date().formatted(.dateTime.day().month().year().hour().minute()))",
+            String(repeating: "─", count: 40)
+        ]
+        for group in grouped {
+            lines.append("")
+            lines.append(dayHeader(group.day).uppercased())
+            for event in group.events {
+                let time = event.timestamp.formatted(.dateTime.hour().minute())
+                let room = event.room.map { " [\($0)]" } ?? ""
+                lines.append("  \(time)  \(String(localized: event.kind.label))\(room)  \(event.detail)")
+            }
+        }
+        return lines.joined(separator: "\n")
+    }
+
     // MARK: - Day header
 
     private func dayHeader(_ date: Date) -> String {
-        if Calendar.current.isDateInToday(date) { return "Today" }
-        if Calendar.current.isDateInYesterday(date) { return "Yesterday" }
+        if Calendar.current.isDateInToday(date) { return String(localized: "Today") }
+        if Calendar.current.isDateInYesterday(date) { return String(localized: "Yesterday") }
         return date.formatted(.dateTime.weekday(.wide).month().day())
     }
 }

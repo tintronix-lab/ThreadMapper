@@ -16,10 +16,10 @@ struct AchievementsView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(achievement.title)
+                    Text(LocalizedStringKey(achievement.title))
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(achievement.isUnlocked ? .primary : .secondary)
-                    Text(achievement.description)
+                    Text(LocalizedStringKey(achievement.description))
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                     if let date = achievement.unlockedAt {
@@ -59,7 +59,7 @@ struct AchievementBanner: View {
                 Text("Achievement Unlocked")
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(.secondary)
-                Text(achievement.title)
+                Text(LocalizedStringKey(achievement.title))
                     .font(.subheadline.weight(.bold))
             }
 

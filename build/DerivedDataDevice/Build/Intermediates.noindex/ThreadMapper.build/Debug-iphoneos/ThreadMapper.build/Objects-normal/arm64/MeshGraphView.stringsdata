@@ -1,0 +1,104 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/MeshGraphView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Pinch to zoom for device names",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 155
+        }
+      },
+      {
+        "comment": "",
+        "key": "Mesh network map",
+        "location": {
+          "startingColumn": 33,
+          "startingLine": 56
+        }
+      },
+      {
+        "comment": "",
+        "key": "Toggle legend",
+        "location": {
+          "startingColumn": 45,
+          "startingLine": 141
+        }
+      },
+      {
+        "comment": "",
+        "key": "Fit graph to view",
+        "location": {
+          "startingColumn": 29,
+          "startingLine": 332
+        }
+      },
+      {
+        "comment": "",
+        "key": "No Thread devices",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 192
+        }
+      },
+      {
+        "comment": "",
+        "key": "Add Thread accessories in the Home app,\nthen tap Scan.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 195
+        }
+      },
+      {
+        "comment": "",
+        "key": "Details →",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 221
+        }
+      },
+      {
+        "comment": "",
+        "key": "No Signal",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 233
+        }
+      },
+      {
+        "comment": "",
+        "key": "%@ (est.)",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 230
+        }
+      },
+      {
+        "comment": "",
+        "key": "CH %lld",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 240
+        }
+      },
+      {
+        "comment": "",
+        "key": "Estimated paths — HomeKit\ndoesn't report Thread routing",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 314
+        }
+      },
+      {
+        "comment": "",
+        "key": "Live routing · Border Router",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 309
+        }
+      }
+    ]
+  },
+  "version": 1
+}

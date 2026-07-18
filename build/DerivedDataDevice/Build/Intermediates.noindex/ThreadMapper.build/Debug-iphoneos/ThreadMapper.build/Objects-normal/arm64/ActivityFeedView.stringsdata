@@ -1,0 +1,144 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/ActivityFeedView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Activity",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 82
+        }
+      },
+      {
+        "comment": "",
+        "key": "Search events",
+        "location": {
+          "startingColumn": 52,
+          "startingLine": 83
+        }
+      },
+      {
+        "comment": "",
+        "key": "Explore",
+        "location": {
+          "startingColumn": 33,
+          "startingLine": 71
+        }
+      },
+      {
+        "comment": "",
+        "key": "Summarising activity…",
+        "location": {
+          "startingColumn": 46,
+          "startingLine": 47
+        }
+      },
+      {
+        "comment": "",
+        "key": "AI Summary",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 61
+        }
+      },
+      {
+        "comment": "",
+        "key": "Today",
+        "location": {
+          "startingColumn": 76,
+          "startingLine": 201
+        }
+      },
+      {
+        "comment": "",
+        "key": "Yesterday",
+        "location": {
+          "startingColumn": 80,
+          "startingLine": 202
+        }
+      },
+      {
+        "comment": "",
+        "key": "Network Timeline",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 73
+        }
+      },
+      {
+        "comment": "",
+        "key": "Device History",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 76
+        }
+      },
+      {
+        "comment": "",
+        "key": "Filter by type",
+        "location": {
+          "startingColumn": 37,
+          "startingLine": 105
+        }
+      },
+      {
+        "comment": "",
+        "key": "Clear All Events",
+        "location": {
+          "startingColumn": 36,
+          "startingLine": 132
+        }
+      },
+      {
+        "comment": "",
+        "key": "All Events",
+        "location": {
+          "startingColumn": 43,
+          "startingLine": 109
+        }
+      },
+      {
+        "comment": "",
+        "key": "Export Activity Log",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 129
+        }
+      },
+      {
+        "comment": "",
+        "key": "No Activity Yet",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 152
+        }
+      },
+      {
+        "comment": "",
+        "key": "ThreadMapper records device events here as your network changes — offline alerts, topology shifts, and health score changes.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 154
+        }
+      },
+      {
+        "comment": "",
+        "key": "No matching events",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 168
+        }
+      },
+      {
+        "comment": "",
+        "key": "Clear Filter",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 171
+        }
+      }
+    ]
+  },
+  "version": 1
+}

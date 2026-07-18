@@ -1,0 +1,360 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/SettingsView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Settings",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 53
+        }
+      },
+      {
+        "comment": "",
+        "key": "Data",
+        "location": {
+          "startingColumn": 17,
+          "startingLine": 214
+        }
+      },
+      {
+        "comment": "",
+        "key": "About",
+        "location": {
+          "startingColumn": 17,
+          "startingLine": 273
+        }
+      },
+      {
+        "comment": "",
+        "key": "Setup Checklist",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 66
+        }
+      },
+      {
+        "comment": "",
+        "key": "Demo Mode",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 71
+        }
+      },
+      {
+        "comment": "",
+        "key": "Simulates a Thread network — no HomeKit required. Restart the app to apply.",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 72
+        }
+      },
+      {
+        "comment": "",
+        "key": "Tools",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 78
+        }
+      },
+      {
+        "comment": "",
+        "key": "Offline device alerts",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 93
+        }
+      },
+      {
+        "comment": "",
+        "key": "Offline grace period",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 95
+        }
+      },
+      {
+        "comment": "",
+        "key": "Network topology changes",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 101
+        }
+      },
+      {
+        "comment": "",
+        "key": "Mesh health grade changes",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 103
+        }
+      },
+      {
+        "comment": "",
+        "key": "New device detected",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 105
+        }
+      },
+      {
+        "comment": "",
+        "key": "Proactive AI insights",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 107
+        }
+      },
+      {
+        "comment": "",
+        "key": "Weekly network report",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 109
+        }
+      },
+      {
+        "comment": "",
+        "key": "Enable in iOS Settings",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 89
+        }
+      },
+      {
+        "comment": "",
+        "key": "Notifications",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 126
+        }
+      },
+      {
+        "comment": "",
+        "key": "Grade drop alerts fire when your network health falls by one letter grade or more. Offline alerts wait for the grace period before firing. Weekly report arrives Sunday mornings.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 129
+        }
+      },
+      {
+        "comment": "",
+        "key": "ThreadMapper needs notification permission to alert you about device and network events.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 131
+        }
+      },
+      {
+        "comment": "",
+        "key": "Enable Quiet Hours",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 140
+        }
+      },
+      {
+        "comment": "",
+        "key": "Start",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 142
+        }
+      },
+      {
+        "comment": "",
+        "key": "End",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 147
+        }
+      },
+      {
+        "comment": "",
+        "key": "Quiet Hours",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 154
+        }
+      },
+      {
+        "comment": "",
+        "key": "Notifications are suppressed %@.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 160
+        }
+      },
+      {
+        "comment": "",
+        "key": "Suppress all alerts during a nightly window.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 162
+        }
+      },
+      {
+        "comment": "",
+        "key": "http://192.168.1.50:8081",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 175
+        }
+      },
+      {
+        "comment": "",
+        "key": "Test Connection",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 185
+        }
+      },
+      {
+        "comment": "",
+        "key": "Border Router",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 198
+        }
+      },
+      {
+        "comment": "",
+        "key": "Advanced: connect an OpenThread Border Router's REST API to read real Thread network facts (channel, PAN ID) and improve link quality readings. Changes apply immediately. Apple/Google border routers don't expose this; OTBR-based ones (e.g. Home Assistant) do.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 200
+        }
+      },
+      {
+        "comment": "",
+        "key": "Clear Signal History",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 215
+        }
+      },
+      {
+        "comment": "",
+        "key": "Clear all stored per-device signal readings?",
+        "location": {
+          "startingColumn": 17,
+          "startingLine": 219
+        }
+      },
+      {
+        "comment": "",
+        "key": "Clear Health Score History",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 228
+        }
+      },
+      {
+        "comment": "",
+        "key": "Clear the 24-hour health score history?",
+        "location": {
+          "startingColumn": 17,
+          "startingLine": 232
+        }
+      },
+      {
+        "comment": "",
+        "key": "Clear Activity Feed",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 241
+        }
+      },
+      {
+        "comment": "",
+        "key": "Clear all activity events?",
+        "location": {
+          "startingColumn": 17,
+          "startingLine": 245
+        }
+      },
+      {
+        "comment": "",
+        "key": "Clear All Signal Data",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 223
+        }
+      },
+      {
+        "comment": "",
+        "key": "Clear History",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 236
+        }
+      },
+      {
+        "comment": "",
+        "key": "Clear Activity",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 249
+        }
+      },
+      {
+        "comment": "",
+        "key": "Preview Paywall",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 260
+        }
+      },
+      {
+        "comment": "",
+        "key": "Debug",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 264
+        }
+      },
+      {
+        "comment": "",
+        "key": "Debug-only. Not visible in release builds.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 266
+        }
+      },
+      {
+        "comment": "",
+        "key": "Version",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 285
+        }
+      },
+      {
+        "comment": "",
+        "key": "Build",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 289
+        }
+      },
+      {
+        "comment": "",
+        "key": "User Manual",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 277
+        }
+      },
+      {
+        "comment": "",
+        "key": "Language",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 282
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -15,6 +15,9 @@ struct DeviceDetailView: View {
     // Generated once on appear — generating in body wrote a temp file on every render.
     @State private var exportURL: URL?
     @State private var showFirmwareHistory = false
+    @State private var showAIAssistant = false
+    @State private var deviceAISummary: String? = nil
+    @State private var isLoadingDeviceSummary = false
 
     private var stats: DeviceStats? { statsStore.stats(for: device.uniqueIdentifier) }
     private var surveyPoints: [SurveyPoint] { surveyVM.surveys(for: device.name) }
@@ -35,6 +38,9 @@ struct DeviceDetailView: View {
                 if device.batteryPercentage != nil { batterySection }
                 if device.isBorderRouter { threadClassificationSection }
                 vendorInsightSection
+                reliabilitySection
+                if #available(iOS 26, *) { aiSummarySection }
+                aiAssistantSection
                 surveySection
                 deviceHistorySection
                 notesSection
@@ -44,6 +50,23 @@ struct DeviceDetailView: View {
             .onAppear {
                 noteText = notesStore.note(for: device.uniqueIdentifier.uuidString)
                 exportURL = surveyVM.exportCSV(for: device.name)
+            }
+            .task {
+                guard #available(iOS 26, *) else { return }
+                guard !isLoadingDeviceSummary, deviceAISummary == nil else { return }
+                isLoadingDeviceSummary = true
+                let offlineCount = activityStore.events.filter {
+                    $0.deviceID == device.uniqueIdentifier &&
+                    ($0.kind == .deviceOffline || $0.kind == .borderRouterOffline) &&
+                    $0.timestamp > Date().addingTimeInterval(-30 * 24 * 3600)
+                }.count
+                deviceAISummary = try? await AINetworkAnalyzer.deviceSummary(
+                    device: device,
+                    anomaly: meshViewModel.anomalies[device.uniqueIdentifier],
+                    stats: statsStore.stats(for: device.uniqueIdentifier),
+                    offlineCount: offlineCount
+                )
+                isLoadingDeviceSummary = false
             }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -55,6 +78,11 @@ struct DeviceDetailView: View {
             }
             .sheet(item: $troubleshootProblem) { problem in
                 TroubleshooterView(device: device, problem: problem)
+            }
+            .sheet(isPresented: $showAIAssistant) {
+                NavigationStack {
+                    NetworkAssistantWrapperView(focusDevice: device)
+                }
             }
         }
     }
@@ -359,7 +387,7 @@ struct DeviceDetailView: View {
                     HStack {
                         Label("Version History", systemImage: "clock.arrow.trianglehead.counterclockwise.rotate.90")
                         Spacer()
-                        Text("\(history.count) change\(history.count == 1 ? "" : "s")")
+                        Text("^[\(history.count) change](inflect: true)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         Image(systemName: "chevron.right")
@@ -401,7 +429,7 @@ struct DeviceDetailView: View {
 
     @ViewBuilder
     private var batterySection: some View {
-        Section("Battery") {
+        Section {
             if let batt = device.batteryPercentage {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
@@ -429,7 +457,37 @@ struct DeviceDetailView: View {
                     .frame(height: 8)
                 }
                 .padding(.vertical, 4)
+
+                if device.isSleepyEndDevice, let estimate = batteryDaysEstimate(batt) {
+                    HStack {
+                        Label("Est. remaining", systemImage: "clock.badge")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text(estimate.label)
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(estimate.color)
+                    }
+                }
             }
+        } header: {
+            Text("Battery")
+        } footer: {
+            if device.isSleepyEndDevice {
+                Text("Days remaining is an estimate based on typical Thread sensor battery profiles (~90 day total life). Actual life varies by device and usage.")
+                    .font(.caption2)
+            }
+        }
+    }
+
+    private func batteryDaysEstimate(_ percent: Int) -> (label: LocalizedStringResource, color: Color)? {
+        let totalDays = 90
+        let days = Int(Double(percent) / 100.0 * Double(totalDays))
+        switch days {
+        case 0:       return ("Replace soon", .red)
+        case 1...7:   return ("~^[\(days) day](inflect: true)", .red)
+        case 8...21:  return ("~\(days) days", .orange)
+        default:      return ("~\(days) days", .secondary)
         }
     }
 
@@ -629,7 +687,7 @@ struct DeviceDetailView: View {
                 HStack(spacing: 10) {
                     Image(systemName: hopCount <= 2 ? "checkmark.circle.fill" : hopCount == 3 ? "exclamationmark.circle" : "exclamationmark.triangle.fill")
                         .foregroundStyle(hopCount <= 2 ? .green : hopCount == 3 ? .orange : .red)
-                    Text("\(hopCount) hop\(hopCount == 1 ? "" : "s") from border router")
+                    Text("^[\(hopCount) hop](inflect: true) from border router")
                         .font(.subheadline.weight(.semibold))
                     Spacer()
                 }
@@ -677,6 +735,68 @@ struct DeviceDetailView: View {
         case .borderRouter: return "antenna.radiowaves.left.and.right"
         case .router:       return "point.3.connected.trianglepath.dotted"
         case .endDevice:    return "circle.dotted"
+        }
+    }
+
+    // MARK: - AI Assistant
+
+    @available(iOS 26, *)
+    @ViewBuilder
+    private var aiSummarySection: some View {
+        if isLoadingDeviceSummary || deviceAISummary != nil {
+            Section {
+                if isLoadingDeviceSummary {
+                    HStack(spacing: 10) {
+                        ProgressView().controlSize(.small)
+                        Text("Generating AI analysis…").font(.caption).foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 6)
+                } else if let summary = deviceAISummary {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "apple.intelligence").font(.caption).foregroundStyle(.purple)
+                            Text("AI Analysis").font(.caption.weight(.semibold)).foregroundStyle(.purple)
+                        }
+                        Text(summary)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(.vertical, 4)
+                }
+            } header: {
+                Label("AI Device Summary", systemImage: "sparkles")
+            }
+        }
+    }
+
+    private var aiAssistantSection: some View {
+        Section {
+            Button {
+                showAIAssistant = true
+            } label: {
+                HStack(spacing: 12) {
+                    ZStack {
+                        Circle().fill(Color.purple.opacity(0.12)).frame(width: 34, height: 34)
+                        Image(systemName: "bubble.left.and.text.bubble.right.fill")
+                            .foregroundStyle(.purple).font(.caption)
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Ask AI about this device")
+                            .font(.subheadline.weight(.medium))
+                        Text("Get personalised advice and diagnostics")
+                            .font(.caption2).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.tertiaryLabel)
+                }
+                .padding(.vertical, 2)
+            }
+            .buttonStyle(.plain)
+        } header: {
+            Text("AI Insights")
         }
     }
 
@@ -730,6 +850,55 @@ struct DeviceDetailView: View {
             return "Samsung SmartThings Station supports Thread and Matter. It can act as a border router for your mesh alongside HomePod and Apple TV devices."
         }
         return nil
+    }
+
+    // MARK: - Reliability
+
+    private var reliabilitySection: some View {
+        let cutoff = Date().addingTimeInterval(-30 * 24 * 3600)
+        let offlineEvents = activityStore.events.filter {
+            $0.deviceID == device.uniqueIdentifier &&
+            ($0.kind == .deviceOffline || $0.kind == .borderRouterOffline) &&
+            $0.timestamp > cutoff
+        }
+        let count = offlineEvents.count
+        let (label, color): (String, Color) = switch count {
+        case 0:        ("Excellent", .green)
+        case 1:        ("Very Good", .mint)
+        case 2:        ("Good",      .yellow)
+        case 3...4:    ("Fair",      .orange)
+        default:       ("Needs Attention", .red)
+        }
+
+        let lastOfflineDate = offlineEvents.first?.timestamp
+        let streakDays: Int? = lastOfflineDate.map { Int(Date().timeIntervalSince($0) / 86400) }
+
+        return Section {
+            LabeledContent("30-day Reliability") {
+                HStack(spacing: 6) {
+                    Circle().fill(color).frame(width: 8, height: 8)
+                    Text(label).foregroundStyle(color).fontWeight(.medium)
+                }
+            }
+            LabeledContent("Offline Events (30 days)") {
+                Text(count == 0 ? "None" : "\(count)")
+                    .foregroundStyle(count == 0 ? .green : count < 3 ? .primary : .red)
+            }
+            if let days = streakDays {
+                LabeledContent("Online Streak") {
+                    Text(days == 0 ? "< 1 day" : "^[\(days) day](inflect: true)")
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                LabeledContent("Online Streak") {
+                    Text("No outages recorded").foregroundStyle(.green)
+                }
+            }
+        } header: {
+            Text("Reliability")
+        } footer: {
+            Text("Based on activity events recorded by ThreadMapper in the last 30 days.")
+        }
     }
 
     // MARK: - Device History

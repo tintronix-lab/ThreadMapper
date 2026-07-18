@@ -1,0 +1,56 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/DeviceFilterView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "No devices match this category right now.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 52
+        }
+      },
+      {
+        "comment": "",
+        "key": "No Devices",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 50
+        }
+      },
+      {
+        "comment": "",
+        "key": "Offline",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 72
+        }
+      },
+      {
+        "comment": "",
+        "key": "Online",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 75
+        }
+      },
+      {
+        "comment": "",
+        "key": "View Details",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 63
+        }
+      },
+      {
+        "comment": "",
+        "key": "Copy Name",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 68
+        }
+      }
+    ]
+  },
+  "version": 1
+}

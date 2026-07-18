@@ -25,7 +25,7 @@ struct MeshGraphView: View {
     @State var viewSize: CGSize = .zero
     // Gating hash: skip layout re-solve when node membership/rooms/size are unchanged.
     @State var layoutHash: Int? = nil
-    @State var legendExpanded = false
+    @AppStorage("mesh.legendExpanded") var legendExpanded = false
 
     @ScaledMetric(relativeTo: .caption2) var canvasNodeLabel: CGFloat = 8
     @ScaledMetric(relativeTo: .caption2) var canvasRoomLabel: CGFloat = 9
@@ -274,7 +274,7 @@ struct MeshGraphView: View {
             }
         }
         let hops = path.filter { $0.kind == .router }.count
-        let via = hops > 0 ? " · via \(hops) relay\(hops == 1 ? "" : "s")" : " · direct"
+        let via = hops > 0 ? " · via \(hops) \(hops == 1 ? "relay" : "relays")" : " · direct"
         return "Route: " + names.joined(separator: " → ") + via
     }
 

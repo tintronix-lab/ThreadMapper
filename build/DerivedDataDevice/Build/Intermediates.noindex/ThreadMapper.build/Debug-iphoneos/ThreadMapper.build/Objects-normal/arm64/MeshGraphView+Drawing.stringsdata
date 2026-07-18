@@ -1,0 +1,32 @@
+{
+  "source": "/Users/MAC/Documents/GitHub/ThreadMapper/Sources/ThreadMapper/Views/MeshGraphView+Drawing.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "%@  ·  ",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 31
+        }
+      },
+      {
+        "comment": "",
+        "key": "^[%lld device](inflect: true)",
+        "location": {
+          "startingColumn": 47,
+          "startingLine": 31
+        }
+      },
+      {
+        "comment": "",
+        "key": "%@",
+        "location": {
+          "startingColumn": 45,
+          "startingLine": 121
+        }
+      }
+    ]
+  },
+  "version": 1
+}

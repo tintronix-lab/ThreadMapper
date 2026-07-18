@@ -3,14 +3,14 @@ import SwiftUI
 public enum OnboardingPage: CaseIterable, Identifiable {
     case welcome, setup, survey
     public var id: Self { self }
-    public var title: String {
+    public var title: LocalizedStringResource {
         switch self {
         case .welcome: "Welcome"
         case .setup: "Setup"
         case .survey: "Survey"
         }
     }
-    public var text: String {
+    public var text: LocalizedStringResource {
         switch self {
         case .welcome: "See every Thread device in your home, spot weak signal, and get alerted the moment something drops offline."
         case .setup: "ThreadMapper uses HomeKit to find your devices. You'll need a Thread border router — a HomePod mini, HomePod, or Apple TV 4K — set up in the Home app."
