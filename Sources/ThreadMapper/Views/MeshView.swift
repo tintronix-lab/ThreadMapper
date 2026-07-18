@@ -185,8 +185,7 @@ struct MeshView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 10)
-        .background(Color(UIColor.secondarySystemGroupedBackground),
-                    in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .cardBackground()
     }
 
     private func statCell(value: String, label: String, color: Color) -> some View {

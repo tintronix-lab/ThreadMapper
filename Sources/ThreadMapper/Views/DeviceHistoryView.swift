@@ -3,6 +3,7 @@ import SwiftUI
 /// Aggregated device history derived from ActivityStore events.
 /// Shows when each device was first and last seen, and how often it disconnected.
 struct DeviceHistoryView: View {
+    @ScaledMetric(relativeTo: .caption2) private var microLabelSize: CGFloat = 9
     @Environment(ActivityStore.self) private var activityStore
     @Environment(MeshViewModel.self) private var meshViewModel
 
@@ -186,7 +187,7 @@ struct DeviceHistoryView: View {
                     .font(.caption2.monospacedDigit())
                     .foregroundStyle(.tertiary)
                 Text("last event")
-                    .font(.system(size: 9))
+                    .font(.system(size: microLabelSize))
                     .foregroundStyle(.tertiary)
             }
         }

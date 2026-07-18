@@ -662,12 +662,16 @@ struct DashboardHealthHistorySection: View {
                             AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [3, 3]))
                             AxisValueLabel {
                                 if let v = value.as(Int.self) {
-                                    Text("\(v)").font(.system(size: chartAxisFont))
+                                    Text(verbatim: "\(v)").font(.system(size: chartAxisFont))
                                 }
                             }
                         }
                     }
                     .frame(height: 90)
+                    .accessibilityLabel(Text("Health score chart, last 24 hours"))
+                    .accessibilityValue(Text(entries.last.map {
+                        String(localized: "Latest score \($0.score) of 100, grade \($0.grade)")
+                    } ?? String(localized: "No score history")))
                 }
                 .padding(.vertical, 4)
             }

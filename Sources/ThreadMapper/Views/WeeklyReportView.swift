@@ -65,8 +65,7 @@ struct WeeklyReportView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(20)
-        .background(Color(UIColor.secondarySystemGroupedBackground),
-                    in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .cardBackground(cornerRadius: 16)
     }
 
     // MARK: - Stats row
@@ -95,8 +94,7 @@ struct WeeklyReportView: View {
             )
         }
         .padding(.vertical, 12)
-        .background(Color(UIColor.secondarySystemGroupedBackground),
-                    in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .cardBackground(cornerRadius: 16)
     }
 
     private func statChip(icon: String, value: String, label: String, tint: Color) -> some View {

@@ -86,7 +86,7 @@ final class MatterDiscoveryService: DiscoveryService, @unchecked Sendable {
                     isSleepyEndDevice: batteryLevel(for: accessory) != nil,
                     parentNodeID: nil,
                     channel: nil,
-                    rssi: accessory.isReachable ? nil : -100,
+                    rssi: accessory.isReachable ? nil : SignalThresholds.offlineSentinel,
                     batteryPercentage: batteryLevel(for: accessory),
                     room: accessory.room?.name ?? home.name,
                     firmwareVersion: Self.firmwareVersion(for: accessory)
@@ -113,7 +113,7 @@ final class MatterDiscoveryService: DiscoveryService, @unchecked Sendable {
     }
 
     private static func latencyRSSI(for accessory: HMAccessory) async -> Int {
-        guard accessory.isReachable else { return -100 }
+        guard accessory.isReachable else { return SignalThresholds.offlineSentinel }
         guard let char = accessory.services
             .flatMap(\.characteristics)
             .first(where: { $0.properties.contains(HMCharacteristicPropertyReadable) })

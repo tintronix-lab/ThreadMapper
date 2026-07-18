@@ -68,8 +68,7 @@ struct BRHealthMonitorView: View {
             }
         }
         .padding(.vertical, 10)
-        .background(Color(UIColor.secondarySystemGroupedBackground),
-                    in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .cardBackground()
     }
 
     private func bannerCell(_ value: String, label: LocalizedStringKey, color: Color) -> some View {
@@ -106,6 +105,7 @@ struct BRHealthMonitorView: View {
 // MARK: - Per-BR card
 
 private struct BRCard: View {
+    @ScaledMetric(relativeTo: .caption2) private var axisLabelSize: CGFloat = 8
     let device: ThreadDevice
     let statsStore: DeviceStatsStore
     let isOnlyBR: Bool
@@ -127,7 +127,7 @@ private struct BRCard: View {
     private var statusColor: Color {
         if device.isOffline { return .red }
         guard let rssi = device.rssi else { return .secondary }
-        return rssi > -65 ? .green : rssi > -80 ? .orange : .red
+        return rssi > SignalThresholds.good ? .green : rssi > SignalThresholds.weak ? .orange : .red
     }
 
     private var statusLabel: LocalizedStringResource {
@@ -226,8 +226,7 @@ private struct BRCard: View {
             }
         }
         .padding(14)
-        .background(Color(UIColor.secondarySystemGroupedBackground),
-                    in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .cardBackground()
         .overlay(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .strokeBorder(device.isOffline ? Color.red.opacity(0.3) : Color.clear, lineWidth: 1)
@@ -266,22 +265,26 @@ private struct BRCard: View {
                 if i == 0 { path.move(to: CGPoint(x: x, y: y)) }
                 else { path.addLine(to: CGPoint(x: x, y: y)) }
             }
-            let color: Color = device.isOffline ? .red : (device.rssi ?? -100 > -65 ? .green : .orange)
+            let color: Color = device.isOffline
+                ? .red
+                : ((device.rssi ?? SignalThresholds.offlineSentinel) > SignalThresholds.good ? .green : .orange)
             ctx.stroke(path, with: .color(color.opacity(0.8)), lineWidth: 1.5)
         }
         .frame(height: 36)
         .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 6))
         .overlay(alignment: .topLeading) {
-            Text("−40 dBm")
-                .font(.system(size: 7))
+            Text(verbatim: "−40 dBm")
+                .font(.system(size: axisLabelSize))
                 .foregroundStyle(.tertiary)
                 .padding(.leading, 4).padding(.top, 2)
         }
         .overlay(alignment: .bottomLeading) {
-            Text("−100 dBm")
-                .font(.system(size: 7))
+            Text(verbatim: "−100 dBm")
+                .font(.system(size: axisLabelSize))
                 .foregroundStyle(.tertiary)
                 .padding(.leading, 4).padding(.bottom, 2)
         }
+        .accessibilityLabel(Text("Signal trend for \(device.name)"))
+        .accessibilityValue(Text(device.rssi.map { "Latest \($0) dBm, \($0.rssiQualityLabel)" } ?? String(localized: "No signal data")))
     }
 }

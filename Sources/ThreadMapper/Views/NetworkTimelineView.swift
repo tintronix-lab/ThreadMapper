@@ -2,6 +2,8 @@ import SwiftUI
 import Charts
 
 struct NetworkTimelineView: View {
+    @ScaledMetric(relativeTo: .largeTitle) private var heroIconSize: CGFloat = 32
+    @ScaledMetric(relativeTo: .caption2) private var axisLabelSize: CGFloat = 9
     @Environment(HealthHistoryStore.self) private var historyStore
     @Environment(ActivityStore.self) private var activityStore
 
@@ -118,7 +120,7 @@ struct NetworkTimelineView: View {
             Spacer()
             VStack(spacing: 10) {
                 Image(systemName: "chart.xyaxis.line")
-                    .font(.system(size: 32))
+                    .font(.system(size: heroIconSize))
                     .foregroundStyle(.tertiary)
                 Text("No Score History")
                     .font(.subheadline.weight(.semibold))
@@ -192,12 +194,21 @@ struct NetworkTimelineView: View {
                 AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [3, 3]))
                 AxisValueLabel {
                     if let v = value.as(Int.self) {
-                        Text("\(v)").font(.system(size: 8))
+                        Text(verbatim: "\(v)").font(.system(size: axisLabelSize))
                     }
                 }
             }
         }
         .frame(height: 170)
+        .accessibilityLabel(Text("Network health score timeline"))
+        .accessibilityValue(timelineAccessibilitySummary(entries))
+    }
+
+    private func timelineAccessibilitySummary(_ entries: [HealthHistoryStore.Entry]) -> Text {
+        guard let latest = entries.last else { return Text("No score history") }
+        let lo = entries.map(\.score).min() ?? latest.score
+        let hi = entries.map(\.score).max() ?? latest.score
+        return Text("Latest score \(latest.score), grade \(latest.grade). Ranged \(lo) to \(hi) over ^[\(entries.count) sample](inflect: true).")
     }
 
     private var xAxisFormat: Date.FormatStyle {
@@ -293,7 +304,7 @@ struct NetworkTimelineView: View {
                                 .font(.caption2.monospacedDigit())
                                 .foregroundStyle(.tertiary)
                             Text("ago")
-                                .font(.system(size: 8))
+                                .font(.system(size: axisLabelSize))
                                 .foregroundStyle(.tertiary)
                         }
                     }

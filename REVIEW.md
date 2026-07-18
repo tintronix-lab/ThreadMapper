@@ -1131,3 +1131,37 @@ See WORKPLAN.md for full summary. `SmartHomeAdvisorView` + `SmartHomeAdvisor` en
 
 **Files changed:**
 `NotificationService.swift`, `MeshViewModel.swift`, `ContentView.swift`, `DashboardView.swift`, `MeshView.swift`, `ThreadMapperWidget.swift`, `ActivityFeedView.swift`
+
+---
+
+## Phase 8 — Iteration 30 (2026-07-19: production-hardening pass — persistence, concurrency, dedup, accessibility)
+
+**Batch A — Reliability & data safety:**
+- New `Utils/PersistedStore.swift`: `PersistenceEnvelope{schemaVersion, payload}` + `PersistedStore.load/save` + `PersistenceWriter` actor. Load order: enveloped → legacy bare payload (existing data migrates transparently) → quarantine to `<name>.corrupt` (never silently wiped, fixes REVIEW/M9-class silent data loss)
+- Writes are chained on the main actor for per-file ordering, executed on the background `PersistenceWriter` actor — no more synchronous file I/O in `@MainActor` stores. `PersistedStore.flush()` is the test hook
+- Migrated all 9 file-backed stores + `TopologySnapshot`; `SurveyViewModel` keeps its JSONSerialization format but routes writes through the writer, and its `nonisolated(unsafe)` ISO formatter became a Sendable `Date.ISO8601FormatStyle`
+- `AppGroupStore` throttle statics are now `@MainActor` (was `nonisolated(unsafe)`); stale "keyed by name" comment fixed
+- `SWIFT_STRICT_CONCURRENCY: complete` enabled in project.yml (shipping build now matches Package.swift intent). Fixed the 5 resulting warnings (BackgroundRefreshHandler isolation, `AppTab.destination` @MainActor)
+- `MeshViewModel` filter didSets no longer use `MainActor.assumeIsolated`
+- Fixed pre-existing broken NetworkHealthScoreTests (compared `LocalizedStringResource` with `.contains`; now compares locale-independent `.key` — sim runs in Swedish)
+
+**Batch B — Performance:**
+- `DeviceDetailView.meshPath` no longer rebuilds the topology graph every render — cached in `@State`, refreshed by `.task(id: topologyFingerprint)`
+- Dashboard room grouping moved into `DashboardRoomCoverageSection` so parent presentation-state churn skips it; `MeshView` list derives `devicesByID`/`borderRouters`/`roomGroups` once per render instead of 3–4×
+- `LiveActivityManager` redundant `Task { @MainActor in }` wrappers removed
+
+**Batch C — Maintainability:**
+- `SignalThresholds` (excellent/good/weak/offlineSentinel) in `Utils/SignalStrength.swift` + `Int.isWeakRSSI`; migrated ~25 hard-coded `-80`/`-100` sites (comparison directions preserved). `SignalBarsView.barCount` now reuses `rssiLinkQuality`
+- `cardBackground(cornerRadius:)` View extension (`Views/CardStyle.swift`); 14 duplicated background/corner-radius sites migrated
+- `NetworkDiagnosticsView` split 1492 → 587 lines + `+Sections.swift` (780) + `+Compatibility.swift` (135); `DeviceDetailView` mesh-path/neighbor sections → `+MeshPath.swift`
+- Deleted dead `DashboardPreferences.swift` (zero call sites; DashboardView uses `@AppStorage` with different keys)
+- `SurveyViewModel` CSV builder deduplicated; `SignalSparklineView`/`SignalQualityBarView` moved out of `Services/DeviceStatsStore.swift` into `Views/SignalSparklineViews.swift`
+
+**Batch D — Accessibility & Dynamic Type:**
+- VoiceOver labels + data summaries on all custom-drawn charts: device sparkline, channel spectrum, BR sparkline, survey heatmap, health timeline, dashboard 24h chart
+- Remaining raw `.font(.system(size:))` literals migrated to `@ScaledMetric`/semantic styles; 7pt labels raised to 8–9pt (ChannelScanner, BRHealth, widget)
+- Numeric axis labels use `Text(verbatim:)` so numerals stay out of the string catalog
+- Verified: no undersized tap targets (chart glyphs are display-only; the one small-glyph gesture already sits on a 44pt frame)
+- Follow-up: sv translations for the new a11y strings once the catalog extracts them
+
+**Verification:** 164 tests green (75 XCTest + 89 Swift Testing), SwiftLint no new violations, zero strict-concurrency warnings on clean build, on-simulator boot smoke after each batch.
