@@ -41,6 +41,7 @@
 | 42 | Per-Device AI Assistant — "Ask AI about this device" section in DeviceDetailView; `NetworkAssistantView` accepts `focusDevice` parameter; session pre-seeded with device RSSI, battery, anomaly trajectory, role; auto-asks opening question |
 | 43 | AI Weekly Digest — `scheduleWeeklyReportWithAIHeadline` generates an AI-written one-sentence summary using `HealthHistoryStore` trend data; used when toggling the weekly report in Settings; falls back to generic copy if AI unavailable |
 | 44 | Live Activities — `ThreadNetworkActivityAttributes` (Shared); `LiveActivityManager` starts an ActivityKit Live Activity when a device goes offline after grace period; Dynamic Island shows grade letter (compact leading), offline count (compact trailing), full health in expanded; Lock Screen banner with grade circle + device/offline counts; activity ends 10 s after all devices come back online; `NSSupportsLiveActivities` added to Info.plist |
+| 57 | AI-B1: Commissioning coach — `@Generable CommissioningBriefing`; `CommissioningBriefingStore`; triggered by `MeshViewModel` on first-seen join; dismissible card in `ActivityFeedView` "New Device" section |
 | 56 | AI-B2: NL device queries — `@Generable NLDeviceFilter` (room/role/status/minHops/sort/battery); `AINetworkAnalyzer.parseNLFilter`; `MeshView` list search bar gets sparkles button + filter-active chip + match count; `applyNLFilter` + `clearNLFilter`; Pro + iOS 26 gated |
 | 55 | AI-A3: Contextual metric explanation ("Explain This") — long-press signal stat cells (Live/Avg/Min/Max) or hop count row in `DeviceDetailView`; `MetricExplanationContext` struct; `AINetworkAnalyzer.explainMetric`; compact half-sheet with sparkles header; Pro + iOS 26 gated |
 | 54 | AI-A1: Predictive failure prevention — OLS linear trend projection in `AnomalyDetector` (`projectHoursToFailure`); `projectedHoursToFailure: Double?` added to `DeviceAnomaly`; projection surfaced in `DeviceDetailView` signal section (triangle warning, time label, caption); passed into `AINetworkAnalyzer.deviceSummary` prompt so AI narrates the estimate; capped at 14 days; floored at 30 min |
@@ -99,7 +100,7 @@
 
 The app is strong on **reactive AI** (explain what happened) and **structured generation**. The gaps are in **predictive AI**, **conversational guidance**, and **ambient/proactive intelligence**. Items below are ordered roughly by implementation difficulty and data-pipeline readiness.
 
-**Status as of 2026-07-19:** 4 done · 2 partial · 6 open (out of 12 items)
+**Status as of 2026-07-19:** 5 done · 2 partial · 5 open (out of 12 items)
 
 ### Tier A — Highest ROI, data pipeline already exists
 
@@ -113,7 +114,7 @@ The app is strong on **reactive AI** (explain what happened) and **structured ge
 
 | # | Status | Feature | Implementation notes |
 |---|--------|---------|----------------------|
-| AI-B1 | Open | **AI commissioning coach** | When `KnownDeviceRegistry` fires a new-device notification, generate an AI briefing in `ActivityFeedView`: device role (BR / FTD / MTD), how it fits current topology, one recommended action. Extends the Iter 34 new-device alert. |
+| AI-B1 | ✓ Done | **AI commissioning coach** | When a device joins for the first time (checked via `KnownDeviceRegistry`), `MeshViewModel` fires `AINetworkAnalyzer.commissioningBriefing` (iOS 26+, Pro); `@Generable CommissioningBriefing` (roleExplanation, topologyFit, recommendation) stored in `CommissioningBriefingStore`; `ActivityFeedView` shows a dismissible "New Device" sparkles card. Iter 57. |
 | AI-B2 | ✓ Done | **Natural language device/topology queries** | `@Generable NLDeviceFilter` in `AINetworkAnalyzer` (room, role, status, minHops, sortOrder, batteryPoweredOnly, filterDescription); `parseNLFilter(query:rooms:deviceCount:)`; `MeshView` list-mode search bar upgraded — sparkles button triggers AI parse on iOS 26+/Pro, filter-active chip shows description + match count, `applyNLFilter` maps to `[UUID]` and overrides `roomGroups`, `clearNLFilter` resets both text and filter. Iter 56. |
 | AI-B3 | Open | **Resilience Simulator AI narration** | Add AI-generated scenario summary to `ResilienceSimulatorView`: converts raw BFS impact scores into a human story ("Losing this BR isolates 4 bedroom devices; the next-best BR covers 2 of them"). One `AINetworkAnalyzer` call with the existing `SimulationResult`. |
 | AI-B4 | Open | **Predictive maintenance calendar** | Combine `FirmwareHistoryStore` age, `DeviceStatsStore` health trends, battery estimates, and `ActivityStore` offline frequency to generate a prioritised weekly/monthly task list. Render as a timeline in a new `MaintenanceCalendarView` (similar structure to `NetworkTimelineView`). |

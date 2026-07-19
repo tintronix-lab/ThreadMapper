@@ -33,6 +33,7 @@ struct ContentView: View {
     @State private var activityStore = ActivityStore.shared
     @State private var proStore = ProStore.shared
     @State private var deviceOverrideStore = DeviceOverrideStore.shared
+    @State private var commissioningBriefingStore = CommissioningBriefingStore.shared
 
     var body: some View {
         if !hasSeenOnboarding {
@@ -51,6 +52,7 @@ struct ContentView: View {
                 .environment(activityStore)
                 .environment(proStore)
                 .environment(deviceOverrideStore)
+                .environment(commissioningBriefingStore)
                 .task {
                     await NotificationService.shared.requestAuthorization()
                     BackgroundRefreshHandler.schedule()

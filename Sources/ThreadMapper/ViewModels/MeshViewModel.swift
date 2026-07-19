@@ -297,10 +297,28 @@ final class MeshViewModel {
         )
         NotificationService.shared.notifyTopologyChange(joined: joined, left: left)
 
-        // Fire first-seen notification for devices never seen before across sessions.
+        // Fire first-seen notification and AI commissioning briefing for devices never seen before across sessions.
         for id in joinedIDs where !KnownDeviceRegistry.contains(id) {
             let name = currentNamesByID[id] ?? "Unknown"
             NotificationService.shared.notifyFirstSeenDevice(name: name, id: id)
+            if #available(iOS 26, *), ProStore.shared.isPro,
+               let device = devices.first(where: { $0.uniqueIdentifier == id }) {
+                let allDevicesSnapshot = devices
+                Task {
+                    guard let b = try? await AINetworkAnalyzer.commissioningBriefing(
+                        device: device,
+                        allDevices: allDevicesSnapshot,
+                        report: nil
+                    ) else { return }
+                    CommissioningBriefingStore.shared.store(
+                        deviceID: id,
+                        deviceName: device.name,
+                        roleExplanation: b.roleExplanation,
+                        topologyFit: b.topologyFit,
+                        recommendation: b.recommendation
+                    )
+                }
+            }
         }
         KnownDeviceRegistry.markAllKnown(Array(joinedIDs))
 

@@ -123,6 +123,19 @@ struct NLDeviceFilter {
 }
 
 @available(iOS 26, *)
+@Generable(description: "AI commissioning briefing for a newly joined Thread device")
+struct CommissioningBriefing {
+    @Guide(description: "One sentence explaining this device's role in plain English, e.g. 'This is an internet hub that anchors your Thread network.'")
+    var roleExplanation: String
+
+    @Guide(description: "One sentence on how this device fits the current mesh, mentioning a specific benefit if applicable.")
+    var topologyFit: String
+
+    @Guide(description: "One short recommended action to get the best from this device, starting with a verb.")
+    var recommendation: String
+}
+
+@available(iOS 26, *)
 @Generable(description: "Root cause analysis when multiple devices share the same issue")
 struct RootCauseHypothesis {
     @Guide(description: "The single root cause explaining all the listed symptoms, plain English")
@@ -407,6 +420,50 @@ struct AINetworkAnalyzer {
         """
         let response = try await session.respond(to: prompt)
         return String(response.content.prefix(280))
+    }
+
+    // MARK: - Commissioning Briefing (AI-B1)
+
+    /// Generates a 3-field briefing (role, topology fit, recommendation) for a device that just joined the mesh for the first time.
+    static func commissioningBriefing(
+        device: ThreadDevice,
+        allDevices: [ThreadDevice],
+        report: NetworkDiagnosticsEngine.Report?
+    ) async throws -> CommissioningBriefing {
+        let session = LanguageModelSession(
+            instructions: sessionInstructions("""
+            You are a friendly smart home expert welcoming a new Thread device to an existing mesh. \
+            Be warm and concise. No jargon or acronyms without explanation. \
+            Mention the device name in your response.\(languageInstruction)
+            """)
+        )
+        let roleLabel = device.isBorderRouter
+            ? "border router (internet hub)"
+            : device.isRouter ? "router (relay device)"
+            : device.isSleepyEndDevice ? "battery-powered sensor"
+            : "end device (sensor or light)"
+        let hubNames = allDevices.filter(\.isBorderRouter).map(\.name)
+        var lines: [String] = [
+            "New device: \(device.name)\(device.room.map { " in \($0)" } ?? "").",
+            "Role: \(roleLabel).",
+            "Network: \(allDevices.count) devices total, \(hubNames.count) hub(s): \(hubNames.joined(separator: ", ")).",
+        ]
+        if let rssi = device.rssi { lines.append("Signal: \(rssi) dBm.") }
+        if let report {
+            let poorRooms = report.roomCoverage.filter { $0.gradeRank <= 1 }.map(\.room)
+            if !poorRooms.isEmpty {
+                lines.append("Rooms with poor coverage before join: \(poorRooms.joined(separator: ", ")).")
+            }
+            if let hops = report.deviceHops.first(where: { $0.device.id == device.id }), hops.hopCount < 99 {
+                lines.append("Hop count from hub: \(hops.hopCount).")
+            }
+        }
+        lines.append("Generate a commissioning briefing for this device.\(languageInstruction)")
+        let response = try await session.respond(
+            to: lines.joined(separator: " "),
+            generating: CommissioningBriefing.self
+        )
+        return response.content
     }
 
     /// Wraps a role description with a leading language requirement when the device locale is non-English.

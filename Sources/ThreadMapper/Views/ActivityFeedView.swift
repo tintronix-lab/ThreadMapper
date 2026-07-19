@@ -3,6 +3,7 @@ import SwiftUI
 struct ActivityFeedView: View {
     @Environment(ActivityStore.self) private var store
     @Environment(MeshViewModel.self) private var meshVM
+    @Environment(CommissioningBriefingStore.self) private var briefingStore
     @State private var selectedDevice: ThreadDevice?
     @State private var searchText = ""
     @State private var kindFilter: ActivityEvent.Kind? = nil
@@ -39,6 +40,21 @@ struct ActivityFeedView: View {
                     noResultsState
                 } else {
                     List {
+                        if #available(iOS 26, *) {
+                            let pending = briefingStore.briefings.values
+                                .sorted { $0.generatedAt > $1.generatedAt }
+                            if !pending.isEmpty {
+                                Section {
+                                    ForEach(pending, id: \.deviceID) { entry in
+                                        CommissioningBriefingCard(entry: entry) {
+                                            briefingStore.dismiss(entry.deviceID)
+                                        }
+                                    }
+                                } header: {
+                                    Label("New Device", systemImage: "sparkles")
+                                }
+                            }
+                        }
                         if #available(iOS 26, *), isLoadingDigest || aiDigest != nil {
                             Section {
                                 if isLoadingDigest {
@@ -201,6 +217,48 @@ struct ActivityFeedView: View {
         if Calendar.current.isDateInToday(date) { return String(localized: "Today") }
         if Calendar.current.isDateInYesterday(date) { return String(localized: "Yesterday") }
         return date.formatted(.dateTime.weekday(.wide).month().day())
+    }
+}
+
+// MARK: - Commissioning briefing card
+
+private struct CommissioningBriefingCard: View {
+    let entry: CommissioningBriefingEntry
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "apple.intelligence")
+                    .foregroundStyle(.purple)
+                    .font(.caption)
+                Text(entry.deviceName)
+                    .font(.subheadline.weight(.semibold))
+                Spacer()
+                Button(action: onDismiss) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.tertiary)
+                        .font(.body)
+                }
+                .buttonStyle(.plain)
+            }
+            Text(entry.roleExplanation)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(entry.topologyFit)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            HStack(alignment: .top, spacing: 6) {
+                Image(systemName: "lightbulb.fill")
+                    .font(.caption2)
+                    .foregroundStyle(.yellow)
+                    .padding(.top, 1)
+                Text(entry.recommendation)
+                    .font(.caption)
+                    .foregroundStyle(.primary)
+            }
+        }
+        .padding(.vertical, 4)
     }
 }
 
