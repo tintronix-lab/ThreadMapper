@@ -117,8 +117,91 @@ The app is strong on **reactive AI** (explain what happened) and **structured ge
 |---|--------|---------|----------------------|
 | AI-B1 | ✓ Done | **AI commissioning coach** | When a device joins for the first time (checked via `KnownDeviceRegistry`), `MeshViewModel` fires `AINetworkAnalyzer.commissioningBriefing` (iOS 26+, Pro); `@Generable CommissioningBriefing` (roleExplanation, topologyFit, recommendation) stored in `CommissioningBriefingStore`; `ActivityFeedView` shows a dismissible "New Device" sparkles card. Iter 57. |
 | AI-B2 | ✓ Done | **Natural language device/topology queries** | `@Generable NLDeviceFilter` in `AINetworkAnalyzer` (room, role, status, minHops, sortOrder, batteryPoweredOnly, filterDescription); `parseNLFilter(query:rooms:deviceCount:)`; `MeshView` list-mode search bar upgraded — sparkles button triggers AI parse on iOS 26+/Pro, filter-active chip shows description + match count, `applyNLFilter` maps to `[UUID]` and overrides `roomGroups`, `clearNLFilter` resets both text and filter. Iter 56. |
-| AI-B3 | Open | **Resilience Simulator AI narration** | Add AI-generated scenario summary to `ResilienceSimulatorView`: converts raw BFS impact scores into a human story ("Losing this BR isolates 4 bedroom devices; the next-best BR covers 2 of them"). One `AINetworkAnalyzer` call with the existing `SimulationResult`. |
+| AI-B3 | Open | **Resilience Simulator AI narration** | Add AI-generated scenario summary to `ResilienceSimulatorView`: converts raw BFS impact scores into a human story ("Losing this BR isolates 4 bedroom devices; the next-best BR covers 2 of them"). One `AINetworkAnalyzer` call with the existing `SimulationResult`. See detail section below. |
 | AI-B4 | Open | **Predictive maintenance calendar** | Combine `FirmwareHistoryStore` age, `DeviceStatsStore` health trends, battery estimates, and `ActivityStore` offline frequency to generate a prioritised weekly/monthly task list. Render as a timeline in a new `MaintenanceCalendarView` (similar structure to `NetworkTimelineView`). |
+
+---
+
+#### AI-B3 — Implementation Detail
+
+**What it produces:** A new "AI Impact Analysis" section inside `ImpactDetailView` (the per-node detail sheet) with two fields from a `@Generable ResilienceNarration` struct:
+
+- **`scenario`** (1–2 sentences) — the human story: which rooms/devices lose connectivity and why it matters. E.g. "Losing the Living Room Relay cuts off 4 bedroom sensors. They'll need to route through the Kitchen Hub, which is already serving 6 devices."
+- **`fallback`** (1 sentence) — what coverage remains. E.g. "The Kitchen Hub can reach 2 of the 4 affected devices; the remaining 2 have no alternative path."
+
+Gated: **Pro + iOS 26** (same as AI-A3, AI-B1, AI-B2). No new file, no store — narration is ephemeral per sheet.
+
+##### File 1: `AINetworkAnalyzer.swift`
+
+Add `@Generable ResilienceNarration` struct after `CommissioningBriefing`:
+
+```swift
+@available(iOS 26, *)
+@Generable(description: "Plain-English story of a Thread mesh resilience simulation")
+struct ResilienceNarration {
+    @Guide(description: "1–2 sentences describing which rooms and devices lose connectivity if this node is removed, and why it matters. Mention room names. No jargon.")
+    var scenario: String
+
+    @Guide(description: "1 sentence on what coverage or fallback path remains. If no border router remains, say the whole network loses internet.")
+    var fallback: String
+}
+```
+
+Add `resilienceNarration` method and `buildResiliencePrompt` private helper.
+
+Prompt data from `ResilienceSimulator.Impact`:
+
+| Prompt field | Source |
+|---|---|
+| Node name, type, room | `impact.removedNode.{name, kind, room}` |
+| Severity | `impact.severity` → "critical / major / minor / safe" |
+| End devices cut off | `impact.affectedDeviceCount` |
+| Relays lost | `impact.affectedRouterCount` |
+| Affected rooms | `Set(impact.affectedNodes.compactMap(\.room))` |
+| BRs remaining | `impact.totalBorderRouters - 1` (0 if `isLastBorderRouter`) |
+
+##### File 2: `ResilienceSimulatorView.swift` — `ImpactDetailView`
+
+State additions:
+```swift
+@Environment(ProStore.self) private var proStore
+@State private var narration: ResilienceNarration? = nil   // wrapped in #available block
+@State private var isLoadingNarration = false
+```
+
+New List section between "Impact Summary" and "Affected Devices":
+```swift
+if proStore.isPro, #available(iOS 26, *) {
+    Section("AI Impact Analysis") {
+        if isLoadingNarration {
+            HStack { ProgressView(); Spacer() }
+        } else if let n = narration {
+            HStack(alignment: .top, spacing: 10) {
+                Image(systemName: "sparkles").foregroundStyle(.purple)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(n.scenario).font(.subheadline)
+                    Text(n.fallback).font(.subheadline).foregroundStyle(.secondary)
+                }
+            }
+            .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+```
+
+`.task` on the `NavigationStack`:
+```swift
+.task {
+    guard proStore.isPro else { return }
+    if #available(iOS 26, *) {
+        isLoadingNarration = true
+        narration = try? await AINetworkAnalyzer.resilienceNarration(impact: impact)
+        isLoadingNarration = false
+    }
+}
+```
+
+---
 
 ### Tier C — Longer-term / needs more design
 
