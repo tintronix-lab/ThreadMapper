@@ -14,6 +14,10 @@ struct MeshView: View {
     @State private var showBRMonitor = false
     @State private var isExportingMap = false
     @State private var exportedMapImage: UIImage? = nil
+    @State private var nlFilterIDs: [UUID]? = nil
+    @State private var nlFilterDescription: String? = nil
+    @State private var isRunningNLFilter = false
+    @State private var showPaywall = false
 
     private var selectedDeviceBinding: Binding<ThreadDevice?> {
         Binding(get: { viewModel.selectedDevice }, set: { viewModel.selectedDevice = $0 })
@@ -38,7 +42,13 @@ struct MeshView: View {
     private var roomGroups: [(room: String, nodes: [MeshNode])] {
         let visible = viewModel.nodes.filter { $0.kind != .gateway }
         let q = searchText.trimmingCharacters(in: .whitespaces).lowercased()
-        let matches = q.isEmpty ? visible : visible.filter { $0.name.lowercased().contains(q) }
+        let matches: [MeshNode]
+        if let ids = nlFilterIDs {
+            let idSet = Set(ids)
+            matches = visible.filter { node in node.deviceID.map { idSet.contains($0) } ?? false }
+        } else {
+            matches = q.isEmpty ? visible : visible.filter { $0.name.lowercased().contains(q) }
+        }
         let grouped = Dictionary(grouping: matches) { $0.room ?? "Unassigned" }
         return grouped
             .sorted { $0.key < $1.key }
@@ -68,6 +78,7 @@ struct MeshView: View {
                     MeshMapShareSheet(image: img)
                 }
             }
+            .sheet(isPresented: $showPaywall) { PaywallView() }
             .safeAreaInset(edge: .top, spacing: 0) {
                 topBar
             }
@@ -77,7 +88,7 @@ struct MeshView: View {
                 }
             }
             .onChange(of: viewMode) { _, mode in
-                if mode == .map { searchText = "" }
+                if mode == .map { clearNLFilter() }
             }
     }
 
@@ -129,15 +140,21 @@ struct MeshView: View {
                         .padding(.bottom, 16)
                 }
 
-                if groups.isEmpty && !searchText.isEmpty {
+                if groups.isEmpty && (!searchText.isEmpty || nlFilterDescription != nil) {
                     VStack(spacing: 12) {
-                        Image(systemName: "magnifyingglass")
+                        Image(systemName: nlFilterDescription != nil ? "sparkles" : "magnifyingglass")
                             .font(.title2)
                             .foregroundStyle(.tertiary)
-                        Text("No devices match \"\(searchText)\"")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        Button("Clear Search") { searchText = "" }
+                        if let desc = nlFilterDescription {
+                            Text("No devices matched: \(desc)")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Text("No devices match \"\(searchText)\"")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        Button("Clear Search") { clearNLFilter() }
                             .font(.subheadline)
                     }
                     .frame(maxWidth: .infinity)
@@ -308,6 +325,80 @@ struct MeshView: View {
         }
     }
 
+    // MARK: - NL Filter
+
+    private func runNLFilter() {
+        let query = searchText.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return }
+        guard ProStore.shared.isPro else { showPaywall = true; return }
+        guard #available(iOS 26, *) else { return }
+        isRunningNLFilter = true
+        let rooms = Array(Set(viewModel.devices.compactMap(\.room))).sorted()
+        let count = viewModel.devices.count
+        Task { @MainActor in
+            defer { isRunningNLFilter = false }
+            guard let filter = try? await AINetworkAnalyzer.parseNLFilter(
+                query: query, rooms: rooms, deviceCount: count
+            ) else { return }
+            applyNLFilter(filter)
+        }
+    }
+
+    @available(iOS 26, *)
+    private func applyNLFilter(_ filter: NLDeviceFilter) {
+        let hops = hopCountByNodeID
+        var matched = viewModel.devices.filter { device in
+            if let room = filter.roomContains?.lowercased(), !room.isEmpty {
+                guard device.room?.lowercased().contains(room) == true else { return false }
+            }
+            if let role = filter.roleFilter {
+                switch role {
+                case "border_router": if !device.isBorderRouter { return false }
+                case "router":        if !device.isRouter || device.isBorderRouter { return false }
+                case "end_device":    if device.isRoutingCapable { return false }
+                default: break
+                }
+            }
+            if let status = filter.statusFilter {
+                switch status {
+                case "offline": if !device.isOffline { return false }
+                case "online":  if device.isOffline { return false }
+                case "weak":    if !device.isWeak { return false }
+                default: break
+                }
+            }
+            if let minH = filter.minHops {
+                let nodeID = viewModel.nodes.first(where: { $0.deviceID == device.id })?.id
+                if (nodeID.flatMap { hops[$0] } ?? 0) < minH { return false }
+            }
+            if filter.batteryPoweredOnly == true {
+                if !device.isSleepyEndDevice && device.batteryPercentage == nil { return false }
+            }
+            return true
+        }
+        if let sort = filter.sortOrder {
+            switch sort {
+            case "rssi_weakest": matched.sort { ($0.rssi ?? -100) < ($1.rssi ?? -100) }
+            case "rssi_best":    matched.sort { ($0.rssi ?? -100) > ($1.rssi ?? -100) }
+            case "hops_most":
+                matched.sort { a, b in
+                    let hA = viewModel.nodes.first(where: { $0.deviceID == a.id }).flatMap { hops[$0.id] } ?? 0
+                    let hB = viewModel.nodes.first(where: { $0.deviceID == b.id }).flatMap { hops[$0.id] } ?? 0
+                    return hA > hB
+                }
+            default: break
+            }
+        }
+        nlFilterIDs = matched.map { $0.id }
+        nlFilterDescription = filter.filterDescription
+    }
+
+    private func clearNLFilter() {
+        searchText = ""
+        nlFilterIDs = nil
+        nlFilterDescription = nil
+    }
+
     // MARK: - Role helpers
 
     private func roleOrder(_ node: MeshNode) -> Int {
@@ -393,27 +484,59 @@ struct MeshView: View {
         isExportingMap = true
     }
 
-    // MARK: - List search bar
+    // MARK: - List search bar (with AI NL filter)
 
     private var listSearchBar: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "magnifyingglass")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
-            TextField("Search devices", text: $searchText)
-                .font(.subheadline)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-            if !searchText.isEmpty {
-                Button { searchText = "" } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(.tertiary)
-                        .font(.caption)
+        VStack(spacing: 0) {
+            HStack(spacing: 8) {
+                Image(systemName: nlFilterDescription != nil ? "sparkles" : "magnifyingglass")
+                    .font(.caption)
+                    .foregroundStyle(nlFilterDescription != nil ? Color.purple : Color.secondary.opacity(0.5))
+                TextField("Search or ask AI…", text: $searchText)
+                    .font(.subheadline)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .onSubmit { runNLFilter() }
+                if isRunningNLFilter {
+                    ProgressView().controlSize(.mini)
+                } else if !searchText.isEmpty && nlFilterDescription == nil {
+                    if #available(iOS 26, *) {
+                        Button { runNLFilter() } label: {
+                            Image(systemName: "sparkles")
+                                .font(.caption)
+                                .foregroundStyle(.purple)
+                        }
+                    }
+                }
+                if !searchText.isEmpty || nlFilterDescription != nil {
+                    Button { clearNLFilter() } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.tertiary)
+                            .font(.caption)
+                    }
                 }
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+
+            if let desc = nlFilterDescription {
+                HStack(spacing: 6) {
+                    Image(systemName: "sparkles").font(.caption2).foregroundStyle(.purple)
+                    Text(desc)
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.purple)
+                    Spacer()
+                    if let count = nlFilterIDs?.count {
+                        Text("^[\(count) device](inflect: true) matched")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 5)
+                .background(.purple.opacity(0.08))
+            }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
         .background(.ultraThinMaterial)
         .overlay(Divider(), alignment: .bottom)
     }

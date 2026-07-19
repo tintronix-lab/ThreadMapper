@@ -19,6 +19,16 @@ struct DeviceDetailView: View {
     @State private var showPaywall = false
     @State private var deviceAISummary: String? = nil
     @State private var isLoadingDeviceSummary = false
+    @State private var explainContext: MetricExplanationContext? = nil
+    @State private var metricExplanation: String? = nil
+    @State private var isLoadingMetricExplanation = false
+
+    struct MetricExplanationContext: Identifiable {
+        let id = UUID()
+        let metricName: String
+        let displayValue: String
+        let aiPromptContext: String
+    }
 
     struct HopEntry {
         let name: String
@@ -101,6 +111,25 @@ struct DeviceDetailView: View {
                 }
             }
             .sheet(isPresented: $showPaywall) { PaywallView() }
+            .sheet(item: $explainContext) { ctx in
+                MetricExplainSheet(
+                    context: ctx,
+                    explanation: metricExplanation,
+                    isLoading: isLoadingMetricExplanation
+                )
+            }
+            .task(id: explainContext?.id) {
+                guard let ctx = explainContext else { return }
+                guard #available(iOS 26, *) else { return }
+                isLoadingMetricExplanation = true
+                metricExplanation = nil
+                metricExplanation = try? await AINetworkAnalyzer.explainMetric(
+                    metricName: ctx.metricName,
+                    value: ctx.displayValue,
+                    context: ctx.aiPromptContext
+                )
+                isLoadingMetricExplanation = false
+            }
         }
     }
 
@@ -164,15 +193,27 @@ struct DeviceDetailView: View {
                     .frame(height: 90)
                     .padding(.vertical, 2)
 
-                // Stat cells: Live / Avg / Min / Max
+                // Stat cells: Live / Avg / Min / Max  (long-press any cell to explain with AI)
                 HStack(spacing: 0) {
-                    statCell(value: s.latestRSSI, label: "Live", color: s.latestRSSI.rssiColor)
+                    statCell(value: s.latestRSSI, label: "Live", color: s.latestRSSI.rssiColor) {
+                        setExplainContext(metricName: "Live Signal", displayValue: "\(s.latestRSSI) RQ",
+                                          aiPromptContext: signalMetricContext(label: "live", value: s.latestRSSI))
+                    }
                     Divider().frame(height: 30)
-                    statCell(value: s.avgRSSI, label: "Avg", color: s.avgRSSI.rssiColor)
+                    statCell(value: s.avgRSSI, label: "Avg", color: s.avgRSSI.rssiColor) {
+                        setExplainContext(metricName: "Average Signal", displayValue: "\(s.avgRSSI) RQ",
+                                          aiPromptContext: signalMetricContext(label: "average", value: s.avgRSSI))
+                    }
                     Divider().frame(height: 30)
-                    statCell(value: s.minRSSI, label: "Min", color: s.minRSSI.rssiColor)
+                    statCell(value: s.minRSSI, label: "Min", color: s.minRSSI.rssiColor) {
+                        setExplainContext(metricName: "Minimum Signal", displayValue: "\(s.minRSSI) RQ",
+                                          aiPromptContext: signalMetricContext(label: "minimum", value: s.minRSSI))
+                    }
                     Divider().frame(height: 30)
-                    statCell(value: s.maxRSSI, label: "Max", color: s.maxRSSI.rssiColor)
+                    statCell(value: s.maxRSSI, label: "Max", color: s.maxRSSI.rssiColor) {
+                        setExplainContext(metricName: "Maximum Signal", displayValue: "\(s.maxRSSI) RQ",
+                                          aiPromptContext: signalMetricContext(label: "maximum", value: s.maxRSSI))
+                    }
                 }
                 .padding(.vertical, 4)
 
@@ -225,6 +266,33 @@ struct DeviceDetailView: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
+            }
+
+            // Failure projection (AI-A1) — shown when trajectory is declining/critical
+            if let anomaly = meshViewModel.anomalies[device.uniqueIdentifier],
+               anomaly.trajectory != .stable,
+               let hours = anomaly.projectedHoursToFailure {
+                let days = hours / 24
+                let timeLabel: String = {
+                    if hours < 1 { return "< 1 hour" }
+                    if days < 1  { return "\(Int(hours.rounded())) hours" }
+                    if days < 2  { return "~1 day" }
+                    return "~\(Int(days.rounded())) days"
+                }()
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(anomaly.trajectory == .critical ? .red : .orange)
+                        .imageScale(.small)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("Projected decline to critical: \(timeLabel)")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(anomaly.trajectory == .critical ? .red : .orange)
+                        Text("Linear estimate based on current rate of change")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.vertical, 2)
             }
 
             // Troubleshooter entry point for offline or weak devices
@@ -283,7 +351,7 @@ struct DeviceDetailView: View {
         .frame(maxWidth: .infinity)
     }
 
-    private func statCell(value: Int, label: String, color: Color) -> some View {
+    private func statCell(value: Int, label: String, color: Color, onLongPress: (() -> Void)? = nil) -> some View {
         VStack(spacing: 1) {
             Text("\(value)")
                 .font(.caption.weight(.semibold).monospacedDigit())
@@ -296,6 +364,8 @@ struct DeviceDetailView: View {
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())
+        .onLongPressGesture { onLongPress?() }
     }
 
     private func samplingSpanLabel(_ s: DeviceStats) -> String {
@@ -819,6 +889,37 @@ struct DeviceDetailView: View {
 
     // MARK: - Helpers
 
+    private var networkAvgRSSI: Int? {
+        let values = meshViewModel.devices.compactMap { $0.rssi }.filter { $0 != 0 }
+        guard !values.isEmpty else { return nil }
+        return values.reduce(0, +) / values.count
+    }
+
+    func setExplainContext(metricName: String, displayValue: String, aiPromptContext: String) {
+        guard ProStore.shared.isPro else { showPaywall = true; return }
+        if #available(iOS 26, *) {
+            metricExplanation = nil
+            explainContext = MetricExplanationContext(
+                metricName: metricName,
+                displayValue: displayValue,
+                aiPromptContext: aiPromptContext
+            )
+        }
+    }
+
+    private func signalMetricContext(label: String, value: Int) -> String {
+        var parts = ["Device: \(device.name)\(device.room.map { " in \($0)" } ?? "")."]
+        parts.append("Metric: \(label) signal = \(value) Response Quality (RQ) units. RQ is estimated from HomeKit response latency — higher values mean better connectivity.")
+        if let avg = networkAvgRSSI {
+            parts.append("Network average across all devices: \(avg) RQ.")
+        }
+        parts.append("Quality label for this value: '\(value.rssiQualityLabel)'.")
+        if let a = meshViewModel.anomalies[device.uniqueIdentifier], a.trajectory != .stable {
+            parts.append("Current signal trend: \(a.trajectory.label). Signal has dropped \(String(format: "%.0f", a.dropDelta)) RQ units from baseline.")
+        }
+        return parts.joined(separator: " ")
+    }
+
     private var currentRSSI: Int { stats?.latestRSSI ?? device.rssi ?? -65 }
     private var currentColor: Color { currentRSSI.rssiColor }
 
@@ -827,5 +928,68 @@ struct DeviceDetailView: View {
         if device.isRouter { return "Router" }
         if device.isSleepyEndDevice { return "Sleepy End Device" }
         return "End Device"
+    }
+}
+
+// MARK: - Metric Explain Sheet
+
+private struct MetricExplainSheet: View {
+    let context: DeviceDetailView.MetricExplanationContext
+    let explanation: String?
+    let isLoading: Bool
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(context.metricName)
+                        .font(.title3.weight(.semibold))
+                    Text(context.displayValue)
+                        .font(.subheadline.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                }
+
+                Divider()
+
+                if isLoading {
+                    HStack(spacing: 10) {
+                        ProgressView().controlSize(.small)
+                        Text("Asking AI…")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                } else if let text = explanation {
+                    HStack(spacing: 6) {
+                        Image(systemName: "sparkles")
+                            .font(.caption)
+                            .foregroundStyle(.purple)
+                        Text("AI Explanation")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.purple)
+                    }
+                    Text(text)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                } else {
+                    Text("AI explanation unavailable.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+            .navigationTitle("Explain This")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+        .presentationDetents([.fraction(0.4)])
     }
 }

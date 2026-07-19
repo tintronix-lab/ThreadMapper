@@ -98,6 +98,31 @@ struct MeshExpansionPlan {
 }
 
 @available(iOS 26, *)
+@Generable(description: "Structured filter parsed from a natural language query about Thread mesh devices")
+struct NLDeviceFilter {
+    @Guide(description: "Room name to filter by. Use a lowercase substring that matches the room name (e.g. 'bedroom' matches 'Master Bedroom'). Null if no room filter.")
+    var roomContains: String?
+
+    @Guide(description: "Device role filter: 'border_router' for internet hubs, 'router' for relay devices, 'end_device' for sensors and lights. Null for no role filter.")
+    var roleFilter: String?
+
+    @Guide(description: "Status filter: 'offline' for unreachable devices, 'online' for reachable, 'weak' for poor signal. Null for no status filter.")
+    var statusFilter: String?
+
+    @Guide(description: "Minimum hop count inclusive. For '>3 hops' set 4; for '3+ hops' set 3. Null for no hop filter.")
+    var minHops: Int?
+
+    @Guide(description: "Sort order after filtering: 'rssi_weakest' (weakest signal first), 'rssi_best' (strongest first), 'hops_most' (furthest first). Null for default order.")
+    var sortOrder: String?
+
+    @Guide(description: "True to show only battery-powered (sleepy end) devices. Null for no battery filter.")
+    var batteryPoweredOnly: Bool?
+
+    @Guide(description: "One short sentence describing what this filter shows. Example: 'Bedroom devices with 3+ hops'.")
+    var filterDescription: String
+}
+
+@available(iOS 26, *)
 @Generable(description: "Root cause analysis when multiple devices share the same issue")
 struct RootCauseHypothesis {
     @Guide(description: "The single root cause explaining all the listed symptoms, plain English")
@@ -129,13 +154,13 @@ struct AINetworkAnalyzer {
         report: NetworkDiagnosticsEngine.Report?
     ) async throws -> MeshSummary {
         let session = LanguageModelSession(
-            instructions: """
+            instructions: sessionInstructions("""
             You are a friendly smart home expert helping a non-technical user understand \
             their Apple Thread mesh network. Be concise, warm, and specific. \
             Never use jargon like "RSSI", "BFS", "HAP", or acronyms without explanation. \
             Say "signal strength" instead of RSSI, "hub" for border router, \
             "relay device" for router. Keep responses brief.\(languageInstruction)
-            """
+            """)
         )
         let response = try await session.respond(
             to: buildSummaryPrompt(devices: devices, health: health, report: report),
@@ -161,11 +186,11 @@ struct AINetworkAnalyzer {
         report: NetworkDiagnosticsEngine.Report?
     ) async throws -> PredictiveAnalysis {
         let session = LanguageModelSession(
-            instructions: """
+            instructions: sessionInstructions("""
             You are a Thread mesh network reliability expert. \
             Predict which devices are most likely to have problems based on the data provided. \
             Be specific and actionable. Avoid jargon and acronyms.\(languageInstruction)
-            """
+            """)
         )
         let prompt = buildPredictivePrompt(devices: devices, offlineEvents: offlineEvents, report: report)
         let response = try await session.respond(to: prompt, generating: PredictiveAnalysis.self)
@@ -181,12 +206,12 @@ struct AINetworkAnalyzer {
         historyEntries: [HealthHistoryStore.Entry]
     ) async throws -> String {
         let session = LanguageModelSession(
-            instructions: """
+            instructions: sessionInstructions("""
             You are a smart home network assistant. Write a single, friendly sentence (max 120 chars) \
             summarising how someone's Thread network performed this week. \
             Mention the grade and whether it improved, declined, or stayed steady. \
             Avoid jargon and acronyms.\(languageInstruction)
-            """
+            """)
         )
         let weekEntries = historyEntries.filter {
             Date().timeIntervalSince($0.timestamp) < 7 * 24 * 3600
@@ -220,11 +245,11 @@ struct AINetworkAnalyzer {
         report: NetworkDiagnosticsEngine.Report?
     ) async throws -> OptimizationPlan {
         let session = LanguageModelSession(
-            instructions: """
+            instructions: sessionInstructions("""
             You are a Thread mesh network optimization expert. \
             Generate a prioritised list of concrete, actionable improvements. \
             Be specific about which device or room needs attention. Avoid jargon.\(languageInstruction)
-            """
+            """)
         )
         let prompt = buildOptimizationPrompt(devices: devices, health: health, anomalies: anomalies, report: report)
         let response = try await session.respond(to: prompt, generating: OptimizationPlan.self)
@@ -242,11 +267,11 @@ struct AINetworkAnalyzer {
         guard problematic.count >= 2 else { return nil }
 
         let session = LanguageModelSession(
-            instructions: """
+            instructions: sessionInstructions("""
             You are a network diagnostics expert. When multiple Thread devices show the same \
             degradation pattern simultaneously, there is usually one root cause. \
             Identify the most likely single root cause and recommend a fix.\(languageInstruction)
-            """
+            """)
         )
         let prompt = buildRootCausePrompt(devices: devices, anomalies: Array(problematic), report: report)
         let response = try await session.respond(to: prompt, generating: RootCauseHypothesis.self)
@@ -263,10 +288,10 @@ struct AINetworkAnalyzer {
         offlineCount: Int
     ) async throws -> String {
         let session = LanguageModelSession(
-            instructions: """
+            instructions: sessionInstructions("""
             You are a friendly smart home expert. Write a brief, plain-English assessment of one \
             Thread device. Be specific about the device's current state. No acronyms.\(languageInstruction)
-            """
+            """)
         )
         var lines: [String] = [
             "Device: \(device.name)\(device.room.map { " in \($0)" } ?? "").",
@@ -276,6 +301,13 @@ struct AINetworkAnalyzer {
         if let avg = stats?.avgRSSI { lines.append("30-day average signal: \(avg) dBm.") }
         if let a = anomaly, a.trajectory != .stable {
             lines.append("Signal trend: \(a.trajectory.label) (dropped \(String(format: "%.0f", a.dropDelta)) dBm from baseline).")
+            if let hours = a.projectedHoursToFailure {
+                let days = hours / 24
+                let estimate = days < 1
+                    ? "less than 24 hours"
+                    : days < 2 ? "about 1 day" : "about \(Int(days.rounded())) days"
+                lines.append("At the current rate of decline, signal is projected to reach a critical level in \(estimate).")
+            }
         }
         if let bat = device.batteryPercentage { lines.append("Battery: \(bat)%.") }
         lines.append("Offline events in 30 days: \(offlineCount).")
@@ -293,12 +325,12 @@ struct AINetworkAnalyzer {
     ) async throws -> String {
         guard !events.isEmpty else { return "" }
         let session = LanguageModelSession(
-            instructions: """
+            instructions: sessionInstructions("""
             You are a friendly network monitoring assistant. \
             Summarise recent Thread network events in 2 short, plain-English sentences. \
             No bullet points. Mention specific device names and times where helpful. \
             Maximum 200 characters total.\(languageInstruction)
-            """
+            """)
         )
         let recent = events.prefix(10)
         let lines = recent.map { e -> String in
@@ -318,15 +350,72 @@ struct AINetworkAnalyzer {
         report: NetworkDiagnosticsEngine.Report?
     ) async throws -> MeshExpansionPlan {
         let session = LanguageModelSession(
-            instructions: """
+            instructions: sessionInstructions("""
             You are a Thread mesh network expansion expert. \
             Recommend up to 2 specific places in the home to add Thread devices. \
             Be specific about rooms and explain the expected benefit. Avoid jargon.\(languageInstruction)
-            """
+            """)
         )
         let prompt = buildExpansionPrompt(devices: devices, health: health, report: report)
         let response = try await session.respond(to: prompt, generating: MeshExpansionPlan.self)
         return response.content
+    }
+
+    // MARK: - NL Device Filter
+
+    /// Parses a natural-language query into a structured `NLDeviceFilter`.
+    static func parseNLFilter(
+        query: String,
+        rooms: [String],
+        deviceCount: Int
+    ) async throws -> NLDeviceFilter {
+        let role = """
+        You parse natural language queries about a Thread smart home mesh network \
+        into structured device filters. Be precise and literal. \
+        Available rooms: \(rooms.isEmpty ? "none" : rooms.joined(separator: ", ")). \
+        Match rooms case-insensitively; allow partial matches.\(languageInstruction)
+        """
+        let session = LanguageModelSession(instructions: sessionInstructions(role))
+        let prompt = """
+        Thread mesh: \(deviceCount) devices.
+        User query: "\(query)"
+        Parse into a structured device filter.
+        """
+        let response = try await session.respond(to: prompt, generating: NLDeviceFilter.self)
+        return response.content
+    }
+
+    // MARK: - Metric Explanation ("Explain This")
+
+    /// Returns a 2-sentence plain-English explanation of a single metric value in context.
+    static func explainMetric(
+        metricName: String,
+        value: String,
+        context: String
+    ) async throws -> String {
+        let session = LanguageModelSession(
+            instructions: sessionInstructions("""
+            You are a friendly smart home expert explaining one Thread network metric to a \
+            non-technical user. Be warm and concise. Exactly 2 sentences. \
+            No acronyms without explanation.\(languageInstruction)
+            """)
+        )
+        let prompt = """
+        Metric: \(metricName) = \(value).
+        \(context)
+        Explain in 2 sentences: what this value means for the smart home, and whether it is good, acceptable, or needs attention.
+        """
+        let response = try await session.respond(to: prompt)
+        return String(response.content.prefix(280))
+    }
+
+    /// Wraps a role description with a leading language requirement when the device locale is non-English.
+    /// Putting the requirement FIRST makes the model respect it for structured @Generable output.
+    private static func sessionInstructions(_ role: String) -> String {
+        let code = Locale.current.language.languageCode?.identifier ?? "en"
+        guard code != "en" else { return role }
+        let name = Locale(identifier: "en").localizedString(forLanguageCode: code) ?? code
+        return "CRITICAL: Every text field you generate MUST be written in \(name), not English.\n\n\(role)"
     }
 
     private static var languageInstruction: String {

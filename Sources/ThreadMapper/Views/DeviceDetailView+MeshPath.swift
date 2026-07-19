@@ -106,7 +106,7 @@ extension DeviceDetailView {
         let path = meshPath   // cached @State, refreshed by .task(id: topologyFingerprint)
         if path.count >= 2 {
             Section {
-                // Hop count row
+                // Hop count row (long-press to explain with AI)
                 let hopCount = path.count - 1  // gateway excluded from "hops"
                 HStack(spacing: 10) {
                     Image(systemName: hopCount <= 2 ? "checkmark.circle.fill" : hopCount == 3 ? "exclamationmark.circle" : "exclamationmark.triangle.fill")
@@ -116,6 +116,16 @@ extension DeviceDetailView {
                     Spacer()
                 }
                 .padding(.vertical, 2)
+                .contentShape(Rectangle())
+                .onLongPressGesture {
+                    let quality = hopCount <= 2 ? "good" : hopCount == 3 ? "acceptable" : "high — may cause delays"
+                    let context = "Device: \(device.name)\(device.room.map { " in \($0)" } ?? ""). Hop count: \(hopCount) hop\(hopCount == 1 ? "" : "s") to the border router (internet hub). Typical quality: 1–2 hops is ideal, 3 is acceptable, 4+ is \(quality). Each hop adds latency and a potential point of failure."
+                    setExplainContext(
+                        metricName: "Hop Count",
+                        displayValue: "^[\(hopCount) hop](inflect: true)",
+                        aiPromptContext: context
+                    )
+                }
 
                 // Visual hop chain
                 ForEach(path.indices, id: \.self) { i in

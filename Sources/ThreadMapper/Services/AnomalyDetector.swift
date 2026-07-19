@@ -32,6 +32,9 @@ struct DeviceAnomaly {
     let baselineMean: Double   // dBm
     let recentMean: Double     // dBm
     let readingCount: Int
+    /// Hours until signal reaches a deeply critical level at the current linear rate of decline.
+    /// Nil when trajectory is stable, slope is near-zero, or projection exceeds 14 days.
+    let projectedHoursToFailure: Double?
 
     var dropDelta: Double { baselineMean - recentMean }   // positive = dropped
 }
@@ -85,15 +88,53 @@ enum AnomalyDetector {
                 trajectory = .stable
             }
 
+            let projection: Double? = trajectory != .stable
+                ? projectHoursToFailure(readings: readings, baselineMean: baselineMean, stddev: stddev, currentMean: recentMean)
+                : nil
+
             result[id] = DeviceAnomaly(
                 deviceID: id,
                 trajectory: trajectory,
                 deviationScore: deviationScore,
                 baselineMean: baselineMean,
                 recentMean: recentMean,
-                readingCount: n
+                readingCount: n,
+                projectedHoursToFailure: projection
             )
         }
         return result
+    }
+
+    /// OLS linear regression over all readings to estimate slope (units/second).
+    /// Projects from `currentMean` to `baselineMean - 4σ` and returns hours.
+    /// Returns nil if slope is near-zero, projection is negative, or > 14 days (too uncertain).
+    private static func projectHoursToFailure(
+        readings: [DeviceStatsStore.Reading],
+        baselineMean: Double,
+        stddev: Double,
+        currentMean: Double
+    ) -> Double? {
+        let targetValue = baselineMean - 4.0 * stddev
+        guard currentMean > targetValue else { return nil }
+
+        let n = Double(readings.count)
+        let times = readings.map { $0.timestamp.timeIntervalSince1970 }
+        let values = readings.map { Double($0.rssi) }
+
+        let meanTime = times.reduce(0, +) / n
+        let meanVal  = values.reduce(0, +) / n
+
+        let numerator   = zip(times, values).reduce(0.0) { $0 + ($1.0 - meanTime) * ($1.1 - meanVal) }
+        let denominator = times.reduce(0.0) { $0 + pow($1 - meanTime, 2) }
+
+        guard denominator > 0 else { return nil }
+        let slopePerSecond = numerator / denominator
+        guard slopePerSecond < -0.0001 else { return nil }   // ignore near-zero / upward slopes
+
+        let secondsToTarget = (currentMean - targetValue) / (-slopePerSecond)
+        let hours = secondsToTarget / 3600.0
+
+        guard hours > 0, hours <= 336 else { return nil }   // cap at 14 days
+        return max(0.5, hours)                               // floor at 30 minutes
     }
 }

@@ -1,6 +1,6 @@
 # ThreadMapper — Active Backlog
 
-**Last updated:** 2026-07-18 (AI roadmap brainstorm added)  
+**Last updated:** 2026-07-19 (AI roadmap status audit)  
 **Engineering log:** `REVIEW.md` (full iteration history, Iterations 1–26+)
 
 ---
@@ -41,6 +41,9 @@
 | 42 | Per-Device AI Assistant — "Ask AI about this device" section in DeviceDetailView; `NetworkAssistantView` accepts `focusDevice` parameter; session pre-seeded with device RSSI, battery, anomaly trajectory, role; auto-asks opening question |
 | 43 | AI Weekly Digest — `scheduleWeeklyReportWithAIHeadline` generates an AI-written one-sentence summary using `HealthHistoryStore` trend data; used when toggling the weekly report in Settings; falls back to generic copy if AI unavailable |
 | 44 | Live Activities — `ThreadNetworkActivityAttributes` (Shared); `LiveActivityManager` starts an ActivityKit Live Activity when a device goes offline after grace period; Dynamic Island shows grade letter (compact leading), offline count (compact trailing), full health in expanded; Lock Screen banner with grade circle + device/offline counts; activity ends 10 s after all devices come back online; `NSSupportsLiveActivities` added to Info.plist |
+| 56 | AI-B2: NL device queries — `@Generable NLDeviceFilter` (room/role/status/minHops/sort/battery); `AINetworkAnalyzer.parseNLFilter`; `MeshView` list search bar gets sparkles button + filter-active chip + match count; `applyNLFilter` + `clearNLFilter`; Pro + iOS 26 gated |
+| 55 | AI-A3: Contextual metric explanation ("Explain This") — long-press signal stat cells (Live/Avg/Min/Max) or hop count row in `DeviceDetailView`; `MetricExplanationContext` struct; `AINetworkAnalyzer.explainMetric`; compact half-sheet with sparkles header; Pro + iOS 26 gated |
+| 54 | AI-A1: Predictive failure prevention — OLS linear trend projection in `AnomalyDetector` (`projectHoursToFailure`); `projectedHoursToFailure: Double?` added to `DeviceAnomaly`; projection surfaced in `DeviceDetailView` signal section (triangle warning, time label, caption); passed into `AINetworkAnalyzer.deviceSummary` prompt so AI narrates the estimate; capped at 14 days; floored at 30 min |
 | 45 | Control Center — `ScanNetworkControl` (`ControlWidget`, iOS 18+) with `OpenThreadMapperIntent` (`openAppWhenRun = true`); "Thread Network" button in Control Center opens ThreadMapper; added to `ThreadMapperWidgetBundle` behind `if #available(iOS 18.0, *)` |
 | 46 | Positive Notifications — `notifyGradeImproved(from:to:)` fires when grade letter improves (gated on "Mesh health grade changes" toggle — same as drops); `notifyAllDevicesOnline(count:)` fires when last offline device recovers (gated on "Offline alerts" toggle); `hadOfflineDevices` flag prevents spurious "all online" fires; Settings label updated to "Mesh health grade changes" |
 | 47 | Device Reliability Score — `reliabilitySection` in `DeviceDetailView`; filters `ActivityStore.events` by device UUID + kind (offline/BR-offline) for last 30 days; shows colour-coded reliability label (Excellent→Needs Attention), 30-day offline event count, and online streak (days since last offline event) |
@@ -96,29 +99,31 @@
 
 The app is strong on **reactive AI** (explain what happened) and **structured generation**. The gaps are in **predictive AI**, **conversational guidance**, and **ambient/proactive intelligence**. Items below are ordered roughly by implementation difficulty and data-pipeline readiness.
 
+**Status as of 2026-07-19:** 4 done · 2 partial · 6 open (out of 12 items)
+
 ### Tier A — Highest ROI, data pipeline already exists
 
-| # | Feature | Implementation notes |
-|---|---------|----------------------|
-| AI-A1 | **Predictive failure prevention** | Extrapolate per-device RSSI / packet-loss trend forward using linear/exponential model in `AnomalyDetector`; surface "~2–3 days to failure" estimate + AI-narrated sentence. All data is in `DeviceStatsStore`. No new data pipeline needed. |
-| AI-A2 | **Conversational diagnostic sessions** | Replace / augment the static `TroubleshooterView` decision tree with a multi-turn `LanguageModelSession`; AI asks clarifying questions ("Near a microwave?") and injects answers back as context each turn. Builds on existing `NetworkAssistantView` chat pattern. |
-| AI-A3 | **Contextual metric explanation ("Explain This")** | Long-press any metric value (RSSI, hop count, link quality, LQI) in `DeviceDetailView` to get an AI-generated popover explaining that specific value relative to the user's network average. Zero new infrastructure — one `AINetworkAnalyzer` call with device + metric context. |
+| # | Status | Feature | Implementation notes |
+|---|--------|---------|----------------------|
+| AI-A1 | ✓ Done | **Predictive failure prevention** | OLS projection in `AnomalyDetector.projectHoursToFailure`; `DeviceAnomaly.projectedHoursToFailure: Double?`; triangle warning row in `DeviceDetailView` signal section; projection injected into `AINetworkAnalyzer.deviceSummary` prompt. Iter 54. |
+| AI-A2 | ✓ Done | **Conversational diagnostic sessions** | `NetworkAssistantView` (Iter 37) + streaming (Iter 52) + per-device focus (Iter 42). Core multi-turn chat fully shipped. Note: `TroubleshooterView` decision-tree augmentation (AI asking clarifying questions mid-tree) not wired up — optional follow-on. |
+| AI-A3 | ✓ Done | **Contextual metric explanation ("Explain This")** | Long-press Live/Avg/Min/Max signal stat cells or hop count row → compact sheet (`presentationDetents .fraction(0.4)`) with AI 2-sentence explanation; `AINetworkAnalyzer.explainMetric`; `MetricExplanationContext` struct; network-average + trajectory injected into prompt; Pro + iOS 26 gated. Iter 55. |
 
 ### Tier B — High value, moderate new work
 
-| # | Feature | Implementation notes |
-|---|---------|----------------------|
-| AI-B1 | **AI commissioning coach** | When `KnownDeviceRegistry` fires a new-device notification, generate an AI briefing in `ActivityFeedView`: device role (BR / FTD / MTD), how it fits current topology, one recommended action. Extends the Iter 34 new-device alert. |
-| AI-B2 | **Natural language device/topology queries** | NL search bar in `MeshView` and `DeviceDetailView` device list; AI parses intent → applies filter to the existing device list (`DeviceFilterView` infrastructure). Query examples: "show bedroom devices with >3 hops", "which BR has the weakest RSSI". |
-| AI-B3 | **Resilience Simulator AI narration** | Add AI-generated scenario summary to `ResilienceSimulatorView`: converts raw BFS impact scores into a human story ("Losing this BR isolates 4 bedroom devices; the next-best BR covers 2 of them"). One `AINetworkAnalyzer` call with the existing `SimulationResult`. |
-| AI-B4 | **Predictive maintenance calendar** | Combine `FirmwareHistoryStore` age, `DeviceStatsStore` health trends, battery estimates, and `ActivityStore` offline frequency to generate a prioritised weekly/monthly task list. Render as a timeline in a new `MaintenanceCalendarView` (similar structure to `NetworkTimelineView`). |
+| # | Status | Feature | Implementation notes |
+|---|--------|---------|----------------------|
+| AI-B1 | Open | **AI commissioning coach** | When `KnownDeviceRegistry` fires a new-device notification, generate an AI briefing in `ActivityFeedView`: device role (BR / FTD / MTD), how it fits current topology, one recommended action. Extends the Iter 34 new-device alert. |
+| AI-B2 | ✓ Done | **Natural language device/topology queries** | `@Generable NLDeviceFilter` in `AINetworkAnalyzer` (room, role, status, minHops, sortOrder, batteryPoweredOnly, filterDescription); `parseNLFilter(query:rooms:deviceCount:)`; `MeshView` list-mode search bar upgraded — sparkles button triggers AI parse on iOS 26+/Pro, filter-active chip shows description + match count, `applyNLFilter` maps to `[UUID]` and overrides `roomGroups`, `clearNLFilter` resets both text and filter. Iter 56. |
+| AI-B3 | Open | **Resilience Simulator AI narration** | Add AI-generated scenario summary to `ResilienceSimulatorView`: converts raw BFS impact scores into a human story ("Losing this BR isolates 4 bedroom devices; the next-best BR covers 2 of them"). One `AINetworkAnalyzer` call with the existing `SimulationResult`. |
+| AI-B4 | Open | **Predictive maintenance calendar** | Combine `FirmwareHistoryStore` age, `DeviceStatsStore` health trends, battery estimates, and `ActivityStore` offline frequency to generate a prioritised weekly/monthly task list. Render as a timeline in a new `MaintenanceCalendarView` (similar structure to `NetworkTimelineView`). |
 
 ### Tier C — Longer-term / needs more design
 
-| # | Feature | Implementation notes |
-|---|---------|----------------------|
-| AI-C1 | **AI network journal / changelog** | Weekly plain-English narrative of what changed on the network (devices joined/left, firmware updates, signal changes, anomalies resolved). Deeper than the AI Weekly Digest headline — paragraph-length, stored alongside `WeeklyReportStore`. |
-| AI-C2 | **AI device naming suggestions** | When `KnownDeviceRegistry` detects a new unnamed device, AI suggests a friendly name from vendor + role + signal-inferred location. One-tap accept chip in the new-device alert or `DeviceDetailView`. |
-| AI-C3 | **Topology placement assistant (interactive)** | User taps blank area on mesh map or selects a room → AI explains which role a new device should play there, which existing node it should route through, and expected hop count. More specific than the Mesh Expansion Advisor. |
-| AI-C4 | **Siri deep integration** | Extend existing App Intents with parameter-accepting variants: "Check the status of my kitchen sensor", "Is my border router online?" — AI generates the spoken response via `LanguageModelSession`. Fully on-device, no network required. |
-| AI-C5 | **Cross-session device memory** | Persist per-device AI observations across sessions (lightweight JSON blobs keyed by device UUID in a new `AIMemoryStore`). When reopening a device chat, assistant proactively references recurring patterns ("This device had packet loss in June — I'm seeing it again"). |
+| # | Status | Feature | Implementation notes |
+|---|--------|---------|----------------------|
+| AI-C1 | ~ Partial | **AI network journal / changelog** | Iter 43 shipped a one-sentence AI headline for the weekly digest. Missing: the full paragraph-length narrative of what changed (devices joined/left, firmware updates, signal changes, anomalies resolved) stored alongside `WeeklyReportStore`. |
+| AI-C2 | Open | **AI device naming suggestions** | When `KnownDeviceRegistry` detects a new unnamed device, AI suggests a friendly name from vendor + role + signal-inferred location. One-tap accept chip in the new-device alert or `DeviceDetailView`. |
+| AI-C3 | ~ Partial | **Topology placement assistant (interactive)** | Iter 51 (Mesh Expansion Advisor) covers expansion advice with `@Generable MeshExpansionPlan`. Missing: the interactive map-tap flow — user taps blank area on mesh map → AI explains role, routing, expected hop count for that specific spot. |
+| AI-C4 | Open | **Siri deep integration** | Extend existing App Intents with parameter-accepting variants: "Check the status of my kitchen sensor", "Is my border router online?" — AI generates the spoken response via `LanguageModelSession`. Fully on-device, no network required. |
+| AI-C5 | Open | **Cross-session device memory** | Persist per-device AI observations across sessions (lightweight JSON blobs keyed by device UUID in a new `AIMemoryStore`). When reopening a device chat, assistant proactively references recurring patterns ("This device had packet loss in June — I'm seeing it again"). |
