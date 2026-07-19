@@ -91,109 +91,120 @@ struct ThreadNetworkLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: ThreadNetworkActivityAttributes.self) { context in
             LiveActivityLockScreenView(state: context.state)
-                .activityBackgroundTint(Color(.systemBackground).opacity(0.9))
+                .activityBackgroundTint(Color(.systemBackground))
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    HStack(spacing: 8) {
+                    HStack(spacing: 10) {
                         ZStack {
-                            Circle()
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
                                 .fill(gradeColor(context.state.grade).opacity(0.18))
-                                .frame(width: 46, height: 46)
+                                .frame(width: 44, height: 44)
                             VStack(spacing: 0) {
-                                Text("Grade")
-                                    .font(.system(size: 8, weight: .semibold))
-                                    .foregroundStyle(gradeColor(context.state.grade).opacity(0.8))
                                 Text(context.state.grade)
                                     .font(.system(.title2, design: .rounded, weight: .black))
                                     .foregroundStyle(gradeColor(context.state.grade))
+                                Text("\(context.state.score)")
+                                    .font(.system(size: 9, weight: .semibold))
+                                    .foregroundStyle(gradeColor(context.state.grade).opacity(0.7))
                             }
                         }
-                        VStack(alignment: .leading, spacing: 2) {
+                        VStack(alignment: .leading, spacing: 1) {
                             Text("Thread Network")
                                 .font(.caption.weight(.semibold))
-                            Text("Score \(context.state.score) / 100")
-                                .font(.caption2.monospacedDigit())
+                                .lineLimit(1)
+                            Text(context.state.alertMessage ?? "Monitoring…")
+                                .font(.caption2)
                                 .foregroundStyle(.secondary)
+                                .lineLimit(1)
                         }
                     }
                     .padding(.leading, 4)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     let onlineCount = context.state.deviceCount - context.state.offlineCount
-                    VStack(alignment: .trailing, spacing: 5) {
-                        Label("\(onlineCount) online", systemImage: "wifi")
-                            .font(.caption2.weight(.medium))
-                            .foregroundStyle(.green)
-                        if context.state.offlineCount > 0 {
-                            Label("\(context.state.offlineCount) offline", systemImage: "wifi.slash")
-                                .font(.caption2.weight(.semibold))
-                                .foregroundStyle(.red)
+                    VStack(alignment: .trailing, spacing: 4) {
+                        HStack(spacing: 4) {
+                            Text("\(onlineCount)")
+                                .font(.caption.weight(.semibold).monospacedDigit())
+                                .foregroundStyle(.green)
+                            Image(systemName: "wifi")
+                                .font(.caption2)
+                                .foregroundStyle(.green)
                         }
-                        Text("of \(context.state.deviceCount) devices")
+                        if context.state.offlineCount > 0 {
+                            HStack(spacing: 4) {
+                                Text("\(context.state.offlineCount)")
+                                    .font(.caption.weight(.bold).monospacedDigit())
+                                    .foregroundStyle(.red)
+                                Image(systemName: "wifi.slash")
+                                    .font(.caption2)
+                                    .foregroundStyle(.red)
+                            }
+                        }
+                        Text("/ \(context.state.deviceCount)")
                             .font(.system(size: 9))
                             .foregroundStyle(.tertiary)
                     }
                     .padding(.trailing, 4)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        // Score progress bar
-                        HStack(spacing: 6) {
-                            Text("Health")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                            GeometryReader { geo in
-                                ZStack(alignment: .leading) {
-                                    RoundedRectangle(cornerRadius: 3)
-                                        .fill(Color.secondary.opacity(0.2))
-                                    RoundedRectangle(cornerRadius: 3)
-                                        .fill(gradeColor(context.state.grade))
-                                        .frame(width: geo.size.width * CGFloat(context.state.score) / 100)
-                                }
-                            }
-                            .frame(height: 5)
-                            Text("\(context.state.score)%")
-                                .font(.caption2.monospacedDigit())
-                                .foregroundStyle(.secondary)
-                        }
-                        // Alert row + dismiss
-                        HStack(spacing: 6) {
-                            if let alert = context.state.alertMessage {
-                                Image(systemName: context.state.offlineCount > 0
-                                      ? "exclamationmark.triangle.fill"
-                                      : "checkmark.circle.fill")
-                                    .foregroundStyle(context.state.offlineCount > 0 ? .orange : .green)
-                                    .font(.caption2)
-                                Text(alert)
-                                    .font(.caption.weight(.medium))
-                                    .lineLimit(1)
-                            } else {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundStyle(.green)
-                                    .font(.caption2)
-                                Text("Mesh fully connected")
-                                    .font(.caption.weight(.medium))
-                                    .foregroundStyle(.secondary)
-                            }
+                    VStack(spacing: 10) {
+                        // Status row + dismiss button
+                        HStack(spacing: 8) {
+                            Image(systemName: context.state.offlineCount > 0
+                                  ? "exclamationmark.triangle.fill"
+                                  : "checkmark.circle.fill")
+                                .foregroundStyle(context.state.offlineCount > 0 ? Color.orange : Color.green)
+                                .font(.subheadline)
+                            Text(context.state.alertMessage ?? "Mesh fully connected")
+                                .font(.subheadline.weight(.semibold))
+                                .lineLimit(1)
                             Spacer()
                             Button(intent: DismissLiveActivityIntent()) {
-                                Label("Dismiss", systemImage: "xmark")
-                                    .font(.caption.weight(.medium))
-                                    .foregroundStyle(.secondary)
+                                HStack(spacing: 4) {
+                                    Image(systemName: "xmark")
+                                        .font(.caption2.weight(.bold))
+                                    Text("Dismiss")
+                                        .font(.caption2.weight(.semibold))
+                                }
+                                .foregroundStyle(.secondary)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(.secondary.opacity(0.15), in: Capsule())
                             }
                             .buttonStyle(.plain)
                         }
+                        // Health progress bar
+                        HStack(spacing: 6) {
+                            Text("Health")
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                            ProgressView(value: Double(context.state.score), total: 100)
+                                .tint(gradeColor(context.state.grade))
+                                .frame(height: 4)
+                            Text("\(context.state.score)/100")
+                                .font(.caption2.monospacedDigit())
+                                .foregroundStyle(.tertiary)
+                        }
                     }
-                    .padding(.top, 6)
+                    .padding(.top, 4)
+                    .padding(.bottom, 2)
                 }
             } compactLeading: {
-                Text(context.state.grade)
-                    .font(.system(.body, design: .rounded, weight: .black))
-                    .foregroundStyle(gradeColor(context.state.grade))
+                HStack(spacing: 4) {
+                    Text(context.state.grade)
+                        .font(.system(.callout, design: .rounded, weight: .black))
+                        .foregroundStyle(gradeColor(context.state.grade))
+                    if context.state.offlineCount > 0 {
+                        Image(systemName: "wifi.slash")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.red)
+                    }
+                }
             } compactTrailing: {
                 if context.state.offlineCount > 0 {
-                    Label("\(context.state.offlineCount)", systemImage: "wifi.slash")
+                    Text("\(context.state.offlineCount) offline")
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.red)
                 } else {
@@ -214,52 +225,73 @@ private struct LiveActivityLockScreenView: View {
     let state: ThreadNetworkActivityAttributes.ContentState
 
     private var onlineCount: Int { state.deviceCount - state.offlineCount }
+    private var color: Color { gradeColor(state.grade) }
+    private var isAlert: Bool { state.offlineCount > 0 }
 
     var body: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(gradeColor(state.grade).opacity(0.15))
-                    .frame(width: 52, height: 52)
-                VStack(spacing: 0) {
-                    Text("Grade")
-                        .font(.system(size: 8, weight: .semibold))
-                        .foregroundStyle(gradeColor(state.grade).opacity(0.7))
-                    Text(state.grade)
-                        .font(.system(.title2, design: .rounded, weight: .black))
-                        .foregroundStyle(gradeColor(state.grade))
-                }
-            }
-            VStack(alignment: .leading, spacing: 4) {
-                if let alert = state.alertMessage {
-                    Text(alert)
-                        .font(.subheadline.weight(.semibold))
-                } else {
-                    Text("Thread Network")
-                        .font(.subheadline.weight(.semibold))
-                }
-                HStack(spacing: 10) {
-                    Label("\(onlineCount) online", systemImage: "wifi")
-                        .foregroundStyle(.green)
-                    if state.offlineCount > 0 {
-                        Label("\(state.offlineCount) offline", systemImage: "wifi.slash")
-                            .foregroundStyle(.red)
+        VStack(spacing: 12) {
+            // Main row
+            HStack(spacing: 14) {
+                // Grade badge
+                ZStack {
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(color.opacity(0.15))
+                        .frame(width: 58, height: 58)
+                    VStack(spacing: 1) {
+                        Text(state.grade)
+                            .font(.system(.title, design: .rounded, weight: .black))
+                            .foregroundStyle(color)
+                        Text("\(state.score)")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(color.opacity(0.7))
                     }
-                    Text("· Score \(state.score)")
-                        .foregroundStyle(.secondary)
                 }
-                .font(.caption)
+
+                // Status
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(state.alertMessage ?? "Thread Network")
+                        .font(.headline.weight(.semibold))
+                        .lineLimit(1)
+                    HStack(spacing: 10) {
+                        Label("\(onlineCount) online", systemImage: "wifi")
+                            .foregroundStyle(.green)
+                        if isAlert {
+                            Label("\(state.offlineCount) offline", systemImage: "wifi.slash")
+                                .foregroundStyle(.red)
+                        }
+                    }
+                    .font(.caption.weight(.medium))
+                }
+
+                Spacer(minLength: 0)
             }
-            Spacer()
-            Button(intent: DismissLiveActivityIntent()) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.title2)
-                    .foregroundStyle(.secondary)
-                    .symbolRenderingMode(.hierarchical)
+
+            // Progress bar + dismiss
+            HStack(spacing: 10) {
+                ProgressView(value: Double(state.score), total: 100)
+                    .tint(color)
+                    .frame(height: 5)
+
+                Button(intent: DismissLiveActivityIntent()) {
+                    HStack(spacing: 5) {
+                        Image(systemName: "xmark")
+                            .font(.caption2.weight(.bold))
+                        Text("Dismiss")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .foregroundStyle(isAlert ? color : .secondary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(
+                        (isAlert ? color : Color.secondary).opacity(0.12),
+                        in: Capsule()
+                    )
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
-        .padding()
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
     }
 }
 

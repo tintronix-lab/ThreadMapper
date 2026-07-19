@@ -16,6 +16,7 @@ struct DeviceDetailView: View {
     @State private var exportURL: URL?
     @State private var showFirmwareHistory = false
     @State private var showAIAssistant = false
+    @State private var showPaywall = false
     @State private var deviceAISummary: String? = nil
     @State private var isLoadingDeviceSummary = false
 
@@ -67,7 +68,7 @@ struct DeviceDetailView: View {
                 meshPath = computeMeshPath()
             }
             .task {
-                guard #available(iOS 26, *) else { return }
+                guard #available(iOS 26, *), ProStore.shared.isPro else { return }
                 guard !isLoadingDeviceSummary, deviceAISummary == nil else { return }
                 isLoadingDeviceSummary = true
                 let offlineCount = activityStore.events.filter {
@@ -99,6 +100,7 @@ struct DeviceDetailView: View {
                     NetworkAssistantWrapperView(focusDevice: device)
                 }
             }
+            .sheet(isPresented: $showPaywall) { PaywallView() }
         }
     }
 
@@ -637,7 +639,8 @@ struct DeviceDetailView: View {
     private var aiAssistantSection: some View {
         Section {
             Button {
-                showAIAssistant = true
+                if ProStore.shared.isPro { showAIAssistant = true }
+                else { showPaywall = true }
             } label: {
                 HStack(spacing: 12) {
                     ZStack {

@@ -134,7 +134,7 @@ struct AINetworkAnalyzer {
             their Apple Thread mesh network. Be concise, warm, and specific. \
             Never use jargon like "RSSI", "BFS", "HAP", or acronyms without explanation. \
             Say "signal strength" instead of RSSI, "hub" for border router, \
-            "relay device" for router. Keep responses brief.
+            "relay device" for router. Keep responses brief.\(languageInstruction)
             """
         )
         let response = try await session.respond(
@@ -164,7 +164,7 @@ struct AINetworkAnalyzer {
             instructions: """
             You are a Thread mesh network reliability expert. \
             Predict which devices are most likely to have problems based on the data provided. \
-            Be specific and actionable. Use plain English, no acronyms.
+            Be specific and actionable. Avoid jargon and acronyms.\(languageInstruction)
             """
         )
         let prompt = buildPredictivePrompt(devices: devices, offlineEvents: offlineEvents, report: report)
@@ -185,7 +185,7 @@ struct AINetworkAnalyzer {
             You are a smart home network assistant. Write a single, friendly sentence (max 120 chars) \
             summarising how someone's Thread network performed this week. \
             Mention the grade and whether it improved, declined, or stayed steady. \
-            Plain English only, no acronyms.
+            Avoid jargon and acronyms.\(languageInstruction)
             """
         )
         let weekEntries = historyEntries.filter {
@@ -223,7 +223,7 @@ struct AINetworkAnalyzer {
             instructions: """
             You are a Thread mesh network optimization expert. \
             Generate a prioritised list of concrete, actionable improvements. \
-            Be specific about which device or room needs attention. Use plain English.
+            Be specific about which device or room needs attention. Avoid jargon.\(languageInstruction)
             """
         )
         let prompt = buildOptimizationPrompt(devices: devices, health: health, anomalies: anomalies, report: report)
@@ -245,7 +245,7 @@ struct AINetworkAnalyzer {
             instructions: """
             You are a network diagnostics expert. When multiple Thread devices show the same \
             degradation pattern simultaneously, there is usually one root cause. \
-            Identify the most likely single root cause and recommend a fix.
+            Identify the most likely single root cause and recommend a fix.\(languageInstruction)
             """
         )
         let prompt = buildRootCausePrompt(devices: devices, anomalies: Array(problematic), report: report)
@@ -265,7 +265,7 @@ struct AINetworkAnalyzer {
         let session = LanguageModelSession(
             instructions: """
             You are a friendly smart home expert. Write a brief, plain-English assessment of one \
-            Thread device. Be specific about the device's current state. No acronyms.
+            Thread device. Be specific about the device's current state. No acronyms.\(languageInstruction)
             """
         )
         var lines: [String] = [
@@ -297,7 +297,7 @@ struct AINetworkAnalyzer {
             You are a friendly network monitoring assistant. \
             Summarise recent Thread network events in 2 short, plain-English sentences. \
             No bullet points. Mention specific device names and times where helpful. \
-            Maximum 200 characters total.
+            Maximum 200 characters total.\(languageInstruction)
             """
         )
         let recent = events.prefix(10)
@@ -321,12 +321,19 @@ struct AINetworkAnalyzer {
             instructions: """
             You are a Thread mesh network expansion expert. \
             Recommend up to 2 specific places in the home to add Thread devices. \
-            Be specific about rooms and explain the expected benefit. Plain English only.
+            Be specific about rooms and explain the expected benefit. Avoid jargon.\(languageInstruction)
             """
         )
         let prompt = buildExpansionPrompt(devices: devices, health: health, report: report)
         let response = try await session.respond(to: prompt, generating: MeshExpansionPlan.self)
         return response.content
+    }
+
+    private static var languageInstruction: String {
+        let code = Locale.current.language.languageCode?.identifier ?? "en"
+        guard code != "en" else { return "" }
+        let name = Locale(identifier: "en").localizedString(forLanguageCode: code) ?? code
+        return " Respond in \(name)."
     }
 
     // MARK: - Prompt builders
@@ -371,7 +378,7 @@ struct AINetworkAnalyzer {
             parts.append("Offline devices: \(offlineNames.joined(separator: ", ")).")
         }
 
-        parts.append("Summarise the health of this Thread mesh network in plain English.")
+        parts.append("Summarise the health of this Thread mesh network.\(languageInstruction)")
         return parts.joined(separator: " ")
     }
 
@@ -417,7 +424,7 @@ struct AINetworkAnalyzer {
         \(riskLines.joined(separator: "\n"))
 
         Based on this data, identify up to 3 devices most at risk of failure in the next 24 hours \
-        and predict the overall network outlook.
+        and predict the overall network outlook.\(languageInstruction)
         """
     }
 
@@ -452,7 +459,7 @@ struct AINetworkAnalyzer {
             lines.append("Weak signal: \(weakDevices.map { "\($0.name) (\($0.rssi ?? 0) dBm)" }.joined(separator: ", ")).")
         }
 
-        lines.append("Generate a prioritised optimisation plan with up to 3 specific actions.")
+        lines.append("Generate a prioritised optimisation plan with up to 3 specific actions.\(languageInstruction)")
         return lines.joined(separator: " ")
     }
 
@@ -477,7 +484,7 @@ struct AINetworkAnalyzer {
             prompt += "\nNetwork diagnostics also flagged: \(issueText)."
         }
 
-        prompt += "\n\nIdentify the single most likely root cause for this pattern and the recommended fix."
+        prompt += "\n\nIdentify the single most likely root cause for this pattern and the recommended fix.\(languageInstruction)"
         return prompt
     }
 
@@ -509,7 +516,7 @@ struct AINetworkAnalyzer {
         }
         let roomsWithDevices = Set(devices.compactMap(\.room)).sorted()
         lines.append("Currently covered rooms: \(roomsWithDevices.joined(separator: ", ")).")
-        lines.append("Recommend up to 2 specific locations to add Thread devices to improve this mesh.")
+        lines.append("Recommend up to 2 specific locations to add Thread devices to improve this mesh.\(languageInstruction)")
         return lines.joined(separator: " ")
     }
 }

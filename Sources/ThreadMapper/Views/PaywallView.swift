@@ -8,11 +8,12 @@ struct PaywallView: View {
     @State private var purchaseError: String?
 
     private let features: [(icon: String, title: String, detail: String)] = [
-        ("clock.arrow.circlepath",      "30-Day Health History",   "Track network trends over weeks, not just 24 hours"),
-        ("chart.bar.fill",              "Mesh Resilience Score",   "Know which device failure would partition your mesh"),
-        ("flame.fill",                  "Health Streaks",          "Track consecutive Grade A days across the year"),
-        ("mic.fill",                    "Siri Shortcuts",          "Ask about your network without opening the app"),
-        ("doc.text.fill",               "Weekly Reports",          "Plain-English summaries delivered every Sunday"),
+        ("apple.intelligence",          "AI Insights",             "Full network health analysis, predictions, and optimization plans powered by Apple Intelligence"),
+        ("bubble.left.and.text.bubble.right.fill", "Network Assistant", "On-device AI chat for personalised diagnostics — ask anything about your mesh"),
+        ("wand.and.stars",              "Smart Home Advisor",      "Placement, automation, and scene recommendations tailored to your devices"),
+        ("doc.text.fill",               "Weekly Reports",          "AI-written summaries of your network health delivered every Sunday"),
+        ("chart.bar.fill",              "Mesh Resilience Score",   "Know exactly which device failure would partition your mesh"),
+        ("flame.fill",                  "Health Streaks",          "Track consecutive Grade A days and build a reliability record"),
     ]
 
     var body: some View {

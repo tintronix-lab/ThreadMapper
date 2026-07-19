@@ -1,6 +1,6 @@
 # ThreadMapper
 
-**Thread mesh network monitor for iOS 17+** — visualizes HomeKit Thread devices, measures response quality, surveys coverage room-by-room, and alerts you when devices go offline.
+**Thread mesh network monitor for iOS 17+** — visualizes HomeKit Thread devices, measures response quality, surveys coverage room-by-room, and alerts you when devices go offline. On iOS 26+ with Apple Intelligence, it adds on-device AI diagnostics and a conversational network assistant.
 
 ---
 
@@ -14,15 +14,18 @@
 - **Placement suggestions** — rooms with poor average signal flagged for router addition
 - **30-minute signal trend** sparkline across all devices
 - **Topology change banner** — shows devices that joined or left the mesh in the last 5 minutes
+- **Weekly report** — auto-generated weekly summary card with grade distribution, stability score, streak tracking, and shareable plain-text export
 
 ### Devices
 - Per-device **signal sparkline** with live/avg/min/max stats and quality distribution bar
 - **Device health grade** (A–F) from rolling signal history
 - **Role badges** — Border Router, Router, End Device, Sleepy End Device
 - **Battery level** with low-battery warning
+- **Mesh path view** — visual hop-by-hop path from the device to the internet
 - **Survey history** and CSV export per device
 - **Device notes** — persistent, debounced (one write per pause, not per keystroke)
 - **Troubleshooter** — guided step-by-step fix flow for offline and weak-signal devices, role-aware steps
+- **Device filter** — filter device list by role, room, or signal quality
 
 ### Mesh Graph
 - **Hierarchical room-based layout** visualizing logical device topology
@@ -30,6 +33,32 @@
 - Cross-room links rendered as arcs; backbone links as dashed straight lines
 - Filter by room or Thread channel
 - Tap a node to open device detail; selected node highlights its route to the internet
+
+### Network Diagnostics Tools
+- **Border Router Health Monitor** — per-BR card with uptime, signal, and single-point-of-failure warning when only one BR is present
+- **Channel Scanner** — Thread channel spectrum view (channels 11–26 / 2.4 GHz) showing devices per channel with Wi-Fi interference risk ratings (high/medium/low)
+- **Resilience Simulator** — select any border router or router and simulate its failure; shows severity (critical / moderate / low) and which devices would be orphaned
+- **Anomaly Detector** — background service that flags unusual signal degradation patterns and surface them as activity events
+
+### AI Insights *(iOS 26+ · Apple Intelligence required)*
+- **Mesh health summary** — plain-English headline + explanation + single top action, generated on-device
+- **Predictive analysis** — up to three at-risk device alerts with 24-hour stability outlook
+- **Optimization plan** — ordered list of actionable improvements for the current topology
+- **Root cause hypothesis** — when issues are detected, explains likely cause and suggested fix
+- **Mesh expansion plan** — recommends where to add routers or border routers based on coverage gaps
+- Graceful fallback UI when Apple Intelligence is disabled, device is ineligible, or model is downloading
+
+### Network Assistant *(iOS 26+ · Apple Intelligence required)*
+- **Conversational chat interface** — ask free-form questions about your mesh in plain English
+- **Streaming responses** — answers appear word-by-word as the on-device model generates them
+- **Suggested questions** — quick-tap prompts to get started
+- **Device-focused mode** — launched from Device Detail to ask questions scoped to a specific device
+- Full mesh context (devices, signal history, activity log, diagnostic report) injected into every session
+
+### Smart Home Advisor
+- **Placement suggestions** — room-by-room recommendations for adding Thread routers based on signal data
+- **Automation suggestions** — Thread-aware automation ideas derived from the current device topology
+- **Scene recommendations** — suggested HomeKit scenes based on device roles and coverage patterns
 
 ### Survey
 - **Guided room-by-room survey** — walk each room, capture response-quality samples tagged to the room
@@ -40,9 +69,14 @@
 - Location permission requested at survey start, not app launch
 
 ### Activity Feed
-- Chronological log of device offline/online events, topology changes, and health score shifts ≥ 15 points
+- Chronological log of device offline/online events, topology changes, health score shifts ≥ 15 points, and anomaly detections
 - Events persist for 7 days (max 500), grouped by day
 - Clear-all action in toolbar
+
+### Live Activity & Dynamic Island
+- **Offline alert Live Activity** — starts automatically when a device goes offline; shows device name, offline count, grade, and score on the Lock Screen and in the Dynamic Island
+- User-dismissable via the Dynamic Island; suppresses re-creation until all devices recover
+- Ends automatically when all devices come back online
 
 ### Notifications & Monitoring
 - **Offline device push notifications** with configurable grace period (30 s – 5 min)
@@ -58,8 +92,20 @@
 ### Settings
 - Toggle offline and topology notifications
 - Configurable offline grace period
+- **OpenThread Border Router URL** — point ThreadMapper at a local OT-BR HTTP API for richer diagnostics
 - Clear signal history, health score history, and activity feed independently
 - Setup Checklist accessible from Settings → Tools
+
+### iPad Support
+- **NavigationSplitView** sidebar layout on iPad (regular horizontal size class)
+- Same tab destinations as iPhone; sidebar selection drives the detail column
+
+### Deep Links
+- `threadmapper://dashboard` — jump to Dashboard
+- `threadmapper://mesh` — jump to Mesh Graph
+- `threadmapper://activity` — jump to Activity Feed
+- `threadmapper://device/<uuid>` — open a specific device's detail sheet
+- `threadmapper://dismiss-live-activity` — end the current Live Activity (used by Live Activity button)
 
 ---
 
@@ -72,28 +118,41 @@ Sources/
     ViewModels/         # MeshViewModel (poll loop), SurveyViewModel
     Services/           # MatterDiscoveryService, DeviceStatsStore, ActivityStore,
                         # HealthHistoryStore, DeviceNotesStore, AppGroupStore,
-                        # SurveySessionManager, NotificationService
+                        # SurveySessionManager, NotificationService,
+                        # LiveActivityManager, SmartHomeAdvisor,
+                        # AINetworkAnalyzer (FoundationModels),
+                        # AnomalyDetector, ResilienceSimulator,
+                        # KnownDeviceRegistry, WeeklyReportStore,
+                        # BorderRouterClient, NetworkDiagnosticsEngine
     Views/              # DashboardView, MeshGraphView, SurveyWalkView,
-                        # DeviceDetailView, ActivityFeedView, TroubleshooterView,
-                        # SettingsView, OnboardingFlow, AppChecklistView, …
+                        # DeviceDetailView (+MeshPath), ActivityFeedView,
+                        # TroubleshooterView, SettingsView, OnboardingFlow,
+                        # AIInsightsView, NetworkAssistantView,
+                        # SmartHomeAdvisorView, BRHealthMonitorView,
+                        # ChannelScannerView, ResilienceSimulatorView,
+                        # WeeklyReportView, AppChecklistView, …
     Utils/              # NetworkHealthScore, MeshTopologyBuilder, GraphLayout,
-                        # SignalStrength extensions
+                        # PersistedStore, SignalStrength extensions
   ThreadMapperApp/      # App entry point, ContentView, BackgroundRefreshHandler
-  Shared/               # WidgetSnapshot, TMStyle (grade colors, room icons)
+  Shared/               # WidgetSnapshot, TMStyle (grade colors, room icons),
+                        # ThreadNetworkActivityAttributes (Live Activity)
   ThreadMapperWidget/   # WidgetKit extension
 ```
 
 **Key design decisions:**
 - `@Observable` throughout — no Combine
-- Persistence: debounced JSON files via `Codable` (Documents directory)
+- Persistence: debounced JSON files via `Codable` (Documents directory), centralized through `PersistedStore`
+- AI features use `FoundationModels` (`SystemLanguageModel.default`) — fully on-device, no network calls
 - Signal values are **latency-derived response quality estimates**, not radio-measured RSSI — labeled as "estimated" in the UI
 - Topology links are **logical estimates** (non-BR devices linked to nearest border router) — not from Thread diagnostics
+- Resilience and channel analysis are **computed from cached HomeKit data** — not live radio measurements
 
 ---
 
 ## Build & Run
 
-**Requirements:** Xcode 26+, iOS 17+ device or simulator, HomeKit-enabled home for real data.
+**Requirements:** Xcode 26+, iOS 17+ device or simulator, HomeKit-enabled home for real data.  
+**AI features** (AI Insights, Network Assistant) additionally require iOS 26+ and an Apple Intelligence-eligible device (iPhone 16 or later).
 
 ```bash
 # Open the SPM workspace in Xcode
@@ -115,15 +174,11 @@ xcrun xcodebuild \
 |---|---|
 | Signal strength / dBm | Latency-derived quality estimate (HomeKit round-trip time bucketed to a −55…−92 scale) |
 | Mesh graph links | Logical estimate — every non-border-router linked to the nearest border router |
+| Channel interference risk | Static classification of Thread channels by known Wi-Fi 2.4 GHz overlap — not a live radio scan |
+| Resilience simulator impact | Graph-connectivity analysis on cached topology — not a live failure test |
 | Parent node | Populated only if HomeKit exposes it (rare) |
 
-Real Thread diagnostics (true RSSI, LQI, actual parent/child links) require the Matter Thread Network Diagnostics cluster, which Apple's HomeKit APIs do not currently expose for third-party apps.
-
----
-
-## Roadmap
-
-See [REVIEW.md](REVIEW.md) for the full technical-lead review and feature backlog.
+Real Thread diagnostics (true RSSI, LQI, actual parent/child links) require the Matter Thread Network Diagnostics cluster, which Apple's HomeKit APIs do not currently expose for third-party apps. Connecting an OpenThread Border Router via its HTTP API (Settings → Border Router URL) provides richer data where available.
 
 ---
 
@@ -131,5 +186,6 @@ See [REVIEW.md](REVIEW.md) for the full technical-lead review and feature backlo
 
 - HomeKit device inventory and survey location data stored locally in the app's Documents directory
 - App Group data shared with the widget contains only aggregate counts (grade, score, device count) — no device names or coordinates
+- AI Insights and Network Assistant run entirely on-device via Apple Intelligence; no data leaves the device
 - Location used only during surveys; permission requested at survey start
 - No analytics, no remote telemetry

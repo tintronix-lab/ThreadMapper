@@ -183,6 +183,13 @@ struct NetworkAssistantView: View {
 
     // MARK: - Session setup
 
+    private var languageInstruction: String {
+        let code = Locale.current.language.languageCode?.identifier ?? "en"
+        guard code != "en" else { return "" }
+        let name = Locale(identifier: "en").localizedString(forLanguageCode: code) ?? code
+        return " Respond in \(name)."
+    }
+
     private func setupSession() {
         guard session == nil, model.isAvailable else { return }
         let contextStr = focusDevice != nil ? buildDeviceContext(focusDevice!) : buildContext()
@@ -195,7 +202,7 @@ struct NetworkAssistantView: View {
             Use plain English — say "signal strength" not RSSI, "hub" not border router, "relay device" not router. \
             Never mention acronyms without explanation. If you don't know something, say so honestly. \
             Current network snapshot:
-            \(contextStr)
+            \(contextStr)\(languageInstruction)
             """
         )
     }

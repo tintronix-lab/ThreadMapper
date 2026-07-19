@@ -116,12 +116,18 @@ struct DashboardView: View {
                         }
                     }
                     ToolbarItem(placement: .secondaryAction) {
-                        Button { showSmartAdvisor = true } label: {
+                        Button {
+                            if ProStore.shared.isPro { showSmartAdvisor = true }
+                            else { showPaywall = true }
+                        } label: {
                             Label("Smart Home Advisor", systemImage: "wand.and.stars")
                         }
                     }
                     ToolbarItem(placement: .secondaryAction) {
-                        Button { showAIInsights = true } label: {
+                        Button {
+                            if ProStore.shared.isPro { showAIInsights = true }
+                            else { showPaywall = true }
+                        } label: {
                             Label("AI Insights", systemImage: "apple.intelligence")
                         }
                     }
@@ -133,7 +139,10 @@ struct DashboardView: View {
                 }
                 if WeeklyReportStore.shared.latestReport != nil {
                     ToolbarItem(placement: .secondaryAction) {
-                        Button { showWeeklyReport = true } label: {
+                        Button {
+                            if ProStore.shared.isPro { showWeeklyReport = true }
+                            else { showPaywall = true }
+                        } label: {
                             Label("Weekly Report", systemImage: "doc.text.fill")
                         }
                     }

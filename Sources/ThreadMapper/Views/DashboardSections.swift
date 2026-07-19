@@ -785,6 +785,7 @@ struct DashboardResilienceSection: View {
 
     var body: some View {
         let r = resilience
+        let isPro = ProStore.shared.isPro
         Section {
             HStack(spacing: 16) {
                 ZStack {
@@ -817,17 +818,31 @@ struct DashboardResilienceSection: View {
                 }
             }
             .padding(.vertical, 6)
+            .blur(radius: isPro ? 0 : 4)
+            .overlay {
+                if !isPro {
+                    Button { showPaywall = true } label: {
+                        VStack(spacing: 6) {
+                            Image(systemName: "lock.fill")
+                                .font(.title3)
+                            Text("Pro Feature")
+                                .font(.caption.weight(.semibold))
+                        }
+                        .foregroundStyle(.primary)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
         } header: {
             HStack {
                 Text("Mesh Resilience")
                 Spacer()
-                if !ProStore.shared.isPro {
-                    Button { showPaywall = true } label: {
-                        Label("Pro", systemImage: "lock.fill")
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.plain)
+                if !isPro {
+                    Label("Pro", systemImage: "lock.fill")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.secondary)
                 }
             }
         }
