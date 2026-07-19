@@ -8,13 +8,19 @@ struct NetworkTimelineView: View {
     @Environment(ActivityStore.self) private var activityStore
 
     @State private var selectedRange: TimeRange = .day
+    @State private var showPaywall = false
 
     enum TimeRange: String, CaseIterable, Identifiable {
-        case hour6 = "6H", day = "24H", week = "7D"
+        case hour6 = "6H", day = "24H", week = "7D", month = "30D"
         var id: String { rawValue }
 
         var seconds: TimeInterval {
-            switch self { case .hour6: 6 * 3600; case .day: 24 * 3600; case .week: 7 * 24 * 3600 }
+            switch self {
+            case .hour6: 6 * 3600
+            case .day: 24 * 3600
+            case .week: 7 * 24 * 3600
+            case .month: 30 * 24 * 3600
+            }
         }
     }
 
@@ -23,7 +29,11 @@ struct NetworkTimelineView: View {
     private var cutoff: Date { Date().addingTimeInterval(-selectedRange.seconds) }
 
     private var filteredEntries: [HealthHistoryStore.Entry] {
-        historyStore.entries.filter { $0.timestamp >= cutoff }
+        let entries = historyStore.entries.filter { $0.timestamp >= cutoff }
+        // 30 days at 5-min samples is ~8640 points; average into hourly
+        // buckets so the chart stays responsive.
+        guard selectedRange == .month else { return entries }
+        return HealthHistoryStore.downsampled(entries, bucket: 3600)
     }
 
     private var filteredEvents: [ActivityEvent] {
@@ -60,6 +70,13 @@ struct NetworkTimelineView: View {
         }
         .navigationTitle("Network Timeline")
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: selectedRange) { oldValue, newValue in
+            if newValue == .month && !ProStore.shared.isPro {
+                selectedRange = oldValue
+                showPaywall = true
+            }
+        }
+        .sheet(isPresented: $showPaywall) { PaywallView() }
     }
 
     // MARK: - Range picker
@@ -216,6 +233,7 @@ struct NetworkTimelineView: View {
         case .hour6: return .dateTime.hour().minute()
         case .day:   return .dateTime.hour()
         case .week:  return .dateTime.weekday(.abbreviated).hour()
+        case .month: return .dateTime.month(.abbreviated).day()
         }
     }
 

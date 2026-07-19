@@ -14,7 +14,8 @@ let package = Package(
             path: "Sources",
             exclude: ["ThreadMapper/Assets.xcassets",
                       "ThreadMapper/Info.plist",
-                      "ThreadMapper/ThreadMapper.entitlements"],
+                      "ThreadMapper/ThreadMapper.entitlements",
+                      "ThreadMapper/Localizable.xcstrings"],
             sources: ["ThreadMapper", "Shared"],
             swiftSettings: [.enableExperimentalFeature("StrictConcurrency")]
         ),

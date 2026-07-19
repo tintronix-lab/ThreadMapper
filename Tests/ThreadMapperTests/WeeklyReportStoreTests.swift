@@ -110,6 +110,22 @@ final class WeeklyReportStoreTests: XCTestCase {
         XCTAssertTrue(report.body.contains("No offline events"))
     }
 
+    func testHistoryEntriesOutsideSevenDaysAreExcluded() {
+        // The history store retains 30 days; the weekly report must ignore
+        // anything older than 7. A score-0 entry 10 days back must not drag
+        // the average down or register as the lowest grade.
+        let stale = HealthHistoryStore.Entry(
+            timestamp: Date().addingTimeInterval(-10 * 86400), score: 0, grade: "F")
+        let entries = [stale] + makeHistory(scores: [80, 90, 85])
+        let report = WeeklyReportStore.generate(
+            historyEntries: entries, activityEvents: [],
+            currentStreak: 0, totalADays: 0)
+
+        XCTAssertEqual(report.avgScore, 85)
+        XCTAssertEqual(report.lowestGrade, "B", "stale grade should not register as lowest")
+        XCTAssertNil(report.gradeDistribution["F"])
+    }
+
     func testNowParameterDrivesWeekLabel() {
         // Use noon UTC on Jan 15 to avoid timezone-boundary "Dec" / "Feb" edge cases.
         let anchor = Date(timeIntervalSinceReferenceDate: 86400 * 14 + 43200) // 2001-01-15 12:00 UTC

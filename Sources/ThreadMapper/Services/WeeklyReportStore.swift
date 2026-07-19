@@ -105,6 +105,9 @@ final class WeeklyReportStore {
         let fmt = DateFormatter(); fmt.dateFormat = "MMM d"
         let weekLabel = "\(fmt.string(from: sevenDaysAgo)) – \(fmt.string(from: now))"
 
+        // The history store retains 30 days; a weekly report must only look at 7.
+        let historyEntries = historyEntries.filter { $0.timestamp > sevenDaysAgo }
+
         // Score stats
         let avgScore = historyEntries.isEmpty ? 0
             : historyEntries.map(\.score).reduce(0, +) / historyEntries.count

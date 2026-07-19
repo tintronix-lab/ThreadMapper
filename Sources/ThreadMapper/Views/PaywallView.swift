@@ -14,6 +14,7 @@ struct PaywallView: View {
         ("doc.text.fill",               "Weekly Reports",          "AI-written summaries of your network health delivered every Sunday"),
         ("chart.bar.fill",              "Mesh Resilience Score",   "Know exactly which device failure would partition your mesh"),
         ("flame.fill",                  "Health Streaks",          "Track consecutive Grade A days and build a reliability record"),
+        ("clock.arrow.circlepath",      "30-Day History",          "See a full month of network health trends and events in the timeline"),
     ]
 
     var body: some View {

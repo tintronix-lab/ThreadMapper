@@ -1,6 +1,6 @@
 # ThreadMapper — Active Backlog
 
-**Last updated:** 2026-07-19 (AI roadmap status audit)  
+**Last updated:** 2026-07-19 (Iter 58 — 30-Day History for Pro)  
 **Engineering log:** `REVIEW.md` (full iteration history, Iterations 1–26+)
 
 ---
@@ -54,6 +54,7 @@
 | 51 | Mesh Expansion Advisor — `@Generable MeshExpansionPlan` (max 2 `ExpansionSpot`s with location, deviceType, reason, expectedBenefit); `AINetworkAnalyzer.meshExpansionPlan(devices:health:report:)` uses room coverage gaps, high-hop devices, and weak-signal rooms; shown in new "Mesh Expansion Advisor" section in `AIInsightsView`; runs in parallel with other analyses |
 | 52 | AI Streaming Chat — `NetworkAssistantView` now uses `session.streamResponse(to:)` instead of `respond(to:)`; tokens stream into a live `StreamingBubbleView` (blinking cursor, scrolls as text grows) replacing the dots `ThinkingBubbleView`; on completion the final `ChatMessage` is appended and the streaming view clears; `Snapshot.content` used to access `String.PartiallyGenerated` from `ResponseStream<String>` |
 | 53 | Interactive Widget — `RefreshWidgetIntent` (`AppIntent`, `openAppWhenRun = true`) added to widget bundle; `Button(intent: RefreshWidgetIntent())` arrow-clockwise icon in medium widget's "Updated" row lets users tap to open app and refresh from Home Screen; existing `widgetURL` tap still works for the rest of the widget |
+| 58 | 30-Day History (Pro) — `TimeRange.month` ("30D") in `NetworkTimelineView` gated by `ProStore.isPro` → `PaywallView` (tap intercepted via `onChange`, selection reverts); `HealthHistoryStore` retention 7→30 days (`maxEntries` 8640) with new `downsampled(_:bucket:)` hourly averaging for the 30D chart; `WeeklyReportStore.generate` now filters history to 7 days (was silently relying on store retention); "30-Day History" paywall feature row |
 
 ---
 

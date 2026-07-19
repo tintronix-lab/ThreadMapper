@@ -33,7 +33,7 @@ final class HealthHistoryStore {
 
     private(set) var entries: [Entry] = []
 
-    @ObservationIgnored private let maxEntries = 2016  // 7 days at 5-min intervals
+    @ObservationIgnored private let maxEntries = 8640  // 30 days at 5-min intervals
     @ObservationIgnored private let storeURL: URL
     @ObservationIgnored private var persistTask: Task<Void, Never>?
 
@@ -65,6 +65,36 @@ final class HealthHistoryStore {
         persist()
     }
 
+    /// Averages chronologically ordered entries into fixed time buckets so long
+    /// ranges render with fewer chart points. Each bucket keeps the mean score
+    /// and the timestamp/grade of its last entry.
+    static func downsampled(_ entries: [Entry], bucket: TimeInterval) -> [Entry] {
+        guard bucket > 0, entries.count > 1 else { return entries }
+        var result: [Entry] = []
+        var currentKey = Int.min
+        var scores: [Int] = []
+        var lastInBucket: Entry?
+
+        func flush() {
+            guard let e = lastInBucket, !scores.isEmpty else { return }
+            let avg = Int((Double(scores.reduce(0, +)) / Double(scores.count)).rounded())
+            result.append(Entry(timestamp: e.timestamp, score: avg, grade: e.grade))
+        }
+
+        for entry in entries {
+            let key = Int(entry.timestamp.timeIntervalSinceReferenceDate / bucket)
+            if key != currentKey {
+                flush()
+                currentKey = key
+                scores = []
+            }
+            scores.append(entry.score)
+            lastInBucket = entry
+        }
+        flush()
+        return result
+    }
+
     private func schedulePersist() {
         persistTask?.cancel()
         persistTask = Task { [weak self] in
@@ -80,7 +110,7 @@ final class HealthHistoryStore {
 
     private func restore() {
         guard let decoded = PersistedStore.load([Entry].self, from: storeURL) else { return }
-        let cutoff = Date().addingTimeInterval(-7 * 86400)
+        let cutoff = Date().addingTimeInterval(-30 * 86400)
         entries = decoded.filter { $0.timestamp > cutoff }
     }
 }
