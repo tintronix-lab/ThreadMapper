@@ -1,5 +1,73 @@
 # Changelog
 
+## 1.1.0 (2026-07-19)
+
+### Added
+
+**Network Diagnostics (new engine + full view)**
+- `NetworkDiagnosticsEngine` — background analysis pass producing a structured `Report` (issues, tips, scores, partition detection)
+- **Mesh path view** in Device Detail — hop-by-hop path from the selected device to the internet
+- **Thread channel analysis** — per-channel spectrum with Wi-Fi 2.4 GHz interference risk ratings (high / medium / low) for channels 11–26
+- **Failure Impact Analysis** — shows which devices would be orphaned if a selected border router or router went offline
+- **Signal Degradation view** — surface devices with deteriorating rolling-average signal over the last 24 h
+- **Topology Baseline Comparison** — snapshot the current topology and diff against a saved baseline to catch silent drift
+- **Network Partition Detection** — flags mesh segments unreachable from any border router
+- **Room Signal History sparklines** in the diagnostics view per room
+- **Diagnostic Run History** — scored trend chart of past diagnostic passes
+- **Mesh Quality Scorecard** — four-dimension fitness breakdown (coverage, resilience, balance, border-router health)
+- **OTBR Thread Dataset Inspector** — decode and display the active Thread dataset from an OpenThread Border Router
+- **Commissioning Readiness Check** — verifies prerequisites before adding a new device (BR present, channel stable, partition-free)
+- **Expandable fix instructions** on each diagnostic recommendation
+- **Network Timeline** — full-screen health-score chart with activity-event markers
+- **Share Diagnostic Report** — plain-text export of the current diagnostic pass
+
+**Device Detail enhancements**
+- **Commissioning timeline** — Matter commissioning history per device
+- **Live OTBR neighbor table** — real-time neighbor data pulled from Border Router when configured
+- **Vendor notes** — pre-populated notes for known device models (via `KnownDeviceRegistry`)
+- **Hop-count depth indicator** in the mesh list view
+
+**New tools (accessible from the Tools menu / diagnostics hub)**
+- **Border Router Health Monitor** — per-BR card with signal history, uptime, and single-point-of-failure warning
+- **Channel Scanner** — interactive spectrum view of all Thread channels with device counts and interference risk
+- **Resilience Simulator** — tap any border router or router to see which devices it protects and how severe a failure would be (critical / moderate / low)
+- **Smart Home Advisor** — placement suggestions, automation ideas, and scene recommendations derived from the current topology
+
+**AI Insights** *(iOS 26+ · Apple Intelligence)*
+- On-device mesh health summary, predictive device-risk analysis, optimization plan, root-cause hypothesis, and mesh expansion plan via `FoundationModels`
+- Graceful unavailability states for Apple Intelligence disabled, device ineligible, or model downloading
+
+**Network Assistant** *(iOS 26+ · Apple Intelligence)*
+- Conversational chat interface with streaming on-device responses
+- Suggested-question chips; device-scoped mode launchable from Device Detail
+
+**Live Activity / Dynamic Island**
+- Starts automatically when a device goes offline; shows device name, offline count, grade, and score on the Lock Screen and in the Dynamic Island
+- User-dismissable; suppresses re-creation until full recovery
+
+**Platform & navigation**
+- **iPad NavigationSplitView** — sidebar layout on regular horizontal size class; landscape orientation supported
+- **User Manual** linked from Settings → About
+- **Firmware tracking** — records firmware versions over time with a per-device history view; HAP characteristic fallback for devices that don't advertise firmware via Matter
+- **Deep link scheme** (`threadmapper://`) — dashboard, mesh, activity, device/<uuid>, dismiss-live-activity
+
+**Localization**
+- Swedish added as a supported language
+
+### Fixed
+- Firmware section was always visible even when no firmware data was available; now hidden until at least one entry is present
+- HAP characteristic read fell through to an empty string instead of the fallback value when the characteristic was present but unreadable
+- Weak-device substring matching false positives carried forward from 0.2.0 (e.g. "Hub" matching "Hub 2") — corrected in channel and diagnostic queries
+
+### Internals
+- `PersistedStore` base class centralises debounced JSON persistence across all stores; eliminates duplicated load/save boilerplate
+- `AnomalyDetector` service flags unusual signal-degradation patterns and posts them as `ActivityEvent`s
+- `LiveActivityManager` encapsulates all ActivityKit lifecycle; guarded by `#available(iOS 16.2, *)`
+- `ResilienceSimulator` and `SmartHomeAdvisor` are pure value-type services with no external dependencies
+- Production-hardening pass: strict-concurrency clean on all new files, `@MainActor` propagated through diagnostics engine, deduplication of repeated store reads on the poll loop
+
+---
+
 ## 1.0.0 (2026-07-13) — Initial App Store Release
 
 ### Fixed
