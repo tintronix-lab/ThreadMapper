@@ -19,15 +19,21 @@ struct MeshFilterBar: View {
     var onExportMap: () -> Void = {}
     @Environment(MeshViewModel.self) private var viewModel
 
+    private var hasActiveFilter: Bool {
+        viewModel.selectedRoom != nil || viewModel.selectedChannel != nil
+    }
+
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 10) {
+            // Map / List toggle — labelled so the intent is unambiguous
             Picker("View", selection: $viewMode) {
-                Image(systemName: "map").tag(MeshViewMode.map)
-                Image(systemName: "list.bullet").tag(MeshViewMode.list)
+                Label("Map", systemImage: "map").tag(MeshViewMode.map)
+                Label("List", systemImage: "list.bullet").tag(MeshViewMode.list)
             }
             .pickerStyle(.segmented)
-            .frame(width: 72)
+            .frame(width: 88)
 
+            // Room + channel filter chips
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
                     Menu {
@@ -40,7 +46,7 @@ struct MeshFilterBar: View {
                         .pickerStyle(.inline)
                     } label: {
                         filterChip(
-                            label: viewModel.selectedRoom ?? "All Rooms",
+                            label: viewModel.selectedRoom ?? "Room",
                             icon: "house",
                             active: viewModel.selectedRoom != nil
                         )
@@ -56,13 +62,13 @@ struct MeshFilterBar: View {
                         .pickerStyle(.inline)
                     } label: {
                         filterChip(
-                            label: viewModel.selectedChannel.map { "CH \($0)" } ?? "All Channels",
+                            label: viewModel.selectedChannel.map { "CH \($0)" } ?? "Channel",
                             icon: "wifi",
                             active: viewModel.selectedChannel != nil
                         )
                     }
 
-                    if viewModel.selectedRoom != nil || viewModel.selectedChannel != nil {
+                    if hasActiveFilter {
                         Button {
                             withAnimation {
                                 viewModel.selectedRoom = nil
@@ -71,67 +77,92 @@ struct MeshFilterBar: View {
                         } label: {
                             Image(systemName: "xmark.circle.fill")
                                 .foregroundStyle(.secondary)
-                                .font(.caption2)
+                                .font(.caption)
                         }
                     }
                 }
             }
 
+            // Analysis tools menu — slider.horizontal.3 is the iOS-standard "controls" icon
             Menu {
-                Button {
-                    showSimulator = true
-                } label: {
-                    Label("Resilience Simulator", systemImage: "shield.lefthalf.filled.trianglebadge.exclamationmark")
-                }
-                .disabled(viewModel.nodes.filter { $0.kind == .borderRouter || $0.kind == .router }.isEmpty)
+                Section("Analysis") {
+                    Button {
+                        showSimulator = true
+                    } label: {
+                        Label("Resilience Simulator", systemImage: "shield.lefthalf.filled.trianglebadge.exclamationmark")
+                    }
+                    .disabled(viewModel.nodes.filter { $0.kind == .borderRouter || $0.kind == .router }.isEmpty)
 
-                Button {
-                    showScanner = true
-                } label: {
-                    Label("Channel Scanner", systemImage: "waveform.path")
-                }
+                    Button {
+                        showScanner = true
+                    } label: {
+                        Label("Channel Scanner", systemImage: "waveform.path")
+                    }
 
-                Button {
-                    showBRMonitor = true
-                } label: {
-                    Label("BR Health Monitor", systemImage: "antenna.radiowaves.left.and.right")
-                }
+                    Button {
+                        showBRMonitor = true
+                    } label: {
+                        Label("Router Health", systemImage: "antenna.radiowaves.left.and.right")
+                    }
 
-                Button {
-                    showTimeLapse = true
-                } label: {
-                    Label("Topology Time-Lapse", systemImage: "clock.arrow.circlepath")
+                    Button {
+                        showTimeLapse = true
+                    } label: {
+                        Label("Topology Time-Lapse", systemImage: "clock.arrow.circlepath")
+                    }
                 }
 
                 if viewMode == .map {
-                    Divider()
-                    Button {
-                        onExportMap()
-                    } label: {
-                        Label("Export Map", systemImage: "square.and.arrow.up")
+                    Section {
+                        Button {
+                            onExportMap()
+                        } label: {
+                            Label("Export Map", systemImage: "square.and.arrow.up")
+                        }
+                        .disabled(viewModel.nodes.isEmpty)
                     }
-                    .disabled(viewModel.nodes.isEmpty)
                 }
             } label: {
-                Image(systemName: "wrench.and.screwdriver")
-                    .font(.caption2)
+                toolbarIconButton(systemImage: "slider.horizontal.3", badge: hasActiveFilter)
             }
 
+            // Refresh / scan
             Button {
                 Task { await viewModel.startScan() }
             } label: {
                 if viewModel.isScanning {
                     ProgressView().controlSize(.mini)
+                        .frame(width: 30, height: 28)
+                        .background(Color.secondary.opacity(0.1),
+                                    in: RoundedRectangle(cornerRadius: 7, style: .continuous))
                 } else {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.caption2)
+                    toolbarIconButton(systemImage: "arrow.clockwise", badge: false)
                 }
             }
             .disabled(viewModel.isScanning)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
         .background(.ultraThinMaterial)
+        .overlay(Divider(), alignment: .bottom)
+    }
+
+    // A consistent icon button with a subtle tappable background.
+    @ViewBuilder
+    private func toolbarIconButton(systemImage: String, badge: Bool) -> some View {
+        Image(systemName: systemImage)
+            .font(.callout)
+            .frame(width: 30, height: 28)
+            .background(Color.secondary.opacity(0.1),
+                        in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+            .overlay(alignment: .topTrailing) {
+                if badge {
+                    Circle()
+                        .fill(Color.accentColor)
+                        .frame(width: 7, height: 7)
+                        .offset(x: 2, y: -2)
+                }
+            }
     }
 
     private var roomBinding: Binding<String?> {

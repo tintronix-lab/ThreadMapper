@@ -6842,6 +6842,7 @@
     },
     "Mesh" : {
       "comment" : "Tab bar title for the mesh topology tab.",
+      "extractionState" : "stale",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
