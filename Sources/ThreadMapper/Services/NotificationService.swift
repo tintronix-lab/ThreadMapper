@@ -249,6 +249,22 @@ final class NotificationService: NSObject {
 // MARK: - UNUserNotificationCenterDelegate
 
 extension NotificationService: UNUserNotificationCenterDelegate {
+    /// Maps a scheduled notification's request id to the deep link a tap should
+    /// open, or `nil` to leave navigation unchanged. Pure and `nonisolated` so
+    /// it can be unit-tested without constructing a `UNNotificationResponse`.
+    /// Device request ids encode the `uniqueIdentifier` ("offline-<uuid>" /
+    /// "first-seen-<uuid>"); a malformed uuid falls back to the dashboard.
+    nonisolated static func deepLink(forRequestID id: String) -> NotificationDeepLink? {
+        for prefix in ["offline-", "first-seen-"] where id.hasPrefix(prefix) {
+            let uuidStr = String(id.dropFirst(prefix.count))
+            return UUID(uuidString: uuidStr).map(NotificationDeepLink.deviceDetail) ?? .dashboard
+        }
+        if id.hasPrefix("health-drop-") { return .dashboard }
+        if id.hasPrefix("topology-") { return .activity }
+        if id == "weekly-report" { return .activity }
+        return nil
+    }
+
     // Called when user taps a notification while app is in background or closed.
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
@@ -257,24 +273,8 @@ extension NotificationService: UNUserNotificationCenterDelegate {
     ) {
         let id = response.notification.request.identifier
         Task { @MainActor [self] in
-            if id.hasPrefix("offline-") || id.hasPrefix("first-seen-") {
-                // Both notification kinds encode the device's `uniqueIdentifier`
-                // in the request id ("offline-<uuid>" / "first-seen-<uuid>").
-                // first-seen was previously unhandled, so tapping a "New Thread
-                // Device" alert did nothing.
-                let prefix = id.hasPrefix("offline-") ? "offline-" : "first-seen-"
-                let uuidStr = String(id.dropFirst(prefix.count))
-                if let uuid = UUID(uuidString: uuidStr) {
-                    pendingDeepLink = .deviceDetail(uuid)
-                } else {
-                    pendingDeepLink = .dashboard
-                }
-            } else if id.hasPrefix("health-drop-") {
-                pendingDeepLink = .dashboard
-            } else if id.hasPrefix("topology-") {
-                pendingDeepLink = .activity
-            } else if id == "weekly-report" {
-                pendingDeepLink = .activity
+            if let link = Self.deepLink(forRequestID: id) {
+                pendingDeepLink = link
             }
         }
         completionHandler()

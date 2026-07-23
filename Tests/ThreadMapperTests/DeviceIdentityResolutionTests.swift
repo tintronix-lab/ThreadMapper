@@ -73,4 +73,16 @@ import Testing
         #expect(suggestions.contains { $0.title.contains("Front Door") })
         #expect(!suggestions.contains { $0.title.contains("Unknown Device") })
     }
+
+    @MainActor
+    @Test("A non-Thread override is keyed consistently across id and uniqueIdentifier")
+    func overrideKeyIsIdentityConsistent() {
+        let store = DeviceOverrideStore(defaults: UserDefaults(suiteName: "test-\(UUID().uuidString)")!)
+        let device = makeDevice(name: "Zigbee Bridge", uniqueIdentifier: UUID())
+        // The DeviceDetailView toggle writes by uniqueIdentifier; the mesh filter
+        // and any id-based check must agree because id == uniqueIdentifier.
+        store.setNonThread(device.uniqueIdentifier, true)
+        #expect(store.isNonThread(device.uniqueIdentifier))
+        #expect(store.isNonThread(device.id))
+    }
 }
