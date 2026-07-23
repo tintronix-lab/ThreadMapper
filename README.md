@@ -18,6 +18,7 @@ ThreadMapper's core monitoring is free. **ThreadMapper Pro** (annual subscriptio
 | Live Activity & Dynamic Island | ✓ | ✓ |
 | Home-screen widget | ✓ | ✓ |
 | Apple Watch app | ✓ | ✓ |
+| Apple Watch guided-survey remote | ✓ | ✓ |
 | Troubleshooter | ✓ | ✓ |
 | Channel Scanner | ✓ | ✓ |
 | Border Router Health Monitor | ✓ | ✓ |
@@ -126,7 +127,7 @@ ThreadMapper's core monitoring is free. **ThreadMapper Pro** (annual subscriptio
 - **Scene recommendations** — suggested HomeKit scenes based on device roles and coverage patterns
 
 ### Survey
-- **Guided room-by-room survey** — walk each room, capture response-quality samples tagged to the room
+- **Guided room-by-room survey** — walk each room, capture response-quality samples tagged to the room; controllable from Apple Watch (Start / Done / Skip)
 - **Free-walk survey** — continuous sampling with GPS for outdoor or large-space mapping
 - **Heatmap overlay** — color-coded signal strength across surveyed points
 - Survey sessions stored with room tag; viewable per-device in Device Detail
@@ -157,7 +158,8 @@ ThreadMapper's core monitoring is free. **ThreadMapper Pro** (annual subscriptio
 - Widget reloads throttled (content-diffed, 60 s minimum interval) to stay within WidgetKit budget
 
 ### Apple Watch Companion *(watchOS 10+)*
-- **Watch app** — grade ring (Gauge arc), device count, offline count, and last-updated timestamp displayed natively on the watch
+- **Watch app** — a custom grade ring (grade + score), a colour-coded status line, and full-width Devices / Offline tiles, all fitting on a single screen (no scrolling); ships its own hub-and-spokes app icon
+- **Guided Survey remote** — control the room-by-room survey from your wrist: **Start / Done / Skip** the current room with live progress and a recording timer, synced with the phone in real time. Remote-control model — the phone's Guided Survey screen stays open (it owns the sampling)
 - **Live sync** via WatchConnectivity `updateApplicationContext` — the Watch receives the latest health snapshot every time it changes on the phone, even when the Watch is not currently reachable
 - **Haptic alert** — notification haptic fires on the watch when a border router transitions to offline
 - **Watch face complications** *(Pro)* — three WidgetKit complication families:
@@ -201,7 +203,8 @@ Sources/
                         #   .swift / +Types / +Prompts / +Topology),
                         # AnomalyDetector, ResilienceSimulator,
                         # KnownDeviceRegistry, WeeklyReportStore,
-                        # BorderRouterClient, NetworkDiagnosticsEngine
+                        # BorderRouterClient, NetworkDiagnosticsEngine,
+                        # GuidedSurveyBridge (Watch survey remote)
     Views/              # DashboardView, MeshGraphView, SurveyWalkView,
                         # DeviceDetailView (+MeshPath), ActivityFeedView,
                         # TroubleshooterView, SettingsView, OnboardingFlow,
@@ -215,7 +218,8 @@ Sources/
   Shared/               # WidgetSnapshot, TMStyle (grade colors, room icons),
                         # ThreadNetworkActivityAttributes (Live Activity)
   ThreadMapperWidget/   # WidgetKit extension (iOS)
-  ThreadMapperWatch/    # Apple Watch app (watchOS 10+)
+  ThreadMapperWatch/    # Apple Watch app (watchOS 10+) — dashboard +
+                        # GuidedSurveyControlView (survey remote), own AppIcon
   ThreadMapperWatchWidget/ # Watch face complications (WidgetKit, watchOS)
 ```
 
