@@ -21,6 +21,25 @@ build target runs `make proj` first, or regenerate by hand with `xcodegen genera
 > and UIKit, which exist only on iOS. `make build` and `make test` drive an iOS
 > simulator through `xcodebuild`, matching `.github/workflows/ci.yml`.
 
+## Run on a device
+HomeKit returns no accessories in the simulator, so real data needs a physical
+iPhone (paired, Developer Mode on, and registered to the signing team).
+
+```bash
+xcodegen generate
+xcrun devicectl list devices                 # find the connected device's UDID
+xcrun xcodebuild \
+  -project ThreadMapper.xcodeproj \
+  -scheme ThreadMapper \
+  -destination 'id=<device-udid>' \
+  -configuration Debug \
+  -derivedDataPath build/DerivedDataDevice build
+xcrun devicectl device install app \
+  build/DerivedDataDevice/Build/Products/Debug-iphoneos/ThreadMapper.app
+```
+
+Or just open `ThreadMapper.xcodeproj` in Xcode, pick the device, and press Run.
+
 ## Lint
 ```bash
 make lint

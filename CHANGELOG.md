@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.4.1 (2026-07-23)
+
+### Fixed
+
+**Device identity** — `ThreadDevice` carried a second identifier (`id`) generated as a fresh random `UUID()` on every launch, distinct from the stable HomeKit `uniqueIdentifier`. Notifications, activity events, stats, and overrides all key on `uniqueIdentifier`, so six features that matched on `id` silently did nothing (no crash, which is why they escaped review):
+- Tapping a **device-offline notification** now opens that device's detail sheet
+- Tapping a **"New Thread Device" notification** now opens the device (the `first-seen-` route was previously unhandled)
+- **Automation suggestions** now show the real device name instead of "Unknown Device"
+- A device's **activity history** in Device Detail now populates
+- **Border-router stats** in the BR Health Monitor now resolve
+- The **"Include in Thread mesh" toggle** now actually excludes a device from the graph
+
+`ThreadDevice.id` is now a computed alias of `uniqueIdentifier`, so the two can never diverge again.
+
+### Changed
+
+- `AINetworkAnalyzer` (1,318 lines) split into `AINetworkAnalyzer.swift`, `+Types`, `+Prompts`, and `+Topology`; all on-device model calls now funnel through shared `generate`/`generateText` helpers, so session configuration lives in one place
+- Removed deprecated `UserDefaults.synchronize()` calls and a dead notification `userInfo` deep link
+
+### Internal
+
+- Added regression tests: device-identity resolution, the non-Thread mesh filter (end-to-end), and notification deep-link routing
+- Lint autocorrect across the tree (401 → ~135 warnings; remainder are intentionally tolerated); untracked the per-developer `xcuserstate`
+
+---
+
 ## 1.4.0 (2026-07-23)
 
 ### Added

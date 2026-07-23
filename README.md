@@ -197,7 +197,8 @@ Sources/
                         # HealthHistoryStore, DeviceNotesStore, AppGroupStore,
                         # SurveySessionManager, NotificationService,
                         # LiveActivityManager, SmartHomeAdvisor,
-                        # AINetworkAnalyzer (FoundationModels),
+                        # AINetworkAnalyzer (FoundationModels; split into
+                        #   .swift / +Types / +Prompts / +Topology),
                         # AnomalyDetector, ResilienceSimulator,
                         # KnownDeviceRegistry, WeeklyReportStore,
                         # BorderRouterClient, NetworkDiagnosticsEngine
@@ -220,6 +221,7 @@ Sources/
 
 **Key design decisions:**
 - `@Observable` throughout — no Combine
+- Device identity is the HomeKit `uniqueIdentifier` everywhere — stats, activity events, notifications, and overrides all key on it; `ThreadDevice.id` (SwiftUI `Identifiable`) is a computed alias of it so the two can never diverge
 - Persistence: debounced JSON files via `Codable` (Documents directory), centralized through `PersistedStore`
 - AI features use `FoundationModels` (`SystemLanguageModel.default`) — fully on-device, no network calls
 - Signal values are **latency-derived response quality estimates**, not radio-measured RSSI — labeled as "estimated" in the UI
