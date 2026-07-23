@@ -188,6 +188,20 @@ final class MeshViewModel {
             readingsByKey: DeviceStatsStore.shared.readings,
             deviceIDs: ids
         )
+        // Record newly worsened trajectories into AI memory for self-learning
+        for (id, anomaly) in newAnomalies where anomaly.trajectory != .stable {
+            let prev = anomalies[id]?.trajectory
+            guard prev != anomaly.trajectory else { continue }
+            let deviceName = devices.first(where: { $0.uniqueIdentifier == id })?.name ?? "Unknown"
+            AIMemoryStore.shared.record(AIObservation(
+                id: UUID(),
+                deviceID: id,
+                timestamp: Date(),
+                kind: .anomalyDetected,
+                detail: "\(deviceName) \(anomaly.trajectory.label): dropped \(Int(anomaly.dropDelta)) dBm from baseline",
+                isResolved: false
+            ))
+        }
         anomalies = newAnomalies
         fireProactiveAnomalyAlert(anomalies: newAnomalies)
     }
@@ -364,6 +378,14 @@ final class MeshViewModel {
                             let dur = Int(gracePeriod / 60) > 0 ? "\(Int(gracePeriod / 60))m" : "\(Int(gracePeriod))s"
                             ActivityStore.shared.record(kind: kind, deviceID: uuid, deviceName: name, room: room,
                                 detail: "\(name)\(loc) has been unreachable for over \(dur)")
+                            AIMemoryStore.shared.record(AIObservation(
+                                id: UUID(),
+                                deviceID: uuid,
+                                timestamp: Date(),
+                                kind: .offlineEvent,
+                                detail: "\(name)\(loc) offline for \(dur)",
+                                isResolved: false
+                            ))
                         }
                         self.pendingOfflineTasks[uuid] = nil
                     }

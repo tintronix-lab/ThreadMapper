@@ -11,6 +11,7 @@ struct AIInsightsView: View {
     @State private var planState: PlanState = .idle
     @State private var rootCauseState: RootCauseState = .idle
     @State private var expansionState: ExpansionState = .idle
+    @State private var healState: HealState = .idle
     @State private var report: NetworkDiagnosticsEngine.Report?
 
     private let model = SystemLanguageModel.default
@@ -33,6 +34,10 @@ struct AIInsightsView: View {
 
     enum ExpansionState {
         case idle, loading, done(MeshExpansionPlan), failed(String)
+    }
+
+    enum HealState {
+        case idle, loading, done(AutoHealReport), notApplicable, failed(String)
     }
 
     var body: some View {
@@ -104,20 +109,20 @@ struct AIInsightsView: View {
     private var assistantLinkSection: some View {
         Section {
             NavigationLink(destination: NetworkAssistantWrapperView()) {
-                HStack(spacing: 14) {
-                    ZStack {
-                        Circle().fill(Color.purple.opacity(0.12)).frame(width: 38, height: 38)
-                        Image(systemName: "bubble.left.and.text.bubble.right.fill")
-                            .foregroundStyle(.purple).font(.subheadline)
-                    }
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Network Assistant")
-                            .font(.subheadline.weight(.semibold))
-                        Text("Ask anything about your mesh in plain English")
-                            .font(.caption2).foregroundStyle(.secondary)
-                    }
-                }
-                .padding(.vertical, 4)
+                AIInsightsLinkRow(
+                    icon: "bubble.left.and.text.bubble.right.fill",
+                    color: .purple,
+                    title: "Network Assistant",
+                    subtitle: "Ask anything about your mesh in plain English"
+                )
+            }
+            NavigationLink(destination: MaintenanceCalendarView()) {
+                AIInsightsLinkRow(
+                    icon: "calendar.badge.checkmark",
+                    color: .teal,
+                    title: "Maintenance Calendar",
+                    subtitle: "AI-prioritised tasks for firmware, battery, and signal health"
+                )
             }
         }
     }
@@ -261,6 +266,36 @@ struct AIInsightsView: View {
         default:
             EmptyView()
         }
+
+        switch healState {
+        case .done(let report):
+            Section {
+                AutoHealRows(report: report)
+            } header: {
+                Label("Self-Healing Insights", systemImage: "wand.and.sparkles")
+            } footer: {
+                Text("Recurring patterns detected across sessions. Tap 'Mark Fixed' after applying a fix.")
+                    .font(.caption)
+            }
+        case .loading:
+            Section {
+                HStack(spacing: 10) {
+                    ProgressView().controlSize(.small)
+                    Text("Analysing recurring patterns…").font(.caption).foregroundStyle(.secondary)
+                }
+                .padding(.vertical, 6)
+            } header: {
+                Label("Self-Healing Insights", systemImage: "wand.and.sparkles")
+            }
+        case .failed(let msg):
+            Section {
+                ErrorRow(message: msg)
+            } header: {
+                Label("Self-Healing Insights", systemImage: "wand.and.sparkles")
+            }
+        default:
+            EmptyView()
+        }
     }
 
     // MARK: - Share text
@@ -297,6 +332,7 @@ struct AIInsightsView: View {
         if case .loading = planState { return true }
         if case .loading = rootCauseState { return true }
         if case .loading = expansionState { return true }
+        if case .loading = healState { return true }
         return false
     }
 
@@ -305,6 +341,7 @@ struct AIInsightsView: View {
         predictiveState = .loading
         planState = .loading
         expansionState = .loading
+        healState = .loading
         let anomalyCount = meshVM.anomalies.values.filter { $0.trajectory != .stable }.count
         rootCauseState = anomalyCount >= 2 ? .loading : .notApplicable
         async let s: Void = fetchSummary()
@@ -312,7 +349,8 @@ struct AIInsightsView: View {
         async let pl: Void = fetchOptimizationPlan()
         async let rc: Void = fetchRootCause()
         async let ex: Void = fetchExpansionPlan()
-        _ = await (s, p, pl, rc, ex)
+        async let h: Void = fetchAutoHeal()
+        _ = await (s, p, pl, rc, ex, h)
     }
 
     private func fetchOptimizationPlan() async {
@@ -379,6 +417,30 @@ struct AIInsightsView: View {
             predictiveState = .done(result)
         } catch {
             predictiveState = .failed(error.localizedDescription)
+        }
+    }
+
+    private func fetchAutoHeal() async {
+        let memory = AIMemoryStore.shared
+        let recurringOffline = memory.recurringOfflineDevices(threshold: 3)
+        let memoryFragments = meshVM.devices.compactMap { d -> String? in
+            let frag = memory.summaryPromptFragment(for: d.uniqueIdentifier)
+            return frag.isEmpty ? nil : frag
+        }
+        do {
+            if let result = try await AINetworkAnalyzer.autoHealReport(
+                devices: meshVM.devices,
+                anomalies: meshVM.anomalies,
+                events: activityStore.events,
+                recurringOffline: recurringOffline,
+                memoryFragments: memoryFragments
+            ) {
+                healState = .done(result)
+            } else {
+                healState = .notApplicable
+            }
+        } catch {
+            healState = .failed(error.localizedDescription)
         }
     }
 }
@@ -696,6 +758,78 @@ private struct RootCauseCard: View {
                 Text(hypothesis.recommendedFix)
                     .font(.caption.weight(.medium)).foregroundStyle(.purple)
                     .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+// MARK: - Auto-Heal Rows
+
+@available(iOS 26, *)
+private struct AutoHealRows: View {
+    let report: AutoHealReport
+
+    private func urgencyColor(_ urgency: String) -> Color {
+        switch urgency.lowercased() {
+        case "critical": return .red
+        case "high":     return .orange
+        default:         return .yellow
+        }
+    }
+
+    var body: some View {
+        if !report.networkPattern.isEmpty {
+            HStack(alignment: .top, spacing: 8) {
+                Image(systemName: "wand.and.sparkles").font(.caption2).foregroundStyle(.purple).padding(.top, 2)
+                Text(report.networkPattern).font(.caption).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.bottom, 2)
+        }
+        ForEach(report.recommendations, id: \.deviceName) { rec in
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 8) {
+                    Circle().fill(urgencyColor(rec.urgency)).frame(width: 8, height: 8)
+                    Text(rec.deviceName).font(.subheadline.weight(.semibold))
+                    Spacer()
+                    Text(rec.urgency.capitalized)
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(urgencyColor(rec.urgency))
+                        .padding(.horizontal, 7).padding(.vertical, 2)
+                        .background(urgencyColor(rec.urgency).opacity(0.12), in: Capsule())
+                }
+                Text(rec.issuePattern).font(.caption).foregroundStyle(.secondary)
+                Text(rec.rootCause).font(.caption).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 4) {
+                    Image(systemName: "wrench.and.screwdriver.fill").font(.caption2).foregroundStyle(.teal)
+                    Text(rec.proposedFix).font(.caption.weight(.medium)).foregroundStyle(.teal)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(.vertical, 4)
+        }
+    }
+}
+
+// MARK: - Shared link row
+
+private struct AIInsightsLinkRow: View {
+    let icon: String
+    let color: Color
+    let title: String
+    let subtitle: String
+
+    var body: some View {
+        HStack(spacing: 14) {
+            ZStack {
+                Circle().fill(color.opacity(0.12)).frame(width: 38, height: 38)
+                Image(systemName: icon).foregroundStyle(color).font(.subheadline)
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.subheadline.weight(.semibold))
+                Text(subtitle).font(.caption2).foregroundStyle(.secondary)
             }
         }
         .padding(.vertical, 4)

@@ -123,6 +123,70 @@ struct NLDeviceFilter {
 }
 
 @available(iOS 26, *)
+@Generable(description: "A single maintenance task for one Thread device")
+struct MaintenanceTask {
+    @Guide(description: "Device name exactly as provided")
+    var deviceName: String
+
+    @Guide(description: "Task category: 'firmware', 'battery', 'signal', or 'reliability'")
+    var category: String
+
+    @Guide(description: "Priority: 'critical', 'high', 'medium', or 'low'")
+    var priority: String
+
+    @Guide(description: "When to do it: 'Today', 'This week', or 'This month'")
+    var timeframe: String
+
+    @Guide(description: "The specific action to take, starting with a verb. E.g. 'Replace battery before it drops below 10%.'")
+    var action: String
+
+    @Guide(description: "One sentence explaining why this task is needed right now")
+    var reason: String
+}
+
+@available(iOS 26, *)
+@Generable(description: "A prioritised maintenance plan for a Thread mesh network")
+struct MaintenancePlan {
+    @Guide(description: "Maintenance tasks ordered by priority, maximum 6", .maximumCount(6))
+    var tasks: [MaintenanceTask]
+
+    @Guide(description: "One sentence summarising the overall maintenance outlook")
+    var summary: String
+}
+
+@available(iOS 26, *)
+@Generable(description: "A self-healing recommendation for a recurring device issue")
+struct HealingRecommendation {
+    @Guide(description: "Device name exactly as provided")
+    var deviceName: String
+
+    @Guide(description: "The recurring issue pattern observed, e.g. 'Offline 4 times in 2 weeks'")
+    var issuePattern: String
+
+    @Guide(description: "The most likely root cause in plain English, no jargon")
+    var rootCause: String
+
+    @Guide(description: "The specific corrective action, starting with a verb")
+    var proposedFix: String
+
+    @Guide(description: "Urgency: 'critical', 'high', or 'medium'")
+    var urgency: String
+
+    @Guide(description: "Confidence in this diagnosis: 'high', 'medium', or 'low'")
+    var confidence: String
+}
+
+@available(iOS 26, *)
+@Generable(description: "An auto-heal report identifying recurring issues and their fixes")
+struct AutoHealReport {
+    @Guide(description: "Devices with recurring issues, highest urgency first, maximum 3", .maximumCount(3))
+    var recommendations: [HealingRecommendation]
+
+    @Guide(description: "One sentence describing the overall pattern across affected devices")
+    var networkPattern: String
+}
+
+@available(iOS 26, *)
 @Generable(description: "Plain-English story of a Thread mesh resilience simulation")
 struct ResilienceNarration {
     @Guide(description: "1–2 sentences describing which rooms and devices lose connectivity if this node is removed, and why it matters. Mention room names. No jargon.")
@@ -308,7 +372,8 @@ struct AINetworkAnalyzer {
         device: ThreadDevice,
         anomaly: DeviceAnomaly?,
         stats: DeviceStats?,
-        offlineCount: Int
+        offlineCount: Int,
+        memoryFragment: String = ""
     ) async throws -> String {
         let session = LanguageModelSession(
             instructions: sessionInstructions("""
@@ -334,6 +399,7 @@ struct AINetworkAnalyzer {
         }
         if let bat = device.batteryPercentage { lines.append("Battery: \(bat)%.") }
         lines.append("Offline events in 30 days: \(offlineCount).")
+        if !memoryFragment.isEmpty { lines.append(memoryFragment) }
         lines.append("Write 2 sentences: the device's current health state, then one specific recommendation.")
         let response = try await session.respond(to: lines.joined(separator: " "))
         return String(response.content.prefix(300))
@@ -473,6 +539,54 @@ struct AINetworkAnalyzer {
             to: lines.joined(separator: " "),
             generating: CommissioningBriefing.self
         )
+        return response.content
+    }
+
+    // MARK: - Maintenance Calendar (AI-B4)
+
+    static func maintenancePlan(
+        devices: [ThreadDevice],
+        anomalies: [UUID: DeviceAnomaly],
+        firmwareChanges: [FirmwareChange],
+        events: [ActivityEvent]
+    ) async throws -> MaintenancePlan {
+        let session = LanguageModelSession(
+            instructions: sessionInstructions("""
+            You are a proactive smart home maintenance expert. Generate a practical, prioritised \
+            maintenance schedule for a Thread mesh network. Be specific about device names and \
+            actions. No jargon. Maximum 6 tasks, ordered by priority.\(languageInstruction)
+            """)
+        )
+        let prompt = buildMaintenancePrompt(devices: devices, anomalies: anomalies,
+                                            firmwareChanges: firmwareChanges, events: events)
+        let response = try await session.respond(to: prompt, generating: MaintenancePlan.self)
+        return response.content
+    }
+
+    // MARK: - Auto-Heal (self-healing)
+
+    /// Returns nil when there is insufficient recurring-issue data to make healing recommendations.
+    static func autoHealReport(
+        devices: [ThreadDevice],
+        anomalies: [UUID: DeviceAnomaly],
+        events: [ActivityEvent],
+        recurringOffline: [UUID: Int],
+        memoryFragments: [String]
+    ) async throws -> AutoHealReport? {
+        let hasDeclining = anomalies.values.filter { $0.trajectory != .stable }.count >= 2
+        let hasRecurring = !recurringOffline.isEmpty
+        guard hasDeclining || hasRecurring else { return nil }
+
+        let session = LanguageModelSession(
+            instructions: sessionInstructions("""
+            You are a self-healing network expert. Analyse recurring device failures and signal \
+            degradation patterns to identify root causes and recommend corrective actions. \
+            Be specific, practical, and mention device names. No jargon.\(languageInstruction)
+            """)
+        )
+        let prompt = buildAutoHealPrompt(devices: devices, anomalies: anomalies, events: events,
+                                         recurringOffline: recurringOffline, memoryFragments: memoryFragments)
+        let response = try await session.respond(to: prompt, generating: AutoHealReport.self)
         return response.content
     }
 
@@ -691,6 +805,107 @@ struct AINetworkAnalyzer {
         let roomsWithDevices = Set(devices.compactMap(\.room)).sorted()
         lines.append("Currently covered rooms: \(roomsWithDevices.joined(separator: ", ")).")
         lines.append("Recommend up to 2 specific locations to add Thread devices to improve this mesh.\(languageInstruction)")
+        return lines.joined(separator: " ")
+    }
+
+    private static func buildMaintenancePrompt(
+        devices: [ThreadDevice],
+        anomalies: [UUID: DeviceAnomaly],
+        firmwareChanges: [FirmwareChange],
+        events: [ActivityEvent]
+    ) -> String {
+        var lines: [String] = [
+            "Thread mesh: \(devices.count) devices total, \(devices.filter(\.isOffline).count) offline."
+        ]
+
+        // Firmware age
+        let staleDevices = devices.filter { d in
+            guard let lastChange = firmwareChanges
+                .filter({ $0.deviceID == d.uniqueIdentifier })
+                .sorted(by: { $0.detectedAt > $1.detectedAt }).first
+            else { return false }
+            return Date().timeIntervalSince(lastChange.detectedAt) > 90 * 24 * 3600
+        }
+        if !staleDevices.isEmpty {
+            lines.append("Devices with firmware unchanged for 90+ days: \(staleDevices.map(\.name).joined(separator: ", ")).")
+        }
+
+        // Battery-powered devices with low battery
+        let lowBattery = devices.filter { ($0.batteryPercentage ?? 100) < 25 && $0.isSleepyEndDevice }
+        if !lowBattery.isEmpty {
+            lines.append("Low battery devices: \(lowBattery.map { "\($0.name) (\($0.batteryPercentage ?? 0)%)" }.joined(separator: ", ")).")
+        }
+
+        // Anomalies
+        let declining = anomalies.values.filter { $0.trajectory != .stable }
+        if !declining.isEmpty {
+            let names = declining.compactMap { a in
+                devices.first(where: { $0.uniqueIdentifier == a.deviceID })
+                    .map { "\($0.name) (\(a.trajectory.label))" }
+            }
+            lines.append("Signal anomalies: \(names.joined(separator: ", ")).")
+        }
+
+        // Offline frequency
+        let cutoff30d = Date().addingTimeInterval(-30 * 24 * 3600)
+        let offlineCounts = events.filter { $0.kind == .deviceOffline && $0.timestamp > cutoff30d }
+            .reduce(into: [UUID: Int]()) { dict, e in
+                guard let did = e.deviceID else { return }
+                dict[did, default: 0] += 1
+            }
+        let frequentlyOffline = offlineCounts.filter { $0.value >= 3 }
+            .compactMap { id, count -> String? in
+                devices.first(where: { $0.uniqueIdentifier == id }).map { "\($0.name) (\(count)x offline)" }
+            }
+        if !frequentlyOffline.isEmpty {
+            lines.append("Frequently offline in 30 days: \(frequentlyOffline.joined(separator: ", ")).")
+        }
+
+        // Weak signal devices
+        let weak = devices.filter { $0.rssi?.isWeakRSSI == true && !$0.isOffline }
+        if !weak.isEmpty {
+            lines.append("Weak signal devices: \(weak.map { "\($0.name) (\($0.rssi ?? 0) dBm)" }.joined(separator: ", ")).")
+        }
+
+        lines.append("Generate a prioritised maintenance plan with up to 6 tasks grouped by timeframe (Today / This week / This month).\(languageInstruction)")
+        return lines.joined(separator: " ")
+    }
+
+    private static func buildAutoHealPrompt(
+        devices: [ThreadDevice],
+        anomalies: [UUID: DeviceAnomaly],
+        events: [ActivityEvent],
+        recurringOffline: [UUID: Int],
+        memoryFragments: [String]
+    ) -> String {
+        var lines: [String] = ["Thread mesh auto-heal analysis."]
+
+        // Recurring offline patterns
+        if !recurringOffline.isEmpty {
+            let entries = recurringOffline.compactMap { id, count -> String? in
+                devices.first(where: { $0.uniqueIdentifier == id })
+                    .map { "\($0.name)\($0.room.map { " in \($0)" } ?? ""): offline \(count)x in 30 days" }
+            }
+            lines.append("Recurring offline devices: \(entries.joined(separator: "; ")).")
+        }
+
+        // Persistent anomalies
+        let persistent = anomalies.values.filter { $0.trajectory != .stable }
+        if !persistent.isEmpty {
+            let entries = persistent.compactMap { a -> String? in
+                devices.first(where: { $0.uniqueIdentifier == a.deviceID })
+                    .map { "\($0.name): \(a.trajectory.label), dropped \(Int(a.dropDelta)) dBm from baseline" }
+            }
+            lines.append("Persistent signal issues: \(entries.joined(separator: "; ")).")
+        }
+
+        // Device memory (cross-session observations)
+        if !memoryFragments.isEmpty {
+            lines.append("Historical memory:")
+            lines += memoryFragments.prefix(5)
+        }
+
+        lines.append("Identify root causes for recurring issues and propose specific corrective actions. Maximum 3 recommendations.\(languageInstruction)")
         return lines.joined(separator: " ")
     }
 
