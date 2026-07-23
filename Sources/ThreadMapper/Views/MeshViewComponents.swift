@@ -15,6 +15,7 @@ struct MeshFilterBar: View {
     @Binding var showSimulator: Bool
     @Binding var showScanner: Bool
     @Binding var showBRMonitor: Bool
+    @Binding var showTimeLapse: Bool
     var onExportMap: () -> Void = {}
     @Environment(MeshViewModel.self) private var viewModel
 
@@ -94,6 +95,12 @@ struct MeshFilterBar: View {
                     showBRMonitor = true
                 } label: {
                     Label("BR Health Monitor", systemImage: "antenna.radiowaves.left.and.right")
+                }
+
+                Button {
+                    showTimeLapse = true
+                } label: {
+                    Label("Topology Time-Lapse", systemImage: "clock.arrow.circlepath")
                 }
 
                 if viewMode == .map {

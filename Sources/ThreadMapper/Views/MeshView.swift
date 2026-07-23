@@ -12,6 +12,7 @@ struct MeshView: View {
     @State private var showResilienceSimulator = false
     @State private var showChannelScanner = false
     @State private var showBRMonitor = false
+    @State private var showTimeLapse = false
     @State private var isExportingMap = false
     @State private var exportedMapImage: UIImage? = nil
     @State private var nlFilterIDs: [UUID]? = nil
@@ -72,6 +73,9 @@ struct MeshView: View {
             }
             .sheet(isPresented: $showBRMonitor) {
                 BRHealthMonitorView()
+            }
+            .sheet(isPresented: $showTimeLapse) {
+                MeshTopologyRewindView()
             }
             .sheet(isPresented: $isExportingMap) {
                 if let img = exportedMapImage {
@@ -461,6 +465,7 @@ struct MeshView: View {
             showSimulator: $showResilienceSimulator,
             showScanner: $showChannelScanner,
             showBRMonitor: $showBRMonitor,
+            showTimeLapse: $showTimeLapse,
             onExportMap: { exportMap() }
         )
     }

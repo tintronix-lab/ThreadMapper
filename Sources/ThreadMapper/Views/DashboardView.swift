@@ -28,6 +28,8 @@ struct DashboardView: View {
     @State private var showAIInsights = false
     @State private var showHealthCard = false
     @State private var healthCardImage: UIImage? = nil
+    @State private var diagnosticPDFURL: URL? = nil
+    @State private var showPDFShare = false
 
     private var health: NetworkHealthScore { viewModel.health }
 
@@ -41,6 +43,11 @@ struct DashboardView: View {
             List {
                 DashboardTopologyBanner(changes: viewModel.recentTopologyChanges)
                 DashboardAnomalyBanner(anomalies: viewModel.anomalies, devices: viewModel.devices)
+                DashboardRoomHealthGrid(
+                    devices: viewModel.devices,
+                    anomalies: viewModel.anomalies,
+                    selectedRoom: $selectedRoom
+                )
                 DashboardHealthSection(
                     health: health,
                     devices: viewModel.devices,
@@ -136,6 +143,11 @@ struct DashboardView: View {
                             Label("Share Health Card", systemImage: "square.and.arrow.up")
                         }
                     }
+                    ToolbarItem(placement: .secondaryAction) {
+                        Button { exportDiagnosticPDF() } label: {
+                            Label("Export Diagnostic PDF", systemImage: "doc.text")
+                        }
+                    }
                 }
                 if WeeklyReportStore.shared.latestReport != nil {
                     ToolbarItem(placement: .secondaryAction) {
@@ -173,6 +185,42 @@ struct DashboardView: View {
             .sheet(isPresented: $showHealthCard) {
                 if let img = healthCardImage {
                     HealthCardShareSheet(image: img)
+                }
+            }
+            .sheet(isPresented: $showPDFShare) {
+                if let url = diagnosticPDFURL {
+                    NavigationStack {
+                        VStack(spacing: 20) {
+                            Image(systemName: "doc.text.fill")
+                                .font(.system(size: 64))
+                                .foregroundStyle(.blue)
+                            Text("Diagnostic Report")
+                                .font(.headline)
+                            Text("3-page PDF with health summary, device inventory, and recommendations.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 32)
+                            ShareLink(item: url,
+                                      preview: SharePreview("ThreadMapper Diagnostic Report")) {
+                                Label("Share PDF", systemImage: "square.and.arrow.up")
+                                    .font(.headline)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(.blue)
+                                    .foregroundStyle(.white)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .padding(.horizontal)
+                            }
+                        }
+                        .navigationTitle("Export PDF")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Done") { showPDFShare = false }
+                            }
+                        }
+                    }
                 }
             }
             .overlay(alignment: .top) {
@@ -244,6 +292,12 @@ struct DashboardView: View {
         case "F": return 1
         default:  return 0
         }
+    }
+
+    @MainActor private func exportDiagnosticPDF() {
+        guard let url = DiagnosticPDFExporter.generate(health: health, devices: viewModel.devices) else { return }
+        diagnosticPDFURL = url
+        showPDFShare = true
     }
 
     @MainActor private func exportHealthCard() {

@@ -1,33 +1,55 @@
 import BackgroundTasks
 import HomeKit
 import OSLog
+import UserNotifications
 
 private let logger = Logger(subsystem: "com.tintronixlab.ThreadMapper", category: "background")
 
 enum BackgroundRefreshHandler {
-    static let taskID = "com.tintronixlab.ThreadMapper.bgrefresh"
+    static let refreshTaskID  = "com.tintronixlab.ThreadMapper.bgrefresh"
+    static let watchdogTaskID = "com.tintronixlab.ThreadMapper.healthwatch"
+    // Legacy alias kept so schedule() call in ContentView continues to work
+    static let taskID = refreshTaskID
 
     static func register() {
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: taskID, using: .main) { task in
-            // register(using: .main) guarantees this closure runs on the main queue.
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: refreshTaskID, using: .main) { task in
             MainActor.assumeIsolated {
                 guard let refreshTask = task as? BGAppRefreshTask else {
-                    logger.error("Unexpected task type for \(taskID, privacy: .public); marking complete")
+                    logger.error("Unexpected task type for \(refreshTaskID, privacy: .public); marking complete")
                     task.setTaskCompleted(success: false)
                     return
                 }
                 handleRefresh(task: refreshTask)
             }
         }
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: watchdogTaskID, using: .main) { task in
+            MainActor.assumeIsolated {
+                guard let processingTask = task as? BGProcessingTask else {
+                    task.setTaskCompleted(success: false)
+                    return
+                }
+                handleHealthWatch(task: processingTask)
+            }
+        }
     }
 
     static func schedule() {
-        let request = BGAppRefreshTaskRequest(identifier: taskID)
+        let request = BGAppRefreshTaskRequest(identifier: refreshTaskID)
         request.earliestBeginDate = Date(timeIntervalSinceNow: 15 * 60)
         do {
             try BGTaskScheduler.shared.submit(request)
         } catch {
-            logger.error("BGTaskScheduler submit failed: \(error.localizedDescription)")
+            logger.error("BGAppRefreshTask submit failed: \(error.localizedDescription)")
+        }
+
+        let watchdog = BGProcessingTaskRequest(identifier: watchdogTaskID)
+        watchdog.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60)
+        watchdog.requiresNetworkConnectivity = false
+        watchdog.requiresExternalPower = false
+        do {
+            try BGTaskScheduler.shared.submit(watchdog)
+        } catch {
+            logger.error("BGProcessingTask submit failed: \(error.localizedDescription)")
         }
     }
 
@@ -45,7 +67,101 @@ enum BackgroundRefreshHandler {
             task.setTaskCompleted(success: false)
         }
     }
+
+    @MainActor
+    private static func handleHealthWatch(task: BGProcessingTask) {
+        schedule()
+
+        let watcher = HealthWatcher()
+        let work = Task {
+            await watcher.run()
+            task.setTaskCompleted(success: true)
+        }
+        task.expirationHandler = {
+            work.cancel()
+            task.setTaskCompleted(success: false)
+        }
+    }
 }
+
+// MARK: - Health Watchdog (NF-4)
+// Computes a lightweight grade from HM reachability; fires a notification if
+// the grade has dropped since the last foreground snapshot.
+
+private final class HealthWatcher: NSObject, HMHomeManagerDelegate {
+    private static let lastGradeKey = "bgLastGrade"
+    private let manager = HMHomeManager()
+
+    override init() {
+        super.init()
+        manager.delegate = self
+    }
+
+    func run() async {
+        for _ in 0..<16 {
+            if !manager.homes.isEmpty { break }
+            try? await Task.sleep(for: .milliseconds(500))
+        }
+        await computeAndNotifyIfNeeded()
+    }
+
+    func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {}
+
+    private func computeAndNotifyIfNeeded() async {
+        var total = 0
+        var offline = 0
+        for home in manager.homes {
+            for acc in home.accessories {
+                total += 1
+                if !acc.isReachable { offline += 1 }
+            }
+        }
+
+        guard total > 0 else { return }
+
+        let score = max(0, 100 - offline * 12)
+        let grade: String
+        switch score {
+        case 90...:  grade = "A"
+        case 75..<90: grade = "B"
+        case 60..<75: grade = "C"
+        case 40..<60: grade = "D"
+        default:      grade = "F"
+        }
+
+        let gradeOrder = ["A": 0, "B": 1, "C": 2, "D": 3, "F": 4]
+        let lastGrade = UserDefaults.standard.string(forKey: Self.lastGradeKey) ?? "A"
+        let currentRank = gradeOrder[grade] ?? 4
+        let lastRank    = gradeOrder[lastGrade] ?? 0
+
+        UserDefaults.standard.set(grade, forKey: Self.lastGradeKey)
+
+        if currentRank > lastRank {
+            await HealthWatcher.fireGradeDropNotification(from: lastGrade, to: grade, offlineCount: offline)
+        }
+    }
+
+    @MainActor
+    static func fireGradeDropNotification(from old: String, to new: String, offlineCount: Int) async {
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        guard settings.authorizationStatus == .authorized else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = "Network Health Dropped"
+        content.body = offlineCount > 0
+            ? "Your mesh grade fell from \(old) to \(new) — \(offlineCount) device\(offlineCount == 1 ? "" : "s") offline."
+            : "Your mesh grade fell from \(old) to \(new). Open ThreadMapper to investigate."
+        content.sound = .default
+        content.categoryIdentifier = "HEALTH_DROP"
+
+        let request = UNNotificationRequest(identifier: "health-drop-\(Date().timeIntervalSince1970)",
+                                            content: content, trigger: nil)
+        try? await UNUserNotificationCenter.current().add(request)
+        logger.info("Background health watchdog fired grade-drop notification: \(old)→\(new)")
+    }
+}
+
+// MARK: - Reachability checker
 
 // Checks HMAccessory.isReachable for all accessories and fires
 // offline/online notifications for state changes since last run.

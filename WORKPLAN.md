@@ -1,6 +1,6 @@
 # ThreadMapper — Active Backlog
 
-**Last updated:** 2026-07-23 (Iter 60 — AI-B4 + Self-Learning + Self-Healing)  
+**Last updated:** 2026-07-23 (Iter 61 — NF-2 through NF-10)  
 **Engineering log:** `REVIEW.md` (full iteration history, Iterations 1–26+)
 
 ---
@@ -57,6 +57,7 @@
 | 58 | 30-Day History (Pro) — `TimeRange.month` ("30D") in `NetworkTimelineView` gated by `ProStore.isPro` → `PaywallView` (tap intercepted via `onChange`, selection reverts); `HealthHistoryStore` retention 7→30 days (`maxEntries` 8640) with new `downsampled(_:bucket:)` hourly averaging for the 30D chart; `WeeklyReportStore.generate` now filters history to 7 days (was silently relying on store retention); "30-Day History" paywall feature row |
 | 59 | Resilience Simulator AI Narration (AI-B3) — `@Generable ResilienceNarration` struct with `scenario` + `fallback` fields; `AINetworkAnalyzer.resilienceNarration(impact:)` + `buildResiliencePrompt` private helper; `ImpactDetailView` gains "AI Impact Analysis" section (sparkles icon, loading spinner, scenario + fallback text) between Impact Summary and Affected Devices; Pro + iOS 26 gated via `.task` |
 | 60 | AI-B4 + Self-Learning + Self-Healing — `AIMemoryStore` persists per-device observations (anomaly/offline/resolved) with 30-day retention and 10-min dedup; `MeshViewModel` records trajectory changes + offline events; `deviceSummary` injects memory fragment; `@Generable MaintenancePlan` + `MaintenanceCalendarView` (tasks grouped by Today/This week/This month); `@Generable AutoHealReport` + `HealingRecommendation`; "Self-Healing Insights" section + "Maintenance Calendar" link in `AIInsightsView`; `AutoHealRows` + `AIInsightsLinkRow` components |
+| 61 | NF-2 through NF-10 — Per-Room Health Grid (`DashboardRoomHealthGrid`); Topology Change Digest on cold launch (`TopologyChangeDigestView` + `TopologyChangeSummary` AI); Background Health Watchdog (`BGProcessingTask` + `HealthWatcher` grade-drop notification); Router Saturation Monitor (NF-6 fix — `RouterSaturationSection` + `RouterLoadRow`); HomeKit Scene Triggers (`HomeKitSceneTriggerStore` + `HomeKitSceneTriggerView` in Settings); Battery Radio Efficiency Score (`radioEfficiency` row in `DeviceDetailView`); Diagnostic PDF Export (`DiagnosticPDFExporter` 3-page PDF via `UIGraphicsPDFRenderer`); Topology Time-Lapse (`TopologyTimeLapseStore` 720-frame ring buffer + `MeshTopologyRewindView` scrubber in Mesh Tools) |
 
 ---
 
@@ -96,6 +97,26 @@
 
 - App Store Connect Pro product setup (requires Apple Developer Portal)
 - Localization / internationalisation strings
+
+---
+
+## New Feature Backlog (brainstorm 2026-07-23)
+
+Ten net-new ideas ranked roughly by user impact. None of these overlap with the AI Roadmap below.
+
+| # | Feature | Why | Implementation sketch |
+|---|---------|-----|----------------------|
+| NF-1 | **Apple Watch Companion** | Network health visible at a wrist glance; taptic alert for border router failure | `WatchKit` extension + `WidgetKit` complication showing grade letter + offline count; share data via `WatchConnectivity` + existing App Group store; taptic for `.critical` anomaly |
+| ✓ NF-2 | **Per-Room Health Grid** | **DONE** — Iter 61. `DashboardRoomHealthGrid` with grade cards A–F; tap → room filter. |
+| ✓ NF-3 | **Topology Change Digest on Cold Launch** | **DONE** — Iter 61. `TopologyChangeDigestView` sheet on re-open after >1 h; `TopologyChangeSummary` AI narration (iOS 26+ Pro). |
+| ✓ NF-4 | **Background Health Watchdog** | **DONE** — Iter 61. `BGProcessingTask` (`healthwatch`) + `HealthWatcher`; grade-drop local notification; `processing` background mode added to Info.plist. |
+| NF-5 | **iCloud Sync** | Households have multiple iPhones/iPads — notes and custom names should follow the user | CloudKit `CKRecord` sync for `DeviceOverrideStore` (custom names), `DeviceNotesStore`, `AIMemoryStore` observations, and survey session list; conflict resolution: latest-write-wins with timestamp |
+| ✓ NF-6 | **Router Saturation Monitor** | **DONE** — Iter 61. `RouterSaturationSection` + `RouterLoadRow` in `BRHealthMonitorView`; progress bars per router; overload warning at 80%. |
+| ✓ NF-7 | **HomeKit Scene Triggers** | **DONE** — Iter 61. `HomeKitSceneTriggerStore` + `HomeKitSceneTriggerView` in Settings; grade threshold picker (C/D/F); fires `HMHome.executeActionSet` when grade crosses threshold. |
+| ✓ NF-8 | **Battery Radio Efficiency Score** | **DONE** — Iter 61 (prev session). `radioEfficiency` row in `DeviceDetailView` battery section for sleepy end devices. |
+| ✓ NF-9 | **Full Diagnostic PDF Export** | **DONE** — Iter 61. `DiagnosticPDFExporter` generates 3-page PDF (summary + grade, device inventory, recommendations) via `UIGraphicsPDFRenderer`; "Export Diagnostic PDF" in Dashboard toolbar. |
+| ✓ NF-10 | **Mesh Topology Time-Lapse** | **DONE** — Iter 61. `TopologyTimeLapseStore` 720-frame ring buffer (50-min dedup); `MeshTopologyRewindView` with slider + play/pause; accessible from Mesh Tools menu. |
+| NF-1 | **Apple Watch Companion** | Network health visible at a wrist glance | Requires WatchKit target — needs Xcode project setup first. |
 
 ---
 

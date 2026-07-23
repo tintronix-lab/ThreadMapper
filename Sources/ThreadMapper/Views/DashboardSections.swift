@@ -287,6 +287,115 @@ struct DashboardTrendSection: View {
     }
 }
 
+// MARK: - Room Health Grid (NF-2)
+
+struct DashboardRoomHealthGrid: View {
+    let devices: [ThreadDevice]
+    let anomalies: [UUID: DeviceAnomaly]
+    @Binding var selectedRoom: String?
+
+    struct RoomSummary: Identifiable {
+        let id: String
+        let room: String
+        let total: Int
+        let offline: Int
+        let weak: Int
+        let declining: Int
+        let grade: String
+        let color: Color
+
+        static func compute(room: String, devices: [ThreadDevice], anomalies: [UUID: DeviceAnomaly]) -> RoomSummary {
+            let offline  = devices.filter(\.isOffline).count
+            let weak     = devices.filter(\.isWeak).count
+            let declining = devices.filter { anomalies[$0.uniqueIdentifier]?.trajectory != .stable && anomalies[$0.uniqueIdentifier] != nil }.count
+            var score = 100
+            score -= min(40, offline  * 20)
+            score -= min(20, weak     * 7)
+            score -= min(10, declining * 5)
+            score = max(0, score)
+            let (grade, color): (String, Color)
+            switch score {
+            case 90...: (grade, color) = ("A", .green)
+            case 75..<90: (grade, color) = ("B", .mint)
+            case 60..<75: (grade, color) = ("C", .yellow)
+            case 40..<60: (grade, color) = ("D", .orange)
+            default: (grade, color) = ("F", .red)
+            }
+            return RoomSummary(id: room, room: room, total: devices.count,
+                               offline: offline, weak: weak, declining: declining,
+                               grade: grade, color: color)
+        }
+    }
+
+    private var rooms: [RoomSummary] {
+        Dictionary(grouping: devices) { $0.room ?? "Unknown" }
+            .map { RoomSummary.compute(room: $0.key, devices: $0.value, anomalies: anomalies) }
+            .sorted { $0.room < $1.room }
+    }
+
+    var body: some View {
+        let summaries = rooms
+        guard summaries.count > 1 else { return AnyView(EmptyView()) }
+        return AnyView(
+            Section {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 10)], spacing: 10) {
+                    ForEach(summaries) { summary in
+                        RoomHealthCard(summary: summary, isSelected: selectedRoom == summary.room)
+                            .onTapGesture {
+                                withAnimation(.easeInOut(duration: 0.15)) {
+                                    selectedRoom = selectedRoom == summary.room ? nil : summary.room
+                                }
+                            }
+                    }
+                }
+                .padding(.vertical, 4)
+            } header: {
+                Label("Room Health", systemImage: "house.and.flag")
+            }
+        )
+    }
+}
+
+private struct RoomHealthCard: View {
+    let summary: DashboardRoomHealthGrid.RoomSummary
+    let isSelected: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .top) {
+                Text(summary.room)
+                    .font(.caption.weight(.semibold))
+                    .lineLimit(1)
+                    .foregroundStyle(isSelected ? .white : .primary)
+                Spacer()
+                Text(summary.grade)
+                    .font(.title2.weight(.black))
+                    .foregroundStyle(isSelected ? .white : summary.color)
+            }
+            HStack(spacing: 8) {
+                Label("\(summary.total)", systemImage: "sensor.tag.radiowaves.forward")
+                    .font(.caption2)
+                    .foregroundStyle(isSelected ? .white.opacity(0.8) : .secondary)
+                if summary.offline > 0 {
+                    Label("\(summary.offline)", systemImage: "network.slash")
+                        .font(.caption2)
+                        .foregroundStyle(isSelected ? .white : .red)
+                }
+            }
+        }
+        .padding(10)
+        .background(
+            isSelected
+                ? RoundedRectangle(cornerRadius: 10).fill(summary.color)
+                : RoundedRectangle(cornerRadius: 10).fill(summary.color.opacity(0.10))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .strokeBorder(summary.color.opacity(isSelected ? 0 : 0.25), lineWidth: 1)
+        )
+    }
+}
+
 // MARK: - Room Coverage
 
 struct DashboardRoomCoverageSection: View {

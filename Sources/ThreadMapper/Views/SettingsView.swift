@@ -66,6 +66,9 @@ struct SettingsView: View {
             NavigationLink("Setup Checklist") {
                 AppChecklistView()
             }
+            NavigationLink("HomeKit Scene Trigger") {
+                HomeKitSceneTriggerView()
+            }
             Toggle(isOn: $demoMode) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Demo Mode")

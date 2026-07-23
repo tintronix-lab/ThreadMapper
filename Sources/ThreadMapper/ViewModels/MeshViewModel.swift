@@ -167,6 +167,7 @@ final class MeshViewModel {
                         HealthStreakStore.shared.record(grade: newHealth.grade)
                         if newHealth.grade == "A" { AchievementStore.shared.unlock("firstGradeA") }
                         if agg.brCount >= 2 && agg.routerCount >= 4 { AchievementStore.shared.unlock("resilienceA") }
+                        TopologyTimeLapseStore.shared.record(devices: self.devices)
                     }
                     self.recordHealthDelta(health: newHealth)
                     if rssiJustMeasured { self.updateAnomalies() }
@@ -471,6 +472,10 @@ final class MeshViewModel {
         } else if delta >= 15 {
             ActivityStore.shared.record(kind: .healthImproved,
                 detail: "Network health improved from \(prev) to \(health.score) — Grade \(health.grade)")
+        }
+        // HomeKit scene trigger — fire if grade crosses configured threshold.
+        if let prev = previousGrade {
+            HomeKitSceneTriggerStore.shared.fireIfNeeded(newGrade: health.grade, previousGrade: prev)
         }
         // Keep Live Activity grade/score current whenever health changes.
         LiveActivityManager.shared.updateStatus(

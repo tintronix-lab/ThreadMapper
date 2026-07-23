@@ -556,6 +556,18 @@ struct DeviceDetailView: View {
                             .foregroundStyle(estimate.color)
                     }
                 }
+
+                if device.isSleepyEndDevice {
+                    let eff = radioEfficiency
+                    HStack {
+                        Label("Radio efficiency", systemImage: "antenna.radiowaves.left.and.right")
+                            .font(.caption2).foregroundStyle(.secondary)
+                        Spacer()
+                        Text(eff.label)
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(eff.color)
+                    }
+                }
             }
         } header: {
             Text("Battery")
@@ -565,6 +577,19 @@ struct DeviceDetailView: View {
                     .font(.caption2)
             }
         }
+    }
+
+    private var radioEfficiency: (label: LocalizedStringResource, color: Color) {
+        let stats = DeviceStatsStore.shared.stats(for: device.uniqueIdentifier)
+        let jitter = stats?.jitter ?? 0
+        let cutoff = Date().addingTimeInterval(-30 * 24 * 3600)
+        let offlineCount = activityStore.events.filter {
+            $0.deviceID == device.uniqueIdentifier && $0.kind == .deviceOffline && $0.timestamp > cutoff
+        }.count
+        if jitter > 20 && offlineCount >= 3 { return ("High Drain", .red) }
+        if jitter > 15 || offlineCount >= 2  { return ("Elevated",  .orange) }
+        if jitter <= 10 && offlineCount <= 1 { return ("Efficient", .green) }
+        return ("Normal", .secondary)
     }
 
     private func batteryDaysEstimate(_ percent: Int) -> (label: LocalizedStringResource, color: Color)? {

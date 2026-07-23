@@ -28,6 +28,7 @@ struct BRHealthMonitorView: View {
                                        isOnlyBR: isSingleBR,
                                        totalBRs: borderRouters.count)
                             }
+                            RouterSaturationSection(nodes: meshVM.nodes)
                         }
                         .padding(16)
                     }
@@ -286,5 +287,90 @@ private struct BRCard: View {
         }
         .accessibilityLabel(Text("Signal trend for \(device.name)"))
         .accessibilityValue(Text(device.rssi.map { "Latest \($0) dBm, \($0.rssiQualityLabel)" } ?? String(localized: "No signal data")))
+    }
+}
+
+// MARK: - Router Saturation (NF-6)
+
+private let saturationSoftLimit = 15
+private let saturationWarnThreshold = 0.80
+
+private struct RouterSaturationSection: View {
+    let nodes: [MeshNode]
+
+    struct RouterLoad: Identifiable {
+        let id: UUID
+        let name: String
+        let kind: MeshNodeKind
+        let directCount: Int
+        var saturation: Double { Double(directCount) / Double(saturationSoftLimit) }
+        var isOverloaded: Bool { saturation >= saturationWarnThreshold }
+    }
+
+    private var loads: [RouterLoad] {
+        let routing = nodes.filter { $0.kind == .borderRouter || $0.kind == .router }
+        return routing.map { node in
+            let children = nodes.filter { $0.parentID == node.id && $0.kind == .endDevice }.count
+            return RouterLoad(id: node.id, name: node.name, kind: node.kind, directCount: children)
+        }
+        .filter { $0.directCount > 0 }
+        .sorted { $0.saturation > $1.saturation }
+    }
+
+    private var anyOverloaded: Bool { loads.contains(where: \.isOverloaded) }
+
+    var body: some View {
+        if !loads.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 6) {
+                    Image(systemName: anyOverloaded ? "exclamationmark.triangle.fill" : "chart.bar.fill")
+                        .foregroundStyle(anyOverloaded ? Color.orange : Color.blue)
+                        .font(.subheadline)
+                    Text("Router Capacity")
+                        .font(.subheadline.weight(.semibold))
+                    Spacer()
+                    Text("Limit ~\(saturationSoftLimit)/router")
+                        .font(.caption2).foregroundStyle(.secondary)
+                }
+                if anyOverloaded {
+                    Label("One or more routers are near capacity. Consider adding a Thread relay to balance the load.", systemImage: "info.circle")
+                        .font(.caption2).foregroundStyle(.orange)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                ForEach(loads, id: \.id) { load in
+                    RouterLoadRow(load: load)
+                }
+            }
+            .padding(12)
+            .cardBackground()
+        }
+    }
+}
+
+private struct RouterLoadRow: View {
+    let load: RouterSaturationSection.RouterLoad
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(load.name).font(.caption).lineLimit(1)
+                Text(load.kind == .borderRouter ? "BR" : "Relay")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Text("\(load.directCount)/\(saturationSoftLimit)")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(load.isOverloaded ? Color.orange : Color.primary)
+            }
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 3).fill(Color.secondary.opacity(0.12))
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(load.isOverloaded ? Color.orange : Color.blue)
+                        .frame(width: geo.size.width * min(1, load.saturation))
+                }
+            }
+            .frame(height: 6)
+        }
     }
 }

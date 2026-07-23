@@ -4,8 +4,12 @@ import Observation
 struct ContentView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @AppStorage("demoMode") private var demoMode = false
+    @AppStorage("lastBackgroundTimestamp") private var lastBackgroundTimestamp: Double = 0
     @Environment(\.scenePhase) private var scenePhase
     @State private var notificationService = NotificationService.shared
+    @State private var topologyDiff: SnapshotDiff? = nil
+    @State private var showTopologyDigest = false
+    @State private var needsDigestCheck = false
     // Tab state lives here so deep links from NotificationService can drive navigation.
     @State private var tabSelection: AppTab = .dashboard
     @State private var sidebarSelection: AppTab? = .dashboard
@@ -62,6 +66,33 @@ struct ContentView: View {
                     meshVM.isAppActive = (phase == .active)
                     if phase == .background || phase == .inactive {
                         UserDefaults.standard.synchronize()
+                        if !meshVM.devices.isEmpty {
+                            TopologySnapshot.saveBaseline(TopologySnapshot.capture(devices: meshVM.devices))
+                        }
+                        lastBackgroundTimestamp = Date().timeIntervalSince1970
+                    }
+                    if phase == .active {
+                        let gap = Date().timeIntervalSince1970 - lastBackgroundTimestamp
+                        if gap > 3600 && lastBackgroundTimestamp > 0 {
+                            needsDigestCheck = true
+                        }
+                    }
+                }
+                .onChange(of: meshVM.devices.count) { _, count in
+                    guard needsDigestCheck, count > 0 else { return }
+                    needsDigestCheck = false
+                    if let baseline = TopologySnapshot.loadBaseline() {
+                        let current = TopologySnapshot.capture(devices: meshVM.devices)
+                        let diff = baseline.diff(against: current)
+                        if diff.hasChanges {
+                            topologyDiff = diff
+                            showTopologyDigest = true
+                        }
+                    }
+                }
+                .sheet(isPresented: $showTopologyDigest) {
+                    if let diff = topologyDiff {
+                        TopologyChangeDigestView(diff: diff, deviceCount: meshVM.devices.count)
                     }
                 }
                 .onChange(of: borderRouterURL) { _, _ in

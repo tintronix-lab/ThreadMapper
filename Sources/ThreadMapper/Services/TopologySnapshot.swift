@@ -41,6 +41,21 @@ struct TopologySnapshot: Codable, Identifiable {
         )
     }
 
+    static func capture(devices: [ThreadDevice]) -> TopologySnapshot {
+        let states = devices.map { d in
+            DeviceState(deviceID: d.id, name: d.name, room: d.room,
+                        hopCount: 99, rssi: d.rssi,
+                        isOffline: d.isOffline, isBorderRouter: d.isBorderRouter)
+        }
+        return TopologySnapshot(
+            id: UUID(),
+            capturedAt: Date(),
+            deviceStates: states,
+            borderRouterCount: devices.filter(\.isBorderRouter).count,
+            totalDeviceCount: devices.count
+        )
+    }
+
     func diff(against current: TopologySnapshot) -> SnapshotDiff {
         SnapshotDiff.compute(baseline: self, current: current)
     }
@@ -115,6 +130,20 @@ struct SnapshotDiff {
             case .hopCountWorse(let f, let t):    return "\(f) → \(t) hops"
             case .hopCountBetter(let f, let t):   return "\(f) → \(t) hops"
             case .signalDegraded(let f, let t):   return "\(f) → \(t) dBm"
+            }
+        }
+
+        var promptDescription: String {
+            switch self {
+            case .newDevice:                     return "new device joined"
+            case .deviceRemoved:                 return "no longer seen"
+            case .wentOffline:                   return "went offline"
+            case .cameOnline:                    return "came back online"
+            case .wentUnreachable:               return "lost mesh path"
+            case .becameReachable:               return "path restored"
+            case .hopCountWorse(let f, let t):   return "hop count worsened \(f)→\(t)"
+            case .hopCountBetter(let f, let t):  return "hop count improved \(f)→\(t)"
+            case .signalDegraded(let f, let t):  return "signal degraded \(f)→\(t) dBm"
             }
         }
     }
