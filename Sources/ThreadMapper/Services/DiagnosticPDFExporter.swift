@@ -8,6 +8,11 @@ enum DiagnosticPDFExporter {
     private static let pageHeight: CGFloat = 792
     private static let margin: CGFloat = 48
 
+    // PDF is a static document — adaptive UIColors must be resolved against a
+    // concrete trait collection before being converted to CGColor, otherwise UIKit
+    // logs "Requesting visual style in an implementation that has disabled it."
+    private static let pdfTraits = UITraitCollection(userInterfaceStyle: .light)
+
     static func generate(health: NetworkHealthScore, devices: [ThreadDevice]) -> URL? {
         let pageRect = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
         let renderer = UIGraphicsPDFRenderer(bounds: pageRect)
@@ -41,7 +46,7 @@ enum DiagnosticPDFExporter {
         var y: CGFloat = margin
 
         // Header bar
-        ctx.setFillColor(UIColor.systemBlue.cgColor)
+        ctx.setFillColor(UIColor.systemBlue.resolvedColor(with: pdfTraits).cgColor)
         ctx.fill(CGRect(x: 0, y: 0, width: pageWidth, height: 8))
 
         // Title
@@ -141,7 +146,7 @@ enum DiagnosticPDFExporter {
 
             // Alternate row shading
             if i % 2 == 0 {
-                ctx.setFillColor(UIColor.systemGray6.cgColor)
+                ctx.setFillColor(UIColor.systemGray6.resolvedColor(with: pdfTraits).cgColor)
                 ctx.fill(CGRect(x: x - 4, y: y - 2, width: pageWidth - margin * 2 + 8, height: 18))
             }
 
@@ -224,7 +229,7 @@ enum DiagnosticPDFExporter {
     }
 
     private static func drawDivider(ctx: CGContext, y: CGFloat) {
-        ctx.setStrokeColor(UIColor.separator.cgColor)
+        ctx.setStrokeColor(UIColor.separator.resolvedColor(with: pdfTraits).cgColor)
         ctx.setLineWidth(0.5)
         ctx.move(to: CGPoint(x: margin, y: y))
         ctx.addLine(to: CGPoint(x: pageWidth - margin, y: y))
@@ -241,31 +246,31 @@ enum DiagnosticPDFExporter {
 
     private static func titleAttrs() -> [NSAttributedString.Key: Any] {
         [.font: UIFont.systemFont(ofSize: 20, weight: .bold),
-         .foregroundColor: UIColor.label]
+         .foregroundColor: UIColor.label.resolvedColor(with: pdfTraits)]
     }
     private static func headingAttrs() -> [NSAttributedString.Key: Any] {
         [.font: UIFont.systemFont(ofSize: 14, weight: .semibold),
-         .foregroundColor: UIColor.label]
+         .foregroundColor: UIColor.label.resolvedColor(with: pdfTraits)]
     }
     private static func bodyAttrs() -> [NSAttributedString.Key: Any] {
         [.font: UIFont.systemFont(ofSize: 11),
-         .foregroundColor: UIColor.label]
+         .foregroundColor: UIColor.label.resolvedColor(with: pdfTraits)]
     }
     private static func captionAttrs() -> [NSAttributedString.Key: Any] {
         [.font: UIFont.systemFont(ofSize: 9),
-         .foregroundColor: UIColor.secondaryLabel]
+         .foregroundColor: UIColor.secondaryLabel.resolvedColor(with: pdfTraits)]
     }
     private static func colHeaderAttrs() -> [NSAttributedString.Key: Any] {
         [.font: UIFont.systemFont(ofSize: 10, weight: .semibold),
-         .foregroundColor: UIColor.secondaryLabel]
+         .foregroundColor: UIColor.secondaryLabel.resolvedColor(with: pdfTraits)]
     }
     private static func cellAttrs() -> [NSAttributedString.Key: Any] {
         [.font: UIFont.systemFont(ofSize: 10),
-         .foregroundColor: UIColor.label]
+         .foregroundColor: UIColor.label.resolvedColor(with: pdfTraits)]
     }
     private static func cellAttrsColored(_ color: UIColor) -> [NSAttributedString.Key: Any] {
         [.font: UIFont.systemFont(ofSize: 10, weight: .semibold),
-         .foregroundColor: color]
+         .foregroundColor: color.resolvedColor(with: pdfTraits)]
     }
 
     // MARK: - Utilities

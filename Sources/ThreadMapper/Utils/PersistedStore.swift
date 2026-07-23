@@ -78,7 +78,7 @@ actor PersistenceWriter {
     static let shared = PersistenceWriter()
 
     func write(_ data: Data, to url: URL,
-               options: Data.WritingOptions = [.atomic, .completeFileProtection]) {
+               options: Data.WritingOptions = [.atomic]) {
         do {
             try data.write(to: url, options: options)
         } catch {
