@@ -11,6 +11,22 @@ struct ActivityFeedView: View {
     @State private var showTimeline = false
     @State private var aiDigest: String? = nil
     @State private var isLoadingDigest = false
+    // Comma-separated day keys (yyyy-MM-dd) of collapsed sections; default = all expanded.
+    @AppStorage("activity.collapsedDays") private var collapsedDaysRaw = ""
+
+    private var collapsedDays: Set<String> {
+        Set(collapsedDaysRaw.split(separator: ",").map(String.init))
+    }
+
+    private func dayKey(_ date: Date) -> String {
+        date.formatted(.dateTime.year().month().day())
+    }
+
+    private func toggleDay(_ key: String) {
+        var days = collapsedDays
+        if days.contains(key) { days.remove(key) } else { days.insert(key) }
+        collapsedDaysRaw = days.joined(separator: ",")
+    }
 
     private var filtered: [ActivityEvent] {
         store.events.filter { event in
@@ -78,10 +94,38 @@ struct ActivityFeedView: View {
                             }
                         }
                         ForEach(grouped, id: \.day) { group in
-                            Section(dayHeader(group.day)) {
-                                ForEach(group.events) { event in
-                                    EventRow(event: event)
+                            let key = dayKey(group.day)
+                            let expanded = !collapsedDays.contains(key)
+                            Section {
+                                if expanded {
+                                    ForEach(group.events) { event in
+                                        EventRow(event: event)
+                                    }
                                 }
+                            } header: {
+                                Button {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        toggleDay(key)
+                                    }
+                                } label: {
+                                    HStack(spacing: 6) {
+                                        Text(dayHeader(group.day))
+                                            .font(.footnote.weight(.semibold))
+                                            .foregroundStyle(.secondary)
+                                        Spacer()
+                                        if !expanded {
+                                            Text("\(group.events.count)")
+                                                .font(.caption2.monospacedDigit())
+                                                .foregroundStyle(.tertiary)
+                                        }
+                                        Image(systemName: expanded ? "chevron.up" : "chevron.down")
+                                            .font(.caption2.weight(.semibold))
+                                            .foregroundStyle(.tertiary)
+                                    }
+                                    .textCase(nil)
+                                    .contentShape(Rectangle())
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
                         Section("Explore") {
