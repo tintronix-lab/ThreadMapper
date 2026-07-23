@@ -56,7 +56,21 @@ struct GuidedSurveyView: View {
                 }
             }
         }
-        .onDisappear { stopRecording() }
+        .onAppear {
+            let bridge = GuidedSurveyBridge.shared
+            bridge.onStart   = { if !isRecording { startRecording() } }
+            bridge.onDoneRoom = { if isRecording { doneWithCurrentRoom() } }
+            bridge.onSkip    = { if !isRecording { skipCurrentRoom() } }
+            publishGuidedState()
+        }
+        .onChange(of: currentIndex) { publishGuidedState() }
+        .onChange(of: isRecording) { publishGuidedState() }
+        .onChange(of: elapsedSeconds) { publishGuidedState() }
+        .onChange(of: completedRooms.count) { publishGuidedState() }
+        .onDisappear {
+            stopRecording()
+            GuidedSurveyBridge.shared.deactivate()
+        }
     }
 
     // MARK: - Progress header
@@ -165,9 +179,7 @@ struct GuidedSurveyView: View {
             VStack(spacing: 12) {
                 if isRecording {
                     Button {
-                        stopRecording(room: room)
-                        completedRooms.insert(room)
-                        currentIndex += 1
+                        doneWithCurrentRoom()
                     } label: {
                         Label("Done with \(room)", systemImage: "checkmark.circle.fill")
                             .frame(maxWidth: .infinity)
@@ -187,8 +199,7 @@ struct GuidedSurveyView: View {
                 }
 
                 Button {
-                    stopRecording()
-                    currentIndex += 1
+                    skipCurrentRoom()
                 } label: {
                     Text("Skip \(room)")
                         .font(.subheadline)
@@ -368,6 +379,34 @@ struct GuidedSurveyView: View {
         let totalCompleted = completedRooms.count + (room != nil ? 1 : 0)
         if totalCompleted >= 1 { AchievementStore.shared.unlock("firstSurvey") }
         if totalCompleted >= 3 { AchievementStore.shared.unlock("surveyThreeRooms") }
+    }
+
+    /// Finish the current room (save + advance). Shared by the phone button and
+    /// the Apple Watch "Done" command via `GuidedSurveyBridge`.
+    private func doneWithCurrentRoom() {
+        guard let room = currentRoom else { return }
+        stopRecording(room: room)
+        completedRooms.insert(room)
+        currentIndex += 1
+    }
+
+    /// Skip the current room without saving. Shared by the phone button and the
+    /// Apple Watch "Skip" command.
+    private func skipCurrentRoom() {
+        stopRecording()
+        currentIndex += 1
+    }
+
+    /// Mirror the current guided-survey state to the Apple Watch remote.
+    private func publishGuidedState() {
+        GuidedSurveyBridge.shared.publish(
+            active: !isDone,
+            room: currentRoom,
+            recording: isRecording,
+            elapsed: elapsedSeconds,
+            completed: completedRooms.count,
+            total: rooms.count
+        )
     }
 
     // MARK: - Haptic Geiger Mode

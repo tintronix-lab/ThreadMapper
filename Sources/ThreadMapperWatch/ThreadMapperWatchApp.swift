@@ -6,8 +6,9 @@ struct ThreadMapperWatchApp: App {
 
     var body: some Scene {
         WindowGroup {
-            NavigationStack {
-                WatchDashboardView()
+            TabView {
+                NavigationStack { WatchDashboardView() }
+                NavigationStack { GuidedSurveyControlView() }
             }
             .environmentObject(store)
         }

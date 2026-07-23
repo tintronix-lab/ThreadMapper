@@ -12,11 +12,40 @@ final class WatchConnectivityStore: NSObject, ObservableObject {
     @Published var borderRouterOffline: Bool = false
     @Published var lastUpdated: Date?
 
+    // Guided Survey remote state (mirrored from the iPhone).
+    @Published var guidedActive: Bool = false
+    @Published var guidedRoom: String?
+    @Published var guidedRecording: Bool = false
+    @Published var guidedElapsed: Int = 0
+    @Published var guidedCompleted: Int = 0
+    @Published var guidedTotal: Int = 0
+
     override init() {
         super.init()
         guard WCSession.isSupported() else { return }
         WCSession.default.delegate = self
         WCSession.default.activate()
+    }
+
+    /// Send a Guided Survey command (start / done / skip) to the iPhone. Only
+    /// works while the phone app is reachable (foreground), which the remote
+    /// requires anyway.
+    func sendGuidedCommand(_ command: String) {
+        guard WCSession.default.activationState == .activated,
+              WCSession.default.isReachable else { return }
+        WCSession.default.sendMessage(["type": "guidedCmd", "cmd": command],
+                                      replyHandler: nil, errorHandler: nil)
+        WKInterfaceDevice.current().play(.click)
+    }
+
+    fileprivate func applyGuided(active: Bool, room: String?, recording: Bool,
+                                 elapsed: Int, completed: Int, total: Int) {
+        guidedActive = active
+        guidedRoom = room
+        guidedRecording = recording
+        guidedElapsed = elapsed
+        guidedCompleted = completed
+        guidedTotal = total
     }
 
     // All parameters are Sendable primitives — safe to pass across actor boundaries.
@@ -47,6 +76,21 @@ extension WatchConnectivityStore: WCSessionDelegate {
     nonisolated func session(_ session: WCSession,
                              didReceiveApplicationContext ctx: [String: Any]) {
         unpack(ctx)
+    }
+
+    // Live Guided Survey state pushed from the iPhone while surveying.
+    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        guard message["type"] as? String == "guided" else { return }
+        let active = message["active"] as? Bool ?? false
+        let room = message["room"] as? String
+        let recording = message["recording"] as? Bool ?? false
+        let elapsed = message["elapsed"] as? Int ?? 0
+        let completed = message["completed"] as? Int ?? 0
+        let total = message["total"] as? Int ?? 0
+        Task { @MainActor in
+            self.applyGuided(active: active, room: room, recording: recording,
+                             elapsed: elapsed, completed: completed, total: total)
+        }
     }
 
     // Extract Sendable primitives from [String: Any] before crossing the actor boundary.

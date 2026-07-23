@@ -27,6 +27,25 @@ final class WatchConnectivityManager: NSObject {
         ]
         try? WCSession.default.updateApplicationContext(context)
     }
+
+    /// Pushes live Guided Survey state to the watch remote. Sent only when the
+    /// watch is reachable (its app is foreground) — guided control is a live,
+    /// both-apps-active interaction, so there's no need to queue it.
+    func sendGuidedState(active: Bool, room: String?, recording: Bool,
+                         elapsed: Int, completed: Int, total: Int) {
+        guard WCSession.default.activationState == .activated,
+              WCSession.default.isReachable else { return }
+        var message: [String: Any] = [
+            "type": "guided",
+            "active": active,
+            "recording": recording,
+            "elapsed": elapsed,
+            "completed": completed,
+            "total": total
+        ]
+        if let room { message["room"] = room }
+        WCSession.default.sendMessage(message, replyHandler: nil, errorHandler: { _ in })
+    }
 }
 
 extension WatchConnectivityManager: WCSessionDelegate {
@@ -36,5 +55,12 @@ extension WatchConnectivityManager: WCSessionDelegate {
     nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
     nonisolated func sessionDidDeactivate(_ session: WCSession) {
         WCSession.default.activate()
+    }
+
+    /// Watch → phone Guided Survey commands (start / done / skip).
+    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        guard message["type"] as? String == "guidedCmd",
+              let command = message["cmd"] as? String else { return }
+        Task { @MainActor in GuidedSurveyBridge.shared.handleCommand(command) }
     }
 }
