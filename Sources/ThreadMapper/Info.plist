@@ -15,15 +15,24 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.1</string>
+	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
-	<string>2</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>ThreadMapper uses your location during survey walks to tag signal strength readings on a map.</string>
 	<key>NSHomeKitUsageDescription</key>
 	<string>ThreadMapper uses HomeKit to discover Thread mesh network devices in your home.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>ThreadMapper connects to your OpenThread Border Router on the local network to read real Thread network details.</string>
+	<!-- The OTBR REST API (ot-br-posix) serves plain HTTP on the LAN and has no
+	     TLS story, so ATS would otherwise block every request the border-router
+	     client makes. NSAllowsLocalNetworking lifts the cleartext restriction for
+	     local endpoints only — arbitrary internet loads stay blocked. -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>com.tintronixlab.ThreadMapper.bgrefresh</string>

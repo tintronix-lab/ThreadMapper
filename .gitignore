@@ -4,6 +4,11 @@
 *.xcodeproj/*
 !*.xcodeproj/project.xcworkspace
 !*.xcodeproj/xcshareddata
+# Per-developer Xcode UI state. The `!…/project.xcworkspace` rule above re-includes
+# everything beneath it, which otherwise tracks this binary and churns it on every
+# Xcode session. Directory is `xcuserdata`, so the `*.xcuserdata` glob misses it.
+**/xcuserdata/
+*.xcuserstate
 *.ipa
 *.dSYM
 *.ipa

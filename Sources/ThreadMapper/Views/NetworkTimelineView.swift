@@ -56,7 +56,7 @@ struct NetworkTimelineView: View {
                 return Double(a.score) + t * Double(b.score - a.score)
             }
         }
-        return Double(entries.last!.score)
+        return entries.last.map { Double($0.score) }
     }
 
     // MARK: - Body

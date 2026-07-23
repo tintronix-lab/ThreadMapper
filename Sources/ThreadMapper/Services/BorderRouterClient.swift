@@ -24,8 +24,18 @@ final class BorderRouterClient: DiagnosticsProvider, @unchecked Sendable {
         self.fetch = fetch
     }
 
+    /// Non-2xx responses are surfaced as errors rather than handed to the JSON
+    /// decoder. A misconfigured URL typically returns an HTML error page, which
+    /// would otherwise fail decoding with a misleading "corrupted data" error.
+    enum ClientError: Error {
+        case httpStatus(Int)
+    }
+
     static func defaultFetch(_ request: URLRequest) async throws -> Data {
-        let (data, _) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+            throw ClientError.httpStatus(http.statusCode)
+        }
         return data
     }
 

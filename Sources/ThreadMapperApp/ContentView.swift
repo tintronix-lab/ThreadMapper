@@ -188,7 +188,10 @@ enum AppTab: CaseIterable, Hashable, Identifiable {
     var id: Self { self }
     case dashboard, mesh, survey, activity, settings
 
-    var title: String {
+    /// `LocalizedStringKey`, not `String` — `Label(_ title: S, systemImage:)`
+    /// takes the non-localizing `StringProtocol` overload for a plain `String`,
+    /// which left every tab name untranslated in the Swedish build.
+    var title: LocalizedStringKey {
         switch self {
         case .dashboard: return "Dashboard"
         case .mesh:      return "Mesh"

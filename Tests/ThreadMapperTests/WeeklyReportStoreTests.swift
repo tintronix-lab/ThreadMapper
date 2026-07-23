@@ -21,6 +21,11 @@ final class WeeklyReportStoreTests: XCTestCase {
     }
 
     // MARK: - Body content
+    //
+    // `report.body` is assembled from `String(localized:)` sentences, so its text
+    // depends on the run destination's locale (the verification simulator runs in
+    // Swedish). Assert on `bodySegments` — the typed record of which statements
+    // the report chose to make — rather than on rendered prose.
 
     func testBodyIncludesAverageAndPeakGrade() {
         let entries = makeHistory(scores: [80, 90, 85])
@@ -28,9 +33,9 @@ final class WeeklyReportStoreTests: XCTestCase {
             historyEntries: entries, activityEvents: [],
             currentStreak: 0, totalADays: 0)
 
-        XCTAssertTrue(report.body.contains("/100"), "body should mention average score")
-        XCTAssertTrue(report.body.contains("Grade"), "body should mention peak grade")
+        XCTAssertTrue(report.bodySegments.contains(.average), "body should state the weekly average")
         XCTAssertEqual(report.avgScore, 85)
+        XCTAssertEqual(report.peakGrade, "B")
     }
 
     func testBodyMentionsNoOfflineEventsWhenClean() {
@@ -38,7 +43,8 @@ final class WeeklyReportStoreTests: XCTestCase {
             historyEntries: [], activityEvents: [],
             currentStreak: 0, totalADays: 0)
 
-        XCTAssertTrue(report.body.contains("No offline events"))
+        XCTAssertTrue(report.bodySegments.contains(.noOfflineEvents))
+        XCTAssertFalse(report.bodySegments.contains(.worstDevice))
     }
 
     func testBodyNamesMostProblematicDevice() {
@@ -52,7 +58,9 @@ final class WeeklyReportStoreTests: XCTestCase {
             currentStreak: 0, totalADays: 0)
 
         XCTAssertEqual(report.mostProblematicDevice, "Lamp")
-        XCTAssertTrue(report.body.contains("Lamp"))
+        XCTAssertEqual(report.mostProblematicDeviceEventCount, 2)
+        XCTAssertTrue(report.bodySegments.contains(.worstDevice))
+        XCTAssertTrue(report.body.contains("Lamp"), "device names are not localized")
         XCTAssertEqual(report.offlineEventCount, 3)
     }
 
@@ -61,7 +69,8 @@ final class WeeklyReportStoreTests: XCTestCase {
             historyEntries: [], activityEvents: [],
             currentStreak: 5, totalADays: 5)
 
-        XCTAssertTrue(report.body.contains("5-day"))
+        XCTAssertTrue(report.bodySegments.contains(.streak))
+        XCTAssertFalse(report.bodySegments.contains(.totalADays), "streak supersedes the total")
         XCTAssertEqual(report.streakDays, 5)
     }
 
@@ -70,7 +79,8 @@ final class WeeklyReportStoreTests: XCTestCase {
             historyEntries: [], activityEvents: [],
             currentStreak: 1, totalADays: 4)
 
-        XCTAssertTrue(report.body.contains("4 days total") || report.body.contains("4 day"))
+        XCTAssertTrue(report.bodySegments.contains(.totalADays))
+        XCTAssertFalse(report.bodySegments.contains(.streak))
         XCTAssertEqual(report.totalADays, 4)
     }
 
@@ -80,8 +90,8 @@ final class WeeklyReportStoreTests: XCTestCase {
             historyEntries: entries, activityEvents: [],
             currentStreak: 0, totalADays: 0)
 
-        let delta = 85 - 60   // 25 pts
-        XCTAssertTrue(report.body.contains("improved \(delta) pts"))
+        XCTAssertTrue(report.bodySegments.contains(.improved))
+        XCTAssertEqual(report.scoreDelta, 25)
     }
 
     func testBodyNotesTrendDrop() {
@@ -90,8 +100,8 @@ final class WeeklyReportStoreTests: XCTestCase {
             historyEntries: entries, activityEvents: [],
             currentStreak: 0, totalADays: 0)
 
-        let drop = 90 - 65   // 25 pts
-        XCTAssertTrue(report.body.contains("dropped \(drop) pts"))
+        XCTAssertTrue(report.bodySegments.contains(.dropped))
+        XCTAssertEqual(report.scoreDelta, -25)
     }
 
     // MARK: - Report fields
@@ -107,7 +117,7 @@ final class WeeklyReportStoreTests: XCTestCase {
 
         XCTAssertEqual(report.offlineEventCount, 0)
         XCTAssertNil(report.mostProblematicDevice)
-        XCTAssertTrue(report.body.contains("No offline events"))
+        XCTAssertTrue(report.bodySegments.contains(.noOfflineEvents))
     }
 
     func testHistoryEntriesOutsideSevenDaysAreExcluded() {

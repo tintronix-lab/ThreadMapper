@@ -1,14 +1,24 @@
 #!/bin/bash
+# Local mirror of .github/workflows/ci.yml.
+#
+# ThreadMapper depends on HomeKit and UIKit, so `swift build` / `swift test`
+# against the macOS host cannot work — the build and test steps go through
+# xcodebuild against an iOS simulator instead (see the Makefile).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-TOOLCHAIN="${TOOLCHAIN:-swift}"
-echo "==> lint ($TOOLCHAIN)"
-if [ "$TOOLCHAIN" = "swiftlint" ] && command -v swiftlint >/dev/null 2>&1; then
-  (cd "$ROOT" && swiftlint lint --reporter xcode || true)
+cd "$ROOT"
+
+echo "==> lint"
+if command -v swiftlint >/dev/null 2>&1; then
+  swiftlint lint --reporter xcode || true
 else
   echo "swiftlint not available; skipping"
 fi
-echo "==> build"
-(cd "$ROOT" && swift build)
-echo "==> test"
-(cd "$ROOT" && swift test)
+
+if ! command -v xcodegen >/dev/null 2>&1; then
+  echo "xcodegen is required (brew install xcodegen)" >&2
+  exit 1
+fi
+
+echo "==> build + test (iOS Simulator)"
+make test
