@@ -229,6 +229,9 @@ struct ResilienceSimulatorView: View {
 private struct ImpactDetailView: View {
     let impact: ResilienceSimulator.Impact
     @Environment(\.dismiss) private var dismiss
+    @State private var narrationScenario: String? = nil
+    @State private var narrationFallback: String? = nil
+    @State private var isLoadingNarration = false
 
     private func severityColor(_ severity: ResilienceSimulator.Impact.Severity) -> Color {
         switch severity {
@@ -297,6 +300,34 @@ private struct ImpactDetailView: View {
                     )
                 }
 
+                // AI narration (Pro + iOS 26)
+                if ProStore.shared.isPro, #available(iOS 26, *) {
+                    if isLoadingNarration || narrationScenario != nil {
+                        Section("AI Impact Analysis") {
+                            if isLoadingNarration {
+                                HStack { ProgressView(); Spacer() }
+                            } else {
+                                HStack(alignment: .top, spacing: 10) {
+                                    Image(systemName: "sparkles")
+                                        .foregroundStyle(.purple)
+                                    VStack(alignment: .leading, spacing: 6) {
+                                        if let scenario = narrationScenario {
+                                            Text(scenario).font(.subheadline)
+                                        }
+                                        if let fallback = narrationFallback {
+                                            Text(fallback)
+                                                .font(.subheadline)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
+                                }
+                                .fixedSize(horizontal: false, vertical: true)
+                                .padding(.vertical, 2)
+                            }
+                        }
+                    }
+                }
+
                 // Affected devices list
                 if !impact.affectedNodes.isEmpty {
                     Section("Affected Devices") {
@@ -344,6 +375,17 @@ private struct ImpactDetailView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") { dismiss() }
                 }
+            }
+            .task {
+                guard ProStore.shared.isPro else { return }
+                guard #available(iOS 26, *) else { return }
+                guard !isLoadingNarration, narrationScenario == nil else { return }
+                isLoadingNarration = true
+                if let narration = try? await AINetworkAnalyzer.resilienceNarration(impact: impact) {
+                    narrationScenario = narration.scenario
+                    narrationFallback = narration.fallback
+                }
+                isLoadingNarration = false
             }
         }
     }

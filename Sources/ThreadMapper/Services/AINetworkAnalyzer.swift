@@ -123,6 +123,16 @@ struct NLDeviceFilter {
 }
 
 @available(iOS 26, *)
+@Generable(description: "Plain-English story of a Thread mesh resilience simulation")
+struct ResilienceNarration {
+    @Guide(description: "1–2 sentences describing which rooms and devices lose connectivity if this node is removed, and why it matters. Mention room names. No jargon.")
+    var scenario: String
+
+    @Guide(description: "1 sentence on what coverage or fallback path remains. If no border router remains, say the whole network loses internet.")
+    var fallback: String
+}
+
+@available(iOS 26, *)
 @Generable(description: "AI commissioning briefing for a newly joined Thread device")
 struct CommissioningBriefing {
     @Guide(description: "One sentence explaining this device's role in plain English, e.g. 'This is an internet hub that anchors your Thread network.'")
@@ -466,6 +476,24 @@ struct AINetworkAnalyzer {
         return response.content
     }
 
+    // MARK: - Resilience Narration (AI-B3)
+
+    /// Generates a plain-English story of what happens if a node is removed from the mesh.
+    static func resilienceNarration(impact: ResilienceSimulator.Impact) async throws -> ResilienceNarration {
+        let session = LanguageModelSession(
+            instructions: sessionInstructions("""
+            You are a friendly smart home expert explaining a network resilience scenario to a \
+            non-technical user. Be concise and specific about which rooms and devices are affected. \
+            No acronyms or jargon. Mention room names and device counts.\(languageInstruction)
+            """)
+        )
+        let response = try await session.respond(
+            to: buildResiliencePrompt(impact: impact),
+            generating: ResilienceNarration.self
+        )
+        return response.content
+    }
+
     /// Wraps a role description with a leading language requirement when the device locale is non-English.
     /// Putting the requirement FIRST makes the model respect it for structured @Generable output.
     private static func sessionInstructions(_ role: String) -> String {
@@ -663,6 +691,34 @@ struct AINetworkAnalyzer {
         let roomsWithDevices = Set(devices.compactMap(\.room)).sorted()
         lines.append("Currently covered rooms: \(roomsWithDevices.joined(separator: ", ")).")
         lines.append("Recommend up to 2 specific locations to add Thread devices to improve this mesh.\(languageInstruction)")
+        return lines.joined(separator: " ")
+    }
+
+    private static func buildResiliencePrompt(impact: ResilienceSimulator.Impact) -> String {
+        let nodeType = impact.removedNode.kind == .borderRouter ? "border router (internet hub)" : "relay device"
+        let room = impact.removedNode.room.map { " in \($0)" } ?? ""
+        let severityLabel: String
+        switch impact.severity {
+        case .critical: severityLabel = "critical"
+        case .major:    severityLabel = "major"
+        case .minor:    severityLabel = "minor"
+        case .none:     severityLabel = "safe"
+        }
+        let affectedRooms = Array(Set(impact.affectedNodes.compactMap(\.room))).sorted()
+        let brsRemaining = impact.isLastBorderRouter ? 0 : impact.totalBorderRouters - 1
+
+        var lines: [String] = [
+            "Scenario: removing '\(impact.removedNode.name)'\(room), a \(nodeType).",
+            "Severity: \(severityLabel).",
+            "End devices cut off: \(impact.affectedDeviceCount).",
+            "Relay devices also lost: \(impact.affectedRouterCount).",
+            "Affected rooms: \(affectedRooms.isEmpty ? "none identified" : affectedRooms.joined(separator: ", ")).",
+            "Border routers remaining after removal: \(brsRemaining).",
+        ]
+        if impact.isLastBorderRouter {
+            lines.append("This is the ONLY border router — the entire Thread network would lose internet connectivity.")
+        }
+        lines.append("Describe the impact in a scenario sentence and a fallback sentence.\(languageInstruction)")
         return lines.joined(separator: " ")
     }
 }

@@ -1,6 +1,6 @@
 # ThreadMapper — Active Backlog
 
-**Last updated:** 2026-07-19 (Iter 58 — 30-Day History for Pro)  
+**Last updated:** 2026-07-23 (Iter 59 — Resilience Simulator AI Narration)  
 **Engineering log:** `REVIEW.md` (full iteration history, Iterations 1–26+)
 
 ---
@@ -55,6 +55,7 @@
 | 52 | AI Streaming Chat — `NetworkAssistantView` now uses `session.streamResponse(to:)` instead of `respond(to:)`; tokens stream into a live `StreamingBubbleView` (blinking cursor, scrolls as text grows) replacing the dots `ThinkingBubbleView`; on completion the final `ChatMessage` is appended and the streaming view clears; `Snapshot.content` used to access `String.PartiallyGenerated` from `ResponseStream<String>` |
 | 53 | Interactive Widget — `RefreshWidgetIntent` (`AppIntent`, `openAppWhenRun = true`) added to widget bundle; `Button(intent: RefreshWidgetIntent())` arrow-clockwise icon in medium widget's "Updated" row lets users tap to open app and refresh from Home Screen; existing `widgetURL` tap still works for the rest of the widget |
 | 58 | 30-Day History (Pro) — `TimeRange.month` ("30D") in `NetworkTimelineView` gated by `ProStore.isPro` → `PaywallView` (tap intercepted via `onChange`, selection reverts); `HealthHistoryStore` retention 7→30 days (`maxEntries` 8640) with new `downsampled(_:bucket:)` hourly averaging for the 30D chart; `WeeklyReportStore.generate` now filters history to 7 days (was silently relying on store retention); "30-Day History" paywall feature row |
+| 59 | Resilience Simulator AI Narration (AI-B3) — `@Generable ResilienceNarration` struct with `scenario` + `fallback` fields; `AINetworkAnalyzer.resilienceNarration(impact:)` + `buildResiliencePrompt` private helper; `ImpactDetailView` gains "AI Impact Analysis" section (sparkles icon, loading spinner, scenario + fallback text) between Impact Summary and Affected Devices; Pro + iOS 26 gated via `.task` |
 
 ---
 
@@ -101,7 +102,7 @@
 
 The app is strong on **reactive AI** (explain what happened) and **structured generation**. The gaps are in **predictive AI**, **conversational guidance**, and **ambient/proactive intelligence**. Items below are ordered roughly by implementation difficulty and data-pipeline readiness.
 
-**Status as of 2026-07-19:** 5 done · 2 partial · 5 open (out of 12 items)
+**Status as of 2026-07-23:** 6 done · 2 partial · 4 open (out of 12 items)
 
 ### Tier A — Highest ROI, data pipeline already exists
 
@@ -117,7 +118,7 @@ The app is strong on **reactive AI** (explain what happened) and **structured ge
 |---|--------|---------|----------------------|
 | AI-B1 | ✓ Done | **AI commissioning coach** | When a device joins for the first time (checked via `KnownDeviceRegistry`), `MeshViewModel` fires `AINetworkAnalyzer.commissioningBriefing` (iOS 26+, Pro); `@Generable CommissioningBriefing` (roleExplanation, topologyFit, recommendation) stored in `CommissioningBriefingStore`; `ActivityFeedView` shows a dismissible "New Device" sparkles card. Iter 57. |
 | AI-B2 | ✓ Done | **Natural language device/topology queries** | `@Generable NLDeviceFilter` in `AINetworkAnalyzer` (room, role, status, minHops, sortOrder, batteryPoweredOnly, filterDescription); `parseNLFilter(query:rooms:deviceCount:)`; `MeshView` list-mode search bar upgraded — sparkles button triggers AI parse on iOS 26+/Pro, filter-active chip shows description + match count, `applyNLFilter` maps to `[UUID]` and overrides `roomGroups`, `clearNLFilter` resets both text and filter. Iter 56. |
-| AI-B3 | Open | **Resilience Simulator AI narration** | Add AI-generated scenario summary to `ResilienceSimulatorView`: converts raw BFS impact scores into a human story ("Losing this BR isolates 4 bedroom devices; the next-best BR covers 2 of them"). One `AINetworkAnalyzer` call with the existing `SimulationResult`. See detail section below. |
+| AI-B3 | ✓ Done | **Resilience Simulator AI narration** | `@Generable ResilienceNarration` (scenario + fallback) in `AINetworkAnalyzer`; `resilienceNarration(impact:)` + `buildResiliencePrompt`; `ImpactDetailView` adds "AI Impact Analysis" List section with sparkles header, ProgressView while loading, scenario + fallback text; `.task` fires on Pro + iOS 26; state stored as `String?` pairs. Iter 59. |
 | AI-B4 | Open | **Predictive maintenance calendar** | Combine `FirmwareHistoryStore` age, `DeviceStatsStore` health trends, battery estimates, and `ActivityStore` offline frequency to generate a prioritised weekly/monthly task list. Render as a timeline in a new `MaintenanceCalendarView` (similar structure to `NetworkTimelineView`). |
 
 ---
