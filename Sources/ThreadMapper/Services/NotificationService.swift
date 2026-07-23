@@ -48,6 +48,39 @@ final class NotificationService: NSObject {
         schedule(content, id: "offline-\(deviceID.uuidString)")
     }
 
+    /// AI-D2: Async variant that scores alert urgency on iOS 26 + Pro before firing.
+    /// Falls back to standard offline notification for free users or older OS.
+    func notifyDeviceOfflineAIScored(
+        _ name: String,
+        room: String?,
+        deviceID: UUID,
+        recentEvents: [ActivityEvent],
+        anomaly: DeviceAnomaly?,
+        offlineCount: Int
+    ) async {
+        guard isAuthorized,
+              UserDefaults.standard.object(forKey: "notifyOffline") as? Bool ?? true,
+              !isInQuietHours() else { return }
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "Thread Device Offline")
+        content.body = room.map { String(localized: "\(name) (\($0)) is unreachable") }
+            ?? String(localized: "\(name) is unreachable")
+        content.sound = .default
+        content.categoryIdentifier = "DEVICE_OFFLINE"
+        if #available(iOS 26, *), ProStore.shared.isPro {
+            if let score = try? await AINetworkAnalyzer.scoreOfflineAlert(
+                deviceName: name, room: room, offlineCount: offlineCount,
+                recentEvents: recentEvents, anomaly: anomaly
+            ) {
+                guard score.shouldNotifyNow || score.urgency >= 5 else { return }
+                if !score.context.isEmpty {
+                    content.subtitle = score.context
+                }
+            }
+        }
+        schedule(content, id: "offline-\(deviceID.uuidString)")
+    }
+
     func clearOfflineNotification(for deviceID: UUID) {
         let id = "offline-\(deviceID.uuidString)"
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id])

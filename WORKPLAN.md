@@ -1,6 +1,6 @@
 # ThreadMapper — Active Backlog
 
-**Last updated:** 2026-07-23 (Iter 61 — NF-2 through NF-10)  
+**Last updated:** 2026-07-23 (Iter 62 — AI-D2/D4/D5/D7/D10)  
 **Engineering log:** `REVIEW.md` (full iteration history, Iterations 1–26+)
 
 ---
@@ -58,6 +58,7 @@
 | 59 | Resilience Simulator AI Narration (AI-B3) — `@Generable ResilienceNarration` struct with `scenario` + `fallback` fields; `AINetworkAnalyzer.resilienceNarration(impact:)` + `buildResiliencePrompt` private helper; `ImpactDetailView` gains "AI Impact Analysis" section (sparkles icon, loading spinner, scenario + fallback text) between Impact Summary and Affected Devices; Pro + iOS 26 gated via `.task` |
 | 60 | AI-B4 + Self-Learning + Self-Healing — `AIMemoryStore` persists per-device observations (anomaly/offline/resolved) with 30-day retention and 10-min dedup; `MeshViewModel` records trajectory changes + offline events; `deviceSummary` injects memory fragment; `@Generable MaintenancePlan` + `MaintenanceCalendarView` (tasks grouped by Today/This week/This month); `@Generable AutoHealReport` + `HealingRecommendation`; "Self-Healing Insights" section + "Maintenance Calendar" link in `AIInsightsView`; `AutoHealRows` + `AIInsightsLinkRow` components |
 | 61 | NF-2 through NF-10 — Per-Room Health Grid (`DashboardRoomHealthGrid`); Topology Change Digest on cold launch (`TopologyChangeDigestView` + `TopologyChangeSummary` AI); Background Health Watchdog (`BGProcessingTask` + `HealthWatcher` grade-drop notification); Router Saturation Monitor (NF-6 fix — `RouterSaturationSection` + `RouterLoadRow`); HomeKit Scene Triggers (`HomeKitSceneTriggerStore` + `HomeKitSceneTriggerView` in Settings); Battery Radio Efficiency Score (`radioEfficiency` row in `DeviceDetailView`); Diagnostic PDF Export (`DiagnosticPDFExporter` 3-page PDF via `UIGraphicsPDFRenderer`); Topology Time-Lapse (`TopologyTimeLapseStore` 720-frame ring buffer + `MeshTopologyRewindView` scrubber in Mesh Tools) |
+| 62 | AI-D2/D4/D5/D7/D10 — Alert Urgency Scoring (`AlertScore` @Generable + `notifyDeviceOfflineAIScored` async); Weekly Health Coach (`CoachingPlan` + `CoachingAction` @Generable; coach card in `WeeklyReportView`); Anomaly Pattern Recognition (`AnomalyPattern` @Generable; pattern card in `DeviceDetailView`); AI Troubleshooter (`TroubleshootingGuide` + `AITroubleshootingStep` @Generable; AI diagnosis card in `TroubleshooterView`); Network Storyteller (`NetworkNarrative` @Generable; story section in `NetworkTimelineView`); paywall updated +5 rows; README + CHANGELOG + UserManualView updated |
 
 ---
 

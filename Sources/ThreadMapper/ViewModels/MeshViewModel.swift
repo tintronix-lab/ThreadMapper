@@ -377,7 +377,16 @@ final class MeshViewModel {
                     guard !Task.isCancelled else { return }
                     await MainActor.run {
                         if self.offlineDeviceIDs.contains(uuid) {
-                            NotificationService.shared.notifyDeviceOffline(name, room: room, deviceID: uuid)
+                            // AI-D2: score urgency asynchronously; falls back for free/older OS
+                            let evts = ActivityStore.shared.events
+                            let anomalySnapshot = self.anomalies[uuid]
+                            let cnt = self.offlineDeviceIDs.count
+                            Task {
+                                await NotificationService.shared.notifyDeviceOfflineAIScored(
+                                    name, room: room, deviceID: uuid,
+                                    recentEvents: evts, anomaly: anomalySnapshot, offlineCount: cnt
+                                )
+                            }
                             LiveActivityManager.shared.alertDeviceOffline(
                                 name: name,
                                 grade: self.health.grade,

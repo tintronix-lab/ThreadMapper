@@ -19,6 +19,11 @@ struct PaywallView: View {
         ("doc.text.fill",               "Weekly Reports",          "Auto-generated weekly summary with grade distribution, stability score, and streak tracking"),
         ("flame.fill",                  "Health Streaks",          "Track consecutive Grade A days and build a long-term reliability record"),
         ("applewatch",                  "Watch Face Complications", "Three WidgetKit complication families show grade, score, and offline count on any watch face"),
+        ("bell.badge.waveform.fill",    "Alert Urgency Scoring",   "AI scores every offline alert 1–10 and suppresses low-urgency notifications so you only get pinged when it matters"),
+        ("graduationcap.fill",          "Weekly Health Coach",      "Personalised weekly coaching plan with 1–3 prioritised actions to improve your mesh grade"),
+        ("waveform.path.ecg.rectangle", "Anomaly Pattern Recognition", "AI names the specific failure pattern (e.g. 'Nightly Signal Drop') and gives a targeted fix for each degrading device"),
+        ("brain.head.profile",          "AI Troubleshooter",        "Device-specific step-by-step troubleshooting guide generated from your device's actual history, not generic advice"),
+        ("book.pages",                  "Network Storyteller",      "A narrative story of your mesh's last 30 days — opening, key events, current chapter, and outlook"),
     ]
 
     var body: some View {

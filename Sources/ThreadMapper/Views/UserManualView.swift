@@ -424,6 +424,30 @@ private extension ManualChapter {
             .init(title: "Proactive AI Insights Push", icon: "bell.badge.fill", body: [
                 .paragraph("When critical anomalies appear on your network, ThreadMapper can send a proactive push notification with an AI-written headline. Enable this in Settings → Notifications → Proactive AI Insights. Requires iOS 26 and Apple Intelligence."),
             ]),
+            .init(title: "Alert Urgency Scoring", icon: "bell.badge.waveform.fill", body: [
+                .paragraph("On iOS 26 with a Pro subscription, ThreadMapper uses on-device AI to score each offline alert from 1 (informational) to 10 (critical) before deciding whether to send a push notification. Routine blips that recover quickly score low and are silently suppressed; genuinely important failures score high and fire immediately."),
+                .tip("The AI context sentence appears as the notification subtitle so you can see why ThreadMapper judged this alert important — even on the Lock Screen."),
+            ]),
+            .init(title: "Weekly Health Coach", icon: "graduationcap.fill", body: [
+                .paragraph("The Weekly Health Coach card appears at the top of the Weekly Report (Pro · iOS 26+). It opens with a 2-sentence motivational summary of the week, then lists 1–3 prioritised coaching actions — each with a title, rationale, expected grade improvement, and effort level (low/medium/high)."),
+                .tip("Actions are ranked by expected impact on your health grade. Tackle the first one this week and re-open the report after scanning to see the result."),
+            ]),
+            .init(title: "Anomaly Pattern Recognition", icon: "waveform.path.ecg.rectangle", body: [
+                .paragraph("When Device Detail detects a declining or critical signal trajectory, an AI-powered Pattern Analysis card appears (Pro · iOS 26+). The card names the specific failure pattern (e.g. 'Gradual Hardware Fade'), lists up to 3 evidence points from the device's recent data, and gives a targeted fix unique to that pattern."),
+                .bullets([
+                    "Confidence badge (high/medium/low) indicates how strongly the evidence supports the diagnosis",
+                    "Evidence points cite specific signal metrics and event counts, not generic descriptions",
+                    "Recommended fix is tailored to the pattern, not just 'move the device closer'",
+                ]),
+            ]),
+            .init(title: "AI Troubleshooter", icon: "brain.head.profile", body: [
+                .paragraph("When you open the Troubleshooter for an offline or weak-signal device (Pro · iOS 26+), an AI Diagnosis card appears above the standard step-by-step guide. The card contains a one-sentence diagnosis of the most likely cause, followed by 2–4 device-specific steps generated from the device's actual history, anomaly data, and cross-session memory."),
+                .tip("Tap the AI Diagnosis header to collapse the card and use the standard steps instead — useful if you have already tried the AI steps."),
+            ]),
+            .init(title: "Network Storyteller", icon: "book.pages", body: [
+                .paragraph("The Network Story section appears near the top of the Network Timeline view (Pro · iOS 26+). It uses the past 30 days of health history and activity events to compose a narrative in four parts: an opening that sets the scene, key events that shaped the network's story, a current chapter describing what is happening now, and an outlook for where things are heading."),
+                .tip("The story always uses 30-day data regardless of the selected time range filter — it's a long-term view, not tied to the 6H/24H/7D/30D window."),
+            ]),
         ]),
 
         .init(title: "Advanced Tools", topics: [

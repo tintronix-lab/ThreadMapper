@@ -4,6 +4,11 @@ import Charts
 struct WeeklyReportView: View {
     let report: WeeklyReportStore.Report
     @Environment(\.dismiss) private var dismiss
+    @Environment(MeshViewModel.self) private var meshViewModel
+    @Environment(HealthHistoryStore.self) private var historyStore
+
+    @State private var coachingPlan: Any? = nil  // holds CoachingPlan on iOS 26+
+    @State private var coachingLoading = false
 
     private var gradeColor: Color { TMStyle.gradeColor(report.peakGrade) }
 
@@ -12,6 +17,9 @@ struct WeeklyReportView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     headerCard
+                    if #available(iOS 26, *), ProStore.shared.isPro {
+                        weeklyCoachCard
+                    }
                     scoreCard
                     if !report.gradeDistribution.isEmpty {
                         distributionCard
@@ -37,6 +45,98 @@ struct WeeklyReportView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Weekly Coach (AI-D5)
+
+    @available(iOS 26, *)
+    private var weeklyCoachCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 8) {
+                Image(systemName: "brain.head.profile")
+                    .foregroundStyle(.purple)
+                Text("This Week's Focus")
+                    .font(.subheadline.weight(.semibold))
+                Spacer()
+                Text("AI")
+                    .font(.caption2.weight(.bold))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(.purple.opacity(0.15), in: Capsule())
+                    .foregroundStyle(.purple)
+            }
+
+            if coachingLoading {
+                HStack {
+                    ProgressView().controlSize(.small)
+                    Text("Analysing your week…")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            } else if let plan = coachingPlan as? CoachingPlan {
+                Text(plan.opening)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if !plan.actions.isEmpty {
+                    Divider()
+                    VStack(alignment: .leading, spacing: 12) {
+                        ForEach(Array(plan.actions.enumerated()), id: \.offset) { i, action in
+                            HStack(alignment: .top, spacing: 10) {
+                                Text("\(i + 1)")
+                                    .font(.caption.weight(.bold))
+                                    .frame(width: 20, height: 20)
+                                    .background(.purple.opacity(0.12), in: Circle())
+                                    .foregroundStyle(.purple)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    HStack(spacing: 6) {
+                                        Text(action.title)
+                                            .font(.subheadline.weight(.semibold))
+                                        effortBadge(action.effort)
+                                    }
+                                    Text(action.rationale)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                    if action.expectedGradeGain != "no change" && !action.expectedGradeGain.isEmpty {
+                                        Text("Expected: \(action.expectedGradeGain)")
+                                            .font(.caption2.weight(.medium))
+                                            .foregroundStyle(.purple)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                Text("Coaching unavailable — Apple Intelligence may be downloading.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(20)
+        .cardBackground(cornerRadius: 16)
+        .task {
+            guard !coachingLoading, coachingPlan == nil else { return }
+            coachingLoading = true
+            coachingPlan = try? await AINetworkAnalyzer.networkCoach(
+                devices: meshViewModel.devices,
+                health: meshViewModel.health,
+                history: historyStore.entries
+            )
+            coachingLoading = false
+        }
+    }
+
+    private func effortBadge(_ effort: String) -> some View {
+        let color: Color = effort == "low" ? .green : effort == "high" ? .orange : .blue
+        return Text(effort.capitalized)
+            .font(.caption2.weight(.semibold))
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(color.opacity(0.12), in: Capsule())
+            .foregroundStyle(color)
     }
 
     // MARK: - Header

@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.4.0 (2026-07-23)
+
+### Added
+
+**AI-D2 — Alert Urgency Scoring** *(Pro · iOS 26+)*
+- Every offline device notification is scored 1–10 by an on-device `@Generable AlertScore` model before firing; low-urgency alerts (score < 5 and `shouldNotifyNow = false`) are silently suppressed
+- High-urgency alerts include an AI-written context sentence as the notification subtitle
+- Falls back to the standard always-fire behaviour for free users and iOS < 26
+- `NotificationService.notifyDeviceOfflineAIScored` — async variant of `notifyDeviceOffline`; called from `MeshViewModel.processOfflineTransitions` via a detached `Task` after the grace period
+
+**AI-D5 — Weekly Health Coach** *(Pro · iOS 26+)*
+- `@Generable CoachingPlan` with a motivating `opening` and up to 3 `CoachingAction` items, each with `title`, `rationale`, `expectedGradeGain`, and `effort` (low/medium/high)
+- Coach card inserted at the top of `WeeklyReportView` (above the Score Overview card); loads asynchronously via `.task` with a spinner; effort is shown as a colour-coded Capsule badge
+- `AINetworkAnalyzer.networkCoach(devices:health:history:)` builds a concise prompt from the weekly average score, trend direction, offline/weak-signal counts, and room list
+
+**AI-D4 — Anomaly Pattern Recognition** *(Pro · iOS 26+)*
+- `@Generable AnomalyPattern` with `patternName`, `confidence`, up to 3 `evidencePoints`, `distinguishingFeature`, and `recommendedFix`
+- Pattern Analysis card added to `DeviceDetailView` signal section when `trajectory != .stable`; loads per-device via `.task(id:)`; expandable evidence list, confidence badge (green/orange/red), and targeted fix
+- `AINetworkAnalyzer.classifyAnomalyPattern(device:anomaly:recentEvents:)` injects trajectory label, signal drop, deviation score, projected hours to failure, and recent offline event count
+
+**AI-D7 — AI-Powered Troubleshooter** *(Pro · iOS 26+)*
+- `@Generable TroubleshootingGuide` with `diagnosis` sentence and up to 4 `AITroubleshootingStep` items (each with `instruction` + `hint`)
+- AI Diagnosis card prepended to the `TroubleshooterView` scroll area; collapsible with a chevron toggle; loads on view appear with device history and `AIMemoryStore` memory fragment injected into the prompt
+- Static step-by-step guide remains as a fallback below the AI card in all cases
+- `AINetworkAnalyzer.aiTroubleshootingGuide(device:problem:anomaly:recentEvents:memoryFragment:)`
+
+**AI-D10 — Network Storyteller** *(Pro · iOS 26+)*
+- `@Generable NetworkNarrative` with `opening`, up to 4 `keyEvents`, `currentChapter`, and `outlook`
+- Network Story section added to `NetworkTimelineView` (before the events legend); always pulls 30-day data regardless of selected time-range filter
+- `AINetworkAnalyzer.networkStory(devices:health:history:events:)` synthesises 30-day avg/low/high scores, offline event count, topology change count, and up to 8 recent events
+
+**Paywall**
+- Added 5 new Pro feature rows: Alert Urgency Scoring, Weekly Health Coach, Anomaly Pattern Recognition, AI Troubleshooter, Network Storyteller
+
+---
+
 ## 1.3.0 (2026-07-23)
 
 ### Added

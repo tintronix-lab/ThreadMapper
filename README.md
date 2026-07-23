@@ -42,6 +42,11 @@ ThreadMapper's core monitoring is free. **ThreadMapper Pro** (annual subscriptio
 | Self-Healing Insights *(iOS 26+)* | — | ✓ |
 | Commissioning Coach *(iOS 26+)* | — | ✓ |
 | NL Device Queries *(iOS 26+)* | — | ✓ |
+| Alert Urgency Scoring *(iOS 26+)* | — | ✓ |
+| Weekly Health Coach *(iOS 26+)* | — | ✓ |
+| Anomaly Pattern Recognition *(iOS 26+)* | — | ✓ |
+| AI Troubleshooter *(iOS 26+)* | — | ✓ |
+| Network Storyteller *(iOS 26+)* | — | ✓ |
 
 ---
 
@@ -99,6 +104,11 @@ ThreadMapper's core monitoring is free. **ThreadMapper Pro** (annual subscriptio
 - **Mesh expansion plan** — recommends where to add routers or border routers based on coverage gaps
 - **Self-Healing Insights** — auto-generated maintenance recommendations based on recurring patterns in device history
 - **Maintenance Calendar** — AI-generated task list grouped by Today / This week / This month
+- **Alert Urgency Scoring** *(AI-D2)* — every offline alert is scored 1–10 on-device; low-urgency blips are suppressed, high-urgency failures fire with an AI-written context subtitle
+- **Weekly Health Coach** *(AI-D5)* — personalised 1–3 action coaching plan shown at the top of the Weekly Report; each action has title, rationale, expected grade gain, and effort level
+- **Anomaly Pattern Recognition** *(AI-D4)* — names the specific failure pattern for degrading devices (e.g. "Gradual Hardware Fade") with evidence points, distinguishing feature, and targeted fix; shown in Device Detail
+- **AI Troubleshooter** *(AI-D7)* — device-specific step-by-step guide generated from actual history, anomaly data, and cross-session memory; appears above the static steps in Troubleshooter
+- **Network Storyteller** *(AI-D10)* — 30-day narrative in four parts (opening, key events, current chapter, outlook) shown in Network Timeline
 - Graceful fallback UI when Apple Intelligence is disabled, device is ineligible, or model is downloading
 
 ### Network Assistant *(Pro · iOS 26+ · Apple Intelligence required)*

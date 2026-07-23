@@ -6,9 +6,12 @@ struct NetworkTimelineView: View {
     @ScaledMetric(relativeTo: .caption2) private var axisLabelSize: CGFloat = 9
     @Environment(HealthHistoryStore.self) private var historyStore
     @Environment(ActivityStore.self) private var activityStore
+    @Environment(MeshViewModel.self) private var meshViewModel
 
     @State private var selectedRange: TimeRange = .day
     @State private var showPaywall = false
+    @State private var networkNarrative: Any? = nil  // holds NetworkNarrative on iOS 26+
+    @State private var narrativeLoading = false
 
     enum TimeRange: String, CaseIterable, Identifiable {
         case hour6 = "6H", day = "24H", week = "7D", month = "30D"
@@ -65,6 +68,9 @@ struct NetworkTimelineView: View {
         List {
             rangePickerSection
             chartSection
+            if #available(iOS 26, *), ProStore.shared.isPro {
+                networkStorySection
+            }
             if !filteredEvents.isEmpty { legendSection }
             eventsSection
         }
@@ -77,6 +83,102 @@ struct NetworkTimelineView: View {
             }
         }
         .sheet(isPresented: $showPaywall) { PaywallView() }
+    }
+
+    // MARK: - Network Story (AI-D10)
+
+    @available(iOS 26, *)
+    private var networkStorySection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 8) {
+                    Image(systemName: "book.pages")
+                        .foregroundStyle(.indigo)
+                        .imageScale(.small)
+                    Text("Network Story")
+                        .font(.subheadline.weight(.semibold))
+                    Spacer()
+                    Text("AI · 30D")
+                        .font(.caption2.weight(.semibold))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(.indigo.opacity(0.12), in: Capsule())
+                        .foregroundStyle(.indigo)
+                }
+
+                if narrativeLoading {
+                    HStack(spacing: 8) {
+                        ProgressView().controlSize(.small)
+                        Text("Composing your network's story…")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                } else if let narrative = networkNarrative as? NetworkNarrative {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text(narrative.opening)
+                            .font(.subheadline)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        if !narrative.keyEvents.isEmpty {
+                            VStack(alignment: .leading, spacing: 6) {
+                                ForEach(narrative.keyEvents, id: \.self) { event in
+                                    HStack(alignment: .top, spacing: 8) {
+                                        Image(systemName: "circle.fill")
+                                            .font(.system(size: 5))
+                                            .foregroundStyle(.indigo.opacity(0.6))
+                                            .padding(.top, 5)
+                                        Text(event)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                }
+                            }
+                        }
+
+                        Divider()
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Now")
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(.indigo)
+                            Text(narrative.currentChapter)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Outlook")
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                            Text(narrative.outlook)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                } else {
+                    Text("Story unavailable — Apple Intelligence may be downloading.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            .padding(.vertical, 4)
+        } header: {
+            Text("Your Network's Story")
+        }
+        .task {
+            guard !narrativeLoading, networkNarrative == nil else { return }
+            narrativeLoading = true
+            let devices = meshViewModel.devices
+            let health = meshViewModel.health
+            networkNarrative = try? await AINetworkAnalyzer.networkStory(
+                devices: devices,
+                health: health,
+                history: historyStore.entries,
+                events: activityStore.events
+            )
+            narrativeLoading = false
+        }
     }
 
     // MARK: - Range picker

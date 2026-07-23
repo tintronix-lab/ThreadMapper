@@ -228,6 +228,95 @@ struct RootCauseHypothesis {
     var isNetworkWide: Bool
 }
 
+// MARK: - AI-D2: Alert Urgency Scoring
+
+@available(iOS 26, *)
+@Generable(description: "Urgency assessment for a Thread network offline alert before sending it to the user")
+struct AlertScore {
+    @Guide(description: "Urgency from 1 (informational) to 10 (critical). 7+ means send immediately.")
+    var urgency: Int
+    @Guide(description: "One sentence of context explaining why this alert matters right now.")
+    var context: String
+    @Guide(description: "True if the alert should be sent immediately; false if it can be skipped.")
+    var shouldNotifyNow: Bool
+}
+
+// MARK: - AI-D5: Weekly Health Coach
+
+@available(iOS 26, *)
+@Generable(description: "A single coaching action to improve Thread mesh health this week")
+struct CoachingAction {
+    @Guide(description: "Short action title, 4–6 words")
+    var title: String
+    @Guide(description: "One sentence explaining why this action is recommended right now")
+    var rationale: String
+    @Guide(description: "Expected grade improvement if this action is taken, e.g. 'B→A' or 'no change'")
+    var expectedGradeGain: String
+    @Guide(description: "Effort level: 'low', 'medium', or 'high'")
+    var effort: String
+}
+
+@available(iOS 26, *)
+@Generable(description: "Personalised weekly coaching plan for a Thread mesh network")
+struct CoachingPlan {
+    @Guide(description: "2-sentence motivating opening summarising this week's health and key theme")
+    var opening: String
+    @Guide(description: "Prioritised coaching actions, highest impact first, maximum 3", .maximumCount(3))
+    var actions: [CoachingAction]
+}
+
+// MARK: - AI-D4: Anomaly Pattern Recognition
+
+@available(iOS 26, *)
+@Generable(description: "AI-recognised anomaly pattern for a degrading Thread device")
+struct AnomalyPattern {
+    @Guide(description: "Short descriptive pattern name, e.g. 'Nightly Signal Drop' or 'Gradual Hardware Fade'")
+    var patternName: String
+    @Guide(description: "Confidence that this is the correct pattern: 'high', 'medium', or 'low'")
+    var confidence: String
+    @Guide(description: "Up to 3 specific evidence points from the device data", .maximumCount(3))
+    var evidencePoints: [String]
+    @Guide(description: "One sentence describing what makes this pattern distinct from random noise")
+    var distinguishingFeature: String
+    @Guide(description: "The recommended fix for this specific pattern, starting with a verb")
+    var recommendedFix: String
+}
+
+// MARK: - AI-D7: AI Troubleshooter
+
+@available(iOS 26, *)
+@Generable(description: "A single AI-generated troubleshooting step tailored to a specific device")
+struct AITroubleshootingStep {
+    @Guide(description: "Plain-English instruction starting with an action verb")
+    var instruction: String
+    @Guide(description: "Optional hint sentence. Use empty string if no hint is needed.")
+    var hint: String
+}
+
+@available(iOS 26, *)
+@Generable(description: "AI-generated device-specific troubleshooting guide")
+struct TroubleshootingGuide {
+    @Guide(description: "One sentence diagnosis of the most likely cause for this device's problem")
+    var diagnosis: String
+    @Guide(description: "Ordered troubleshooting steps, most impactful first, maximum 4", .maximumCount(4))
+    var steps: [AITroubleshootingStep]
+}
+
+// MARK: - AI-D10: Network Storyteller
+
+@available(iOS 26, *)
+@Generable(description: "A narrative story of the Thread network's recent history")
+struct NetworkNarrative {
+    @Guide(description: "1–2 sentence engaging opening about the network's overall recent story")
+    var opening: String
+    @Guide(description: "Key events in the story, each one sentence, maximum 4", .maximumCount(4))
+    var keyEvents: [String]
+    @Guide(description: "One sentence describing the current chapter: what's happening right now")
+    var currentChapter: String
+    @Guide(description: "One sentence outlook: where the network is heading if nothing changes")
+    var outlook: String
+}
+
 // MARK: - Analyzer
 
 @available(iOS 26, *)
@@ -625,6 +714,113 @@ struct AINetworkAnalyzer {
         return " Respond in \(name)."
     }
 
+    // MARK: - Alert Urgency Scoring (AI-D2)
+
+    static func scoreOfflineAlert(
+        deviceName: String,
+        room: String?,
+        offlineCount: Int,
+        recentEvents: [ActivityEvent],
+        anomaly: DeviceAnomaly?
+    ) async throws -> AlertScore {
+        let session = LanguageModelSession(
+            instructions: sessionInstructions("""
+            You are a smart home network alert prioritiser. Decide whether a Thread device going \
+            offline warrants an immediate push notification or is routine enough to skip. \
+            Consider the device's role, recent offline history, and the current network state.\(languageInstruction)
+            """)
+        )
+        let prompt = buildAlertScorePrompt(deviceName: deviceName, room: room,
+                                           offlineCount: offlineCount, recentEvents: recentEvents,
+                                           anomaly: anomaly)
+        let response = try await session.respond(to: prompt, generating: AlertScore.self)
+        return response.content
+    }
+
+    // MARK: - Weekly Health Coach (AI-D5)
+
+    static func networkCoach(
+        devices: [ThreadDevice],
+        health: NetworkHealthScore,
+        history: [HealthHistoryStore.Entry]
+    ) async throws -> CoachingPlan {
+        let session = LanguageModelSession(
+            instructions: sessionInstructions("""
+            You are a friendly weekly Thread mesh network coach. Review the week's performance and \
+            suggest 1–3 specific, achievable improvements. Be encouraging but realistic. \
+            Focus on the highest-impact changes the user can actually make.\(languageInstruction)
+            """)
+        )
+        let prompt = buildCoachingPrompt(devices: devices, health: health, history: history)
+        let response = try await session.respond(to: prompt, generating: CoachingPlan.self)
+        return response.content
+    }
+
+    // MARK: - Anomaly Pattern Recognition (AI-D4)
+
+    static func classifyAnomalyPattern(
+        device: ThreadDevice,
+        anomaly: DeviceAnomaly,
+        recentEvents: [ActivityEvent]
+    ) async throws -> AnomalyPattern {
+        let session = LanguageModelSession(
+            instructions: sessionInstructions("""
+            You are a Thread mesh network anomaly classifier. Analyse the signal degradation \
+            pattern for a single device and identify the specific failure pattern it matches. \
+            Name the pattern, cite the evidence, and give a concrete fix.\(languageInstruction)
+            """)
+        )
+        let prompt = buildAnomalyPatternPrompt(device: device, anomaly: anomaly,
+                                               recentEvents: recentEvents)
+        let response = try await session.respond(to: prompt, generating: AnomalyPattern.self)
+        return response.content
+    }
+
+    // MARK: - AI Troubleshooter (AI-D7)
+
+    static func aiTroubleshootingGuide(
+        device: ThreadDevice,
+        problem: String,
+        anomaly: DeviceAnomaly?,
+        recentEvents: [ActivityEvent],
+        memoryFragment: String = ""
+    ) async throws -> TroubleshootingGuide {
+        let session = LanguageModelSession(
+            instructions: sessionInstructions("""
+            You are a Thread mesh network troubleshooter. Generate device-specific, \
+            step-by-step troubleshooting instructions tailored to this exact device's \
+            history and current state. Be practical and specific — avoid generic advice.\(languageInstruction)
+            """)
+        )
+        let prompt = buildTroubleshootingPrompt(device: device, problem: problem,
+                                                anomaly: anomaly, recentEvents: recentEvents,
+                                                memoryFragment: memoryFragment)
+        let response = try await session.respond(to: prompt, generating: TroubleshootingGuide.self)
+        return response.content
+    }
+
+    // MARK: - Network Storyteller (AI-D10)
+
+    static func networkStory(
+        devices: [ThreadDevice],
+        health: NetworkHealthScore,
+        history: [HealthHistoryStore.Entry],
+        events: [ActivityEvent]
+    ) async throws -> NetworkNarrative {
+        let session = LanguageModelSession(
+            instructions: sessionInstructions("""
+            You are a creative but factual network narrator. Tell the story of this Thread mesh \
+            network over the past 30 days using the data provided. Make it engaging for a \
+            non-technical smart home owner. Mention specific devices and events. \
+            Keep it concise — under 200 words total.\(languageInstruction)
+            """)
+        )
+        let prompt = buildNetworkStoryPrompt(devices: devices, health: health,
+                                             history: history, events: events)
+        let response = try await session.respond(to: prompt, generating: NetworkNarrative.self)
+        return response.content
+    }
+
     // MARK: - Prompt builders
 
     private static func buildSummaryPrompt(
@@ -907,6 +1103,149 @@ struct AINetworkAnalyzer {
         }
 
         lines.append("Identify root causes for recurring issues and propose specific corrective actions. Maximum 3 recommendations.\(languageInstruction)")
+        return lines.joined(separator: " ")
+    }
+
+    private static func buildAlertScorePrompt(
+        deviceName: String,
+        room: String?,
+        offlineCount: Int,
+        recentEvents: [ActivityEvent],
+        anomaly: DeviceAnomaly?
+    ) -> String {
+        var lines: [String] = [
+            "Alert: '\(deviceName)'\(room.map { " in \($0)" } ?? "") just went offline.",
+            "Total offline devices in mesh right now: \(offlineCount).",
+        ]
+        if let a = anomaly, a.trajectory != .stable {
+            lines.append("Signal trend before going offline: \(a.trajectory.label) (dropped \(Int(a.dropDelta)) dBm from baseline).")
+        }
+        let recentOfflineCount = recentEvents.filter {
+            $0.kind == .deviceOffline && $0.deviceName == deviceName
+            && Date().timeIntervalSince($0.timestamp) < 7 * 24 * 3600
+        }.count
+        if recentOfflineCount > 0 {
+            lines.append("This device went offline \(recentOfflineCount) time(s) in the past 7 days.")
+        }
+        lines.append("Score the urgency (1–10) and decide whether to notify the user now.\(languageInstruction)")
+        return lines.joined(separator: " ")
+    }
+
+    private static func buildCoachingPrompt(
+        devices: [ThreadDevice],
+        health: NetworkHealthScore,
+        history: [HealthHistoryStore.Entry]
+    ) -> String {
+        let weekEntries = history.filter { Date().timeIntervalSince($0.timestamp) < 7 * 24 * 3600 }
+        let avgScore = weekEntries.isEmpty ? health.score
+            : Int(weekEntries.map { Double($0.score) }.reduce(0, +) / Double(weekEntries.count))
+        let trend: String = {
+            guard weekEntries.count >= 2,
+                  let first = weekEntries.first?.score, let last = weekEntries.last?.score
+            else { return "steady" }
+            if last - first > 5 { return "improving" }
+            if first - last > 5 { return "declining" }
+            return "steady"
+        }()
+        let offline = devices.filter(\.isOffline).count
+        let weak = devices.filter { $0.rssi?.isWeakRSSI == true && !$0.isOffline }.count
+        var lines: [String] = [
+            "Weekly Thread mesh performance: grade \(health.grade), score \(health.score)/100.",
+            "Weekly average score: \(avgScore), trend: \(trend).",
+            "\(devices.count) total devices, \(offline) offline, \(weak) with weak signal.",
+            "\(devices.filter(\.isBorderRouter).count) border router(s).",
+        ]
+        let rooms = Array(Set(devices.compactMap(\.room))).sorted()
+        if !rooms.isEmpty { lines.append("Rooms: \(rooms.joined(separator: ", ")).") }
+        lines.append("Generate a weekly coaching plan with 1–3 specific, achievable actions.\(languageInstruction)")
+        return lines.joined(separator: " ")
+    }
+
+    private static func buildAnomalyPatternPrompt(
+        device: ThreadDevice,
+        anomaly: DeviceAnomaly,
+        recentEvents: [ActivityEvent]
+    ) -> String {
+        let room = device.room.map { " in \($0)" } ?? ""
+        var lines: [String] = [
+            "Device: '\(device.name)'\(room).",
+            "Type: \(device.isBorderRouter ? "border router" : device.isRouter ? "router" : device.isSleepyEndDevice ? "battery-powered sensor" : "end device").",
+            "Signal trend: \(anomaly.trajectory.label).",
+            "Signal drop from baseline: \(Int(anomaly.dropDelta)) dBm.",
+            "Deviation score: \(String(format: "%.2f", anomaly.deviationScore)).",
+        ]
+        if let rssi = device.rssi { lines.append("Current signal: \(rssi) dBm.") }
+        if let hours = anomaly.projectedHoursToFailure {
+            lines.append("Projected hours to critical: \(Int(hours)).")
+        }
+        let deviceOffline = recentEvents.filter {
+            $0.deviceID == device.id && $0.kind == .deviceOffline
+            && Date().timeIntervalSince($0.timestamp) < 14 * 24 * 3600
+        }.count
+        if deviceOffline > 0 { lines.append("Offline events in past 14 days: \(deviceOffline).") }
+        lines.append("Classify this anomaly pattern with a name, evidence, and recommended fix.\(languageInstruction)")
+        return lines.joined(separator: " ")
+    }
+
+    private static func buildTroubleshootingPrompt(
+        device: ThreadDevice,
+        problem: String,
+        anomaly: DeviceAnomaly?,
+        recentEvents: [ActivityEvent],
+        memoryFragment: String
+    ) -> String {
+        let room = device.room.map { " in \($0)" } ?? ""
+        var lines: [String] = [
+            "Device: '\(device.name)'\(room).",
+            "Problem: \(problem).",
+            "Type: \(device.isBorderRouter ? "border router (internet hub)" : device.isRouter ? "router (relay)" : device.isSleepyEndDevice ? "battery-powered sensor" : "end device").",
+        ]
+        if let rssi = device.rssi { lines.append("Current signal: \(rssi) dBm.") }
+        if let a = anomaly, a.trajectory != .stable {
+            lines.append("Signal trend: \(a.trajectory.label), dropped \(Int(a.dropDelta)) dBm from baseline.")
+        }
+        if let bat = device.batteryPercentage { lines.append("Battery: \(bat)%.") }
+        let pastOffline = recentEvents.filter {
+            $0.deviceID == device.id && $0.kind == .deviceOffline
+            && Date().timeIntervalSince($0.timestamp) < 30 * 24 * 3600
+        }.count
+        if pastOffline > 0 { lines.append("Offline events in 30 days: \(pastOffline).") }
+        if !memoryFragment.isEmpty { lines.append("Historical context: \(memoryFragment)") }
+        lines.append("Generate 2–4 device-specific troubleshooting steps, most impactful first.\(languageInstruction)")
+        return lines.joined(separator: " ")
+    }
+
+    private static func buildNetworkStoryPrompt(
+        devices: [ThreadDevice],
+        health: NetworkHealthScore,
+        history: [HealthHistoryStore.Entry],
+        events: [ActivityEvent]
+    ) -> String {
+        let recentEntries = history.filter { Date().timeIntervalSince($0.timestamp) < 30 * 24 * 3600 }
+        let avgScore = recentEntries.isEmpty ? health.score
+            : Int(recentEntries.map { Double($0.score) }.reduce(0, +) / Double(recentEntries.count))
+        let lowestScore = recentEntries.map(\.score).min() ?? health.score
+        let highestScore = recentEntries.map(\.score).max() ?? health.score
+        let recentEvents = events.filter { Date().timeIntervalSince($0.timestamp) < 30 * 24 * 3600 }
+            .sorted { $0.timestamp < $1.timestamp }
+        let offlineCount = recentEvents.filter { $0.kind == .deviceOffline || $0.kind == .borderRouterOffline }.count
+        let topologyCount = recentEvents.filter { $0.kind == .topologyJoined || $0.kind == .topologyLeft }.count
+        var lines: [String] = [
+            "Thread mesh 30-day story:",
+            "Current: grade \(health.grade), score \(health.score)/100.",
+            "30-day: avg \(avgScore), lowest \(lowestScore), highest \(highestScore).",
+            "\(devices.count) devices, \(devices.filter(\.isOffline).count) currently offline.",
+            "\(offlineCount) offline events, \(topologyCount) topology changes in 30 days.",
+        ]
+        let keyEventSamples = recentEvents.prefix(8).map { e -> String in
+            let daysAgo = Int(Date().timeIntervalSince(e.timestamp) / 86400)
+            let ago = daysAgo == 0 ? "today" : "\(daysAgo)d ago"
+            return "\(e.kind.label) (\(ago)): \(String(e.detail.prefix(60)))"
+        }
+        if !keyEventSamples.isEmpty {
+            lines.append("Key events: \(keyEventSamples.joined(separator: "; ")).")
+        }
+        lines.append("Narrate the network's story with opening, key events, current chapter, and outlook.\(languageInstruction)")
         return lines.joined(separator: " ")
     }
 

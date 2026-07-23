@@ -22,6 +22,8 @@ struct DeviceDetailView: View {
     @State private var explainContext: MetricExplanationContext? = nil
     @State private var metricExplanation: String? = nil
     @State private var isLoadingMetricExplanation = false
+    @State private var anomalyPattern: Any? = nil  // holds AnomalyPattern on iOS 26+
+    @State private var isLoadingAnomalyPattern = false
 
     struct MetricExplanationContext: Identifiable {
         let id = UUID()
@@ -293,6 +295,13 @@ struct DeviceDetailView: View {
                     }
                 }
                 .padding(.vertical, 2)
+            }
+
+            // AI-D4: Anomaly Pattern Recognition
+            if #available(iOS 26, *), ProStore.shared.isPro,
+               let anomaly = meshViewModel.anomalies[device.uniqueIdentifier],
+               anomaly.trajectory != .stable {
+                anomalyPatternCard(anomaly: anomaly)
             }
 
             // Troubleshooter entry point for offline or weak devices
@@ -697,6 +706,103 @@ struct DeviceDetailView: View {
                     notesStore.setNote(new, for: device.uniqueIdentifier.uuidString)
                 }
         }
+    }
+
+    // MARK: - Anomaly Pattern Card (AI-D4)
+
+    @available(iOS 26, *)
+    @ViewBuilder
+    private func anomalyPatternCard(anomaly: DeviceAnomaly) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 6) {
+                Image(systemName: "waveform.path.ecg.rectangle")
+                    .foregroundStyle(.orange)
+                    .imageScale(.small)
+                Text("Pattern Analysis")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.orange)
+                Spacer()
+                Text("AI")
+                    .font(.caption2.weight(.bold))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(.orange.opacity(0.15), in: Capsule())
+                    .foregroundStyle(.orange)
+            }
+
+            if isLoadingAnomalyPattern {
+                HStack(spacing: 8) {
+                    ProgressView().controlSize(.small)
+                    Text("Classifying anomaly pattern…")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            } else if let pattern = anomalyPattern as? AnomalyPattern {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 6) {
+                        Text(pattern.patternName)
+                            .font(.subheadline.weight(.semibold))
+                        confidenceBadge(pattern.confidence)
+                    }
+                    Text(pattern.distinguishingFeature)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if !pattern.evidencePoints.isEmpty {
+                        VStack(alignment: .leading, spacing: 4) {
+                            ForEach(pattern.evidencePoints, id: \.self) { point in
+                                HStack(alignment: .top, spacing: 6) {
+                                    Image(systemName: "circle.fill")
+                                        .font(.system(size: 4))
+                                        .foregroundStyle(.secondary)
+                                        .padding(.top, 5)
+                                    Text(point)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                            }
+                        }
+                    }
+                    HStack(spacing: 6) {
+                        Image(systemName: "wrench.and.screwdriver")
+                            .imageScale(.small)
+                            .foregroundStyle(.orange)
+                        Text(pattern.recommendedFix)
+                            .font(.caption.weight(.medium))
+                    }
+                }
+            } else {
+                Text("Pattern classification unavailable.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        .padding(12)
+        .background(.orange.opacity(0.06), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .stroke(Color.orange.opacity(0.2), lineWidth: 1)
+        )
+        .padding(.vertical, 2)
+        .task(id: device.uniqueIdentifier) {
+            guard !isLoadingAnomalyPattern, anomalyPattern == nil else { return }
+            isLoadingAnomalyPattern = true
+            anomalyPattern = try? await AINetworkAnalyzer.classifyAnomalyPattern(
+                device: device,
+                anomaly: anomaly,
+                recentEvents: activityStore.events
+            )
+            isLoadingAnomalyPattern = false
+        }
+    }
+
+    private func confidenceBadge(_ confidence: String) -> some View {
+        let color: Color = confidence == "high" ? .green : confidence == "low" ? .red : .orange
+        return Text(confidence.capitalized)
+            .font(.caption2.weight(.semibold))
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(color.opacity(0.12), in: Capsule())
+            .foregroundStyle(color)
     }
 
     // MARK: - AI Assistant

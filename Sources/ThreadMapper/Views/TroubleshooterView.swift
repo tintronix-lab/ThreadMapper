@@ -3,10 +3,15 @@ import SwiftUI
 struct TroubleshooterView: View {
     let device: ThreadDevice
     let problem: Problem
+    @Environment(MeshViewModel.self) private var meshViewModel
+    @Environment(ActivityStore.self) private var activityStore
 
     @Environment(\.dismiss) private var dismiss
     @State private var stepIndex = 0
     @State private var resolved = false
+    @State private var aiGuide: Any? = nil  // holds TroubleshootingGuide on iOS 26+
+    @State private var aiGuideLoading = false
+    @State private var showAISteps = true
 
     enum Problem: Identifiable {
         case offline
@@ -73,6 +78,11 @@ struct TroubleshooterView: View {
             // Step content
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
+                    // AI-D7: AI-generated diagnosis and steps (iOS 26 + Pro)
+                    if #available(iOS 26, *), ProStore.shared.isPro {
+                        aiTroubleshooterCard
+                    }
+
                     HStack {
                         Text("Step \(stepIndex + 1) of \(steps.count)")
                             .font(.caption.weight(.semibold))
@@ -100,6 +110,22 @@ struct TroubleshooterView: View {
                     }
                 }
                 .padding(24)
+            }
+            .task {
+                guard #available(iOS 26, *), ProStore.shared.isPro else { return }
+                guard !aiGuideLoading, aiGuide == nil else { return }
+                aiGuideLoading = true
+                let problemLabel = problem == .offline ? "device is offline" : "device has weak signal"
+                let anomaly = meshViewModel.anomalies[device.uniqueIdentifier]
+                let memory = AIMemoryStore.shared.summaryPromptFragment(for: device.uniqueIdentifier)
+                aiGuide = try? await AINetworkAnalyzer.aiTroubleshootingGuide(
+                    device: device,
+                    problem: problemLabel,
+                    anomaly: anomaly,
+                    recentEvents: activityStore.events,
+                    memoryFragment: memory
+                )
+                aiGuideLoading = false
             }
 
             Spacer(minLength: 0)
@@ -150,6 +176,81 @@ struct TroubleshooterView: View {
                 Button("Done") { dismiss() }
             }
         }
+    }
+
+    // MARK: - AI Troubleshooter Card (AI-D7)
+
+    @available(iOS 26, *)
+    private var aiTroubleshooterCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) { showAISteps.toggle() }
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "apple.intelligence")
+                        .foregroundStyle(.purple)
+                        .imageScale(.small)
+                    Text("AI Diagnosis")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.purple)
+                    Spacer()
+                    Image(systemName: showAISteps ? "chevron.up" : "chevron.down")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .buttonStyle(.plain)
+
+            if showAISteps {
+                if aiGuideLoading {
+                    HStack(spacing: 8) {
+                        ProgressView().controlSize(.small)
+                        Text("Generating AI diagnosis…")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                } else if let guide = aiGuide as? TroubleshootingGuide {
+                    Text(guide.diagnosis)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    if !guide.steps.isEmpty {
+                        Divider()
+                        VStack(alignment: .leading, spacing: 10) {
+                            ForEach(Array(guide.steps.enumerated()), id: \.offset) { i, step in
+                                HStack(alignment: .top, spacing: 10) {
+                                    Text("\(i + 1)")
+                                        .font(.caption2.weight(.bold))
+                                        .frame(width: 18, height: 18)
+                                        .background(.purple.opacity(0.12), in: Circle())
+                                        .foregroundStyle(.purple)
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(step.instruction)
+                                            .font(.subheadline)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                        if !step.hint.isEmpty {
+                                            Text(step.hint)
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                                .fixedSize(horizontal: false, vertical: true)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    Text("AI diagnosis unavailable — Apple Intelligence may be downloading.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding(12)
+        .background(.purple.opacity(0.06), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .stroke(Color.purple.opacity(0.18), lineWidth: 1)
+        )
     }
 
     // MARK: - Resolved view
