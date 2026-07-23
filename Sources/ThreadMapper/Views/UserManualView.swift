@@ -95,6 +95,24 @@ private extension ManualChapter {
                 .paragraph("Tap the ··· menu in the Dashboard toolbar and choose Share Health Card to generate a shareable image of your network's current state. The card shows grade letter and score, device counts, a colour-coded score bar, and ThreadMapper branding."),
                 .paragraph("A preview sheet appears first; tap the Share button to send the image via the iOS share sheet."),
             ]),
+            .init(title: "Per-Room Health Grid", icon: "square.grid.2x2.fill", body: [
+                .paragraph("A grid of room cards below the health ring shows a grade (A–F) for each HomeKit room, based on the average signal quality of Thread devices in that room."),
+                .tip("Tap any room card to jump to the device list filtered to that room."),
+            ]),
+            .init(title: "Topology Change Digest", icon: "clock.arrow.2.circlepath", body: [
+                .paragraph("When ThreadMapper is reopened after more than 1 hour away, a digest sheet appears listing devices that joined, left, or changed role while you were away."),
+                .paragraph("On iOS 26 with Apple Intelligence (Pro), the digest includes a short AI-written narration of the most significant topology changes."),
+                .tip("Tap any device name in the digest to open its detail sheet."),
+            ]),
+            .init(title: "Diagnostic PDF Export", icon: "arrow.down.doc.fill", body: [
+                .paragraph("Tap the ··· menu in the Dashboard toolbar and choose Export Diagnostic PDF to generate a 3-page PDF report:"),
+                .bullets([
+                    "Page 1 — Grade summary and current score",
+                    "Page 2 — Full device inventory with role, room, and signal status",
+                    "Page 3 — Top recommendations with severity ratings",
+                ]),
+                .paragraph("The PDF is generated on-device and shared via the iOS share sheet."),
+            ]),
             .init(title: "Pull to Refresh", icon: "arrow.clockwise", body: [
                 .paragraph("Pull down anywhere on the Dashboard to force an immediate HomeKit scan and health recalculation. The widget timeline is also refreshed automatically after a foreground pull."),
             ]),
@@ -151,8 +169,18 @@ private extension ManualChapter {
                     "Resilience Simulator — model the impact of losing any router or border router",
                     "Channel Interference Scanner — spectrum bar chart showing Wi-Fi overlap risk per Thread channel",
                     "Border Router Health Monitor — per-BR status cards with RSSI sparklines",
+                    "Topology Time-Lapse Rewind — replay how your mesh topology changed over time",
                     "Export Map — save or share the current mesh graph as an image (map mode only)",
                 ]),
+            ]),
+            .init(title: "Topology Time-Lapse Rewind", icon: "film.stack", body: [
+                .paragraph("ThreadMapper continuously records mesh snapshots in the background (up to 720 frames, one per 50-minute interval). Open Mesh → Tools → Topology Time-Lapse to scrub through the history with a timeline slider or use the play/pause button to animate the changes."),
+                .bullets([
+                    "Each frame shows the mesh graph at a specific point in time",
+                    "The timeline slider jumps between recorded snapshots",
+                    "Recorded history persists across app launches",
+                ]),
+                .tip("Time-Lapse is most useful after a network incident — scrub back to the moment devices went offline to see what the topology looked like."),
             ]),
             .init(title: "Border Router Indicator", icon: "house.and.flag", body: [
                 .paragraph("Border Router devices are shown with a small flag badge. These devices bridge Thread to your Wi-Fi router and are the most critical nodes — if all Border Routers go offline the entire mesh loses internet access."),
@@ -219,6 +247,10 @@ private extension ManualChapter {
                     "Red — fewer than 7 days remaining",
                 ]),
                 .tip("The estimate is an approximation. Actual battery life varies significantly by device activity, temperature, and HomeKit polling frequency."),
+            ]),
+            .init(title: "Battery Radio Efficiency Score", icon: "bolt.radiowaves.right", body: [
+                .paragraph("For Sleepy End Devices, the Battery section also shows a Radio Efficiency score — an estimate of how efficiently the device uses its battery relative to its signal quality. A high efficiency score means the device is maintaining good signal while conserving power."),
+                .tip("A low efficiency score on a device with strong signal may indicate it is polling more frequently than necessary. Consider moving it closer to a router so it can reach the mesh with less transmit power."),
             ]),
             .init(title: "Device Reliability Score", icon: "chart.bar.fill", body: [
                 .paragraph("The Reliability section summarises how consistently this device has stayed online over the last 30 days:"),
@@ -414,6 +446,24 @@ private extension ManualChapter {
                 .paragraph("The Border Router Health Monitor (Mesh → Tools) shows a status card for each border router: online/offline badge, RSSI sparkline, last-seen timestamp, \"Only BR\" warning (if it's the sole border router), and critical offline warning."),
                 .warning("If you have only one border router and it shows a critical offline warning, your entire Thread mesh has lost its connection to Wi-Fi and the internet."),
             ]),
+            .init(title: "Router Saturation Monitor", icon: "chart.bar.xaxis.ascending", body: [
+                .paragraph("Inside the Border Router Health Monitor (Mesh → Tools), the Router Saturation section shows a progress bar for each routing device — border router or full router — indicating how many child devices are connected relative to Thread's recommended maximum."),
+                .bullets([
+                    "Green — below 60% capacity",
+                    "Orange — 60–80% capacity: approaching the limit",
+                    "Red — above 80%: overloaded; consider adding another router",
+                ]),
+                .warning("An overloaded router may drop children or route traffic unreliably. Add a Thread router device nearby to redistribute the load."),
+            ]),
+            .init(title: "HomeKit Scene Triggers", icon: "theatermasks.fill", body: [
+                .paragraph("HomeKit Scene Triggers (Settings → Tools → Scene Trigger) automatically run a HomeKit scene when your network health grade drops to or below a chosen threshold. Use this to, for example, turn on a smart lamp in the room with the failing device."),
+                .bullets([
+                    "Choose a threshold grade: C (Fair), D (Poor), or F (Critical)",
+                    "Select any HomeKit scene from the list of scenes in your home",
+                    "The scene fires once each time health crosses the threshold from above",
+                ]),
+                .tip("Pair this with a HomeKit scene that flashes a light or activates a visible alert — it doubles as an ambient network health indicator."),
+            ]),
             .init(title: "New Device Alert", icon: "bell.and.waves.left.and.right", body: [
                 .paragraph("When enabled in Settings → Notifications → New Device Alerts, ThreadMapper sends a \"New Thread Device Detected\" push notification whenever a device joins your network that hasn't been seen before."),
                 .tip("Useful for detecting unauthorised commissioning or confirming that a newly purchased device has successfully joined."),
@@ -428,9 +478,19 @@ private extension ManualChapter {
                     "Device back online — fires when the last offline device recovers",
                     "Grade change — fires when your mesh health grade letter improves or degrades",
                     "New device detected — fires when an unknown device joins your Thread network",
+                    "Background health watchdog — fires when the grade letter drops while the app is closed (see below)",
                     "Proactive AI insights — fires when critical anomalies are detected (iOS 26, Apple Intelligence required)",
                 ]),
                 .paragraph("Enable or disable each type individually in Settings → Notifications."),
+            ]),
+            .init(title: "Background Health Watchdog", icon: "shield.lefthalf.filled.badge.checkmark", body: [
+                .paragraph("The Background Health Watchdog runs a grade check while ThreadMapper is fully closed, using iOS's Background Processing task scheduling. If the health grade letter falls (e.g. from B to C) since the last check, it fires a local notification: \"Network health degraded — Grade dropped to C.\""),
+                .bullets([
+                    "No user action required — iOS schedules the task automatically",
+                    "The task runs only when the device is charging and idle",
+                    "Requires Background App Refresh to be enabled in iOS Settings",
+                ]),
+                .tip("This is distinct from the offline alert — it monitors the overall grade, not individual devices. Pair both for comprehensive coverage."),
             ]),
             .init(title: "Positive Notifications", icon: "checkmark.circle.fill", body: [
                 .paragraph("ThreadMapper sends notifications for good news too:"),

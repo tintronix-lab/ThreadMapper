@@ -1,4 +1,4 @@
-import BackgroundTasks
+@preconcurrency import BackgroundTasks
 import HomeKit
 import OSLog
 import UserNotifications
@@ -88,7 +88,7 @@ enum BackgroundRefreshHandler {
 // Computes a lightweight grade from HM reachability; fires a notification if
 // the grade has dropped since the last foreground snapshot.
 
-private final class HealthWatcher: NSObject, HMHomeManagerDelegate {
+private final class HealthWatcher: NSObject, HMHomeManagerDelegate, @unchecked Sendable {
     private static let lastGradeKey = "bgLastGrade"
     private let manager = HMHomeManager()
 
@@ -165,7 +165,7 @@ private final class HealthWatcher: NSObject, HMHomeManagerDelegate {
 
 // Checks HMAccessory.isReachable for all accessories and fires
 // offline/online notifications for state changes since last run.
-private final class ReachabilityChecker: NSObject, HMHomeManagerDelegate {
+private final class ReachabilityChecker: NSObject, HMHomeManagerDelegate, @unchecked Sendable {
     private let manager = HMHomeManager()
 
     override init() {

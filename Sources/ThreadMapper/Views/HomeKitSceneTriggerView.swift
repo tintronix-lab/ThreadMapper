@@ -3,12 +3,17 @@ import SwiftUI
 // MARK: - NF-7: HomeKit Scene Trigger Settings View
 
 struct HomeKitSceneTriggerView: View {
-    @State private var store = HomeKitSceneTriggerStore.shared
+    // Access the singleton directly in body — same pattern as MeshTopologyRewindView.
+    // Using @State with a @MainActor-isolated singleton triggers an actor-isolation
+    // crash in iOS 26 when SwiftUI evaluates the NavigationLink destination.
+    private var store: HomeKitSceneTriggerStore { HomeKitSceneTriggerStore.shared }
 
     var body: some View {
+        @Bindable var bindable = HomeKitSceneTriggerStore.shared
+
         Form {
             Section {
-                Toggle("Enable Scene Trigger", isOn: $store.isEnabled)
+                Toggle("Enable Scene Trigger", isOn: $bindable.isEnabled)
                     .onChange(of: store.isEnabled) { _, enabled in
                         if enabled { store.loadScenes() }
                     }
@@ -29,8 +34,9 @@ struct HomeKitSceneTriggerView: View {
 
     @ViewBuilder
     private var thresholdSection: some View {
+        @Bindable var bindable = HomeKitSceneTriggerStore.shared
         Section("Trigger Threshold") {
-            Picker("Fire when grade drops to", selection: $store.triggerGrade) {
+            Picker("Fire when grade drops to", selection: $bindable.triggerGrade) {
                 Text("C — Fair (60–74)").tag("C")
                 Text("D — Poor (40–59)").tag("D")
                 Text("F — Critical (<40)").tag("F")
@@ -42,7 +48,8 @@ struct HomeKitSceneTriggerView: View {
     @ViewBuilder
     private var scenePickerSection: some View {
         Section(header: Text("HomeKit Scene"),
-                footer: store.actionSetName.isEmpty ? Text("") : Text("Selected: \(store.actionSetName)")) {
+                footer: store.actionSetName.isEmpty
+                    ? Text("") : Text("Selected: \(store.actionSetName)")) {
             if store.isLoadingScenes {
                 HStack {
                     ProgressView()

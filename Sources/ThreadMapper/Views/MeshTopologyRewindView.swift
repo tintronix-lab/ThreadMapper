@@ -3,13 +3,15 @@ import SwiftUI
 // MARK: - NF-10: Mesh Topology Time-Lapse Rewind View
 
 struct MeshTopologyRewindView: View {
-    @State private var store = TopologyTimeLapseStore.shared
+    // Access the singleton directly — @Observable tracks changes automatically in body.
+    // Using @State with a @MainActor-isolated singleton triggers an actor-isolation
+    // crash in iOS 26's stricter concurrency mode.
     @State private var frameIndex = 0
     @State private var isPlaying = false
     @State private var playTask: Task<Void, Never>? = nil
     @Environment(\.dismiss) private var dismiss
 
-    private var frames: [TimeLapseFrame] { store.frames }
+    private var frames: [TimeLapseFrame] { TopologyTimeLapseStore.shared.frames }
     private var currentFrame: TimeLapseFrame? {
         guard !frames.isEmpty else { return nil }
         return frames[min(frameIndex, frames.count - 1)]
@@ -28,29 +30,34 @@ struct MeshTopologyRewindView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
+                    Button("Done") {
+                        stopPlay()
+                        dismiss()
+                    }
                 }
             }
         }
+        .onDisappear { stopPlay() }
     }
 
     @ViewBuilder
     private var content: some View {
         VStack(spacing: 0) {
-            // Frame display
             if let frame = currentFrame {
                 FrameView(frame: frame)
             }
 
             Divider()
 
-            // Scrubber controls
             VStack(spacing: 12) {
-                Slider(value: Binding(
-                    get: { Double(frameIndex) },
-                    set: { frameIndex = Int($0.rounded()) }
-                ), in: 0...Double(max(0, frames.count - 1)), step: 1)
-                .padding(.horizontal)
+                // Only show scrubber when there are multiple frames
+                if frames.count > 1 {
+                    Slider(value: Binding(
+                        get: { Double(frameIndex) },
+                        set: { frameIndex = Int($0.rounded()) }
+                    ), in: 0...Double(frames.count - 1), step: 1)
+                    .padding(.horizontal)
+                }
 
                 if let frame = currentFrame {
                     Text(frame.timestamp.formatted(.dateTime.month().day().hour().minute()))
@@ -64,7 +71,7 @@ struct MeshTopologyRewindView: View {
                     } label: {
                         Image(systemName: "backward.fill")
                     }
-                    .disabled(frameIndex == 0)
+                    .disabled(frameIndex == 0 || frames.count <= 1)
 
                     Button {
                         if isPlaying { stopPlay() } else { startPlay() }
@@ -72,13 +79,14 @@ struct MeshTopologyRewindView: View {
                         Image(systemName: isPlaying ? "pause.fill" : "play.fill")
                             .font(.title2)
                     }
+                    .disabled(frames.count <= 1)
 
                     Button {
                         frameIndex = min(frames.count - 1, frameIndex + 1)
                     } label: {
                         Image(systemName: "forward.fill")
                     }
-                    .disabled(frameIndex == frames.count - 1)
+                    .disabled(frameIndex >= frames.count - 1)
                 }
                 .font(.title3)
 
@@ -89,7 +97,6 @@ struct MeshTopologyRewindView: View {
             .padding()
             .background(Color(UIColor.systemGroupedBackground))
         }
-        .onDisappear { stopPlay() }
     }
 
     @ViewBuilder
@@ -109,11 +116,14 @@ struct MeshTopologyRewindView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
+    @MainActor
     private func startPlay() {
+        guard frames.count > 1 else { return }
         isPlaying = true
-        playTask = Task {
+        playTask = Task { @MainActor in
             while !Task.isCancelled && isPlaying {
                 try? await Task.sleep(for: .milliseconds(600))
+                guard !Task.isCancelled else { break }
                 if frameIndex < frames.count - 1 {
                     frameIndex += 1
                 } else {
@@ -123,6 +133,7 @@ struct MeshTopologyRewindView: View {
         }
     }
 
+    @MainActor
     private func stopPlay() {
         isPlaying = false
         playTask?.cancel()
@@ -142,7 +153,6 @@ private struct FrameView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                // Stats banner
                 HStack(spacing: 0) {
                     statCell("\(frame.totalCount)", label: "Total")
                     Divider().frame(height: 28)
@@ -154,7 +164,6 @@ private struct FrameView: View {
                 .padding(.vertical, 10)
                 .cardBackground()
 
-                // Device list
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                     ForEach(sorted) { device in
                         DeviceFrameCard(device: device)

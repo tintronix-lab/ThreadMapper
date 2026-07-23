@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.2.0 (2026-07-23)
+
+### Added
+
+**Dashboard**
+- **Per-Room Health Grid** — grade cards (A–F) for every HomeKit room at a glance; tap a room card to filter the device list to that room
+- **Topology Change Digest** — on cold launch after a gap of more than 1 hour, a sheet summarises devices that joined, left, or changed role since the last session; iOS 26 Pro users get an AI-written plain-English narration of the changes
+- **Diagnostic PDF Export** — "Export Diagnostic PDF" in the Dashboard toolbar generates a 3-page PDF (cover + grade summary, device inventory, recommendations) via `UIGraphicsPDFRenderer`
+
+**Mesh Tools**
+- **Topology Time-Lapse Rewind** — records up to 720 mesh snapshots (50-minute dedup) in a ring buffer (`TopologyTimeLapseStore`); accessible from Mesh → Tools as a full-screen scrubber with play/pause and a timeline slider; persisted across launches as JSON
+
+**Border Router Health Monitor**
+- **Router Saturation Monitor** — `RouterSaturationSection` shows per-router child-device load with a progress bar; triggers an overload warning at 80% capacity; accessible inside the existing BR Health Monitor view
+
+**Settings → Tools**
+- **HomeKit Scene Triggers** — choose a health-grade threshold (C / D / F) and a HomeKit scene to run automatically when the network drops to or below that grade; `HomeKitSceneTriggerStore` persists the toggle, grade, and selected scene via `@AppStorage`
+
+**Devices**
+- **Battery Radio Efficiency Score** — shown in the battery section of Device Detail for Sleepy End Devices; estimates transmit efficiency as a ratio of battery percentage to signal quality
+
+**Notifications**
+- **Background Health Watchdog** — `BGProcessingTask` (`com.threadmapper.healthwatch`) runs a grade-drop check while the app is suspended and fires a local "Network health degraded" notification when the grade letter drops; registered in Info.plist under both `UIBackgroundModes` and `BGTaskSchedulerPermittedIdentifiers`
+
+### Fixed
+- **HomeKitSceneTriggerView white screen** — `@State private var store = HomeKitSceneTriggerStore.shared` triggered an iOS 26 actor-isolation crash when SwiftUI evaluated the NavigationLink destination off the main actor; replaced with a computed-property accessor and `@Bindable` inside `body`/`@ViewBuilder` sections
+- **Network Assistant localization** — suggested questions and error messages were stored as plain `String` literals, bypassing SwiftUI's locale resolution; replaced with `String(localized:)` so Swedish and future translations apply at runtime
+
+---
+
 ## 1.1.0 (2026-07-19)
 
 ### Added

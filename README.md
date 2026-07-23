@@ -9,18 +9,21 @@
 ### Dashboard
 - **Network health grade** (A–F, 0–100 score) computed from device count, offline/weak ratios, and border-router presence
 - **24-hour health history** chart (Charts framework)
+- **Per-room health grid** — grade cards (A–F) for every HomeKit room; tap a card to filter the device list to that room
 - **Room coverage** summary with per-room signal grades
 - **Issue + tip cards** — critical issues flagged in red, recommendations in amber
 - **Placement suggestions** — rooms with poor average signal flagged for router addition
 - **30-minute signal trend** sparkline across all devices
 - **Topology change banner** — shows devices that joined or left the mesh in the last 5 minutes
+- **Topology Change Digest** — on cold launch after a gap of more than 1 hour, a sheet summarises topology changes since the last session; AI-narrated for Pro + iOS 26 users
+- **Diagnostic PDF Export** — 3-page PDF (grade summary, device inventory, recommendations) generated on-device via `UIGraphicsPDFRenderer`; accessible from the Dashboard toolbar
 - **Weekly report** — auto-generated weekly summary card with grade distribution, stability score, streak tracking, and shareable plain-text export
 
 ### Devices
 - Per-device **signal sparkline** with live/avg/min/max stats and quality distribution bar
 - **Device health grade** (A–F) from rolling signal history
 - **Role badges** — Border Router, Router, End Device, Sleepy End Device
-- **Battery level** with low-battery warning
+- **Battery level** with low-battery warning and **radio efficiency score** (transmit efficiency estimate for Sleepy End Devices)
 - **Mesh path view** — visual hop-by-hop path from the device to the internet
 - **Survey history** and CSV export per device
 - **Device notes** — persistent, debounced (one write per pause, not per keystroke)
@@ -35,10 +38,11 @@
 - Tap a node to open device detail; selected node highlights its route to the internet
 
 ### Network Diagnostics Tools
-- **Border Router Health Monitor** — per-BR card with uptime, signal, and single-point-of-failure warning when only one BR is present
+- **Border Router Health Monitor** — per-BR card with uptime, signal, and single-point-of-failure warning when only one BR is present; **Router Saturation Monitor** shows per-router child load with progress bars and an overload warning at 80%
 - **Channel Scanner** — Thread channel spectrum view (channels 11–26 / 2.4 GHz) showing devices per channel with Wi-Fi interference risk ratings (high/medium/low)
 - **Resilience Simulator** — select any border router or router and simulate its failure; shows severity (critical / moderate / low) and which devices would be orphaned
-- **Anomaly Detector** — background service that flags unusual signal degradation patterns and surface them as activity events
+- **Anomaly Detector** — background service that flags unusual signal degradation patterns and surfaces them as activity events
+- **Topology Time-Lapse Rewind** — up to 720 mesh snapshots recorded in a ring buffer (50-minute dedup); playback with a timeline scrubber from Mesh → Tools
 
 ### AI Insights *(iOS 26+ · Apple Intelligence required)*
 - **Mesh health summary** — plain-English headline + explanation + single top action, generated on-device
@@ -82,6 +86,7 @@
 - **Offline device push notifications** with configurable grace period (30 s – 5 min)
 - **Topology change notifications** when devices join or leave the mesh
 - **Badge count** = number of confirmed offline devices; cleared on recovery
+- **Background Health Watchdog** — `BGProcessingTask` runs a grade-drop check while the app is suspended and fires a local notification when the grade letter falls
 - **Background refresh** task keeps the widget current when the app is closed
 - Poll loop pauses while the app is backgrounded; resumes immediately on foreground
 
@@ -93,6 +98,7 @@
 - Toggle offline and topology notifications
 - Configurable offline grace period
 - **OpenThread Border Router URL** — point ThreadMapper at a local OT-BR HTTP API for richer diagnostics
+- **HomeKit Scene Triggers** — run a HomeKit scene automatically when network health drops to a chosen grade threshold (C / D / F)
 - Clear signal history, health score history, and activity feed independently
 - Setup Checklist accessible from Settings → Tools
 

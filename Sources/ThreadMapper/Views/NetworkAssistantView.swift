@@ -12,13 +12,18 @@ private struct ChatMessage: Identifiable {
     enum Role { case user, assistant }
 }
 
-private let suggestedQuestions = [
-    "Why is my signal dropping?",
-    "Which devices are at risk?",
-    "How can I improve my mesh?",
-    "Is my network ready for more devices?",
-    "Which room has the worst coverage?",
-]
+// Computed so String(localized:) resolves at runtime in the active locale.
+// Plain String values are needed so inputText receives the translated text
+// rather than an untranslated key when the user taps a suggestion.
+private var suggestedQuestions: [String] {
+    [
+        String(localized: "Why is my signal dropping?"),
+        String(localized: "Which devices are at risk?"),
+        String(localized: "How can I improve my mesh?"),
+        String(localized: "Is my network ready for more devices?"),
+        String(localized: "Which room has the worst coverage?"),
+    ]
+}
 
 // MARK: - Main View
 
@@ -285,7 +290,7 @@ struct NetworkAssistantView: View {
                 isThinking = false
             }
             guard let session else {
-                messages.append(ChatMessage(role: .assistant, text: "AI is not available on this device. Please enable Apple Intelligence in Settings."))
+                messages.append(ChatMessage(role: .assistant, text: String(localized: "AI is not available on this device. Please enable Apple Intelligence in Settings.")))
                 return
             }
             do {
@@ -295,7 +300,7 @@ struct NetworkAssistantView: View {
                 }
                 messages.append(ChatMessage(role: .assistant, text: streamingText ?? ""))
             } catch {
-                messages.append(ChatMessage(role: .assistant, text: "Sorry, I couldn't process that. Please try again."))
+                messages.append(ChatMessage(role: .assistant, text: String(localized: "Sorry, I couldn't process that. Please try again.")))
             }
         }
     }
