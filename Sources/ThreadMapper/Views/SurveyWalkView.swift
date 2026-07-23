@@ -278,22 +278,37 @@ struct SurveyWalkView: View {
 
     @ViewBuilder
     private var heatmapSection: some View {
+        let roomStats = viewModel.roomStats()
         Section {
             if heatmapExpanded {
-                Toggle("Show Heatmap", isOn: $showHeatmap)
+                // Room signal grid — always useful after a guided survey, no GPS needed
+                if !roomStats.isEmpty {
+                    RoomSignalGrid(stats: roomStats)
+                        .padding(.vertical, 4)
+                }
+
+                Toggle("GPS Signal Map", isOn: $showHeatmap)
                     .onChange(of: showHeatmap) { _, isOn in
                         if isOn { refreshHeatmap() }
                     }
 
                 if showHeatmap {
                     if heatmapPoints.isEmpty {
-                        Text("No survey data yet")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        Label(
+                            "Walk with the app open outdoors to build a GPS coverage map",
+                            systemImage: "figure.walk.circle"
+                        )
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.vertical, 4)
                     } else {
-                        HeatmapCanvas(cells: heatmapPoints, focus: viewModel.lastSavedFocus)
-                            .frame(height: 140)
-                            .padding(.vertical, 2)
+                        HeatmapCanvas(
+                            cells: heatmapPoints,
+                            focus: viewModel.lastSavedFocus,
+                            resolutionMeters: resolutionMeters
+                        )
+                        .frame(height: 220)
+                        .padding(.vertical, 2)
 
                         Text("^[\(heatmapPoints.count) cell](inflect: true)")
                             .font(.caption2)
@@ -338,7 +353,7 @@ struct SurveyWalkView: View {
                 withAnimation(.easeInOut(duration: 0.2)) { heatmapExpanded.toggle() }
             } label: {
                 HStack(spacing: 6) {
-                    Text("Heatmap")
+                    Text("Coverage Map")
                     Spacer()
                     Image(systemName: heatmapExpanded ? "chevron.up" : "chevron.down")
                         .font(.caption2.weight(.semibold))
