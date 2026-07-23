@@ -3,6 +3,7 @@ options:
   bundleIdPrefix: com.tintronixlab
   deploymentTarget:
     iOS: "17.0"
+    watchOS: "10.0"
   minimumXcodeGenVersion: "2.20"
   xcodeVersion: "15.0"
   developmentLanguage: en
@@ -51,6 +52,8 @@ targets:
     dependencies:
       - target: ThreadMapperWidget
         embed: true
+      - target: ThreadMapperWatch
+        embed: true
     scheme:
       shared: true
       testTargets:
@@ -70,6 +73,38 @@ targets:
         SWIFT_VERSION: "5"
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: QCSX955Y7P
+
+  ThreadMapperWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - Sources/ThreadMapperWatch
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tintronixlab.ThreadMapper.watchkitapp
+        INFOPLIST_FILE: Sources/ThreadMapperWatch/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Sources/ThreadMapperWatch/ThreadMapperWatch.entitlements
+        WATCHOS_DEPLOYMENT_TARGET: "10.0"
+    dependencies:
+      - target: ThreadMapperWatchWidget
+        embed: true
+      - sdk: WatchKit.framework
+      - sdk: WatchConnectivity.framework
+
+  ThreadMapperWatchWidget:
+    type: app-extension
+    platform: watchOS
+    sources:
+      - Sources/ThreadMapperWatchWidget
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tintronixlab.ThreadMapper.watchkitapp.widget
+        INFOPLIST_FILE: Sources/ThreadMapperWatchWidget/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Sources/ThreadMapperWatchWidget/ThreadMapperWatchWidget.entitlements
+        WATCHOS_DEPLOYMENT_TARGET: "10.0"
+    dependencies:
+      - sdk: WidgetKit.framework
+      - sdk: SwiftUI.framework
 
   ThreadMapperTests:
     type: bundle.unit-test

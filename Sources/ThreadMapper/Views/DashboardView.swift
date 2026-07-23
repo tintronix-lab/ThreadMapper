@@ -106,57 +106,52 @@ struct DashboardView: View {
                             ProgressView().controlSize(.small)
                         } else {
                             Label("Rescan", systemImage: "arrow.clockwise")
-                                .font(.caption.weight(.medium))
                         }
                     }
                     .disabled(viewModel.isScanning)
                 }
-                ToolbarItem(placement: .secondaryAction) {
-                    Button { showDiagnostics = true } label: {
-                        Label("Network Diagnostics", systemImage: "stethoscope")
-                    }
-                }
-                if !viewModel.devices.isEmpty {
-                    ToolbarItem(placement: .secondaryAction) {
-                        Button { showCommissioningCheck = true } label: {
-                            Label("Commissioning Readiness", systemImage: "checkmark.shield")
+                // Single menu keeps all actions in the nav bar on iOS, iPad, and Mac.
+                // Using .secondaryAction sends items to the Mac menu bar instead.
+                ToolbarItem(placement: .primaryAction) {
+                    Menu {
+                        Button { showDiagnostics = true } label: {
+                            Label("Network Diagnostics", systemImage: "stethoscope")
                         }
-                    }
-                    ToolbarItem(placement: .secondaryAction) {
-                        Button {
-                            if ProStore.shared.isPro { showSmartAdvisor = true }
-                            else { showPaywall = true }
-                        } label: {
-                            Label("Smart Home Advisor", systemImage: "wand.and.stars")
+                        if !viewModel.devices.isEmpty {
+                            Button { showCommissioningCheck = true } label: {
+                                Label("Commissioning Readiness", systemImage: "checkmark.shield")
+                            }
+                            Divider()
+                            Button {
+                                if ProStore.shared.isPro { showAIInsights = true }
+                                else { showPaywall = true }
+                            } label: {
+                                Label("AI Insights", systemImage: "apple.intelligence")
+                            }
+                            Button {
+                                if ProStore.shared.isPro { showSmartAdvisor = true }
+                                else { showPaywall = true }
+                            } label: {
+                                Label("Smart Home Advisor", systemImage: "wand.and.stars")
+                            }
+                            if WeeklyReportStore.shared.latestReport != nil {
+                                Button {
+                                    if ProStore.shared.isPro { showWeeklyReport = true }
+                                    else { showPaywall = true }
+                                } label: {
+                                    Label("Weekly Report", systemImage: "doc.text.fill")
+                                }
+                            }
+                            Divider()
+                            Button { exportHealthCard() } label: {
+                                Label("Share Health Card", systemImage: "square.and.arrow.up")
+                            }
+                            Button { exportDiagnosticPDF() } label: {
+                                Label("Export Diagnostic PDF", systemImage: "doc.text")
+                            }
                         }
-                    }
-                    ToolbarItem(placement: .secondaryAction) {
-                        Button {
-                            if ProStore.shared.isPro { showAIInsights = true }
-                            else { showPaywall = true }
-                        } label: {
-                            Label("AI Insights", systemImage: "apple.intelligence")
-                        }
-                    }
-                    ToolbarItem(placement: .secondaryAction) {
-                        Button { exportHealthCard() } label: {
-                            Label("Share Health Card", systemImage: "square.and.arrow.up")
-                        }
-                    }
-                    ToolbarItem(placement: .secondaryAction) {
-                        Button { exportDiagnosticPDF() } label: {
-                            Label("Export Diagnostic PDF", systemImage: "doc.text")
-                        }
-                    }
-                }
-                if WeeklyReportStore.shared.latestReport != nil {
-                    ToolbarItem(placement: .secondaryAction) {
-                        Button {
-                            if ProStore.shared.isPro { showWeeklyReport = true }
-                            else { showPaywall = true }
-                        } label: {
-                            Label("Weekly Report", systemImage: "doc.text.fill")
-                        }
+                    } label: {
+                        Label("More", systemImage: "ellipsis.circle")
                     }
                 }
             }

@@ -53,32 +53,36 @@ struct NetworkDiagnosticsView: View {
                     }
                     .disabled(isAnalyzing || devices.isEmpty)
                 }
-                if let snap = currentSnapshot {
-                    ToolbarItem(placement: .secondaryAction) {
-                        Button {
-                            baseline = snap
-                            TopologySnapshot.saveBaseline(snap)
-                            withAnimation { baselineSavedFeedback = true }
-                            Task {
-                                try? await Task.sleep(for: .seconds(2))
-                                withAnimation { baselineSavedFeedback = false }
+                if currentSnapshot != nil || baseline != nil {
+                    ToolbarItem(placement: .primaryAction) {
+                        Menu {
+                            if let snap = currentSnapshot {
+                                Button {
+                                    baseline = snap
+                                    TopologySnapshot.saveBaseline(snap)
+                                    withAnimation { baselineSavedFeedback = true }
+                                    Task {
+                                        try? await Task.sleep(for: .seconds(2))
+                                        withAnimation { baselineSavedFeedback = false }
+                                    }
+                                } label: {
+                                    Label(
+                                        baselineSavedFeedback ? "Baseline Saved" :
+                                            (baseline == nil ? "Save as Baseline" : "Update Baseline"),
+                                        systemImage: baselineSavedFeedback ? "checkmark.circle.fill" : "pin.circle"
+                                    )
+                                }
+                            }
+                            if baseline != nil {
+                                Button(role: .destructive) {
+                                    baseline = nil
+                                    TopologySnapshot.clearBaseline()
+                                } label: {
+                                    Label("Clear Baseline", systemImage: "pin.slash")
+                                }
                             }
                         } label: {
-                            Label(
-                                baselineSavedFeedback ? "Baseline Saved" :
-                                    (baseline == nil ? "Save as Baseline" : "Update Baseline"),
-                                systemImage: baselineSavedFeedback ? "checkmark.circle.fill" : "pin.circle"
-                            )
-                        }
-                    }
-                }
-                if baseline != nil {
-                    ToolbarItem(placement: .secondaryAction) {
-                        Button(role: .destructive) {
-                            baseline = nil
-                            TopologySnapshot.clearBaseline()
-                        } label: {
-                            Label("Clear Baseline", systemImage: "pin.slash")
+                            Label("Baseline", systemImage: "pin.circle")
                         }
                     }
                 }

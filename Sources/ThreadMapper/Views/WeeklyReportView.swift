@@ -30,7 +30,7 @@ struct WeeklyReportView: View {
                 ToolbarItem(placement: .primaryAction) {
                     Button(String(localized: "Done")) { dismiss() }
                 }
-                ToolbarItem(placement: .secondaryAction) {
+                ToolbarItem(placement: .primaryAction) {
                     ShareLink(item: shareText) {
                         Label(String(localized: "Share"), systemImage: "square.and.arrow.up")
                     }

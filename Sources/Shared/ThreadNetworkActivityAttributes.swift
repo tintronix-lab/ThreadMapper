@@ -1,3 +1,4 @@
+#if os(iOS)
 import ActivityKit
 import Foundation
 
@@ -13,3 +14,4 @@ struct ThreadNetworkActivityAttributes: ActivityAttributes {
 
     var networkName: String
 }
+#endif

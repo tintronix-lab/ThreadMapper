@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.3.0 (2026-07-23)
+
+### Added
+
+**Apple Watch Companion** *(watchOS 10+)*
+- **Watch app** — new `ThreadMapperWatch` target; shows a Gauge grade ring, device count, offline count, and a relative "last updated" timestamp
+- **Live sync** via `WCSession.updateApplicationContext` — `WatchConnectivityManager` (iPhone side) sends grade, score, device count, offline count, and border-router-offline flag on every health change; `WatchConnectivityStore` (Watch side) applies updates and replays the last known context on activation
+- **Haptic alert** — `WKInterfaceDevice.play(.notification)` fires when a border router transitions from reachable to offline
+- **Watch face complications** — new `ThreadMapperWatchWidget` extension with three WidgetKit families:
+  - `accessoryCircular` — Gauge arc tinted by grade color; offline count badge when > 0
+  - `accessoryInline` — "Thread A · 8 devices" (or offline count if non-zero)
+  - `accessoryRectangular` — grade letter, score/100, device count, and offline count
+- Complications read `WidgetSnapshot` from the shared App Group (`group.com.tintronixlab.ThreadMapper`) — zero additional battery or network overhead
+
+---
+
 ## 1.2.0 (2026-07-23)
 
 ### Added

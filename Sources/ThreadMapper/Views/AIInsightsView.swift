@@ -93,7 +93,7 @@ struct AIInsightsView: View {
                     .disabled(isAnalyzing)
                 }
                 if let text = shareText {
-                    ToolbarItem(placement: .secondaryAction) {
+                    ToolbarItem(placement: .primaryAction) {
                         ShareLink(item: text) {
                             Label("Share Analysis", systemImage: "square.and.arrow.up")
                         }

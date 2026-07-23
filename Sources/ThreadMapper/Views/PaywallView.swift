@@ -8,13 +8,17 @@ struct PaywallView: View {
     @State private var purchaseError: String?
 
     private let features: [(icon: String, title: String, detail: String)] = [
-        ("apple.intelligence",          "AI Insights",             "Full network health analysis, predictions, and optimization plans powered by Apple Intelligence"),
-        ("bubble.left.and.text.bubble.right.fill", "Network Assistant", "On-device AI chat for personalised diagnostics — ask anything about your mesh"),
-        ("wand.and.stars",              "Smart Home Advisor",      "Placement, automation, and scene recommendations tailored to your devices"),
-        ("doc.text.fill",               "Weekly Reports",          "AI-written summaries of your network health delivered every Sunday"),
-        ("chart.bar.fill",              "Mesh Resilience Score",   "Know exactly which device failure would partition your mesh"),
-        ("flame.fill",                  "Health Streaks",          "Track consecutive Grade A days and build a reliability record"),
+        ("apple.intelligence",          "AI Insights",             "Full network health analysis, predictions, optimization plans, and maintenance calendar — powered by Apple Intelligence on-device"),
+        ("bubble.left.and.text.bubble.right.fill", "Network Assistant", "Streaming on-device AI chat for personalised diagnostics; ask anything about your mesh or any specific device"),
+        ("chart.bar.fill",              "Resilience Simulator",    "Simulate the failure of any border router or relay and see exactly which devices would be orphaned"),
         ("clock.arrow.circlepath",      "30-Day History",          "See a full month of network health trends and events in the timeline"),
+        ("film.stack",                  "Topology Time-Lapse",     "Replay how your mesh topology changed over time with a 50-minute scrubber"),
+        ("arrow.down.doc.fill",         "Diagnostic PDF Export",   "Generate a 3-page diagnostic report for sharing with installers or saving for your records"),
+        ("theatermasks.fill",           "HomeKit Scene Triggers",  "Automatically run a HomeKit scene when health drops below your chosen grade threshold"),
+        ("wand.and.stars",              "Smart Home Advisor",      "Placement, automation, and scene recommendations tailored to your Thread topology"),
+        ("doc.text.fill",               "Weekly Reports",          "Auto-generated weekly summary with grade distribution, stability score, and streak tracking"),
+        ("flame.fill",                  "Health Streaks",          "Track consecutive Grade A days and build a long-term reliability record"),
+        ("applewatch",                  "Watch Face Complications", "Three WidgetKit complication families show grade, score, and offline count on any watch face"),
     ]
 
     var body: some View {

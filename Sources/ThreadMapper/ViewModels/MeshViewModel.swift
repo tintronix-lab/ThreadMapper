@@ -166,7 +166,13 @@ final class MeshViewModel {
                     )
                     if fingerprint != self.lastSnapshotFingerprint || healthChanged {
                         self.lastSnapshotFingerprint = fingerprint
-                        AppGroupStore.writeSnapshot(self.buildWidgetSnapshot(health: newHealth, aggregates: agg))
+                        let widgetSnapshot = self.buildWidgetSnapshot(health: newHealth, aggregates: agg)
+                        AppGroupStore.writeSnapshot(widgetSnapshot)
+                        let brOffline = self.nodes.contains { node in
+                            node.kind == .borderRouter &&
+                            (self.devices.first { $0.uniqueIdentifier == node.deviceID }?.isOffline == true)
+                        }
+                        WatchConnectivityManager.shared.send(snapshot: widgetSnapshot, borderRouterOffline: brOffline)
                         AppGroupStore.writeDeviceStates(agg.deviceStates)
                         HealthHistoryStore.shared.record(score: newHealth.score, grade: newHealth.grade)
                         HealthStreakStore.shared.record(grade: newHealth.grade)
