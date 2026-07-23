@@ -306,8 +306,9 @@ struct AINetworkAnalyzer {
         let avgScore = weekEntries.isEmpty ? health.score
             : Int(weekEntries.map { Double($0.score) }.reduce(0, +) / Double(weekEntries.count))
         let trend: String = {
-            guard weekEntries.count >= 2 else { return "steady" }
-            let first = weekEntries.first!.score, last = weekEntries.last!.score
+            guard weekEntries.count >= 2,
+                  let first = weekEntries.first?.score, let last = weekEntries.last?.score
+            else { return "steady" }
             if last - first > 5 { return "improving" }
             if first - last > 5 { return "declining" }
             return "steady"

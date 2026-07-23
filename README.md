@@ -160,17 +160,29 @@ Sources/
 **Requirements:** Xcode 26+, iOS 17+ device or simulator, HomeKit-enabled home for real data.  
 **AI features** (AI Insights, Network Assistant) additionally require iOS 26+ and an Apple Intelligence-eligible device (iPhone 16 or later).
 
-```bash
-# Open the SPM workspace in Xcode
-open .swiftpm/xcode/package.xcworkspace
+The Xcode project is generated from `project.yml` by [XcodeGen](https://github.com/yonaskolb/XcodeGen) and goes stale whenever a source file is added or renamed — regenerate before building.
 
+```bash
+brew install xcodegen
+xcodegen generate
+open ThreadMapper.xcodeproj
+```
+
+```bash
 # Build for a connected device via xcodebuild
 xcrun xcodebuild \
-  -workspace .swiftpm/xcode/package.xcworkspace \
+  -project ThreadMapper.xcodeproj \
   -scheme ThreadMapper \
   -destination 'id=<device-udid>' \
   -configuration Debug build
 ```
+
+> **Use `ThreadMapper.xcodeproj`, not `.swiftpm/xcode/package.xcworkspace`.** The SPM
+> workspace exposes only the `ThreadMapper` *library* product — it has no app target,
+> so it produces object files rather than an installable `.app`, under a different
+> bundle identifier. `swift build` / `swift test` likewise cannot build this package:
+> it depends on HomeKit and UIKit, which exist only on iOS. Use `make build` and
+> `make test` (both drive an iOS simulator through `xcodebuild`).
 
 ---
 

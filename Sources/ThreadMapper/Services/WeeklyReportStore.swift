@@ -6,6 +6,22 @@ import Observation
 final class WeeklyReportStore {
     static let shared = WeeklyReportStore()
 
+    /// Which statements the report chose to make, independent of how they are
+    /// phrased. `body` is built from `String(localized:)` prose, so it differs
+    /// per locale and cannot be asserted on; these segments are the stable,
+    /// testable record of the report's content decisions.
+    enum BodySegment: String, Codable {
+        case average
+        case noOfflineEvents
+        case worstDevice
+        case borderRouterEvents
+        case streak
+        case totalADays
+        case improved
+        case dropped
+        case noData
+    }
+
     struct Report: Codable, Identifiable {
         let id: UUID
         let generatedAt: Date
@@ -17,10 +33,14 @@ final class WeeklyReportStore {
         let offlineEventCount: Int
         let borderRouterEventCount: Int
         let mostProblematicDevice: String?
+        /// Offline-event count attributed to `mostProblematicDevice`.
+        let mostProblematicDeviceEventCount: Int
         let streakDays: Int
         let totalADays: Int
         let gradeDistribution: [String: Int] // grade → entry count (5-min intervals)
         let body: String
+        /// Locale-independent record of which statements `body` contains.
+        let bodySegments: [BodySegment]
 
         // Backward-compatible decoder: old JSON files lack the new fields.
         init(from decoder: Decoder) throws {
@@ -35,24 +55,29 @@ final class WeeklyReportStore {
             offlineEventCount      = try c.decode(Int.self,    forKey: .offlineEventCount)
             borderRouterEventCount = try c.decodeIfPresent(Int.self,         forKey: .borderRouterEventCount) ?? 0
             mostProblematicDevice  = try c.decodeIfPresent(String.self,      forKey: .mostProblematicDevice)
+            mostProblematicDeviceEventCount = try c.decodeIfPresent(Int.self, forKey: .mostProblematicDeviceEventCount) ?? 0
             streakDays             = try c.decode(Int.self,    forKey: .streakDays)
             totalADays             = try c.decode(Int.self,    forKey: .totalADays)
             gradeDistribution      = try c.decodeIfPresent([String: Int].self, forKey: .gradeDistribution)   ?? [:]
             body                   = try c.decode(String.self, forKey: .body)
+            bodySegments           = try c.decodeIfPresent([BodySegment].self, forKey: .bodySegments)        ?? []
         }
 
         init(id: UUID, generatedAt: Date, weekRangeLabel: String, avgScore: Int,
              peakGrade: String, lowestGrade: String, scoreDelta: Int,
              offlineEventCount: Int, borderRouterEventCount: Int,
-             mostProblematicDevice: String?, streakDays: Int, totalADays: Int,
-             gradeDistribution: [String: Int], body: String) {
+             mostProblematicDevice: String?, mostProblematicDeviceEventCount: Int,
+             streakDays: Int, totalADays: Int,
+             gradeDistribution: [String: Int], body: String, bodySegments: [BodySegment]) {
             self.id = id; self.generatedAt = generatedAt; self.weekRangeLabel = weekRangeLabel
             self.avgScore = avgScore; self.peakGrade = peakGrade; self.lowestGrade = lowestGrade
             self.scoreDelta = scoreDelta; self.offlineEventCount = offlineEventCount
             self.borderRouterEventCount = borderRouterEventCount
             self.mostProblematicDevice = mostProblematicDevice
+            self.mostProblematicDeviceEventCount = mostProblematicDeviceEventCount
             self.streakDays = streakDays; self.totalADays = totalADays
-            self.gradeDistribution = gradeDistribution; self.body = body
+            self.gradeDistribution = gradeDistribution
+            self.body = body; self.bodySegments = bodySegments
         }
     }
 
@@ -113,8 +138,11 @@ final class WeeklyReportStore {
             : historyEntries.map(\.score).reduce(0, +) / historyEntries.count
         let peakGrade  = historyEntries.max(by: { $0.score < $1.score })?.grade ?? "—"
         let lowestGrade = historyEntries.min(by: { $0.score < $1.score })?.grade ?? "—"
-        let scoreDelta  = historyEntries.count >= 2
-            ? (historyEntries.last!.score - historyEntries.first!.score) : 0
+        let scoreDelta: Int = {
+            guard let first = historyEntries.first, let last = historyEntries.last,
+                  historyEntries.count >= 2 else { return 0 }
+            return last.score - first.score
+        }()
 
         // Grade distribution (entry counts per grade letter)
         let gradeDistribution = Dictionary(grouping: historyEntries) { $0.grade }
@@ -130,32 +158,52 @@ final class WeeklyReportStore {
             .mapValues { $0.count }
         let worstDevice = deviceCounts.max(by: { $0.value < $1.value })?.key
 
-        // Build prose body
-        var sentences: [String] = []
-        if !historyEntries.isEmpty {
-            sentences.append(String(localized: "Your Thread network averaged \(avgScore)/100 this week, peaking at Grade \(peakGrade)."))
-        }
+        let worstDeviceCount = worstDevice.map { deviceCounts[$0] ?? 0 } ?? 0
+
+        // Decide *what* the report says, then render it. Segments are recorded
+        // on the Report so the decisions stay assertable without depending on
+        // the rendered locale.
+        var segments: [BodySegment] = []
+        if !historyEntries.isEmpty { segments.append(.average) }
         if offlineEvents.isEmpty {
-            sentences.append(String(localized: "No offline events — solid stability all week."))
-        } else if let device = worstDevice {
-            let n = deviceCounts[device] ?? 0
-            sentences.append(String(localized: "\(device) caused the most disruption with \(n) offline events."))
+            segments.append(.noOfflineEvents)
+        } else if worstDevice != nil {
+            segments.append(.worstDevice)
         }
-        if brEventCount > 0 {
-            sentences.append(String(localized: "\(brEventCount) border router offline events affected whole-mesh connectivity."))
-        }
+        if brEventCount > 0 { segments.append(.borderRouterEvents) }
         if currentStreak >= 3 {
-            sentences.append(String(localized: "You're on a \(currentStreak)-day Grade A streak — excellent!"))
+            segments.append(.streak)
         } else if totalADays > 0 {
-            sentences.append(String(localized: "You've reached Grade A on \(totalADays) days total."))
+            segments.append(.totalADays)
         }
         if scoreDelta >= 10 {
-            sentences.append(String(localized: "Performance improved \(scoreDelta) pts since the start of the window."))
+            segments.append(.improved)
         } else if scoreDelta <= -10 {
-            sentences.append(String(localized: "Performance dropped \(abs(scoreDelta)) pts — check the Issues tab."))
+            segments.append(.dropped)
         }
-        if sentences.isEmpty {
-            sentences.append(String(localized: "Open the app regularly to build up your network history for richer weekly reports."))
+        if segments.isEmpty { segments.append(.noData) }
+
+        let sentences: [String] = segments.map { segment in
+            switch segment {
+            case .average:
+                return String(localized: "Your Thread network averaged \(avgScore)/100 this week, peaking at Grade \(peakGrade).")
+            case .noOfflineEvents:
+                return String(localized: "No offline events — solid stability all week.")
+            case .worstDevice:
+                return String(localized: "\(worstDevice ?? "") caused the most disruption with \(worstDeviceCount) offline events.")
+            case .borderRouterEvents:
+                return String(localized: "\(brEventCount) border router offline events affected whole-mesh connectivity.")
+            case .streak:
+                return String(localized: "You're on a \(currentStreak)-day Grade A streak — excellent!")
+            case .totalADays:
+                return String(localized: "You've reached Grade A on \(totalADays) days total.")
+            case .improved:
+                return String(localized: "Performance improved \(scoreDelta) pts since the start of the window.")
+            case .dropped:
+                return String(localized: "Performance dropped \(abs(scoreDelta)) pts — check the Issues tab.")
+            case .noData:
+                return String(localized: "Open the app regularly to build up your network history for richer weekly reports.")
+            }
         }
 
         return Report(
@@ -169,10 +217,12 @@ final class WeeklyReportStore {
             offlineEventCount: offlineEvents.count,
             borderRouterEventCount: brEventCount,
             mostProblematicDevice: worstDevice,
+            mostProblematicDeviceEventCount: worstDeviceCount,
             streakDays: currentStreak,
             totalADays: totalADays,
             gradeDistribution: gradeDistribution,
-            body: sentences.joined(separator: " ")
+            body: sentences.joined(separator: " "),
+            bodySegments: segments
         )
     }
 

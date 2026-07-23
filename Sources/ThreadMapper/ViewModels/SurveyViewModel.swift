@@ -21,7 +21,8 @@ final class SurveyViewModel {
     }
     @ObservationIgnored
     private let storeURL: URL = {
-        let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
         return documents.appendingPathComponent("surveys.json")
     }()
 

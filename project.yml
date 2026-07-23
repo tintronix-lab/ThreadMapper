@@ -13,6 +13,12 @@ options:
 
 settings:
   base:
+    # Single source of truth for the version — both Info.plists reference these
+    # via $(MARKETING_VERSION) / $(CURRENT_PROJECT_VERSION). Hardcoding them per
+    # target let the app and widget drift, which the App Store rejects
+    # ("CFBundleVersion of an app extension must match its parent app").
+    MARKETING_VERSION: "1.2.0"
+    CURRENT_PROJECT_VERSION: "3"
     SWIFT_VERSION: "5"
     # Match Package.swift's StrictConcurrency opt-in in the shipping build.
     # Swift 5 language mode → diagnostics are warnings, never build errors.

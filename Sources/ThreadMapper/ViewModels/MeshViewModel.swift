@@ -150,16 +150,21 @@ final class MeshViewModel {
                     let agg = self.computeAggregates()
                     NotificationService.shared.updateBadge(agg.offlineCount)
                     let newHealth = NetworkHealthScore.compute(devices: self.devices)
+                    // Capture the comparison *before* assigning — reading
+                    // `newHealth != self.health` after the assignment is always
+                    // false, which would silently drop history/streak/time-lapse
+                    // samples on ticks where only the score moved.
+                    let healthChanged = newHealth != self.health
                     // Assign only on change — NetworkHealthScore is Equatable, so an
                     // identical tick no longer invalidates every Dashboard observer (D4).
-                    if newHealth != self.health { self.health = newHealth }
+                    if healthChanged { self.health = newHealth }
                     // Only write the snapshot and trigger side-effects when the aggregate
                     // state actually changed.
                     let fingerprint = SnapshotFingerprint(
                         deviceCount: self.devices.count, offlineCount: agg.offlineCount,
                         weakCount: agg.weakCount, brCount: agg.brCount, routerCount: agg.routerCount
                     )
-                    if fingerprint != self.lastSnapshotFingerprint || newHealth != self.health {
+                    if fingerprint != self.lastSnapshotFingerprint || healthChanged {
                         self.lastSnapshotFingerprint = fingerprint
                         AppGroupStore.writeSnapshot(self.buildWidgetSnapshot(health: newHealth, aggregates: agg))
                         AppGroupStore.writeDeviceStates(agg.deviceStates)
