@@ -14,9 +14,7 @@ enum SpotlightService {
 
             var parts: [String] = []
             if let room = device.room { parts.append(room) }
-            if      device.isBorderRouter { parts.append("Border Router") }
-            else if device.isRouter       { parts.append("Router") }
-            else                          { parts.append("Thread Device") }
+            if      device.isBorderRouter { parts.append("Border Router") } else if device.isRouter { parts.append("Router") } else { parts.append("Thread Device") }
             attrs.contentDescription = parts.joined(separator: " · ")
 
             var keywords = ["Thread", "network", "HomeKit"]

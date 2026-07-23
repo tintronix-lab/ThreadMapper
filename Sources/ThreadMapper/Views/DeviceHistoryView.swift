@@ -60,7 +60,7 @@ struct DeviceHistoryView: View {
                 lastDates[devID] = event.timestamp
             }
             if event.kind == .topologyJoined { joinCounts[devID, default: 0] += 1 }
-            if event.kind == .deviceOffline   { offlineCounts[devID, default: 0] += 1 }
+            if event.kind == .deviceOffline { offlineCounts[devID, default: 0] += 1 }
         }
 
         let onlineIDs = Set(meshViewModel.devices.filter { !$0.isOffline }.map(\.id))

@@ -1,5 +1,5 @@
-import SwiftUI
 import Observation
+import SwiftUI
 
 // MARK: - Store
 
@@ -166,16 +166,13 @@ struct DeviceStats {
         let total = Double(readings.count)
         var excellent = 0, good = 0, fair = 0, weak = 0
         for r in readings {
-            if      r.rssi > SignalThresholds.excellent { excellent += 1 }
-            else if r.rssi > SignalThresholds.good { good += 1 }
-            else if r.rssi > SignalThresholds.weak { fair += 1 }
-            else { weak += 1 }
+            if      r.rssi > SignalThresholds.excellent { excellent += 1 } else if r.rssi > SignalThresholds.good { good += 1 } else if r.rssi > SignalThresholds.weak { fair += 1 } else { weak += 1 }
         }
         return [
-            QualityBucket(label: "Excellent", color: .green,  fraction: Double(excellent) / total),
-            QualityBucket(label: "Good",      color: .mint,   fraction: Double(good) / total),
-            QualityBucket(label: "Fair",      color: .orange, fraction: Double(fair) / total),
-            QualityBucket(label: "Weak",      color: .red,    fraction: Double(weak) / total),
+            QualityBucket(label: "Excellent", color: .green, fraction: Double(excellent) / total),
+            QualityBucket(label: "Good", color: .mint, fraction: Double(good) / total),
+            QualityBucket(label: "Fair", color: .orange, fraction: Double(fair) / total),
+            QualityBucket(label: "Weak", color: .red, fraction: Double(weak) / total),
         ]
     }
 

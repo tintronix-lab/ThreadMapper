@@ -38,7 +38,6 @@ final class MatterDiscoveryService: DiscoveryService, @unchecked Sendable {
     var discoveryError: DiscoveryError?
 
     @ObservationIgnored private let homeTracker = HomeTracker()
-    @ObservationIgnored private var deviceIDCache: [String: UUID] = [:]
     @ObservationIgnored private var accessoryCache: [UUID: HMAccessory] = [:]
 
     private init() {
@@ -70,12 +69,9 @@ final class MatterDiscoveryService: DiscoveryService, @unchecked Sendable {
     private func extractThreadDevices(from homes: [HMHome]) -> [ThreadDevice] {
         homes.flatMap { home in
             home.accessories.map { accessory in
-                let key = accessory.uniqueIdentifier.uuidString
-                let id = cachedID(for: key)
                 let isBridge = accessory.category.categoryType == HMAccessoryCategoryTypeBridge
                 accessoryCache[accessory.uniqueIdentifier] = accessory
                 return ThreadDevice(
-                    id: id,
                     name: accessory.name,
                     manufacturer: accessory.manufacturer ?? "Unknown",
                     productName: accessory.model ?? accessory.name,
@@ -132,13 +128,6 @@ final class MatterDiscoveryService: DiscoveryService, @unchecked Sendable {
         case 350..<800: return -85
         default:      return -92
         }
-    }
-
-    private func cachedID(for key: String) -> UUID {
-        if let id = deviceIDCache[key] { return id }
-        let id = UUID()
-        deviceIDCache[key] = id
-        return id
     }
 
     private func batteryLevel(for accessory: HMAccessory) -> Int? {

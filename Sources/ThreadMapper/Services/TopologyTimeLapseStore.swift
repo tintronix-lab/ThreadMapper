@@ -74,7 +74,7 @@ final class TopologyTimeLapseStore {
     func biggestChange() -> (from: TimeLapseFrame, to: TimeLapseFrame)? {
         guard frames.count >= 2 else { return nil }
         var maxDelta = 0
-        var result: (TimeLapseFrame, TimeLapseFrame)? = nil
+        var result: (TimeLapseFrame, TimeLapseFrame)?
         for i in 0..<frames.count - 1 {
             let a = frames[i]
             let b = frames[i + 1]

@@ -30,7 +30,7 @@ struct ChannelScannerView: View {
 
     // MARK: - Computed data
 
-    private static let highRisk:   Set<Int> = [11, 12, 13, 17, 18, 19, 22, 23, 24]
+    private static let highRisk: Set<Int> = [11, 12, 13, 17, 18, 19, 22, 23, 24]
     private static let mediumRisk: Set<Int> = [14, 16, 20, 21, 25]
 
     private func spectrumAccessibilitySummary(channels: [ChannelInfo], recommended: Set<Int>) -> Text {
@@ -56,9 +56,7 @@ struct ChannelScannerView: View {
         return (11...26).map { ch in
             let devices = byChannel[ch] ?? []
             let risk: ChannelInfo.Risk
-            if Self.highRisk.contains(ch)   { risk = .high }
-            else if Self.mediumRisk.contains(ch) { risk = .medium }
-            else                             { risk = .low }
+            if Self.highRisk.contains(ch) { risk = .high } else if Self.mediumRisk.contains(ch) { risk = .medium } else { risk = .low }
             return ChannelInfo(
                 channel: ch,
                 frequencyMHz: 2405 + (ch - 11) * 5,
@@ -124,15 +122,15 @@ struct ChannelScannerView: View {
             .accessibilityValue(spectrumAccessibilitySummary(channels: data, recommended: recommended))
 
             HStack(spacing: 14) {
-                legendDot(.red,    "High Wi-Fi overlap")
+                legendDot(.red, "High Wi-Fi overlap")
                 legendDot(.orange, "Medium overlap")
-                legendDot(.green,  "Low overlap")
+                legendDot(.green, "Low overlap")
             }
             .font(.caption2)
             .foregroundStyle(.secondary)
 
             HStack(spacing: 14) {
-                legendDot(.blue,   "Your mesh channel")
+                legendDot(.blue, "Your mesh channel")
                 HStack(spacing: 4) {
                     Text("★")
                         .font(.caption2)

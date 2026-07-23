@@ -1,6 +1,6 @@
-import SwiftUI
-import Observation
 import AppIntents
+import Observation
+import SwiftUI
 
 @main
 struct ThreadMapperApp: App {

@@ -8,8 +8,8 @@ struct TopologyChangeDigestView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(ProStore.self) private var proStore
 
-    @State private var aiHeadline: String? = nil
-    @State private var aiOutlook: String? = nil
+    @State private var aiHeadline: String?
+    @State private var aiOutlook: String?
     @State private var isLoadingAI = false
 
     private var timeAgoLabel: String {

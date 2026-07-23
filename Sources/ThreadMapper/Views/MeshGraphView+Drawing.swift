@@ -160,10 +160,7 @@ extension MeshGraphView {
                 || node.kind == .router
             if showLabel {
                 let maxChars: Int
-                if isSelected        { maxChars = 18 }
-                else if scale >= 2.5 { maxChars = 16 }
-                else if scale >= 1.8 { maxChars = 11 }
-                else                 { maxChars = 7  }
+                if isSelected { maxChars = 18 } else if scale >= 2.5 { maxChars = 16 } else if scale >= 1.8 { maxChars = 11 } else { maxChars = 7  }
 
                 let displayName = node.name.count > maxChars
                     ? String(node.name.prefix(maxChars - 1)) + "…"

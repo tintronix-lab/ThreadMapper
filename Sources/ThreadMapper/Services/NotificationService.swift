@@ -1,6 +1,6 @@
-import UserNotifications
 import Foundation
 import Observation
+import UserNotifications
 
 enum NotificationDeepLink: Equatable {
     case deviceDetail(UUID)
@@ -14,7 +14,7 @@ final class NotificationService: NSObject {
     static let shared = NotificationService()
 
     private(set) var isAuthorized = false
-    var pendingDeepLink: NotificationDeepLink? = nil
+    var pendingDeepLink: NotificationDeepLink?
 
     private override init() {
         super.init()
@@ -133,7 +133,7 @@ final class NotificationService: NSObject {
         content.title = String(localized: "Thread Network Changed")
         var parts: [String] = []
         if !joined.isEmpty { parts.append(String(localized: "\(joined.joined(separator: ", ")) joined")) }
-        if !left.isEmpty   { parts.append(String(localized: "\(left.joined(separator: ", ")) left")) }
+        if !left.isEmpty { parts.append(String(localized: "\(left.joined(separator: ", ")) left")) }
         content.body = parts.joined(separator: " · ")
         content.sound = .default
         schedule(content, id: "topology-\(Int(Date().timeIntervalSince1970))")
@@ -147,7 +147,8 @@ final class NotificationService: NSObject {
         content.title = String(localized: "New Thread Device Detected")
         content.body = String(localized: "\(name) has joined your mesh for the first time.")
         content.sound = .default
-        content.userInfo = ["deepLink": "device/\(id.uuidString)"]
+        // The tap is routed by the request id ("first-seen-<uuid>") in the
+        // delegate; no userInfo deep link needed.
         schedule(content, id: "first-seen-\(id.uuidString)")
     }
 
@@ -256,8 +257,13 @@ extension NotificationService: UNUserNotificationCenterDelegate {
     ) {
         let id = response.notification.request.identifier
         Task { @MainActor [self] in
-            if id.hasPrefix("offline-") {
-                let uuidStr = String(id.dropFirst("offline-".count))
+            if id.hasPrefix("offline-") || id.hasPrefix("first-seen-") {
+                // Both notification kinds encode the device's `uniqueIdentifier`
+                // in the request id ("offline-<uuid>" / "first-seen-<uuid>").
+                // first-seen was previously unhandled, so tapping a "New Thread
+                // Device" alert did nothing.
+                let prefix = id.hasPrefix("offline-") ? "offline-" : "first-seen-"
+                let uuidStr = String(id.dropFirst(prefix.count))
                 if let uuid = UUID(uuidString: uuidStr) {
                     pendingDeepLink = .deviceDetail(uuid)
                 } else {

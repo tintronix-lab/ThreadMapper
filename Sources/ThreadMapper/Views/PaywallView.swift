@@ -1,5 +1,5 @@
-import SwiftUI
 import StoreKit
+import SwiftUI
 
 struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
@@ -8,22 +8,22 @@ struct PaywallView: View {
     @State private var purchaseError: String?
 
     private let features: [(icon: String, title: String, detail: String)] = [
-        ("apple.intelligence",          "AI Insights",             "Full network health analysis, predictions, optimization plans, and maintenance calendar — powered by Apple Intelligence on-device"),
+        ("apple.intelligence", "AI Insights", "Full network health analysis, predictions, optimization plans, and maintenance calendar — powered by Apple Intelligence on-device"),
         ("bubble.left.and.text.bubble.right.fill", "Network Assistant", "Streaming on-device AI chat for personalised diagnostics; ask anything about your mesh or any specific device"),
-        ("chart.bar.fill",              "Resilience Simulator",    "Simulate the failure of any border router or relay and see exactly which devices would be orphaned"),
-        ("clock.arrow.circlepath",      "30-Day History",          "See a full month of network health trends and events in the timeline"),
-        ("film.stack",                  "Topology Time-Lapse",     "Replay how your mesh topology changed over time with a 50-minute scrubber"),
-        ("arrow.down.doc.fill",         "Diagnostic PDF Export",   "Generate a 3-page diagnostic report for sharing with installers or saving for your records"),
-        ("theatermasks.fill",           "HomeKit Scene Triggers",  "Automatically run a HomeKit scene when health drops below your chosen grade threshold"),
-        ("wand.and.stars",              "Smart Home Advisor",      "Placement, automation, and scene recommendations tailored to your Thread topology"),
-        ("doc.text.fill",               "Weekly Reports",          "Auto-generated weekly summary with grade distribution, stability score, and streak tracking"),
-        ("flame.fill",                  "Health Streaks",          "Track consecutive Grade A days and build a long-term reliability record"),
-        ("applewatch",                  "Watch Face Complications", "Three WidgetKit complication families show grade, score, and offline count on any watch face"),
-        ("bell.badge.waveform.fill",    "Alert Urgency Scoring",   "AI scores every offline alert 1–10 and suppresses low-urgency notifications so you only get pinged when it matters"),
-        ("graduationcap.fill",          "Weekly Health Coach",      "Personalised weekly coaching plan with 1–3 prioritised actions to improve your mesh grade"),
+        ("chart.bar.fill", "Resilience Simulator", "Simulate the failure of any border router or relay and see exactly which devices would be orphaned"),
+        ("clock.arrow.circlepath", "30-Day History", "See a full month of network health trends and events in the timeline"),
+        ("film.stack", "Topology Time-Lapse", "Replay how your mesh topology changed over time with a 50-minute scrubber"),
+        ("arrow.down.doc.fill", "Diagnostic PDF Export", "Generate a 3-page diagnostic report for sharing with installers or saving for your records"),
+        ("theatermasks.fill", "HomeKit Scene Triggers", "Automatically run a HomeKit scene when health drops below your chosen grade threshold"),
+        ("wand.and.stars", "Smart Home Advisor", "Placement, automation, and scene recommendations tailored to your Thread topology"),
+        ("doc.text.fill", "Weekly Reports", "Auto-generated weekly summary with grade distribution, stability score, and streak tracking"),
+        ("flame.fill", "Health Streaks", "Track consecutive Grade A days and build a long-term reliability record"),
+        ("applewatch", "Watch Face Complications", "Three WidgetKit complication families show grade, score, and offline count on any watch face"),
+        ("bell.badge.waveform.fill", "Alert Urgency Scoring", "AI scores every offline alert 1–10 and suppresses low-urgency notifications so you only get pinged when it matters"),
+        ("graduationcap.fill", "Weekly Health Coach", "Personalised weekly coaching plan with 1–3 prioritised actions to improve your mesh grade"),
         ("waveform.path.ecg.rectangle", "Anomaly Pattern Recognition", "AI names the specific failure pattern (e.g. 'Nightly Signal Drop') and gives a targeted fix for each degrading device"),
-        ("brain.head.profile",          "AI Troubleshooter",        "Device-specific step-by-step troubleshooting guide generated from your device's actual history, not generic advice"),
-        ("book.pages",                  "Network Storyteller",      "A narrative story of your mesh's last 30 days — opening, key events, current chapter, and outlook"),
+        ("brain.head.profile", "AI Troubleshooter", "Device-specific step-by-step troubleshooting guide generated from your device's actual history, not generic advice"),
+        ("book.pages", "Network Storyteller", "A narrative story of your mesh's last 30 days — opening, key events, current chapter, and outlook"),
     ]
 
     var body: some View {

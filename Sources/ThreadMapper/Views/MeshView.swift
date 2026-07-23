@@ -1,5 +1,5 @@
-import SwiftUI
 import Observation
+import SwiftUI
 
 enum MeshViewMode: Hashable {
     case map, list
@@ -14,9 +14,9 @@ struct MeshView: View {
     @State private var showBRMonitor = false
     @State private var showTimeLapse = false
     @State private var isExportingMap = false
-    @State private var exportedMapImage: UIImage? = nil
-    @State private var nlFilterIDs: [UUID]? = nil
-    @State private var nlFilterDescription: String? = nil
+    @State private var exportedMapImage: UIImage?
+    @State private var nlFilterIDs: [UUID]?
+    @State private var nlFilterDescription: String?
     @State private var isRunningNLFilter = false
     @State private var showPaywall = false
 

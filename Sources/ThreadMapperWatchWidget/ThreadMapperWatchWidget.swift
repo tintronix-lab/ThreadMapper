@@ -1,5 +1,5 @@
-import WidgetKit
 import SwiftUI
+import WidgetKit
 
 // MARK: - Data model (mirrors WidgetSnapshot from Sources/Shared)
 // Kept local so the watchOS widget extension doesn't pull in iOS-only Shared files.

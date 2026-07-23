@@ -10,7 +10,7 @@ final class WatchConnectivityStore: NSObject, ObservableObject {
     @Published var deviceCount: Int = 0
     @Published var offlineCount: Int = 0
     @Published var borderRouterOffline: Bool = false
-    @Published var lastUpdated: Date? = nil
+    @Published var lastUpdated: Date?
 
     override init() {
         super.init()

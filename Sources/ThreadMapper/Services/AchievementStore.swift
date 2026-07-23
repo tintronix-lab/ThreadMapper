@@ -20,12 +20,12 @@ import Observation
     @ObservationIgnored private let storeURL: URL
 
     static let catalog: [Achievement] = [
-        Achievement(id: "firstSurvey",      title: "First Steps",        description: "Complete your first room survey.", icon: "figure.walk"),
-        Achievement(id: "surveyThreeRooms", title: "Coverage Champion",  description: "Survey 3 or more rooms.", icon: "house.fill"),
-        Achievement(id: "firstGradeA",      title: "Grade A Network",    description: "Achieve a Grade A health score.", icon: "checkmark.seal.fill"),
-        Achievement(id: "streak3",          title: "Streak Starter",     description: "Maintain Grade A for 3 consecutive days.", icon: "flame"),
-        Achievement(id: "streak7",          title: "Streak Master",      description: "Maintain Grade A for 7 consecutive days.", icon: "flame.fill"),
-        Achievement(id: "resilienceA",      title: "Resilient Home",     description: "Achieve an A resilience score.", icon: "shield.checkmark.fill"),
+        Achievement(id: "firstSurvey", title: "First Steps", description: "Complete your first room survey.", icon: "figure.walk"),
+        Achievement(id: "surveyThreeRooms", title: "Coverage Champion", description: "Survey 3 or more rooms.", icon: "house.fill"),
+        Achievement(id: "firstGradeA", title: "Grade A Network", description: "Achieve a Grade A health score.", icon: "checkmark.seal.fill"),
+        Achievement(id: "streak3", title: "Streak Starter", description: "Maintain Grade A for 3 consecutive days.", icon: "flame"),
+        Achievement(id: "streak7", title: "Streak Master", description: "Maintain Grade A for 7 consecutive days.", icon: "flame.fill"),
+        Achievement(id: "resilienceA", title: "Resilient Home", description: "Achieve an A resilience score.", icon: "shield.checkmark.fill"),
     ]
 
     /// `storeURL` is injectable so tests can use a throwaway file; the shared

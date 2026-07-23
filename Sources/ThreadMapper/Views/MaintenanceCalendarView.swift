@@ -1,5 +1,5 @@
-import SwiftUI
 import FoundationModels
+import SwiftUI
 
 @available(iOS 26, *)
 struct MaintenanceCalendarView: View {

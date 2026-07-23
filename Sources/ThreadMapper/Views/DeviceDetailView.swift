@@ -11,18 +11,18 @@ struct DeviceDetailView: View {
     @State private var noteText = ""
     @State private var isEditingNote = false
     @Environment(DeviceOverrideStore.self) private var overrideStore
-    @State private var troubleshootProblem: TroubleshooterView.Problem? = nil
+    @State private var troubleshootProblem: TroubleshooterView.Problem?
     // Generated once on appear — generating in body wrote a temp file on every render.
     @State private var exportURL: URL?
     @State private var showFirmwareHistory = false
     @State private var showAIAssistant = false
     @State private var showPaywall = false
-    @State private var deviceAISummary: String? = nil
+    @State private var deviceAISummary: String?
     @State private var isLoadingDeviceSummary = false
-    @State private var explainContext: MetricExplanationContext? = nil
-    @State private var metricExplanation: String? = nil
+    @State private var explainContext: MetricExplanationContext?
+    @State private var metricExplanation: String?
     @State private var isLoadingMetricExplanation = false
-    @State private var anomalyPattern: Any? = nil  // holds AnomalyPattern on iOS 26+
+    @State private var anomalyPattern: Any?  // holds AnomalyPattern on iOS 26+
     @State private var isLoadingAnomalyPattern = false
 
     struct MetricExplanationContext: Identifiable {
@@ -277,8 +277,8 @@ struct DeviceDetailView: View {
                 let days = hours / 24
                 let timeLabel: String = {
                     if hours < 1 { return "< 1 hour" }
-                    if days < 1  { return "\(Int(hours.rounded())) hours" }
-                    if days < 2  { return "~1 day" }
+                    if days < 1 { return "\(Int(hours.rounded())) hours" }
+                    if days < 2 { return "~1 day" }
                     return "~\(Int(days.rounded())) days"
                 }()
                 HStack(spacing: 8) {
@@ -596,7 +596,7 @@ struct DeviceDetailView: View {
             $0.deviceID == device.uniqueIdentifier && $0.kind == .deviceOffline && $0.timestamp > cutoff
         }.count
         if jitter > 20 && offlineCount >= 3 { return ("High Drain", .red) }
-        if jitter > 15 || offlineCount >= 2  { return ("Elevated",  .orange) }
+        if jitter > 15 || offlineCount >= 2 { return ("Elevated", .orange) }
         if jitter <= 10 && offlineCount <= 1 { return ("Efficient", .green) }
         return ("Normal", .secondary)
     }
@@ -616,11 +616,11 @@ struct DeviceDetailView: View {
 
     @ViewBuilder
     private var threadClassificationSection: some View {
-        let isExcluded = overrideStore.isNonThread(device.id)
+        let isExcluded = overrideStore.isNonThread(device.uniqueIdentifier)
         Section {
             Toggle(isOn: Binding(
                 get: { !isExcluded },
-                set: { overrideStore.setNonThread(device.id, !$0) }
+                set: { overrideStore.setNonThread(device.uniqueIdentifier, !$0) }
             )) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Include in Thread mesh")
@@ -840,8 +840,7 @@ struct DeviceDetailView: View {
     private var aiAssistantSection: some View {
         Section {
             Button {
-                if ProStore.shared.isPro { showAIAssistant = true }
-                else { showPaywall = true }
+                if ProStore.shared.isPro { showAIAssistant = true } else { showPaywall = true }
             } label: {
                 HStack(spacing: 12) {
                     ZStack {
@@ -933,8 +932,8 @@ struct DeviceDetailView: View {
         let (label, color): (String, Color) = switch count {
         case 0:        ("Excellent", .green)
         case 1:        ("Very Good", .mint)
-        case 2:        ("Good",      .yellow)
-        case 3...4:    ("Fair",      .orange)
+        case 2:        ("Good", .yellow)
+        case 3...4:    ("Fair", .orange)
         default:       ("Needs Attention", .red)
         }
 
@@ -972,7 +971,7 @@ struct DeviceDetailView: View {
     // MARK: - Device History
 
     private var deviceEvents: [ActivityEvent] {
-        activityStore.events.filter { $0.deviceID == device.id }
+        activityStore.events.filter { $0.deviceID == device.uniqueIdentifier }
     }
 
     @ViewBuilder

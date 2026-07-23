@@ -76,7 +76,12 @@ enum DeviceProtocol: String, CaseIterable {
 
 @Observable
 final class ThreadDevice: Identifiable, Codable, Hashable, Equatable, @unchecked Sendable {
-    let id: UUID
+    /// SwiftUI `Identifiable` identity, backed by `uniqueIdentifier` (the stable
+    /// HomeKit accessory ID) so the two can never diverge. A previous separate
+    /// stored `id` — a fresh random `UUID()` regenerated every launch — silently
+    /// broke every cross-store lookup that mixed the two keys: per-device stats,
+    /// activity-event filtering, non-Thread overrides, and notification deep links.
+    var id: UUID { uniqueIdentifier }
     var name: String
     var manufacturer: String
     var productName: String
@@ -92,11 +97,10 @@ final class ThreadDevice: Identifiable, Codable, Hashable, Equatable, @unchecked
     var room: String?
     var firmwareVersion: String?
 
-    init(id: UUID = UUID(), name: String, manufacturer: String, productName: String, deviceType: String,
+    init(name: String, manufacturer: String, productName: String, deviceType: String,
          uniqueIdentifier: UUID, isBorderRouter: Bool, isRouter: Bool, isSleepyEndDevice: Bool = false,
          parentNodeID: String? = nil, channel: Int? = nil, rssi: Int? = nil,
          batteryPercentage: Int? = nil, room: String? = nil, firmwareVersion: String? = nil) {
-        self.id = id
         self.name = name
         self.manufacturer = manufacturer
         self.productName = productName
@@ -164,47 +168,45 @@ final class ThreadDevice: Identifiable, Codable, Hashable, Equatable, @unchecked
     // MARK: - Codable
 
     private enum CodingKeys: String, CodingKey {
-        case id, name, manufacturer, productName, deviceType, uniqueIdentifier
+        case name, manufacturer, productName, deviceType, uniqueIdentifier
         case isBorderRouter, isRouter, isSleepyEndDevice, parentNodeID
         case channel, rssi, batteryPercentage, room, firmwareVersion
     }
 
     required init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
-        id                = try c.decode(UUID.self,   forKey: .id)
         name              = try c.decode(String.self, forKey: .name)
         manufacturer      = try c.decode(String.self, forKey: .manufacturer)
         productName       = try c.decode(String.self, forKey: .productName)
         deviceType        = try c.decode(String.self, forKey: .deviceType)
-        uniqueIdentifier  = try c.decode(UUID.self,   forKey: .uniqueIdentifier)
-        isBorderRouter    = try c.decode(Bool.self,   forKey: .isBorderRouter)
-        isRouter          = try c.decode(Bool.self,   forKey: .isRouter)
-        isSleepyEndDevice = try c.decode(Bool.self,   forKey: .isSleepyEndDevice)
+        uniqueIdentifier  = try c.decode(UUID.self, forKey: .uniqueIdentifier)
+        isBorderRouter    = try c.decode(Bool.self, forKey: .isBorderRouter)
+        isRouter          = try c.decode(Bool.self, forKey: .isRouter)
+        isSleepyEndDevice = try c.decode(Bool.self, forKey: .isSleepyEndDevice)
         parentNodeID      = try c.decodeIfPresent(String.self, forKey: .parentNodeID)
-        channel           = try c.decodeIfPresent(Int.self,    forKey: .channel)
-        rssi              = try c.decodeIfPresent(Int.self,    forKey: .rssi)
-        batteryPercentage = try c.decodeIfPresent(Int.self,    forKey: .batteryPercentage)
+        channel           = try c.decodeIfPresent(Int.self, forKey: .channel)
+        rssi              = try c.decodeIfPresent(Int.self, forKey: .rssi)
+        batteryPercentage = try c.decodeIfPresent(Int.self, forKey: .batteryPercentage)
         room              = try c.decodeIfPresent(String.self, forKey: .room)
         firmwareVersion   = try c.decodeIfPresent(String.self, forKey: .firmwareVersion)
     }
 
     func encode(to encoder: Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(id,                forKey: .id)
-        try c.encode(name,              forKey: .name)
-        try c.encode(manufacturer,      forKey: .manufacturer)
-        try c.encode(productName,       forKey: .productName)
-        try c.encode(deviceType,        forKey: .deviceType)
-        try c.encode(uniqueIdentifier,  forKey: .uniqueIdentifier)
-        try c.encode(isBorderRouter,    forKey: .isBorderRouter)
-        try c.encode(isRouter,          forKey: .isRouter)
+        try c.encode(name, forKey: .name)
+        try c.encode(manufacturer, forKey: .manufacturer)
+        try c.encode(productName, forKey: .productName)
+        try c.encode(deviceType, forKey: .deviceType)
+        try c.encode(uniqueIdentifier, forKey: .uniqueIdentifier)
+        try c.encode(isBorderRouter, forKey: .isBorderRouter)
+        try c.encode(isRouter, forKey: .isRouter)
         try c.encode(isSleepyEndDevice, forKey: .isSleepyEndDevice)
-        try c.encodeIfPresent(parentNodeID,      forKey: .parentNodeID)
-        try c.encodeIfPresent(channel,           forKey: .channel)
-        try c.encodeIfPresent(rssi,              forKey: .rssi)
+        try c.encodeIfPresent(parentNodeID, forKey: .parentNodeID)
+        try c.encodeIfPresent(channel, forKey: .channel)
+        try c.encodeIfPresent(rssi, forKey: .rssi)
         try c.encodeIfPresent(batteryPercentage, forKey: .batteryPercentage)
-        try c.encodeIfPresent(room,              forKey: .room)
-        try c.encodeIfPresent(firmwareVersion,   forKey: .firmwareVersion)
+        try c.encodeIfPresent(room, forKey: .room)
+        try c.encodeIfPresent(firmwareVersion, forKey: .firmwareVersion)
     }
 
     func hash(into hasher: inout Hasher) {

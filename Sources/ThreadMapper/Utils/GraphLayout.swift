@@ -55,8 +55,8 @@ struct GraphLayout {
         let w = size.width, h = size.height
 
         let outerPad: CGFloat = 14   // canvas edge margin
-        let cellGap:  CGFloat = 10   // gap between room cards
-        let headerH:  CGFloat = 24   // room-name label bar height
+        let cellGap: CGFloat = 10   // gap between room cards
+        let headerH: CGFloat = 24   // room-name label bar height
         let innerPad: CGFloat = 10   // padding inside each card around the node grid
 
         var positions: [UUID: CGPoint] = [:]

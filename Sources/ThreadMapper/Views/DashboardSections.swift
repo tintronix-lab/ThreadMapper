@@ -1,6 +1,6 @@
-import SwiftUI
 import Charts
 import OSLog
+import SwiftUI
 
 private let log = Logger(subsystem: "com.tintronixlab.ThreadMapper", category: "DashboardSections")
 

@@ -1,6 +1,6 @@
 import HomeKit
-import SwiftUI
 import OSLog
+import SwiftUI
 
 private let hmLogger = Logger(subsystem: "com.tintronixlab.ThreadMapper", category: "homekit-trigger")
 

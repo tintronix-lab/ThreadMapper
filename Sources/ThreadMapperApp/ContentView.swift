@@ -1,5 +1,5 @@
-import SwiftUI
 import Observation
+import SwiftUI
 
 struct ContentView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
@@ -7,7 +7,7 @@ struct ContentView: View {
     @AppStorage("lastBackgroundTimestamp") private var lastBackgroundTimestamp: Double = 0
     @Environment(\.scenePhase) private var scenePhase
     @State private var notificationService = NotificationService.shared
-    @State private var topologyDiff: SnapshotDiff? = nil
+    @State private var topologyDiff: SnapshotDiff?
     @State private var showTopologyDigest = false
     @State private var needsDigestCheck = false
     // Tab state lives here so deep links from NotificationService can drive navigation.
@@ -65,7 +65,6 @@ struct ContentView: View {
                 .onChange(of: scenePhase) { _, phase in
                     meshVM.isAppActive = (phase == .active)
                     if phase == .background || phase == .inactive {
-                        UserDefaults.standard.synchronize()
                         if !meshVM.devices.isEmpty {
                             TopologySnapshot.saveBaseline(TopologySnapshot.capture(devices: meshVM.devices))
                         }

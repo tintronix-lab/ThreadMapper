@@ -174,7 +174,7 @@ struct SnapshotDiff {
     static func compute(baseline: TopologySnapshot, current: TopologySnapshot) -> SnapshotDiff {
         var changes: [Change] = []
         let baseByID = Dictionary(uniqueKeysWithValues: baseline.deviceStates.map { ($0.deviceID, $0) })
-        let curByID  = Dictionary(uniqueKeysWithValues: current.deviceStates.map  { ($0.deviceID, $0) })
+        let curByID  = Dictionary(uniqueKeysWithValues: current.deviceStates.map { ($0.deviceID, $0) })
 
         for (id, state) in baseByID where curByID[id] == nil {
             changes.append(Change(name: state.name, room: state.room, kind: .deviceRemoved))

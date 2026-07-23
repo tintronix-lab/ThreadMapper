@@ -6,10 +6,10 @@ struct ActivityFeedView: View {
     @Environment(CommissioningBriefingStore.self) private var briefingStore
     @State private var selectedDevice: ThreadDevice?
     @State private var searchText = ""
-    @State private var kindFilter: ActivityEvent.Kind? = nil
+    @State private var kindFilter: ActivityEvent.Kind?
     @State private var showDeviceHistory = false
     @State private var showTimeline = false
-    @State private var aiDigest: String? = nil
+    @State private var aiDigest: String?
     @State private var isLoadingDigest = false
     // Comma-separated day keys (yyyy-MM-dd) of collapsed sections; default = all expanded.
     @AppStorage("activity.collapsedDays") private var collapsedDaysRaw = ""

@@ -1,5 +1,5 @@
-import SwiftUI
 import FoundationModels
+import SwiftUI
 
 // MARK: - Model
 
@@ -35,12 +35,12 @@ struct NetworkAssistantView: View {
     @Environment(DeviceStatsStore.self)  private var statsStore
 
     /// When set, the assistant focuses on this specific device.
-    var focusDevice: ThreadDevice? = nil
+    var focusDevice: ThreadDevice?
 
     @State private var messages: [ChatMessage] = []
     @State private var inputText = ""
     @State private var isThinking = false
-    @State private var streamingText: String? = nil
+    @State private var streamingText: String?
     @State private var session: LanguageModelSession?
 
     private let model = SystemLanguageModel.default
@@ -389,7 +389,7 @@ private struct ThinkingBubbleView: View {
 // MARK: - Wrapper
 
 struct NetworkAssistantWrapperView: View {
-    var focusDevice: ThreadDevice? = nil
+    var focusDevice: ThreadDevice?
 
     var body: some View {
         if #available(iOS 26, *) {

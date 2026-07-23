@@ -267,8 +267,8 @@ struct BorderRouterCardView: View {
 struct MeshDeviceRowView: View {
     let node: MeshNode
     let device: ThreadDevice?
-    var hopCount: Int? = nil
-    var anomaly: DeviceAnomaly? = nil
+    var hopCount: Int?
+    var anomaly: DeviceAnomaly?
     let onSelect: (ThreadDevice) -> Void
 
     private func roleColor(_ kind: MeshNodeKind) -> Color {

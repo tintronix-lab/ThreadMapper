@@ -9,7 +9,7 @@ struct TroubleshooterView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var stepIndex = 0
     @State private var resolved = false
-    @State private var aiGuide: Any? = nil  // holds TroubleshootingGuide on iOS 26+
+    @State private var aiGuide: Any?  // holds TroubleshootingGuide on iOS 26+
     @State private var aiGuideLoading = false
     @State private var showAISteps = true
 
@@ -27,7 +27,7 @@ struct TroubleshooterView: View {
     private var steps: [Step] {
         if problem == .weakSignal { return weakSteps }
         if device.isBorderRouter { return borderRouterSteps }
-        if device.isRouter       { return routerSteps }
+        if device.isRouter { return routerSteps }
         return endDeviceSteps
     }
 

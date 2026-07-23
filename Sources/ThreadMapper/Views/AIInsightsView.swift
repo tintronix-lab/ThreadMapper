@@ -1,5 +1,5 @@
-import SwiftUI
 import FoundationModels
+import SwiftUI
 
 @available(iOS 26, *)
 struct AIInsightsView: View {
@@ -676,7 +676,7 @@ private struct ExpansionPlanRows: View {
     let plan: MeshExpansionPlan
 
     var body: some View {
-        ForEach(Array(plan.spots.enumerated()), id: \.offset) { idx, spot in
+        ForEach(Array(plan.spots.enumerated()), id: \.offset) { _, spot in
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 8) {
                     ZStack {

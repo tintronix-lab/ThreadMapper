@@ -1,5 +1,5 @@
-import XCTest
 @testable import ThreadMapper
+import XCTest
 
 final class ThreadTopologyBuilderTests: XCTestCase {
 
@@ -7,7 +7,7 @@ final class ThreadTopologyBuilderTests: XCTestCase {
                      battery: Int? = nil, room: String? = nil, rssi: Int? = -60,
                      parent: String? = nil) -> ThreadDevice {
         ThreadDevice(
-            id: UUID(), name: name, manufacturer: "T", productName: name, deviceType: "X",
+            name: name, manufacturer: "T", productName: name, deviceType: "X",
             uniqueIdentifier: UUID(), isBorderRouter: br, isRouter: router,
             isSleepyEndDevice: !br && !router, parentNodeID: parent,
             channel: 15, rssi: rssi, batteryPercentage: battery, room: room

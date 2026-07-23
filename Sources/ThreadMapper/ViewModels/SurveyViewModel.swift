@@ -1,6 +1,6 @@
-import SwiftUI
 import CoreLocation
 import Observation
+import SwiftUI
 
 @Observable
 final class SurveyViewModel {

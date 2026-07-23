@@ -112,15 +112,15 @@ private struct BRCard: View {
     let isOnlyBR: Bool
     let totalBRs: Int
 
-    private var stats: DeviceStats? { statsStore.stats(for: device.id) }
+    private var stats: DeviceStats? { statsStore.stats(for: device.uniqueIdentifier) }
 
     private var lastSeenDate: Date? { stats?.readings.last?.timestamp }
 
     private var uptimeLabel: LocalizedStringResource {
         guard let date = lastSeenDate else { return "No recent data" }
         let interval = Date().timeIntervalSince(date)
-        if interval < 60    { return "Last seen just now" }
-        if interval < 3600  { return "Last seen \(Int(interval / 60))m ago" }
+        if interval < 60 { return "Last seen just now" }
+        if interval < 3600 { return "Last seen \(Int(interval / 60))m ago" }
         if interval < 86400 { return "Last seen \(Int(interval / 3600))h ago" }
         return "Last seen \(Int(interval / 86400))d ago"
     }
@@ -263,8 +263,7 @@ private struct BRCard: View {
                 let fraction = (Double(r.rssi) - minRSSI) / (maxRSSI - minRSSI)
                 let x = CGFloat(i) * w
                 let y = size.height * (1 - CGFloat(max(0, min(1, fraction))))
-                if i == 0 { path.move(to: CGPoint(x: x, y: y)) }
-                else { path.addLine(to: CGPoint(x: x, y: y)) }
+                if i == 0 { path.move(to: CGPoint(x: x, y: y)) } else { path.addLine(to: CGPoint(x: x, y: y)) }
             }
             let color: Color = device.isOffline
                 ? .red

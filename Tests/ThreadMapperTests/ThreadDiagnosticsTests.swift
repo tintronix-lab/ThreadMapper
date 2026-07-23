@@ -1,11 +1,11 @@
-import XCTest
 @testable import ThreadMapper
+import XCTest
 
 @MainActor
 final class ThreadDiagnosticsTests: XCTestCase {
 
     private func dev(_ name: String, br: Bool = false, battery: Int? = nil, room: String? = nil) -> ThreadDevice {
-        ThreadDevice(id: UUID(), name: name, manufacturer: "T", productName: name, deviceType: "X",
+        ThreadDevice(name: name, manufacturer: "T", productName: name, deviceType: "X",
                      uniqueIdentifier: UUID(), isBorderRouter: br, isRouter: br,
                      isSleepyEndDevice: !br, channel: 15, rssi: -60,
                      batteryPercentage: battery, room: room)

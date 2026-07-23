@@ -1,6 +1,6 @@
+import CoreLocation
 import Foundation
 import Observation
-import CoreLocation
 
 @Observable
 final class SurveySessionManager {

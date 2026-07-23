@@ -1,5 +1,5 @@
-import XCTest
 @testable import ThreadMapper
+import XCTest
 
 @MainActor
 final class HealthHistoryStoreTests: XCTestCase {

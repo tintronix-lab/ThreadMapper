@@ -1,5 +1,5 @@
-import XCTest
 @testable import ThreadMapper
+import XCTest
 
 final class SignalExtrapolatorOnlyTests: XCTestCase {
     func testCoverageScore_emptyDevices_isZero() throws {

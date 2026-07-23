@@ -1,6 +1,6 @@
-import XCTest
 import CoreLocation
 @testable import ThreadMapper
+import XCTest
 
 final class SurveyHeatmapPresenterTests: XCTestCase {
 

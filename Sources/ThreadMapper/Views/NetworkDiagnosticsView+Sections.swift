@@ -1,5 +1,5 @@
-import SwiftUI
 import Charts
+import SwiftUI
 
 extension NetworkDiagnosticsView {
     // MARK: - Scorecard
@@ -754,7 +754,7 @@ extension NetworkDiagnosticsView {
 
     private func hopLabel(_ hop: Int) -> String {
         if hop == 99 { return "Unreachable" }
-        if hop == 1  { return "1 Hop (Border Router)" }
+        if hop == 1 { return "1 Hop (Border Router)" }
         return "\(hop) Hops"
     }
 

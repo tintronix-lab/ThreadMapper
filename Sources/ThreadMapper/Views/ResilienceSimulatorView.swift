@@ -229,8 +229,8 @@ struct ResilienceSimulatorView: View {
 private struct ImpactDetailView: View {
     let impact: ResilienceSimulator.Impact
     @Environment(\.dismiss) private var dismiss
-    @State private var narrationScenario: String? = nil
-    @State private var narrationFallback: String? = nil
+    @State private var narrationScenario: String?
+    @State private var narrationFallback: String?
     @State private var isLoadingNarration = false
 
     private func severityColor(_ severity: ResilienceSimulator.Impact.Severity) -> Color {

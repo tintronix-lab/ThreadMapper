@@ -1,5 +1,5 @@
-import SwiftUI
 import Charts
+import SwiftUI
 
 extension NetworkDiagnosticsView {
     // MARK: - Protocol Compatibility Section

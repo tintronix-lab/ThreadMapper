@@ -48,7 +48,7 @@ extension MeshGraphView {
         let cx = size.width / 2, cy = size.height / 2
         let gcx = (minX + maxX) / 2, gcy = (minY + maxY) / 2
         pan = CGSize(
-            width:  -(gcx - cx) * newScale,
+            width: -(gcx - cx) * newScale,
             height: -(gcy - cy) * newScale
         )
         lastPan = pan

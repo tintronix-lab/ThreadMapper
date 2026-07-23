@@ -24,7 +24,7 @@ struct MeshGraphView: View {
     // where onAppear may fire before the final size is settled.
     @State var viewSize: CGSize = .zero
     // Gating hash: skip layout re-solve when node membership/rooms/size are unchanged.
-    @State var layoutHash: Int? = nil
+    @State var layoutHash: Int?
     @AppStorage("mesh.legendExpanded") var legendExpanded = false
 
     @ScaledMetric(relativeTo: .caption2) var canvasNodeLabel: CGFloat = 8
@@ -77,7 +77,7 @@ struct MeshGraphView: View {
                         if d >= 8 || isDragging {
                             isDragging = true
                             pan = CGSize(
-                                width:  lastPan.width  + value.translation.width,
+                                width: lastPan.width  + value.translation.width,
                                 height: lastPan.height + value.translation.height
                             )
                         }
@@ -88,7 +88,7 @@ struct MeshGraphView: View {
                             handleTap(at: value.startLocation, in: viewSize)
                         } else {
                             lastPan = CGSize(
-                                width:  lastPan.width  + value.translation.width,
+                                width: lastPan.width  + value.translation.width,
                                 height: lastPan.height + value.translation.height
                             )
                         }

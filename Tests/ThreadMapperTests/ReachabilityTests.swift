@@ -1,5 +1,5 @@
-import Testing
 import Foundation
+import Testing
 @testable import ThreadMapper
 
 /// Tests for the Reachability enum and all ThreadDevice computed properties

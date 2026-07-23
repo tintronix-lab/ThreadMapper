@@ -68,16 +68,16 @@ struct ConfettiParticle {
         var rng = SystemRandomNumberGenerator()
         return (0..<count).map { _ in
             ConfettiParticle(
-                x:        Double.random(in: -0.05...1.05, using: &rng),
-                y0:       Double.random(in: -30...10, using: &rng),
-                vx:       Double.random(in: -25...25, using: &rng),
-                vy:       Double.random(in: 50...160, using: &rng),
-                width:    CGFloat.random(in: 6...10, using: &rng),
-                height:   CGFloat.random(in: 3...6, using: &rng),
-                color:    colors.randomElement(using: &rng)!,
+                x: Double.random(in: -0.05...1.05, using: &rng),
+                y0: Double.random(in: -30...10, using: &rng),
+                vx: Double.random(in: -25...25, using: &rng),
+                vy: Double.random(in: 50...160, using: &rng),
+                width: CGFloat.random(in: 6...10, using: &rng),
+                height: CGFloat.random(in: 3...6, using: &rng),
+                color: colors.randomElement(using: &rng)!,
                 rotation: Double.random(in: 0...(.pi * 2), using: &rng),
-                spin:     Double.random(in: -6...6, using: &rng),
-                delay:    Double.random(in: 0...0.4, using: &rng)
+                spin: Double.random(in: -6...6, using: &rng),
+                delay: Double.random(in: 0...0.4, using: &rng)
             )
         }
     }

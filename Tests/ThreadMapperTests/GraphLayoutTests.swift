@@ -1,5 +1,5 @@
-import XCTest
 @testable import ThreadMapper
+import XCTest
 
 final class GraphLayoutOnlyTests: XCTestCase {
     func testHierarchical_emptyNodes_returnsEmpty() throws {

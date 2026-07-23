@@ -31,10 +31,10 @@ struct SettingsView: View {
     #endif
 
     private let gracePeriodOptions: [(label: String, seconds: Double)] = [
-        ("30 seconds",  30),
-        ("1 minute",    60),
-        ("2 minutes",  120),
-        ("5 minutes",  300),
+        ("30 seconds", 30),
+        ("1 minute", 60),
+        ("2 minutes", 120),
+        ("5 minutes", 300),
     ]
 
     var body: some View {
@@ -204,7 +204,7 @@ struct SettingsView: View {
         }
     }
 
-    private func testBorderRouter() async {
+    func testBorderRouter() async {
         guard let url = URL(string: borderRouterURL) else { brTestResult = false; return }
         brTesting = true
         let ok = await BorderRouterClient(baseURL: url).testConnection()

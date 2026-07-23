@@ -18,14 +18,14 @@ enum TMStyle {
     /// Room name → SF Symbol.
     static func roomIcon(_ room: String) -> String {
         let l = room.lowercased()
-        if l.contains("kitchen")  { return "oven.fill" }
-        if l.contains("bedroom")  { return "bed.double.fill" }
-        if l.contains("living")   { return "sofa.fill" }
-        if l.contains("bath")     { return "shower.fill" }
-        if l.contains("garage")   { return "car.fill" }
-        if l.contains("office")   { return "desktopcomputer" }
+        if l.contains("kitchen") { return "oven.fill" }
+        if l.contains("bedroom") { return "bed.double.fill" }
+        if l.contains("living") { return "sofa.fill" }
+        if l.contains("bath") { return "shower.fill" }
+        if l.contains("garage") { return "car.fill" }
+        if l.contains("office") { return "desktopcomputer" }
         if l.contains("garden") || l.contains("outdoor") { return "leaf.fill" }
-        if l.contains("hall")     { return "door.left.hand.open" }
+        if l.contains("hall") { return "door.left.hand.open" }
         return "house.fill"
     }
 }

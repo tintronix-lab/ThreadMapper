@@ -1,7 +1,7 @@
-import WidgetKit
-import SwiftUI
 import ActivityKit
 import AppIntents
+import SwiftUI
+import WidgetKit
 
 // MARK: - App Group read (widget-side)
 

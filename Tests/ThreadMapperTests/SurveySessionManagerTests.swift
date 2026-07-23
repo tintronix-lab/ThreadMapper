@@ -1,6 +1,6 @@
-import Testing
-import Foundation
 import CoreLocation
+import Foundation
+import Testing
 @testable import ThreadMapper
 
 @Suite("SurveySessionManager")
@@ -31,7 +31,7 @@ struct SurveySessionManagerTests {
     func weakIDsThreshold() {
         let mgr = SurveySessionManager()
         mgr.recordSample(deviceID: "strong", rssi: -80, location: nil)  // -80 is NOT weak
-        mgr.recordSample(deviceID: "weak",   rssi: -81, location: nil)  // -81 IS weak
+        mgr.recordSample(deviceID: "weak", rssi: -81, location: nil)  // -81 IS weak
         #expect(!mgr.currentWeakIDs.contains("strong"))
         #expect(mgr.currentWeakIDs.contains("weak"))
     }
@@ -93,7 +93,7 @@ struct SurveySessionManagerTests {
     func endSessionWeakDevices() {
         let mgr = SurveySessionManager()
         mgr.recordSample(deviceID: "strong", rssi: -70, location: Self.coord)
-        mgr.recordSample(deviceID: "weak1",  rssi: -85, location: nil)
+        mgr.recordSample(deviceID: "weak1", rssi: -85, location: nil)
         let point = mgr.endSession()
         #expect(point?.weakDeviceList == ["weak1"])
     }

@@ -1,6 +1,6 @@
-import SwiftUI
 import Observation
 import StoreKit
+import SwiftUI
 
 struct DashboardView: View {
     @Environment(MeshViewModel.self)       private var viewModel
@@ -10,7 +10,7 @@ struct DashboardView: View {
 
     @State private var navPath = NavigationPath()
     @State private var selectedDevice: ThreadDevice?
-    @State private var selectedRoom: String? = nil
+    @State private var selectedRoom: String?
     @State private var showWeeklyReport = false
     @State private var showPaywall = false
     @State private var showAchievements = false
@@ -27,8 +27,8 @@ struct DashboardView: View {
     @State private var showSmartAdvisor = false
     @State private var showAIInsights = false
     @State private var showHealthCard = false
-    @State private var healthCardImage: UIImage? = nil
-    @State private var diagnosticPDFURL: URL? = nil
+    @State private var healthCardImage: UIImage?
+    @State private var diagnosticPDFURL: URL?
     @State private var showPDFShare = false
 
     private var health: NetworkHealthScore { viewModel.health }
@@ -59,10 +59,7 @@ struct DashboardView: View {
                     filteredDevices: filteredDevices,
                     selectedRoom: $selectedRoom,
                     isExpanded: allDevicesExpanded,
-                    onToggle: {
-                        allDevicesExpanded.toggle()
-                        UserDefaults.standard.synchronize()
-                    },
+                    onToggle: { allDevicesExpanded.toggle() },
                     isScanning: viewModel.isScanning,
                     onSelectDevice: { selectedDevice = $0 }
                 )
@@ -71,10 +68,7 @@ struct DashboardView: View {
                         devices: viewModel.devices,
                         selectedRoom: $selectedRoom,
                         isExpanded: roomCoverageExpanded,
-                        onToggle: {
-                            roomCoverageExpanded.toggle()
-                            UserDefaults.standard.synchronize()
-                        }
+                        onToggle: { roomCoverageExpanded.toggle() }
                     )
                 }
                 if !health.tips.isEmpty { DashboardTipsSection(tips: health.tips) }
@@ -123,21 +117,18 @@ struct DashboardView: View {
                             }
                             Divider()
                             Button {
-                                if ProStore.shared.isPro { showAIInsights = true }
-                                else { showPaywall = true }
+                                if ProStore.shared.isPro { showAIInsights = true } else { showPaywall = true }
                             } label: {
                                 Label("AI Insights", systemImage: "apple.intelligence")
                             }
                             Button {
-                                if ProStore.shared.isPro { showSmartAdvisor = true }
-                                else { showPaywall = true }
+                                if ProStore.shared.isPro { showSmartAdvisor = true } else { showPaywall = true }
                             } label: {
                                 Label("Smart Home Advisor", systemImage: "wand.and.stars")
                             }
                             if WeeklyReportStore.shared.latestReport != nil {
                                 Button {
-                                    if ProStore.shared.isPro { showWeeklyReport = true }
-                                    else { showPaywall = true }
+                                    if ProStore.shared.isPro { showWeeklyReport = true } else { showPaywall = true }
                                 } label: {
                                     Label("Weekly Report", systemImage: "doc.text.fill")
                                 }
@@ -251,7 +242,10 @@ struct DashboardView: View {
             }
             .onChange(of: viewModel.pendingDeviceID) { _, uuid in
                 guard let uuid else { return }
-                selectedDevice = viewModel.devices.first { $0.id == uuid }
+                // Deep links (notifications, threadmapper://device/…) carry the
+                // HomeKit `uniqueIdentifier`, not the SwiftUI-only `id`; matching
+                // on `id` never resolved, so the detail sheet never opened.
+                selectedDevice = viewModel.devices.first { $0.uniqueIdentifier == uuid }
                 viewModel.pendingDeviceID = nil
             }
         }

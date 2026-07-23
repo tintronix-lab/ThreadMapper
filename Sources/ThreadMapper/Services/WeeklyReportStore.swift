@@ -45,19 +45,19 @@ final class WeeklyReportStore {
         // Backward-compatible decoder: old JSON files lack the new fields.
         init(from decoder: Decoder) throws {
             let c = try decoder.container(keyedBy: CodingKeys.self)
-            id                     = try c.decode(UUID.self,   forKey: .id)
-            generatedAt            = try c.decode(Date.self,   forKey: .generatedAt)
+            id                     = try c.decode(UUID.self, forKey: .id)
+            generatedAt            = try c.decode(Date.self, forKey: .generatedAt)
             weekRangeLabel         = try c.decode(String.self, forKey: .weekRangeLabel)
-            avgScore               = try c.decode(Int.self,    forKey: .avgScore)
+            avgScore               = try c.decode(Int.self, forKey: .avgScore)
             peakGrade              = try c.decode(String.self, forKey: .peakGrade)
-            lowestGrade            = try c.decodeIfPresent(String.self,      forKey: .lowestGrade)            ?? "—"
-            scoreDelta             = try c.decodeIfPresent(Int.self,         forKey: .scoreDelta)             ?? 0
-            offlineEventCount      = try c.decode(Int.self,    forKey: .offlineEventCount)
-            borderRouterEventCount = try c.decodeIfPresent(Int.self,         forKey: .borderRouterEventCount) ?? 0
-            mostProblematicDevice  = try c.decodeIfPresent(String.self,      forKey: .mostProblematicDevice)
+            lowestGrade            = try c.decodeIfPresent(String.self, forKey: .lowestGrade)            ?? "—"
+            scoreDelta             = try c.decodeIfPresent(Int.self, forKey: .scoreDelta)             ?? 0
+            offlineEventCount      = try c.decode(Int.self, forKey: .offlineEventCount)
+            borderRouterEventCount = try c.decodeIfPresent(Int.self, forKey: .borderRouterEventCount) ?? 0
+            mostProblematicDevice  = try c.decodeIfPresent(String.self, forKey: .mostProblematicDevice)
             mostProblematicDeviceEventCount = try c.decodeIfPresent(Int.self, forKey: .mostProblematicDeviceEventCount) ?? 0
-            streakDays             = try c.decode(Int.self,    forKey: .streakDays)
-            totalADays             = try c.decode(Int.self,    forKey: .totalADays)
+            streakDays             = try c.decode(Int.self, forKey: .streakDays)
+            totalADays             = try c.decode(Int.self, forKey: .totalADays)
             gradeDistribution      = try c.decodeIfPresent([String: Int].self, forKey: .gradeDistribution)   ?? [:]
             body                   = try c.decode(String.self, forKey: .body)
             bodySegments           = try c.decodeIfPresent([BodySegment].self, forKey: .bodySegments)        ?? []

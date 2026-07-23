@@ -1,6 +1,6 @@
-import SwiftUI
 import CoreLocation
 import Observation
+import SwiftUI
 
 struct DeviceSurveyHistory: View {
     let deviceID: String

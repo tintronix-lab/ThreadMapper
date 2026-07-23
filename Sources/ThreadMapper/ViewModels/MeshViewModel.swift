@@ -1,5 +1,5 @@
-import SwiftUI
 import Observation
+import SwiftUI
 
 @Observable @MainActor
 final class MeshViewModel {
@@ -10,7 +10,7 @@ final class MeshViewModel {
     var selectedNode: MeshNode?
     var isScanning = false
     /// Set by notification deep links; `DashboardView` observes and opens the device detail sheet.
-    var pendingDeviceID: UUID? = nil
+    var pendingDeviceID: UUID?
     var scanError: String?
 
     /// Latest health score, computed once per poll tick.
@@ -66,12 +66,12 @@ final class MeshViewModel {
     @ObservationIgnored private var knownDeviceNamesByID: [UUID: String] = [:]
     @ObservationIgnored private var offlineDeviceIDs: Set<UUID> = []
     @ObservationIgnored private var pendingOfflineTasks: [UUID: Task<Void, Never>] = [:]
-    @ObservationIgnored private var previousHealthScore: Int? = nil
-    @ObservationIgnored private var previousGrade: String? = nil
+    @ObservationIgnored private var previousHealthScore: Int?
+    @ObservationIgnored private var previousGrade: String?
     @ObservationIgnored private var hadOfflineDevices = false
     /// Fingerprint of the last-written aggregate snapshot — used to skip
     /// redundant AppGroupStore writes when nothing has changed between ticks.
-    @ObservationIgnored private var lastSnapshotFingerprint: SnapshotFingerprint? = nil
+    @ObservationIgnored private var lastSnapshotFingerprint: SnapshotFingerprint?
 
     private struct SnapshotFingerprint: Equatable {
         let deviceCount: Int
@@ -445,16 +445,16 @@ final class MeshViewModel {
             let isOff  = d.isOffline
             let isWeak = d.isWeak
             let room   = d.room ?? "Unknown"
-            if isOff  { agg.offlineCount += 1; agg.offlineNames.append(d.name) }
+            if isOff { agg.offlineCount += 1; agg.offlineNames.append(d.name) }
             if isWeak { agg.weakCount += 1 }
-            if d.isBorderRouter   { agg.brCount += 1 }
+            if d.isBorderRouter { agg.brCount += 1 }
             if d.isRoutingCapable { agg.routerCount += 1 }
             // Keyed by uniqueIdentifier — duplicate names must not collide,
             // and a rename must not orphan state.
             agg.deviceStates[d.uniqueIdentifier.uuidString] = !isOff
             var b = agg.roomBuckets[room, default: (0, 0, 0)]
             b.count += 1
-            if isOff  { b.offline += 1 }
+            if isOff { b.offline += 1 }
             if isWeak { b.weak += 1 }
             agg.roomBuckets[room] = b
         }

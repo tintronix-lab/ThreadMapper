@@ -97,7 +97,7 @@ struct SignalSparklineView: View {
         // Segmented line, colored by signal quality
         for i in 1..<readings.count {
             let prev = CGPoint(x: xPos(i - 1), y: yPos(readings[i - 1].rssi))
-            let curr = CGPoint(x: xPos(i),     y: yPos(readings[i].rssi))
+            let curr = CGPoint(x: xPos(i), y: yPos(readings[i].rssi))
             var seg = Path(); seg.move(to: prev); seg.addLine(to: curr)
             ctx.stroke(seg, with: .color(lineColor(readings[i].rssi).opacity(0.9)),
                        style: StrokeStyle(lineWidth: 1.5, lineCap: .round))

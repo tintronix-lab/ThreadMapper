@@ -4,9 +4,9 @@ import UIKit
 
 enum DiagnosticPDFExporter {
     // US Letter page dimensions
-    private static let pageWidth:  CGFloat = 612
+    private static let pageWidth: CGFloat = 612
     private static let pageHeight: CGFloat = 792
-    private static let margin:     CGFloat = 48
+    private static let margin: CGFloat = 48
 
     static func generate(health: NetworkHealthScore, devices: [ThreadDevice]) -> URL? {
         let pageRect = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
@@ -120,11 +120,11 @@ enum DiagnosticPDFExporter {
 
         // Column headers
         let cols: [(label: String, x: CGFloat, w: CGFloat)] = [
-            ("Device", x,     200),
-            ("Room",   x+204, 120),
-            ("Role",   x+328, 80),
+            ("Device", x, 200),
+            ("Room", x+204, 120),
+            ("Role", x+328, 80),
             ("Status", x+412, 70),
-            ("RSSI",   x+486, 60),
+            ("RSSI", x+486, 60),
         ]
         for col in cols {
             var cy = y

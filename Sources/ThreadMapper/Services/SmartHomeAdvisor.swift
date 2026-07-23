@@ -178,7 +178,9 @@ struct SmartHomeAdvisor {
             .prefix(2)
 
         for (deviceID, events) in troubledDevices {
-            let name = devices.first { $0.id == deviceID }?.name ?? "Unknown Device"
+            // `event.deviceID` is stored as the HomeKit `uniqueIdentifier`, so
+            // resolve the name against that — matching on `id` always missed.
+            let name = devices.first { $0.uniqueIdentifier == deviceID }?.name ?? "Unknown Device"
             results.append(AutomationSuggestion(
                 title: String(localized: "Alert when \(name) goes offline"),
                 description: String(localized: "\(name) has gone offline \(events.count) times recently. Create a HomeKit automation to notify you immediately when it loses connection so you can act before it affects other automations."),

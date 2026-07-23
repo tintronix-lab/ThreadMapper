@@ -1,5 +1,5 @@
-import SwiftUI
 import Observation
+import SwiftUI
 
 struct DiagnosticRun: Codable, Identifiable {
     let id: UUID

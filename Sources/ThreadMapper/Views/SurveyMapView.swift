@@ -1,10 +1,10 @@
-import SwiftUI
-import MapKit
 import CoreLocation
+import MapKit
+import SwiftUI
 
 struct SurveyMapView: View {
     let points: [SurveyPoint]
-    var highlighted: UUID? = nil
+    var highlighted: UUID?
 
     @State private var selectedID: UUID?
     @State private var cameraPosition: MapCameraPosition

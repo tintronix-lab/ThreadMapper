@@ -1,5 +1,5 @@
-import SwiftUI
 import Charts
+import SwiftUI
 
 struct NetworkTimelineView: View {
     @ScaledMetric(relativeTo: .largeTitle) private var heroIconSize: CGFloat = 32
@@ -10,7 +10,7 @@ struct NetworkTimelineView: View {
 
     @State private var selectedRange: TimeRange = .day
     @State private var showPaywall = false
-    @State private var networkNarrative: Any? = nil  // holds NetworkNarrative on iOS 26+
+    @State private var networkNarrative: Any?  // holds NetworkNarrative on iOS 26+
     @State private var narrativeLoading = false
 
     enum TimeRange: String, CaseIterable, Identifiable {

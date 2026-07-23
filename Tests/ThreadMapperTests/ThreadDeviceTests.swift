@@ -1,5 +1,5 @@
-import Testing
 import Foundation
+import Testing
 @testable import ThreadMapper
 
 private func makeDevice(rssi: Int? = nil) -> ThreadDevice {

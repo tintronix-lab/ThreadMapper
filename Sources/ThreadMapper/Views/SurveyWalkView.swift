@@ -1,5 +1,5 @@
-import SwiftUI
 import CoreLocation
+import SwiftUI
 
 struct SurveyWalkView: View {
     @Environment(SurveyViewModel.self) private var viewModel

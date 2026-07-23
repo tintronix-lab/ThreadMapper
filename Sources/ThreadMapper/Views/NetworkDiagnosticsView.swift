@@ -1,5 +1,5 @@
-import SwiftUI
 import Charts
+import SwiftUI
 
 struct NetworkDiagnosticsView: View {
     let devices: [ThreadDevice]
@@ -341,7 +341,7 @@ struct NetworkDiagnosticsView: View {
                         }
                         HStack(spacing: 6) {
                             if run.criticalCount > 0 { runChip("\(run.criticalCount) critical", .red) }
-                            if run.highCount > 0     { runChip("\(run.highCount) high", .orange) }
+                            if run.highCount > 0 { runChip("\(run.highCount) high", .orange) }
                             if run.isolatedDeviceCount > 0 { runChip("\(run.isolatedDeviceCount) isolated", .red) }
                             if run.criticalCount == 0 && run.highCount == 0 && run.isolatedDeviceCount == 0 {
                                 runChip("Healthy", .green)

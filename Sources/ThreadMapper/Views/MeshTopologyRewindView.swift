@@ -8,7 +8,7 @@ struct MeshTopologyRewindView: View {
     // crash in iOS 26's stricter concurrency mode.
     @State private var frameIndex = 0
     @State private var isPlaying = false
-    @State private var playTask: Task<Void, Never>? = nil
+    @State private var playTask: Task<Void, Never>?
     @Environment(\.dismiss) private var dismiss
 
     private var frames: [TimeLapseFrame] { TopologyTimeLapseStore.shared.frames }

@@ -5,7 +5,7 @@ import Foundation
 final class DemoDiscoveryService: DiscoveryService, @unchecked Sendable {
 
     var devices: [ThreadDevice] = []
-    var discoveryError: DiscoveryError? = nil
+    var discoveryError: DiscoveryError?
 
     // MARK: - Simulated network topology
 

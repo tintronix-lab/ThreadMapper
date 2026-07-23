@@ -258,10 +258,7 @@ struct NetworkDiagnosticsEngine {
             } else if total > 1, Double(online) / Double(total) < 0.5 {
                 grade = "D"; color = .red
             } else if let avg {
-                if avg > -65 { grade = "A"; color = .green }
-                else if avg > -75 { grade = "B"; color = .mint }
-                else if avg > -85 { grade = "C"; color = .orange }
-                else { grade = "D"; color = .red }
+                if avg > -65 { grade = "A"; color = .green } else if avg > -75 { grade = "B"; color = .mint } else if avg > -85 { grade = "C"; color = .orange } else { grade = "D"; color = .red }
             } else {
                 grade = "B"; color = .mint   // online but no RSSI data — assume ok
             }
@@ -455,7 +452,7 @@ struct NetworkDiagnosticsEngine {
         let meshRouterNodes = nodes.filter { $0.kind == .router }
         for router in meshRouterNodes {
             let routerID = router.id
-            guard deviceByID[routerID] != nil else { continue }
+            guard let routerDevice = deviceByID[routerID] else { continue }
             // Build modified children map without this router's subtree
             var modChildrenOf = childrenOf
             modChildrenOf.removeValue(forKey: routerID)
@@ -476,7 +473,7 @@ struct NetworkDiagnosticsEngine {
             }
             if !isolated.isEmpty {
                 resilienceNodes.append(ResilienceNode(
-                    device: deviceByID[routerID]!,
+                    device: routerDevice,
                     isolatedCount: isolated.count,
                     isolatedNames: isolated.prefix(4).map(\.name)
                 ))
@@ -522,9 +519,7 @@ struct NetworkDiagnosticsEngine {
         let channelStats: [ChannelStats] = devicesByChannel.map { ch, pairs in
             let devs = pairs.map(\.1)
             let risk: ChannelStats.InterferenceRisk
-            if highRiskChannels.contains(ch) { risk = .high }
-            else if mediumRiskChannels.contains(ch) { risk = .medium }
-            else { risk = .low }
+            if highRiskChannels.contains(ch) { risk = .high } else if mediumRiskChannels.contains(ch) { risk = .medium } else { risk = .low }
             let freqMHz = 2405 + (ch - 11) * 5
             return ChannelStats(channel: ch, deviceCount: devs.count,
                                 deviceNames: devs.map(\.name).sorted(),
@@ -552,8 +547,7 @@ struct NetworkDiagnosticsEngine {
     static func scoreDimensions(from report: Report) -> [ScoreDimension] {
         // Redundancy: border router count, SPOFs, high-impact resilience gaps
         var redundancy = 100
-        if report.totalBorderRouters == 0      { redundancy -= 60 }
-        else if report.totalBorderRouters == 1 { redundancy -= 25 }
+        if report.totalBorderRouters == 0 { redundancy -= 60 } else if report.totalBorderRouters == 1 { redundancy -= 25 }
         redundancy -= min(30, report.singlePointsOfFailure.count * 10)
         redundancy -= min(15, report.resilienceNodes.filter { $0.isolatedCount >= 3 }.count * 5)
 
@@ -584,10 +578,10 @@ struct NetworkDiagnosticsEngine {
         connectivity -= min(15, deepDevices * 5)
 
         return [
-            ScoreDimension(name: "Redundancy",   score: max(0, redundancy),   icon: "shield.lefthalf.filled"),
-            ScoreDimension(name: "Coverage",      score: max(0, coverage),      icon: "wifi"),
-            ScoreDimension(name: "Interference",  score: max(0, interference),  icon: "waveform.badge.exclamationmark"),
-            ScoreDimension(name: "Connectivity",  score: max(0, connectivity),  icon: "point.3.connected.trianglepath.dotted"),
+            ScoreDimension(name: "Redundancy", score: max(0, redundancy), icon: "shield.lefthalf.filled"),
+            ScoreDimension(name: "Coverage", score: max(0, coverage), icon: "wifi"),
+            ScoreDimension(name: "Interference", score: max(0, interference), icon: "waveform.badge.exclamationmark"),
+            ScoreDimension(name: "Connectivity", score: max(0, connectivity), icon: "point.3.connected.trianglepath.dotted"),
         ]
     }
 }

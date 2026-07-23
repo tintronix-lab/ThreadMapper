@@ -1,5 +1,5 @@
-import SwiftUI
 import Charts
+import SwiftUI
 
 struct WeeklyReportView: View {
     let report: WeeklyReportStore.Report
@@ -7,7 +7,7 @@ struct WeeklyReportView: View {
     @Environment(MeshViewModel.self) private var meshViewModel
     @Environment(HealthHistoryStore.self) private var historyStore
 
-    @State private var coachingPlan: Any? = nil  // holds CoachingPlan on iOS 26+
+    @State private var coachingPlan: Any?  // holds CoachingPlan on iOS 26+
     @State private var coachingLoading = false
 
     private var gradeColor: Color { TMStyle.gradeColor(report.peakGrade) }

@@ -1,6 +1,6 @@
-import StoreKit
 import Foundation
 import Observation
+import StoreKit
 
 @MainActor
 @Observable
@@ -58,7 +58,7 @@ final class ProStore {
         var hasPro = false
         for await result in Transaction.currentEntitlements {
             if case .verified(let tx) = result,
-               (tx.productID == Self.annualID || tx.productID == Self.lifetimeID),
+               tx.productID == Self.annualID || tx.productID == Self.lifetimeID,
                tx.revocationDate == nil {
                 hasPro = true
             }
