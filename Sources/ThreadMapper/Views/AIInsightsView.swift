@@ -515,7 +515,7 @@ private struct PredictiveAnalysisRows: View {
     var body: some View {
         if analysis.alerts.isEmpty {
             HStack(spacing: 10) {
-                Image(systemName: "checkmark.shield.fill").foregroundStyle(.green)
+                Image.safeSystem("checkmark.shield.fill", fallback: "checkmark.seal.fill").foregroundStyle(.green)
                 Text("No devices at elevated risk in the next 24 hours.")
                     .font(.subheadline).foregroundStyle(.secondary)
             }
@@ -861,3 +861,4 @@ struct AIInsightsWrapperView: View {
         }
     }
 }
+
