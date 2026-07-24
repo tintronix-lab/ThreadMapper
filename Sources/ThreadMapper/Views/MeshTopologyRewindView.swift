@@ -16,6 +16,14 @@ struct MeshTopologyRewindView: View {
         guard !frames.isEmpty else { return nil }
         return frames[min(frameIndex, frames.count - 1)]
     }
+    private var appVersion: String { Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-" }
+    private var buildNumber: String { Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "-" }
+    private var isTestFlight: Bool {
+        Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+    }
+    private var versionBuildLabel: String {
+        "Build \(buildNumber) • v\(appVersion)\(isTestFlight ? " • TestFlight" : "")"
+    }
 
     var body: some View {
         NavigationStack {
@@ -93,6 +101,10 @@ struct MeshTopologyRewindView: View {
                 Text("\(frameIndex + 1) of \(frames.count) snapshots")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+                
+                Text(versionBuildLabel)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
             }
             .padding()
             .background(Color(UIColor.systemGroupedBackground))
