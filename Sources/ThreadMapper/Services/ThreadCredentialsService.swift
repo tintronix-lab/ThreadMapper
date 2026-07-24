@@ -17,7 +17,8 @@ import ThreadNetwork
 /// build flag is set (i.e. once the entitlement is provisioned and the exact
 /// `THCredentials` API is verified on-device). Until then it returns nothing at
 /// runtime and never risks a CI/build break against an unverified SDK surface.
-final class ThreadCredentialsService: DiagnosticsProvider, @unchecked Sendable {
+/// Stateless, so it is genuinely `Sendable` — no `@unchecked` escape needed.
+final class ThreadCredentialsService: DiagnosticsProvider {
 
     /// HomeKit/ThreadNetwork give no per-node routing — always empty here.
     func nodeDiagnostics(for devices: [ThreadDevice]) async -> [UUID: ThreadNodeDiagnostics] { [:] }

@@ -22,6 +22,17 @@ extension DiscoveryError {
 }
 
 /// Seam between the poll loop and any device source (HomeKit or Demo).
+///
+/// `@MainActor`-isolated on purpose. HomeKit delivers `HMHomeManagerDelegate`
+/// callbacks on the main queue and its object graph (`HMAccessory.services`,
+/// `readValue`) is not documented thread-safe, so the device source has to live
+/// on the main actor to be correct. Previously the conformers carried
+/// `@unchecked Sendable`, which silenced the compiler while `measureSignalQualities()`
+/// — `nonisolated async`, therefore running on the cooperative pool — read state
+/// the delegate callback was concurrently writing on main. The methods are still
+/// `async` and suspend at every HomeKit round-trip, so nothing blocks the main
+/// thread; only the *ownership* of the state moved.
+@MainActor
 protocol DiscoveryService: AnyObject, Sendable {
     var devices: [ThreadDevice] { get }
     var discoveryError: DiscoveryError? { get }
@@ -30,8 +41,8 @@ protocol DiscoveryService: AnyObject, Sendable {
     func measureSignalQualities() async -> [UUID: Int]
 }
 
-@Observable
-final class MatterDiscoveryService: DiscoveryService, @unchecked Sendable {
+@Observable @MainActor
+final class MatterDiscoveryService: DiscoveryService {
     static let shared = MatterDiscoveryService()
 
     var devices: [ThreadDevice] = []
@@ -41,24 +52,23 @@ final class MatterDiscoveryService: DiscoveryService, @unchecked Sendable {
     @ObservationIgnored private var accessoryCache: [UUID: HMAccessory] = [:]
 
     private init() {
+        // Both callbacks are invoked synchronously from HomeTracker's delegate
+        // methods, which are already on the main actor — no Task hop needed, and
+        // the update lands in the same turn as the HomeKit notification.
         homeTracker.onHomesUpdated = { [weak self] homes in
             guard let self else { return }
             let found = self.extractThreadDevices(from: homes)
-            Task { @MainActor in
-                self.devices = found
-                self.discoveryError = found.isEmpty ? .noThreadDevicesFound : nil
-            }
+            self.devices = found
+            self.discoveryError = found.isEmpty ? .noThreadDevicesFound : nil
         }
         homeTracker.onNotAuthorized = { [weak self] in
-            Task { @MainActor in
-                self?.discoveryError = .homeKitNotAuthorized
-                self?.devices = []
-            }
+            self?.discoveryError = .homeKitNotAuthorized
+            self?.devices = []
         }
     }
 
     func startScanning() async throws {
-        await MainActor.run { discoveryError = nil }
+        discoveryError = nil
         homeTracker.start()
     }
 
@@ -154,6 +164,12 @@ final class MatterDiscoveryService: DiscoveryService, @unchecked Sendable {
     }
 }
 
+/// `HMHomeManagerDelegate` predates Swift concurrency and carries no isolation
+/// annotation, so its requirements have to be satisfied by `nonisolated` methods.
+/// HomeKit documents that it delivers these callbacks on the main queue, which
+/// `assumeIsolated` asserts rather than assumes: if HomeKit ever delivered one
+/// off-main, this traps loudly instead of corrupting `devices` silently.
+@MainActor
 private final class HomeTracker: NSObject, HMHomeManagerDelegate {
     var onHomesUpdated: (([HMHome]) -> Void)?
     var onNotAuthorized: (() -> Void)?
@@ -172,19 +188,21 @@ private final class HomeTracker: NSObject, HMHomeManagerDelegate {
         manager = nil
     }
 
-    func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {
-        if manager.authorizationStatus.contains(.authorized) {
-            onHomesUpdated?(manager.homes)
-        } else {
-            onNotAuthorized?()
+    nonisolated func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {
+        MainActor.assumeIsolated {
+            if manager.authorizationStatus.contains(.authorized) {
+                onHomesUpdated?(manager.homes)
+            } else {
+                onNotAuthorized?()
+            }
         }
     }
 
-    func homeManager(_ manager: HMHomeManager, didAdd home: HMHome) {
-        onHomesUpdated?(manager.homes)
+    nonisolated func homeManager(_ manager: HMHomeManager, didAdd home: HMHome) {
+        MainActor.assumeIsolated { onHomesUpdated?(manager.homes) }
     }
 
-    func homeManager(_ manager: HMHomeManager, didRemove home: HMHome) {
-        onHomesUpdated?(manager.homes)
+    nonisolated func homeManager(_ manager: HMHomeManager, didRemove home: HMHome) {
+        MainActor.assumeIsolated { onHomesUpdated?(manager.homes) }
     }
 }

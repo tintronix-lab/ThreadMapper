@@ -12,9 +12,11 @@ import Foundation
 /// (child/route tables) into `ThreadNodeDiagnostics` and correlate OTBR nodes
 /// (by ext-address) to HomeKit accessories — hence `nodeDiagnostics()` is empty
 /// for now.
-final class BorderRouterClient: DiagnosticsProvider, @unchecked Sendable {
+/// Both stored properties are immutable and the injected fetcher is `@Sendable`,
+/// so this is genuinely `Sendable` — no `@unchecked` escape needed.
+final class BorderRouterClient: DiagnosticsProvider {
 
-    typealias Fetcher = (URLRequest) async throws -> Data
+    typealias Fetcher = @Sendable (URLRequest) async throws -> Data
 
     let baseURL: URL
     private let fetch: Fetcher
@@ -31,7 +33,7 @@ final class BorderRouterClient: DiagnosticsProvider, @unchecked Sendable {
         case httpStatus(Int)
     }
 
-    static func defaultFetch(_ request: URLRequest) async throws -> Data {
+    @Sendable static func defaultFetch(_ request: URLRequest) async throws -> Data {
         let (data, response) = try await URLSession.shared.data(for: request)
         if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
             throw ClientError.httpStatus(http.statusCode)

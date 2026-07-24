@@ -2,7 +2,10 @@ import Foundation
 import Testing
 @testable import ThreadMapper
 
+// `DiscoveryService` is @MainActor-isolated (HomeKit is a main-queue framework),
+// so the suites that touch a conformer run on the main actor too.
 @Suite("DemoDiscoveryService")
+@MainActor
 struct DemoDiscoveryServiceTests {
 
     @Test("startScanning populates devices")
@@ -91,6 +94,7 @@ struct DemoDiscoveryServiceTests {
 }
 
 @Suite("DiscoveryService protocol conformance")
+@MainActor
 struct DiscoveryServiceConformanceTests {
 
     @Test("MatterDiscoveryService conforms to DiscoveryService")

@@ -49,15 +49,6 @@ targets:
         embed: true
       - target: ThreadMapperWatch
         embed: true
-    preBuildScripts:
-      - name: Auto Build Number
-        script: |
-          BUILD=$(git -C "${SRCROOT}" rev-list --count HEAD 2>/dev/null || echo "1")
-          PLIST="${SRCROOT}/Sources/ThreadMapper/Info.plist"
-          CURRENT=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" 2>/dev/null || echo "")
-          [ "$CURRENT" = "$BUILD" ] || /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
-        shell: /bin/sh
-        basedOnDependencyAnalysis: false
     scheme:
       shared: true
       testTargets:
@@ -66,6 +57,21 @@ targets:
         storeKitConfiguration: ThreadMapper.storekit
       test:
         storeKitConfiguration: ThreadMapper.storekit
+      build:
+        preActions:
+          - name: Auto Build Number
+            settingsTarget: ThreadMapper
+            script: |
+              BUILD=$(git -C "${SRCROOT}" rev-list --count HEAD 2>/dev/null || echo "1")
+              for PLIST in \
+                  "${SRCROOT}/Sources/ThreadMapper/Info.plist" \
+                  "${SRCROOT}/Sources/ThreadMapperWidget/Info.plist" \
+                  "${SRCROOT}/Sources/ThreadMapperWatch/Info.plist" \
+                  "${SRCROOT}/Sources/ThreadMapperWatchWidget/Info.plist"; do
+                  [ -f "$PLIST" ] || continue
+                  CURRENT=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" 2>/dev/null || echo "")
+                  [ "$CURRENT" = "$BUILD" ] || /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
+              done
 
   ThreadMapperWidget:
     type: app-extension
@@ -80,15 +86,6 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Sources/ThreadMapperWidget/ThreadMapperWidget.entitlements
         CODE_SIGN_STYLE: "Automatic"
         DEVELOPMENT_TEAM: QCSX955Y7P
-    preBuildScripts:
-      - name: Auto Build Number
-        script: |
-          BUILD=$(git -C "${SRCROOT}" rev-list --count HEAD 2>/dev/null || echo "1")
-          PLIST="${SRCROOT}/Sources/ThreadMapperWidget/Info.plist"
-          CURRENT=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" 2>/dev/null || echo "")
-          [ "$CURRENT" = "$BUILD" ] || /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
-        shell: /bin/sh
-        basedOnDependencyAnalysis: false
 
   ThreadMapperWatch:
     type: application
@@ -107,17 +104,21 @@ targets:
         embed: true
       - sdk: WatchKit.framework
       - sdk: WatchConnectivity.framework
-    preBuildScripts:
-      - name: Auto Build Number
-        script: |
-          BUILD=$(git -C "${SRCROOT}" rev-list --count HEAD 2>/dev/null || echo "1")
-          PLIST="${SRCROOT}/Sources/ThreadMapperWatch/Info.plist"
-          CURRENT=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" 2>/dev/null || echo "")
-          [ "$CURRENT" = "$BUILD" ] || /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
-        shell: /bin/sh
-        basedOnDependencyAnalysis: false
     scheme:
       shared: true
+      build:
+        preActions:
+          - name: Auto Build Number
+            settingsTarget: ThreadMapperWatch
+            script: |
+              BUILD=$(git -C "${SRCROOT}" rev-list --count HEAD 2>/dev/null || echo "1")
+              for PLIST in \
+                  "${SRCROOT}/Sources/ThreadMapperWatch/Info.plist" \
+                  "${SRCROOT}/Sources/ThreadMapperWatchWidget/Info.plist"; do
+                  [ -f "$PLIST" ] || continue
+                  CURRENT=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" 2>/dev/null || echo "")
+                  [ "$CURRENT" = "$BUILD" ] || /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
+              done
 
   ThreadMapperWatchWidget:
     type: app-extension
@@ -133,15 +134,6 @@ targets:
     dependencies:
       - sdk: WidgetKit.framework
       - sdk: SwiftUI.framework
-    preBuildScripts:
-      - name: Auto Build Number
-        script: |
-          BUILD=$(git -C "${SRCROOT}" rev-list --count HEAD 2>/dev/null || echo "1")
-          PLIST="${SRCROOT}/Sources/ThreadMapperWatchWidget/Info.plist"
-          CURRENT=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" 2>/dev/null || echo "")
-          [ "$CURRENT" = "$BUILD" ] || /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
-        shell: /bin/sh
-        basedOnDependencyAnalysis: false
 
   ThreadMapperTests:
     type: bundle.unit-test

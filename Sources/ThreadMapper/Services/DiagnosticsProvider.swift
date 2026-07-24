@@ -19,7 +19,8 @@ protocol DiagnosticsProvider: AnyObject, Sendable {
 
 /// Default provider used until a real source is wired up: yields nothing, so the
 /// mesh stays inferred. Keeps call sites simple (no optionals) before Feature #2.
-final class NoDiagnosticsProvider: DiagnosticsProvider, @unchecked Sendable {
+/// Stateless, so it is genuinely `Sendable` — no `@unchecked` escape needed.
+final class NoDiagnosticsProvider: DiagnosticsProvider {
     func threadNetworks() async -> [ThreadNetworkInfo] { [] }
     func nodeDiagnostics(for devices: [ThreadDevice]) async -> [UUID: ThreadNodeDiagnostics] { [:] }
 }

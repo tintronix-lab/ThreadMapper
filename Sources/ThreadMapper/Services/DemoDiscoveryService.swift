@@ -2,7 +2,12 @@ import Foundation
 
 /// Simulated Thread network for demo mode, App Store review, and SwiftUI Previews.
 /// Provides a realistic 8-device home without requiring HomeKit authorization.
-final class DemoDiscoveryService: DiscoveryService, @unchecked Sendable {
+///
+/// `@MainActor` per `DiscoveryService`: `measureSignalQualities()` iterates
+/// `devices` while `startScanning()` replaces it, which was a read/write race
+/// across actors until both landed on the main actor.
+@MainActor
+final class DemoDiscoveryService: DiscoveryService {
 
     var devices: [ThreadDevice] = []
     var discoveryError: DiscoveryError?
@@ -85,9 +90,7 @@ final class DemoDiscoveryService: DiscoveryService, @unchecked Sendable {
     // MARK: - DiscoveryService
 
     func startScanning() async throws {
-        await MainActor.run {
-            devices = Self.demoDevices
-        }
+        devices = Self.demoDevices
     }
 
     func stopScanning() {}
