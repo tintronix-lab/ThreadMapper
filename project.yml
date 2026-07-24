@@ -58,8 +58,6 @@ targets:
           [ "$CURRENT" = "$BUILD" ] || /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
         shell: /bin/sh
         basedOnDependencyAnalysis: false
-        outputFiles:
-          - $(SRCROOT)/Sources/ThreadMapper/Info.plist
     scheme:
       shared: true
       testTargets:
@@ -91,8 +89,6 @@ targets:
           [ "$CURRENT" = "$BUILD" ] || /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
         shell: /bin/sh
         basedOnDependencyAnalysis: false
-        outputFiles:
-          - $(SRCROOT)/Sources/ThreadMapperWidget/Info.plist
 
   ThreadMapperWatch:
     type: application
@@ -120,8 +116,6 @@ targets:
           [ "$CURRENT" = "$BUILD" ] || /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
         shell: /bin/sh
         basedOnDependencyAnalysis: false
-        outputFiles:
-          - $(SRCROOT)/Sources/ThreadMapperWatch/Info.plist
     scheme:
       shared: true
 
@@ -148,8 +142,6 @@ targets:
           [ "$CURRENT" = "$BUILD" ] || /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
         shell: /bin/sh
         basedOnDependencyAnalysis: false
-        outputFiles:
-          - $(SRCROOT)/Sources/ThreadMapperWatchWidget/Info.plist
 
   ThreadMapperTests:
     type: bundle.unit-test

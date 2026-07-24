@@ -425,7 +425,7 @@ private extension ManualChapter {
                 .paragraph("When critical anomalies appear on your network, ThreadMapper can send a proactive push notification with an AI-written headline. Enable this in Settings → Notifications → Proactive AI Insights. Requires iOS 26 and Apple Intelligence."),
             ]),
             .init(title: "Alert Urgency Scoring", icon: "bell.badge.waveform.fill", body: [
-                .paragraph("On iOS 26 with a Pro subscription, ThreadMapper uses on-device AI to score each offline alert from 1 (informational) to 10 (critical) before deciding whether to send a push notification. Routine blips that recover quickly score low and are silently suppressed; genuinely important failures score high and fire immediately."),
+                .paragraph("On iOS 26 with Pro, ThreadMapper uses on-device AI to score each offline alert from 1 (informational) to 10 (critical) before deciding whether to send a push notification. Routine blips that recover quickly score low and are silently suppressed; genuinely important failures score high and fire immediately."),
                 .tip("The AI context sentence appears as the notification subtitle so you can see why ThreadMapper judged this alert important — even on the Lock Screen."),
             ]),
             .init(title: "Weekly Health Coach", icon: "graduationcap.fill", body: [
@@ -564,20 +564,33 @@ private extension ManualChapter {
 
         .init(title: "Pro Features", topics: [
             .init(title: "What's Included in Pro", icon: "star.fill", body: [
-                .paragraph("ThreadMapper Pro unlocks:"),
+                .paragraph("ThreadMapper Pro is a one-time unlock that adds every advanced feature:"),
                 .bullets([
-                    "30-Day Health History — chart and trend analysis beyond the free 24-hour window",
-                    "Mesh Resilience Score — shows which single device failure would partition your mesh",
-                    "Health Streaks — tracks consecutive Grade A days",
-                    "Weekly Reports — AI-narrated plain-English summaries delivered every Sunday",
-                    "Siri Shortcuts — check your network without opening the app",
+                    "AI Insights — full network health analysis, failure predictions, optimisation plans, and a maintenance calendar powered by Apple Intelligence",
+                    "Network Assistant — streaming on-device AI chat for personalised diagnostics; ask anything about your mesh or a specific device",
+                    "Resilience Simulator — simulate the failure of any border router or relay and see which devices would be orphaned",
+                    "30-Day History — a full month of health trends and events in the timeline",
+                    "Topology Time-Lapse — replay how your mesh topology changed over time with a 50-minute scrubber",
+                    "Diagnostic PDF Export — generate a 3-page diagnostic report for sharing with installers or saving for your records",
+                    "HomeKit Scene Triggers — automatically run a HomeKit scene when health drops below your chosen grade threshold",
+                    "Smart Home Advisor — placement, automation, and scene recommendations tailored to your Thread topology",
+                    "Weekly Reports — auto-generated weekly summary with grade distribution, stability score, and streak tracking",
+                    "Health Streaks — track consecutive Grade A days and build a long-term reliability record",
+                    "Watch Face Complications — three WidgetKit complication families show grade, score, and offline count on any watch face",
+                    "Alert Urgency Scoring — AI scores every offline alert 1–10 and suppresses low-urgency notifications",
+                    "Weekly Health Coach — personalised weekly coaching plan with 1–3 prioritised actions",
+                    "Anomaly Pattern Recognition — AI names specific failure patterns and gives a targeted fix for each degrading device",
+                    "AI Troubleshooter — device-specific step-by-step troubleshooting guide generated from your device's actual history",
+                    "Network Storyteller — a narrative of your mesh's last 30 days: opening, key events, current chapter, and outlook",
                 ]),
+                .tip("All Pro features are available immediately after purchase — no waiting, no activation code."),
             ]),
             .init(title: "Purchasing Pro", icon: "creditcard", body: [
-                .paragraph("Tap the Pro badge anywhere in the app. Two subscription options are available: Monthly (billed each month, cancel any time) and Annual (billed once per year, typically ~40% less). Payment is charged to your Apple ID. Manage or cancel in iOS Settings → Apple ID → Subscriptions."),
+                .paragraph("Tap the Pro badge anywhere in the app to open the upgrade screen. ThreadMapper Pro is a one-time purchase — you pay once and own it forever with no recurring charges."),
+                .paragraph("Payment is charged to your Apple ID at the time of purchase. There is no subscription, no auto-renewal, and no cancellation needed."),
             ]),
             .init(title: "Restoring Purchases", icon: "arrow.clockwise", body: [
-                .paragraph("If you reinstall the app or switch to a new iPhone, tap Restore Purchases on the paywall screen. Your subscription is tied to your Apple ID and will be restored automatically at no charge."),
+                .paragraph("If you reinstall the app or switch to a new iPhone, tap Restore Purchases on the paywall screen. Your purchase is tied to your Apple ID and will be restored automatically at no charge."),
             ]),
         ]),
 
@@ -634,7 +647,7 @@ private extension ManualChapter {
                 .paragraph("Grey dots mean no Thread device signal was detectable at that location. Expected if you are too far from any Thread device, the device is a Sleepy End Device that polls infrequently, or the room has significant RF shielding (concrete, metal framing)."),
             ]),
             .init(title: "Resetting Everything", icon: "arrow.counterclockwise", body: [
-                .paragraph("To start fresh: clear all three stores in Settings → Data, then delete and reinstall the app. Your HomeKit home, devices, and Apple ID subscription are unaffected."),
+                .paragraph("To start fresh: clear all three stores in Settings → Data, then delete and reinstall the app. Your HomeKit home, devices, and Pro purchase are unaffected."),
             ]),
         ]),
 
