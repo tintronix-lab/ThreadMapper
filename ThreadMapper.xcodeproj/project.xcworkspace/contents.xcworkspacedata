@@ -4,7 +4,4 @@
    <FileRef
       location = "self:">
    </FileRef>
-   <FileRef
-      location = "group:Image+SafeSystem.swift">
-   </FileRef>
 </Workspace>
