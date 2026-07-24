@@ -90,6 +90,8 @@ targets:
         embed: true
       - sdk: WatchKit.framework
       - sdk: WatchConnectivity.framework
+    scheme:
+      shared: true
 
   ThreadMapperWatchWidget:
     type: app-extension
