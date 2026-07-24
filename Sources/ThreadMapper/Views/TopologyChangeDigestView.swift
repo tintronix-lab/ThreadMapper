@@ -6,7 +6,6 @@ struct TopologyChangeDigestView: View {
     let diff: SnapshotDiff
     let deviceCount: Int
     @Environment(\.dismiss) private var dismiss
-    @Environment(ProStore.self) private var proStore
 
     @State private var aiHeadline: String?
     @State private var aiOutlook: String?
@@ -55,7 +54,7 @@ struct TopologyChangeDigestView: View {
                     }
                 }
 
-                if proStore.isPro {
+                if ProStore.shared.isPro {
                     Section {
                         if isLoadingAI {
                             HStack(spacing: 8) {
@@ -94,7 +93,7 @@ struct TopologyChangeDigestView: View {
                 }
             }
             .task {
-                guard proStore.isPro, #available(iOS 26, *) else { return }
+                guard ProStore.shared.isPro, #available(iOS 26, *) else { return }
                 isLoadingAI = true
                 let result = await AINetworkAnalyzer().topologyChangeSummary(diff: diff, deviceCount: deviceCount)
                 isLoadingAI = false
