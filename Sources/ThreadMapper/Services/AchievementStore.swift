@@ -25,7 +25,7 @@ import Observation
         Achievement(id: "firstGradeA", title: "Grade A Network", description: "Achieve a Grade A health score.", icon: "checkmark.seal.fill"),
         Achievement(id: "streak3", title: "Streak Starter", description: "Maintain Grade A for 3 consecutive days.", icon: "flame"),
         Achievement(id: "streak7", title: "Streak Master", description: "Maintain Grade A for 7 consecutive days.", icon: "flame.fill"),
-        Achievement(id: "resilienceA", title: "Resilient Home", description: "Achieve an A resilience score.", icon: "shield.checkmark.fill"),
+        Achievement(id: "resilienceA", title: "Resilient Home", description: "Achieve an A resilience score.", icon: "checkmark.shield.fill"),
     ]
 
     /// `storeURL` is injectable so tests can use a throwaway file; the shared
