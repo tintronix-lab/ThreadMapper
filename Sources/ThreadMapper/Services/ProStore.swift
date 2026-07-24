@@ -1,11 +1,10 @@
 import Foundation
 import Observation
 import StoreKit
-import Combine
 
 @MainActor
 @Observable
-final class ProStore: ObservableObject {
+final class ProStore {
     static let shared = ProStore()
 
     /// Pro is a single one-time unlock. A second "annual" non-consumable was
@@ -19,7 +18,6 @@ final class ProStore: ObservableObject {
     private(set) var purchaseInProgress = false
 
     @ObservationIgnored private var updateTask: Task<Void, Never>?
-    @ObservationIgnored let objectWillChange = ObservableObjectPublisher()
 
     private init() {
         // Fast path: use persisted value so UI doesn't flicker while StoreKit verifies
@@ -83,7 +81,6 @@ final class ProStore: ObservableObject {
     }
 
     private func setPro(_ value: Bool) {
-        objectWillChange.send()
         isPro = value
         UserDefaults.standard.set(value, forKey: "isPro")
         UserDefaults(suiteName: AppGroupStore.groupID)?.set(value, forKey: "isPro")

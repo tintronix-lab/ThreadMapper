@@ -12,7 +12,6 @@
 *.xcuserstate
 *.ipa
 *.dSYM
-*.ipa
 
 # --- SPM / Swift ---
 .build/

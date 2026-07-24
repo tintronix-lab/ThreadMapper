@@ -1247,7 +1247,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.tintronixlab.ThreadMapper.widget;
 				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -1298,7 +1297,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.tintronixlab.ThreadMapper.widget;
 				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

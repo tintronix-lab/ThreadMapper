@@ -55,7 +55,6 @@ struct ContentView: View {
                 .environment(historyStore)
                 .environment(activityStore)
                 .environment(proStore)
-                .environmentObject(proStore)
                 .environment(deviceOverrideStore)
                 .environment(commissioningBriefingStore)
                 .task {

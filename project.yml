@@ -69,8 +69,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.tintronixlab.ThreadMapper.widget
         INFOPLIST_FILE: Sources/ThreadMapperWidget/Info.plist
         CODE_SIGN_ENTITLEMENTS: Sources/ThreadMapperWidget/ThreadMapperWidget.entitlements
-        SWIFT_VERSION: "5"
-        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_STYLE: "Automatic"
         DEVELOPMENT_TEAM: QCSX955Y7P
 
   ThreadMapperWatch:
