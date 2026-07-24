@@ -1,20 +1,20 @@
 #!/bin/zsh
 
-# Print commands as they run for clear CI log visibility
+# Fail script on first error and log all execution lines
+set -euo pipefail
 set -x
-set -e
 
-echo "==> Setting up environment..."
-
-# Ensure Homebrew binary path is included for Apple Silicon / Intel runners
+echo "==> Configuring build environment paths..."
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+export HOMEBREW_NO_AUTO_UPDATE=1
+export HOMEBREW_NO_INSTALL_CLEANUP=1
 
-# Install XcodeGen if not already present
+echo "==> Checking for XcodeGen..."
 if ! command -v xcodegen &> /dev/null; then
-    echo "==> XcodeGen not found. Installing via Homebrew..."
+    echo "==> Installing XcodeGen via Homebrew..."
     brew install xcodegen
 else
-    echo "==> XcodeGen is already installed."
+    echo "==> XcodeGen already available."
 fi
 
 echo "==> Generating Xcode Project..."
