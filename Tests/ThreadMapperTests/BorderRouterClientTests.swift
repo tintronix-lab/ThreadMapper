@@ -1,6 +1,9 @@
 @testable import ThreadMapper
 import XCTest
 
+// `DiagnosticsProvider` is @MainActor-isolated (it reads live `ThreadDevice`
+// objects the poll loop mutates on the main actor), so its tests are too.
+@MainActor
 final class BorderRouterClientTests: XCTestCase {
 
     private let nodeJSON = """

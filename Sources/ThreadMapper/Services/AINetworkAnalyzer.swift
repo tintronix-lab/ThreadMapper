@@ -3,7 +3,15 @@ import FoundationModels
 
 // MARK: - Analyzer
 
+/// `@MainActor`-isolated. Every entry point reads live `ThreadDevice` objects —
+/// mutable classes the poll loop rewrites on the main actor — but only to build
+/// a prompt `String`; the model call itself carries nothing but that string.
+/// As nonisolated statics, the prompt building ran on the cooperative pool and
+/// raced those writes. Isolating the analyzer keeps device reads on the actor
+/// that owns them, while `session.respond` still suspends (inference is
+/// out-of-process), so the main thread is never occupied by it.
 @available(iOS 26, *)
+@MainActor
 struct AINetworkAnalyzer {
 
     // MARK: - Mesh Summary

@@ -88,7 +88,15 @@ enum BackgroundRefreshHandler {
 // Computes a lightweight grade from HM reachability; fires a notification if
 // the grade has dropped since the last foreground snapshot.
 
-private final class HealthWatcher: NSObject, HMHomeManagerDelegate, @unchecked Sendable {
+// `@MainActor`, not `@unchecked Sendable`: this owns an `HMHomeManager` created
+// on the main actor and set as its own delegate, so HomeKit calls back on the
+// main queue. `run()`/`computeAndNotifyIfNeeded()` were `nonisolated async` and
+// therefore ran on the cooperative pool, reading `manager.homes` and
+// `acc.isReachable` concurrently with those main-queue callbacks. The polling
+// loop below suspends at `Task.sleep`, so main-actor isolation doesn't block the
+// main thread during the BGTask window.
+@MainActor
+private final class HealthWatcher: NSObject, HMHomeManagerDelegate {
     private static let lastGradeKey = "bgLastGrade"
     private let manager = HMHomeManager()
 
@@ -105,7 +113,7 @@ private final class HealthWatcher: NSObject, HMHomeManagerDelegate, @unchecked S
         await computeAndNotifyIfNeeded()
     }
 
-    func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {}
+    nonisolated func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {}
 
     private func computeAndNotifyIfNeeded() async {
         var total = 0
@@ -165,7 +173,9 @@ private final class HealthWatcher: NSObject, HMHomeManagerDelegate, @unchecked S
 
 // Checks HMAccessory.isReachable for all accessories and fires
 // offline/online notifications for state changes since last run.
-private final class ReachabilityChecker: NSObject, HMHomeManagerDelegate, @unchecked Sendable {
+// `@MainActor` for the same reason as `HealthWatcher` — see the note there.
+@MainActor
+private final class ReachabilityChecker: NSObject, HMHomeManagerDelegate {
     private let manager = HMHomeManager()
 
     override init() {
@@ -182,7 +192,7 @@ private final class ReachabilityChecker: NSObject, HMHomeManagerDelegate, @unche
         await checkAndNotify()
     }
 
-    func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {}
+    nonisolated func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {}
 
     private func checkAndNotify() async {
         // State is keyed by device uniqueIdentifier (uuidString), matching the
@@ -207,12 +217,11 @@ private final class ReachabilityChecker: NSObject, HMHomeManagerDelegate, @unche
             let name = names[key] ?? "Device"
             let room = rooms[key]
             let wasReachable = previous[key] ?? true
-            await MainActor.run {
-                if !reachable && wasReachable {
-                    NotificationService.shared.notifyDeviceOffline(name, room: room, deviceID: uuid)
-                } else if reachable && !wasReachable {
-                    NotificationService.shared.clearOfflineNotification(for: uuid)
-                }
+            // Already on the main actor — the former `MainActor.run` hop is gone.
+            if !reachable && wasReachable {
+                NotificationService.shared.notifyDeviceOffline(name, room: room, deviceID: uuid)
+            } else if reachable && !wasReachable {
+                NotificationService.shared.clearOfflineNotification(for: uuid)
             }
         }
 

@@ -75,7 +75,7 @@ enum DeviceProtocol: String, CaseIterable {
 // MARK: - ThreadDevice
 
 @Observable
-final class ThreadDevice: Identifiable, Codable, Hashable, Equatable, @unchecked Sendable {
+final class ThreadDevice: Identifiable, Codable, Hashable, Equatable {
     /// SwiftUI `Identifiable` identity, backed by `uniqueIdentifier` (the stable
     /// HomeKit accessory ID) so the two can never diverge. A previous separate
     /// stored `id` — a fresh random `UUID()` regenerated every launch — silently

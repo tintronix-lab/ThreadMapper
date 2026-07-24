@@ -533,14 +533,14 @@ final class MeshViewModel {
     /// Pull real Thread data from the provider (network facts + per-node routing).
     /// No-op in effect for HomeKit-only setups (empty results → inferred mesh).
     func refreshDiagnostics() async {
-        let currentDevices = await MainActor.run { self.devices }
-        let diags = await diagnosticsProvider.nodeDiagnostics(for: currentDevices)
+        // Already on the main actor (the class is @MainActor) — the former
+        // `MainActor.run` hops were no-ops that also forced the device list
+        // through a Sendable boundary it can't safely cross.
+        let diags = await diagnosticsProvider.nodeDiagnostics(for: devices)
         let networks = await diagnosticsProvider.threadNetworks()
-        await MainActor.run {
-            self.latestDiagnostics = diags
-            self.threadNetworks = networks
-            self.applyFilters()
-        }
+        latestDiagnostics = diags
+        threadNetworks = networks
+        applyFilters()
     }
 
     func routerDensity(for room: String? = nil) -> Int {

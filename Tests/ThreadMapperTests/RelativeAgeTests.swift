@@ -4,7 +4,10 @@ import XCTest
 /// Guards `AINetworkAnalyzer.relativeAge`. Event ages are interpolated into the
 /// prompt and the model echoes them verbatim, so raw minutes previously leaked
 /// into user-facing summaries as nonsense like "7391m ago".
+// `AINetworkAnalyzer` is @MainActor-isolated (it reads live `ThreadDevice`
+// objects the poll loop mutates on the main actor), so its tests are too.
 @available(iOS 26, *)
+@MainActor
 final class RelativeAgeTests: XCTestCase {
 
     private let now = Date(timeIntervalSince1970: 1_800_000_000)

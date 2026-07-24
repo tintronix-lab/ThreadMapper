@@ -7,6 +7,14 @@ import Foundation
 /// network facts, and an OpenThread Border Router (OTBR) REST connection can
 /// provide the real routing table. When no provider yields data,
 /// `MeshTopologyBuilder` falls back to inference (today's behavior).
+///
+/// `@MainActor`-isolated: `nodeDiagnostics(for:)` receives live `ThreadDevice`
+/// objects — mutable classes the poll loop rewrites on the main actor every
+/// RSSI tick. As a `nonisolated async` requirement it read `rssi`, `room`, and
+/// `isBorderRouter` off the main actor while those writes were happening. The
+/// implementations are I/O-bound (`URLSession`, `THClient`), so they suspend
+/// rather than occupy the main thread.
+@MainActor
 protocol DiagnosticsProvider: AnyObject, Sendable {
     /// Real network-level facts (name, channel, PAN ID) when available.
     func threadNetworks() async -> [ThreadNetworkInfo]
