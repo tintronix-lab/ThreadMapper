@@ -3,111 +3,207 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ThreadMapper — Support</title>
+<title>ThreadMapper — See your Thread network</title>
+<meta name="description" content="ThreadMapper turns your Thread smart-home network into something you can actually see. Mesh map, room-by-room survey, offline alerts. Private by design.">
 <style>
-  :root { color-scheme: light dark; }
-  body {
-    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    max-width: 44rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem;
-    color: #1c1c1e; background: #fff;
+  :root {
+    color-scheme: light dark;
+    --bg: #ffffff; --fg: #1c1c1e; --muted: #6e6e73; --line: #d2d2d7;
+    --card: #f5f5f7; --accent: #0a84ff;
   }
-  @media (prefers-color-scheme: dark) { body { color: #f2f2f7; background: #000; } }
-  h1 { font-size: 2rem; margin-bottom: .25rem; }
-  h2 { font-size: 1.15rem; margin-top: 2.25rem; }
-  .tagline { color: #8e8e93; margin-top: 0; }
-  .contact { border-left: 3px solid #0a84ff; padding: .6rem 0 .6rem 1rem; margin: 1.5rem 0; }
-  details { margin: .6rem 0; padding: .6rem 0; border-bottom: 1px solid #d1d1d6; }
-  summary { cursor: pointer; font-weight: 600; }
-  details p { margin: .6rem 0 0; }
-  a { color: #0a84ff; }
-  footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid #d1d1d6; font-size: .9rem; color: #8e8e93; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #000; --fg: #f5f5f7; --muted: #98989d; --line: #38383a; --card: #1c1c1e; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 60rem; margin: 0 auto; padding: 0 1.25rem; }
+
+  /* Hero */
+  header { text-align: center; padding: 4.5rem 0 3rem; }
+  .logo {
+    width: 88px; height: 88px; border-radius: 20px; margin: 0 auto 1.5rem;
+    background: radial-gradient(circle at 50% 45%, #1b3a6b 0%, #0a1228 70%);
+    display: grid; place-items: center;
+  }
+  .logo svg { width: 56px; height: 56px; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); line-height: 1.1; letter-spacing: -.02em; margin: 0 0 .75rem; }
+  .tagline { font-size: clamp(1.05rem, 2.2vw, 1.3rem); color: var(--muted); margin: 0 auto; max-width: 34rem; }
+  .req { margin-top: 1.5rem; font-size: .92rem; color: var(--muted); }
+
+  /* Screenshots */
+  .shots {
+    display: flex; gap: 1.1rem; overflow-x: auto; padding: 2.5rem .25rem 1rem;
+    scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+  }
+  .shot { flex: 0 0 auto; scroll-snap-align: center; text-align: center; }
+  .shot img {
+    width: 240px; height: auto; border-radius: 18px;
+    border: 1px solid var(--line); display: block;
+  }
+  .shot figcaption { margin-top: .6rem; font-size: .85rem; color: var(--muted); }
+
+  /* Features */
+  section { padding: 3rem 0; border-top: 1px solid var(--line); }
+  h2 { font-size: 1.5rem; letter-spacing: -.01em; margin: 0 0 1.5rem; }
+  .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+  .feature { background: var(--card); border-radius: 14px; padding: 1.25rem; }
+  .feature h3 { margin: 0 0 .35rem; font-size: 1.02rem; }
+  .feature p { margin: 0; font-size: .94rem; color: var(--muted); }
+
+  .note { background: var(--card); border-radius: 14px; padding: 1.5rem; }
+  .note p { margin: 0 0 .8rem; }
+  .note p:last-child { margin-bottom: 0; }
+
+  ul.plain { padding-left: 1.15rem; margin: 0; }
+  ul.plain li { margin: .45rem 0; color: var(--muted); }
+  ul.plain strong { color: var(--fg); }
+
+  a { color: var(--accent); }
+  footer {
+    border-top: 1px solid var(--line); padding: 2rem 0 3rem;
+    font-size: .9rem; color: var(--muted); text-align: center;
+  }
+  footer a { margin: 0 .5rem; }
 </style>
 </head>
 <body>
 
-<h1>ThreadMapper Support</h1>
-<p class="tagline">Thread mesh network monitor for iPhone and Apple Watch.</p>
+<div class="wrap">
 
-<div class="contact">
-  <strong>Need help?</strong> Email <a href="mailto:tintronix@gmail.com">tintronix@gmail.com</a>.
-  Please include your iOS version, iPhone model, and a short description of what you were doing.
+  <header>
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#4a9eff" stroke-width="3" opacity=".75">
+          <line x1="50" y1="50" x2="50" y2="18"/><line x1="50" y1="50" x2="78" y2="34"/>
+          <line x1="50" y1="50" x2="78" y2="66"/><line x1="50" y1="50" x2="50" y2="82"/>
+          <line x1="50" y1="50" x2="22" y2="66"/><line x1="50" y1="50" x2="22" y2="34"/>
+        </g>
+        <g fill="#4a9eff">
+          <circle cx="50" cy="18" r="7"/><circle cx="78" cy="34" r="7"/><circle cx="78" cy="66" r="7"/>
+          <circle cx="50" cy="82" r="7"/><circle cx="22" cy="66" r="7"/><circle cx="22" cy="34" r="7"/>
+        </g>
+        <circle cx="50" cy="50" r="12" fill="#00d4ff"/>
+      </svg>
+    </div>
+    <h1>See your Thread network</h1>
+    <p class="tagline">
+      Most Thread devices are invisible. They just work — until they don't.
+      ThreadMapper shows you every device, which rooms have weak coverage,
+      and the moment something drops offline.
+    </p>
+    <p class="req">iPhone · iOS 17 or later · Apple Watch companion included</p>
+  </header>
+
+  <div class="shots">
+    <figure class="shot">
+      <img src="screenshots/01_dashboard.jpg" alt="ThreadMapper dashboard showing network health grade and per-room coverage" loading="lazy">
+      <figcaption>Health at a glance</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="screenshots/02_mesh_topology.jpg" alt="Mesh map showing Thread devices grouped by room and linked to border routers" loading="lazy">
+      <figcaption>Live mesh map</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="screenshots/03_survey.jpg" alt="Survey screen listing live signal quality for each device" loading="lazy">
+      <figcaption>Room-by-room survey</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="screenshots/04_activity.jpg" alt="Activity feed showing network health events over time" loading="lazy">
+      <figcaption>Every event, logged</figcaption>
+    </figure>
+  </div>
+
+  <section>
+    <h2>What it does</h2>
+    <div class="grid">
+      <div class="feature">
+        <h3>Network health grade</h3>
+        <p>An A–F grade with a clear score, plus the specific issues pulling it down.</p>
+      </div>
+      <div class="feature">
+        <h3>Live mesh map</h3>
+        <p>Every device grouped by room, showing how each one reaches your border routers.</p>
+      </div>
+      <div class="feature">
+        <h3>Room-by-room survey</h3>
+        <p>Walk each room and get a coverage grade you can act on — drivable from your wrist.</p>
+      </div>
+      <div class="feature">
+        <h3>Offline alerts</h3>
+        <p>Know the moment a device drops, with a configurable grace period and quiet hours.</p>
+      </div>
+      <div class="feature">
+        <h3>Device history</h3>
+        <p>30 days of signal trends, uptime and firmware changes for every accessory.</p>
+      </div>
+      <div class="feature">
+        <h3>Apple Watch</h3>
+        <p>Your network grade on your wrist, plus a remote for running room surveys hands-free.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Honest about its data</h2>
+    <div class="note">
+      <p>
+        iOS doesn't expose true radio signal strength for Thread accessories. So ThreadMapper
+        measures response quality instead — and labels it as an <strong>estimate</strong> everywhere
+        it appears, rather than dressing it up as dBm it can't actually read.
+      </p>
+      <p>
+        Mesh links are shown as inferred routing unless you connect an OpenThread Border Router,
+        in which case real routing data is used. No invented numbers.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Private by design</h2>
+    <ul class="plain">
+      <li><strong>No account.</strong> Nothing to sign up for, nothing to log into.</li>
+      <li><strong>No analytics, no tracking.</strong> No third-party SDKs of any kind.</li>
+      <li><strong>Everything stays on your iPhone.</strong> We run no servers and receive no copy of your data.</li>
+      <li><strong>AI runs on device.</strong> On iOS 26 with Apple Intelligence — your network data is never uploaded.</li>
+    </ul>
+    <p style="margin-top:1.25rem"><a href="privacy.html">Read the full privacy policy →</a></p>
+  </section>
+
+  <section>
+    <h2>ThreadMapper Pro</h2>
+    <p style="margin-top:-.75rem;color:var(--muted)">A one-time purchase — not a subscription.</p>
+    <ul class="plain">
+      <li>AI Insights, Network Assistant and an AI troubleshooter that reads your device's actual history</li>
+      <li>Resilience Simulator — see exactly which devices would be orphaned if a router failed</li>
+      <li>30-day history timeline and topology time-lapse</li>
+      <li>Diagnostic PDF export for installers or your own records</li>
+      <li>Weekly reports, health streaks, HomeKit scene triggers and Watch complications</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Before you start</h2>
+    <p style="color:var(--muted);margin-top:-.75rem">
+      ThreadMapper reads your network through HomeKit, so you'll need a home with at least one
+      Thread border router — a HomePod mini, Apple TV 4K or similar. AI features require iOS 26
+      on an Apple Intelligence-capable device. Want to look around first? Turn on
+      <strong style="color:var(--fg)">Demo Mode</strong> to explore the whole app with a simulated
+      network, no hardware needed.
+    </p>
+  </section>
+
+  <footer>
+    ThreadMapper is developed by Tintronix Lab.<br>
+    <a href="support.html">Support</a> ·
+    <a href="privacy.html">Privacy Policy</a> ·
+    <a href="https://github.com/tintronix-lab/ThreadMapper">Source on GitHub</a>
+  </footer>
+
 </div>
-
-<h2>Frequently asked questions</h2>
-
-<details>
-  <summary>The app says "No devices found"</summary>
-  <p>
-    ThreadMapper reads your Thread devices through HomeKit, so it needs two things: HomeKit
-    access must be granted (iOS Settings → Privacy &amp; Security → HomeKit → ThreadMapper),
-    and you need at least one Thread border router in your home — for example a HomePod mini,
-    Apple TV 4K, or a compatible hub. If you just want to explore the app, turn on
-    <em>Demo Mode</em> in Settings.
-  </p>
-</details>
-
-<details>
-  <summary>Why is signal strength called an "estimate"?</summary>
-  <p>
-    iOS does not expose real radio RSSI for Thread accessories to third-party apps. ThreadMapper
-    derives a response-quality estimate by timing how quickly each accessory replies. It is a
-    reliable way to compare devices and rooms, but it is not a radio-measured dBm value — which
-    is why the app labels it as estimated throughout.
-  </p>
-</details>
-
-<details>
-  <summary>Are the mesh links real Thread routing?</summary>
-  <p>
-    By default they are logical estimates: devices are linked to the nearest border router or
-    same-room router. If you connect an OpenThread Border Router in Settings, ThreadMapper will
-    use its real routing table instead.
-  </p>
-</details>
-
-<details>
-  <summary>How do I run a room survey?</summary>
-  <p>
-    Open the Survey tab and choose Guided Survey. Stand in a room, tap Start, walk around while
-    it samples, then tap Done to save that room and move to the next. If you have an Apple Watch,
-    you can drive Start / Done / Skip from your wrist while the survey runs on your iPhone.
-  </p>
-</details>
-
-<details>
-  <summary>Do the AI features send my data anywhere?</summary>
-  <p>
-    No. On iOS 26 and later they run entirely on device using Apple Intelligence. Nothing about
-    your network leaves your iPhone. They require an Apple Intelligence–capable device.
-  </p>
-</details>
-
-<details>
-  <summary>I bought Pro but features are still locked</summary>
-  <p>
-    Open Settings in ThreadMapper and tap <em>Restore Purchases</em>. Make sure you are signed in
-    with the same Apple Account used for the original purchase.
-  </p>
-</details>
-
-<details>
-  <summary>The Apple Watch app has no data</summary>
-  <p>
-    The watch mirrors your iPhone. Open ThreadMapper on the iPhone at least once so it can send a
-    snapshot, and make sure the watch app is installed in the Watch app on your iPhone.
-  </p>
-</details>
-
-<h2>Privacy</h2>
-<p>
-  ThreadMapper collects no personal data and has no accounts or analytics.
-  Read the full <a href="privacy.html">Privacy Policy</a>.
-</p>
-
-<footer>
-  ThreadMapper is developed by Tintronix Lab.
-  <a href="privacy.html">Privacy Policy</a>
-</footer>
 
 </body>
 </html>
