@@ -729,6 +729,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 85FE66D4EFD946946ED7E667 /* Build configuration list for PBXNativeTarget "ThreadMapperWatchWidget" */;
 			buildPhases = (
+				CBB643B3CA7458838B1524A0 /* Auto Build Number */,
 				4B936E21A765B1B6177C90F9 /* Sources */,
 				B2B6C67EF112B181E6D6BE81 /* Frameworks */,
 			);
@@ -747,6 +748,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 725ED2B8BCFA3157C51E379A /* Build configuration list for PBXNativeTarget "ThreadMapperWidget" */;
 			buildPhases = (
+				8A3F56003969883C1D21BA77 /* Auto Build Number */,
 				8FB8EE39F3AA4BE4A5F2C78C /* Sources */,
 			);
 			buildRules = (
@@ -916,11 +918,50 @@
 			);
 			outputPaths = (
 				"$(SRCROOT)/Sources/ThreadMapperWatch/Info.plist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "BUILD=$(git -C \"${SRCROOT}\" rev-list --count HEAD 2>/dev/null || echo \"1\")\nPLIST=\"${SRCROOT}/Sources/ThreadMapperWatch/Info.plist\"\nCURRENT=$(/usr/libexec/PlistBuddy -c \"Print :CFBundleVersion\" \"$PLIST\" 2>/dev/null || echo \"\")\n[ \"$CURRENT\" = \"$BUILD\" ] || /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD\" \"$PLIST\"\n";
+		};
+		8A3F56003969883C1D21BA77 /* Auto Build Number */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Auto Build Number";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/Sources/ThreadMapperWidget/Info.plist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "BUILD=$(git -C \"${SRCROOT}\" rev-list --count HEAD 2>/dev/null || echo \"1\")\nPLIST=\"${SRCROOT}/Sources/ThreadMapperWidget/Info.plist\"\nCURRENT=$(/usr/libexec/PlistBuddy -c \"Print :CFBundleVersion\" \"$PLIST\" 2>/dev/null || echo \"\")\n[ \"$CURRENT\" = \"$BUILD\" ] || /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD\" \"$PLIST\"\n";
+		};
+		CBB643B3CA7458838B1524A0 /* Auto Build Number */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Auto Build Number";
+			outputFileListPaths = (
+			);
+			outputPaths = (
 				"$(SRCROOT)/Sources/ThreadMapperWatchWidget/Info.plist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "BUILD=$(git -C \"${SRCROOT}\" rev-list --count HEAD 2>/dev/null || echo \"1\")\nfor PLIST in \\\n    \"${SRCROOT}/Sources/ThreadMapperWatch/Info.plist\" \\\n    \"${SRCROOT}/Sources/ThreadMapperWatchWidget/Info.plist\"; do\n    [ -f \"$PLIST\" ] || continue\n    CURRENT=$(/usr/libexec/PlistBuddy -c \"Print :CFBundleVersion\" \"$PLIST\" 2>/dev/null || echo \"\")\n    [ \"$CURRENT\" = \"$BUILD\" ] && continue\n    /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD\" \"$PLIST\"\ndone\n";
+			shellScript = "BUILD=$(git -C \"${SRCROOT}\" rev-list --count HEAD 2>/dev/null || echo \"1\")\nPLIST=\"${SRCROOT}/Sources/ThreadMapperWatchWidget/Info.plist\"\nCURRENT=$(/usr/libexec/PlistBuddy -c \"Print :CFBundleVersion\" \"$PLIST\" 2>/dev/null || echo \"\")\n[ \"$CURRENT\" = \"$BUILD\" ] || /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD\" \"$PLIST\"\n";
 		};
 		EA9319D48599B6E1E6DD4107 /* Auto Build Number */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -937,11 +978,10 @@
 			);
 			outputPaths = (
 				"$(SRCROOT)/Sources/ThreadMapper/Info.plist",
-				"$(SRCROOT)/Sources/ThreadMapperWidget/Info.plist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "BUILD=$(git -C \"${SRCROOT}\" rev-list --count HEAD 2>/dev/null || echo \"1\")\nfor PLIST in \\\n    \"${SRCROOT}/Sources/ThreadMapper/Info.plist\" \\\n    \"${SRCROOT}/Sources/ThreadMapperWidget/Info.plist\"; do\n    [ -f \"$PLIST\" ] || continue\n    CURRENT=$(/usr/libexec/PlistBuddy -c \"Print :CFBundleVersion\" \"$PLIST\" 2>/dev/null || echo \"\")\n    [ \"$CURRENT\" = \"$BUILD\" ] && continue\n    /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD\" \"$PLIST\"\ndone\n";
+			shellScript = "BUILD=$(git -C \"${SRCROOT}\" rev-list --count HEAD 2>/dev/null || echo \"1\")\nPLIST=\"${SRCROOT}/Sources/ThreadMapper/Info.plist\"\nCURRENT=$(/usr/libexec/PlistBuddy -c \"Print :CFBundleVersion\" \"$PLIST\" 2>/dev/null || echo \"\")\n[ \"$CURRENT\" = \"$BUILD\" ] || /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD\" \"$PLIST\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

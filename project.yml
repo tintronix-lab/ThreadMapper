@@ -53,19 +53,13 @@ targets:
       - name: Auto Build Number
         script: |
           BUILD=$(git -C "${SRCROOT}" rev-list --count HEAD 2>/dev/null || echo "1")
-          for PLIST in \
-              "${SRCROOT}/Sources/ThreadMapper/Info.plist" \
-              "${SRCROOT}/Sources/ThreadMapperWidget/Info.plist"; do
-              [ -f "$PLIST" ] || continue
-              CURRENT=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" 2>/dev/null || echo "")
-              [ "$CURRENT" = "$BUILD" ] && continue
-              /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
-          done
+          PLIST="${SRCROOT}/Sources/ThreadMapper/Info.plist"
+          CURRENT=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" 2>/dev/null || echo "")
+          [ "$CURRENT" = "$BUILD" ] || /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
         shell: /bin/sh
         basedOnDependencyAnalysis: false
         outputFiles:
           - $(SRCROOT)/Sources/ThreadMapper/Info.plist
-          - $(SRCROOT)/Sources/ThreadMapperWidget/Info.plist
     scheme:
       shared: true
       testTargets:
@@ -88,6 +82,17 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Sources/ThreadMapperWidget/ThreadMapperWidget.entitlements
         CODE_SIGN_STYLE: "Automatic"
         DEVELOPMENT_TEAM: QCSX955Y7P
+    preBuildScripts:
+      - name: Auto Build Number
+        script: |
+          BUILD=$(git -C "${SRCROOT}" rev-list --count HEAD 2>/dev/null || echo "1")
+          PLIST="${SRCROOT}/Sources/ThreadMapperWidget/Info.plist"
+          CURRENT=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" 2>/dev/null || echo "")
+          [ "$CURRENT" = "$BUILD" ] || /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
+        shell: /bin/sh
+        basedOnDependencyAnalysis: false
+        outputFiles:
+          - $(SRCROOT)/Sources/ThreadMapperWidget/Info.plist
 
   ThreadMapperWatch:
     type: application
@@ -110,19 +115,13 @@ targets:
       - name: Auto Build Number
         script: |
           BUILD=$(git -C "${SRCROOT}" rev-list --count HEAD 2>/dev/null || echo "1")
-          for PLIST in \
-              "${SRCROOT}/Sources/ThreadMapperWatch/Info.plist" \
-              "${SRCROOT}/Sources/ThreadMapperWatchWidget/Info.plist"; do
-              [ -f "$PLIST" ] || continue
-              CURRENT=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" 2>/dev/null || echo "")
-              [ "$CURRENT" = "$BUILD" ] && continue
-              /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
-          done
+          PLIST="${SRCROOT}/Sources/ThreadMapperWatch/Info.plist"
+          CURRENT=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" 2>/dev/null || echo "")
+          [ "$CURRENT" = "$BUILD" ] || /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
         shell: /bin/sh
         basedOnDependencyAnalysis: false
         outputFiles:
           - $(SRCROOT)/Sources/ThreadMapperWatch/Info.plist
-          - $(SRCROOT)/Sources/ThreadMapperWatchWidget/Info.plist
     scheme:
       shared: true
 
@@ -140,6 +139,17 @@ targets:
     dependencies:
       - sdk: WidgetKit.framework
       - sdk: SwiftUI.framework
+    preBuildScripts:
+      - name: Auto Build Number
+        script: |
+          BUILD=$(git -C "${SRCROOT}" rev-list --count HEAD 2>/dev/null || echo "1")
+          PLIST="${SRCROOT}/Sources/ThreadMapperWatchWidget/Info.plist"
+          CURRENT=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" 2>/dev/null || echo "")
+          [ "$CURRENT" = "$BUILD" ] || /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
+        shell: /bin/sh
+        basedOnDependencyAnalysis: false
+        outputFiles:
+          - $(SRCROOT)/Sources/ThreadMapperWatchWidget/Info.plist
 
   ThreadMapperTests:
     type: bundle.unit-test
