@@ -1,14 +1,23 @@
-cat << 'EOF' > ci_scripts/ci_post_clone.sh
 #!/bin/zsh
 
-# Stop script on first failure
+# Print commands as they run for clear CI log visibility
+set -x
 set -e
 
-echo "==> Installing XcodeGen via Homebrew..."
-brew install xcodegen
+echo "==> Setting up environment..."
+
+# Ensure Homebrew binary path is included for Apple Silicon / Intel runners
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+# Install XcodeGen if not already present
+if ! command -v xcodegen &> /dev/null; then
+    echo "==> XcodeGen not found. Installing via Homebrew..."
+    brew install xcodegen
+else
+    echo "==> XcodeGen is already installed."
+fi
 
 echo "==> Generating Xcode Project..."
 xcodegen generate
 
-echo "==> Post-clone setup complete."
-EOF
+echo "==> Post-clone hook finished successfully."
