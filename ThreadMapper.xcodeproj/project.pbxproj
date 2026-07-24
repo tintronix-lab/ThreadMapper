@@ -237,7 +237,7 @@
 /* Begin PBXFileReference section */
 		03CE092261E5CCF97BFE9321 /* UserManualView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserManualView.swift; sourceTree = "<group>"; };
 		056854A48066FDD4C424DA05 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		06300078EC0A534C113E7F1D /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		06300078EC0A534C113E7F1D /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		070ABDE17694E51953D30A11 /* RelativeAgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelativeAgeTests.swift; sourceTree = "<group>"; };
 		07E1F1AD9FC1803DB767202A /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		08EB54538F02339479DAFAA5 /* MaintenanceCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaintenanceCalendarView.swift; sourceTree = "<group>"; };
@@ -264,7 +264,7 @@
 		1E510BEAB7A1EFD20FB2BB8F /* NetworkDiagnosticsEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkDiagnosticsEngine.swift; sourceTree = "<group>"; };
 		22EF6A4C0DAE5825A8738816 /* DashboardSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardSections.swift; sourceTree = "<group>"; };
 		23611ED66290E8EBCD505780 /* DeviceSurveyHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceSurveyHistory.swift; sourceTree = "<group>"; };
-		26F9BF9060BDCFB49BDDA458 /* ThreadMapper.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = ThreadMapper.storekit; sourceTree = "<group>"; };
+		26F9BF9060BDCFB49BDDA458 /* ThreadMapper.storekit */ = {isa = PBXFileReference; path = ThreadMapper.storekit; sourceTree = "<group>"; };
 		2945FB9DDBA1FB96AB5ECB9A /* BorderRouterClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorderRouterClient.swift; sourceTree = "<group>"; };
 		2B05CD388CEE4470A2BE6153 /* ThreadMapperWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadMapperWidget.swift; sourceTree = "<group>"; };
 		2DF6D8640A114C1AE284B5E6 /* SurveyWalkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SurveyWalkView.swift; sourceTree = "<group>"; };
@@ -333,7 +333,7 @@
 		9F32616F87B1055D0E39CB66 /* ThreadTopologyBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadTopologyBuilder.swift; sourceTree = "<group>"; };
 		A07B4E6BD7C3B375900EC3DD /* GraphLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphLayout.swift; sourceTree = "<group>"; };
 		A10B468BACD55F97BDA2917B /* DiagnosticsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsProvider.swift; sourceTree = "<group>"; };
-		A2741D530546E998463B5919 /* ThreadMapperWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.extensionkit-extension"; path = ThreadMapperWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2741D530546E998463B5919 /* ThreadMapperWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ThreadMapperWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		A46137591F7E9D29196D7557 /* DeviceListRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceListRow.swift; sourceTree = "<group>"; };
 		A4CC14DAA9C98602C31F7413 /* NetworkDiagnosticsView+Compatibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NetworkDiagnosticsView+Compatibility.swift"; sourceTree = "<group>"; };
 		A7B452E8E6A6C4776B21B687 /* AINetworkAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AINetworkAnalyzer.swift; sourceTree = "<group>"; };
@@ -764,6 +764,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = E0047047B3137BA6D77C1105 /* Build configuration list for PBXNativeTarget "ThreadMapper" */;
 			buildPhases = (
+				EA9319D48599B6E1E6DD4107 /* Auto Build Number */,
 				4AC6ABC5A4457EADEB6A131C /* Sources */,
 				732654E25BA5B27914813812 /* Resources */,
 				9A4C6645FC1166C7380A4168 /* Embed Foundation Extensions */,
@@ -786,6 +787,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = FDBC37D465F8FCD80CBA4122 /* Build configuration list for PBXNativeTarget "ThreadMapperWatch" */;
 			buildPhases = (
+				7A5E330C275E88F4D4F1BBB4 /* Auto Build Number */,
 				0BA81855575A0A76C1127823 /* Sources */,
 				0EAED9A34475513DC5F34664 /* Resources */,
 				65D20A567B267ECCDE424EEA /* Frameworks */,
@@ -897,6 +899,51 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		7A5E330C275E88F4D4F1BBB4 /* Auto Build Number */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Auto Build Number";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/Sources/ThreadMapperWatch/Info.plist",
+				"$(SRCROOT)/Sources/ThreadMapperWatchWidget/Info.plist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "BUILD=$(git -C \"${SRCROOT}\" rev-list --count HEAD 2>/dev/null || echo \"1\")\nfor PLIST in \\\n    \"${SRCROOT}/Sources/ThreadMapperWatch/Info.plist\" \\\n    \"${SRCROOT}/Sources/ThreadMapperWatchWidget/Info.plist\"; do\n    [ -f \"$PLIST\" ] || continue\n    CURRENT=$(/usr/libexec/PlistBuddy -c \"Print :CFBundleVersion\" \"$PLIST\" 2>/dev/null || echo \"\")\n    [ \"$CURRENT\" = \"$BUILD\" ] && continue\n    /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD\" \"$PLIST\"\ndone\n";
+		};
+		EA9319D48599B6E1E6DD4107 /* Auto Build Number */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Auto Build Number";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/Sources/ThreadMapper/Info.plist",
+				"$(SRCROOT)/Sources/ThreadMapperWidget/Info.plist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "BUILD=$(git -C \"${SRCROOT}\" rev-list --count HEAD 2>/dev/null || echo \"1\")\nfor PLIST in \\\n    \"${SRCROOT}/Sources/ThreadMapper/Info.plist\" \\\n    \"${SRCROOT}/Sources/ThreadMapperWidget/Info.plist\"; do\n    [ -f \"$PLIST\" ] || continue\n    CURRENT=$(/usr/libexec/PlistBuddy -c \"Print :CFBundleVersion\" \"$PLIST\" 2>/dev/null || echo \"\")\n    [ \"$CURRENT\" = \"$BUILD\" ] && continue\n    /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD\" \"$PLIST\"\ndone\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		0BA81855575A0A76C1127823 /* Sources */ = {

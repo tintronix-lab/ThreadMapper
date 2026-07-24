@@ -49,6 +49,23 @@ targets:
         embed: true
       - target: ThreadMapperWatch
         embed: true
+    preBuildScripts:
+      - name: Auto Build Number
+        script: |
+          BUILD=$(git -C "${SRCROOT}" rev-list --count HEAD 2>/dev/null || echo "1")
+          for PLIST in \
+              "${SRCROOT}/Sources/ThreadMapper/Info.plist" \
+              "${SRCROOT}/Sources/ThreadMapperWidget/Info.plist"; do
+              [ -f "$PLIST" ] || continue
+              CURRENT=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" 2>/dev/null || echo "")
+              [ "$CURRENT" = "$BUILD" ] && continue
+              /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
+          done
+        shell: /bin/sh
+        basedOnDependencyAnalysis: false
+        outputFiles:
+          - $(SRCROOT)/Sources/ThreadMapper/Info.plist
+          - $(SRCROOT)/Sources/ThreadMapperWidget/Info.plist
     scheme:
       shared: true
       testTargets:
@@ -89,6 +106,23 @@ targets:
         embed: true
       - sdk: WatchKit.framework
       - sdk: WatchConnectivity.framework
+    preBuildScripts:
+      - name: Auto Build Number
+        script: |
+          BUILD=$(git -C "${SRCROOT}" rev-list --count HEAD 2>/dev/null || echo "1")
+          for PLIST in \
+              "${SRCROOT}/Sources/ThreadMapperWatch/Info.plist" \
+              "${SRCROOT}/Sources/ThreadMapperWatchWidget/Info.plist"; do
+              [ -f "$PLIST" ] || continue
+              CURRENT=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST" 2>/dev/null || echo "")
+              [ "$CURRENT" = "$BUILD" ] && continue
+              /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$PLIST"
+          done
+        shell: /bin/sh
+        basedOnDependencyAnalysis: false
+        outputFiles:
+          - $(SRCROOT)/Sources/ThreadMapperWatch/Info.plist
+          - $(SRCROOT)/Sources/ThreadMapperWatchWidget/Info.plist
     scheme:
       shared: true
 
