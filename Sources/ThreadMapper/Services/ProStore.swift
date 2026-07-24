@@ -16,6 +16,7 @@ final class ProStore {
     private(set) var isPro: Bool = false
     private(set) var products: [Product] = []
     private(set) var purchaseInProgress = false
+    private(set) var productsLoadError: String?
 
     @ObservationIgnored private var updateTask: Task<Void, Never>?
 
@@ -32,8 +33,18 @@ final class ProStore {
     }
 
     func loadProducts() async {
+        productsLoadError = nil
         guard products.isEmpty else { return }
-        products = (try? await Product.products(for: [Self.lifetimeID])) ?? []
+        do {
+            let fetched = try await Product.products(for: [Self.lifetimeID])
+            if fetched.isEmpty {
+                productsLoadError = "Product not found in App Store Connect. Verify product ID \"\(Self.lifetimeID)\" is approved and the bundle ID matches."
+            } else {
+                products = fetched
+            }
+        } catch {
+            productsLoadError = error.localizedDescription
+        }
     }
 
     func purchase(_ product: Product) async throws {

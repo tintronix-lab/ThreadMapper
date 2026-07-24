@@ -4,7 +4,6 @@ import SwiftUI
 struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var proStore = ProStore.shared
-    @State private var loadError = false
     @State private var purchaseError: String?
 
     private let features: [(icon: String, title: String, detail: String)] = [
@@ -48,7 +47,6 @@ struct PaywallView: View {
         }
         .task {
             await proStore.loadProducts()
-            if proStore.products.isEmpty { loadError = true }
         }
         .alert("Purchase Failed", isPresented: .init(
             get: { purchaseError != nil },
@@ -118,24 +116,23 @@ struct PaywallView: View {
     @ViewBuilder
     private var purchaseSection: some View {
         VStack(spacing: 12) {
-            if loadError {
+            if let errorMessage = proStore.productsLoadError {
                 VStack(spacing: 8) {
                     Text("Couldn't load products")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
                     Button("Try Again") {
-                        loadError = false
-                        Task {
-                            await proStore.loadProducts()
-                            if proStore.products.isEmpty { loadError = true }
-                        }
+                        Task { await proStore.loadProducts() }
                     }
                     .font(.subheadline)
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
             } else if proStore.products.isEmpty {
-                // Products not yet loaded
                 ProgressView("Loading…")
                     .frame(maxWidth: .infinity)
                     .padding()
