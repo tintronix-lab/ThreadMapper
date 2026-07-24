@@ -58,6 +58,10 @@ targets:
       shared: true
       testTargets:
         - ThreadMapperTests
+      # Local StoreKit products so the paywall loads prices in the simulator
+      # without a sandbox account. Affects debug runs only — never the store.
+      run:
+        storeKitConfiguration: ThreadMapper.storekit
 
   ThreadMapperWidget:
     type: app-extension
