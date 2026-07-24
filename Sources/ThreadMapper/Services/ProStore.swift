@@ -8,7 +8,10 @@ import Combine
 final class ProStore: ObservableObject {
     static let shared = ProStore()
 
-    static let annualID   = "com.tintronixlab.ThreadMapper.pro.annual"
+    /// Pro is a single one-time unlock. A second "annual" non-consumable was
+    /// dropped before launch: being non-consumable it never expired or renewed,
+    /// so it was indistinguishable from Lifetime and the name misled buyers.
+    /// A genuine recurring tier would be an auto-renewable *subscription*.
     static let lifetimeID = "com.tintronixlab.ThreadMapper.pro.lifetime"
 
     private(set) var isPro: Bool = false
@@ -32,7 +35,7 @@ final class ProStore: ObservableObject {
 
     func loadProducts() async {
         guard products.isEmpty else { return }
-        products = (try? await Product.products(for: [Self.annualID, Self.lifetimeID])) ?? []
+        products = (try? await Product.products(for: [Self.lifetimeID])) ?? []
     }
 
     func purchase(_ product: Product) async throws {
@@ -60,7 +63,7 @@ final class ProStore: ObservableObject {
         var hasPro = false
         for await result in Transaction.currentEntitlements {
             if case .verified(let tx) = result,
-               tx.productID == Self.annualID || tx.productID == Self.lifetimeID,
+               tx.productID == Self.lifetimeID,
                tx.revocationDate == nil {
                 hasPro = true
             }

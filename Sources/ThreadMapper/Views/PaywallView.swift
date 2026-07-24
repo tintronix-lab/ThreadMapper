@@ -177,7 +177,6 @@ struct PaywallView: View {
 
     @ViewBuilder
     private func productButton(_ product: Product) -> some View {
-        let isAnnual = product.id == ProStore.annualID
         Button {
             Task {
                 do {
@@ -190,18 +189,8 @@ struct PaywallView: View {
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 6) {
-                        Text(product.displayName)
-                            .font(.subheadline.weight(.semibold))
-                        if isAnnual {
-                            Text("Most Popular")
-                                .font(.caption2.weight(.bold))
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(.orange.opacity(0.15), in: Capsule())
-                                .foregroundStyle(.orange)
-                        }
-                    }
+                    Text(product.displayName)
+                        .font(.subheadline.weight(.semibold))
                     Text(product.description)
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -211,11 +200,11 @@ struct PaywallView: View {
                     .font(.subheadline.weight(.bold))
             }
             .padding(16)
-            .background(isAnnual ? Color.accentColor.opacity(0.1) : Color(UIColor.secondarySystemGroupedBackground),
+            .background(Color.accentColor.opacity(0.1),
                         in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(
-                isAnnual ? RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(Color.accentColor, lineWidth: 1.5) : nil
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(Color.accentColor, lineWidth: 1.5)
             )
         }
         .buttonStyle(.plain)

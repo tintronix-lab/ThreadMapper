@@ -6,7 +6,7 @@
 
 ## Free vs Pro
 
-ThreadMapper's core monitoring is free. **ThreadMapper Pro** (annual subscription or one-time lifetime purchase) unlocks advanced diagnostics, AI features, and power-user tools.
+ThreadMapper's core monitoring is free. **ThreadMapper Pro** (a one-time purchase — no subscription) unlocks advanced diagnostics, AI features, and power-user tools.
 
 | | Free | Pro |
 |---|:---:|:---:|

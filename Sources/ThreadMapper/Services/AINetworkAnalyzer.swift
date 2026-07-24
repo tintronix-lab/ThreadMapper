@@ -183,8 +183,7 @@ struct AINetworkAnalyzer {
             """
         let recent = events.prefix(10)
         let lines = recent.map { e -> String in
-            let ago = Int(Date().timeIntervalSince(e.timestamp) / 60)
-            return "\(e.kind.label): \(e.detail) (\(ago)m ago)"
+            "\(e.kind.label): \(e.detail) (\(Self.relativeAge(e.timestamp)))"
         }
         let prompt = "Recent network events:\n\(lines.joined(separator: "\n"))\n\nSummarise in 2 sentences."
         return try await generateText(role: role, prompt: prompt, limit: 220)
@@ -357,6 +356,22 @@ struct AINetworkAnalyzer {
         guard code != "en" else { return role }
         let name = Locale(identifier: "en").localizedString(forLanguageCode: code) ?? code
         return "CRITICAL: Every text field you generate MUST be written in \(name), not English.\n\n\(role)"
+    }
+
+    /// Human-readable age for event lines fed into prompts.
+    ///
+    /// The model repeats these strings verbatim in its summary, so raw minutes
+    /// leaked straight through to the user as nonsense like "7391m ago". Feed it
+    /// units a person would actually say.
+    static func relativeAge(_ date: Date, now: Date = Date()) -> String {
+        let seconds = max(0, now.timeIntervalSince(date))
+        if seconds < 90 { return "just now" }
+        let minutes = Int(seconds / 60)
+        if minutes < 60 { return "\(minutes) minutes ago" }
+        let hours = Int(seconds / 3600)
+        if hours < 24 { return hours == 1 ? "1 hour ago" : "\(hours) hours ago" }
+        let days = Int(seconds / 86400)
+        return days == 1 ? "1 day ago" : "\(days) days ago"
     }
 
     // MARK: - Session helpers
