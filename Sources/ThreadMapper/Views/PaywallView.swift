@@ -154,12 +154,25 @@ struct PaywallView: View {
             }
             .padding(.top, 4)
 
-            Text("Payment charged to your Apple ID. Subscriptions auto-renew unless cancelled at least 24 hours before the end of the period. Manage subscriptions in Settings.")
+            // The disclosure must describe what is actually being sold. Claiming
+            // auto-renewal for a non-consumable (a one-time unlock) is misleading
+            // and is a App Review rejection under Guideline 3.1.2, so only show
+            // the subscription wording when a subscription is genuinely offered.
+            Text(purchaseDisclosure)
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
                 .padding(.top, 4)
         }
+    }
+
+    /// Subscription wording only when at least one offered product is actually
+    /// an auto-renewable subscription; otherwise plain one-time-purchase terms.
+    private var purchaseDisclosure: LocalizedStringKey {
+        let hasSubscription = proStore.products.contains { $0.subscription != nil }
+        return hasSubscription
+            ? "Payment charged to your Apple ID. Subscriptions auto-renew unless cancelled at least 24 hours before the end of the period. Manage subscriptions in Settings."
+            : "One-time purchase charged to your Apple ID. This is not a subscription — it does not auto-renew."
     }
 
     @ViewBuilder

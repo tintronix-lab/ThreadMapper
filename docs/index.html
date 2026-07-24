@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ThreadMapper — Support</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    max-width: 44rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem;
+    color: #1c1c1e; background: #fff;
+  }
+  @media (prefers-color-scheme: dark) { body { color: #f2f2f7; background: #000; } }
+  h1 { font-size: 2rem; margin-bottom: .25rem; }
+  h2 { font-size: 1.15rem; margin-top: 2.25rem; }
+  .tagline { color: #8e8e93; margin-top: 0; }
+  .contact { border-left: 3px solid #0a84ff; padding: .6rem 0 .6rem 1rem; margin: 1.5rem 0; }
+  details { margin: .6rem 0; padding: .6rem 0; border-bottom: 1px solid #d1d1d6; }
+  summary { cursor: pointer; font-weight: 600; }
+  details p { margin: .6rem 0 0; }
+  a { color: #0a84ff; }
+  footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid #d1d1d6; font-size: .9rem; color: #8e8e93; }
+</style>
+</head>
+<body>
+
+<h1>ThreadMapper Support</h1>
+<p class="tagline">Thread mesh network monitor for iPhone and Apple Watch.</p>
+
+<div class="contact">
+  <strong>Need help?</strong> Email <a href="mailto:tintronix@gmail.com">tintronix@gmail.com</a>.
+  Please include your iOS version, iPhone model, and a short description of what you were doing.
+</div>
+
+<h2>Frequently asked questions</h2>
+
+<details>
+  <summary>The app says "No devices found"</summary>
+  <p>
+    ThreadMapper reads your Thread devices through HomeKit, so it needs two things: HomeKit
+    access must be granted (iOS Settings → Privacy &amp; Security → HomeKit → ThreadMapper),
+    and you need at least one Thread border router in your home — for example a HomePod mini,
+    Apple TV 4K, or a compatible hub. If you just want to explore the app, turn on
+    <em>Demo Mode</em> in Settings.
+  </p>
+</details>
+
+<details>
+  <summary>Why is signal strength called an "estimate"?</summary>
+  <p>
+    iOS does not expose real radio RSSI for Thread accessories to third-party apps. ThreadMapper
+    derives a response-quality estimate by timing how quickly each accessory replies. It is a
+    reliable way to compare devices and rooms, but it is not a radio-measured dBm value — which
+    is why the app labels it as estimated throughout.
+  </p>
+</details>
+
+<details>
+  <summary>Are the mesh links real Thread routing?</summary>
+  <p>
+    By default they are logical estimates: devices are linked to the nearest border router or
+    same-room router. If you connect an OpenThread Border Router in Settings, ThreadMapper will
+    use its real routing table instead.
+  </p>
+</details>
+
+<details>
+  <summary>How do I run a room survey?</summary>
+  <p>
+    Open the Survey tab and choose Guided Survey. Stand in a room, tap Start, walk around while
+    it samples, then tap Done to save that room and move to the next. If you have an Apple Watch,
+    you can drive Start / Done / Skip from your wrist while the survey runs on your iPhone.
+  </p>
+</details>
+
+<details>
+  <summary>Do the AI features send my data anywhere?</summary>
+  <p>
+    No. On iOS 26 and later they run entirely on device using Apple Intelligence. Nothing about
+    your network leaves your iPhone. They require an Apple Intelligence–capable device.
+  </p>
+</details>
+
+<details>
+  <summary>I bought Pro but features are still locked</summary>
+  <p>
+    Open Settings in ThreadMapper and tap <em>Restore Purchases</em>. Make sure you are signed in
+    with the same Apple Account used for the original purchase.
+  </p>
+</details>
+
+<details>
+  <summary>The Apple Watch app has no data</summary>
+  <p>
+    The watch mirrors your iPhone. Open ThreadMapper on the iPhone at least once so it can send a
+    snapshot, and make sure the watch app is installed in the Watch app on your iPhone.
+  </p>
+</details>
+
+<h2>Privacy</h2>
+<p>
+  ThreadMapper collects no personal data and has no accounts or analytics.
+  Read the full <a href="privacy.html">Privacy Policy</a>.
+</p>
+
+<footer>
+  ThreadMapper is developed by Tintronix Lab.
+  <a href="privacy.html">Privacy Policy</a>
+</footer>
+
+</body>
+</html>
