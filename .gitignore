@@ -2,6 +2,7 @@
 *.xcworkspace
 *.xcuserdata
 *.xcodeproj/*
+!*.xcodeproj/project.pbxproj
 !*.xcodeproj/project.xcworkspace
 !*.xcodeproj/xcshareddata
 # Per-developer Xcode UI state. The `!…/project.xcworkspace` rule above re-includes
