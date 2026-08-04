@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build a ThreadMapper probe — ThreadMapper</title>
+<meta name="description" content="Step by step: turn a Raspberry Pi and an 802.15.4 dongle into a ThreadMapper probe, so the app can show measured Thread signal, routing and interference.">
+<meta name="theme-color" content="#0B1020">
+<!-- Generated from tools/pi-image/SETUP.md by tools/build-docs.py — edit the Markdown, not this file. -->
+<style>
+  :root {
+    color-scheme: light dark;
+    --ink:#0B1020; --paper:#FBFAFD; --surface:#F3F1F9; --line:#E2DEEE;
+    --body:#3A3A46; --muted:#5C5C6E; --signal:#1D5DBF; --noise:#4A2C9C;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink:#F2F1F7; --paper:#08090F; --surface:#14141F; --line:#262636;
+             --body:#B9B9C6; --muted:#85859A; --signal:#6FB2FF; --noise:#9878DE; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+          font:16.5px/1.7 var(--sans); -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:46rem; margin:0 auto; padding:0 1.5rem 5rem; }
+  a { color:var(--signal); text-underline-offset:2px; }
+  a:focus-visible { outline:2px solid var(--signal); outline-offset:3px; border-radius:3px; }
+
+  .top { border-bottom:1px solid var(--line); margin-bottom:3rem; }
+  .top .wrap { padding-top:1.25rem; padding-bottom:1.25rem; }
+  .top a { font:600 .8rem/1 var(--mono); letter-spacing:.04em; text-decoration:none; color:var(--muted); }
+  .top a:hover { color:var(--ink); }
+
+  h1 { font:500 clamp(1.9rem,4.5vw,2.6rem)/1.1 var(--mono); letter-spacing:-.035em; margin:0 0 2rem; }
+  h2 { font:500 1.35rem/1.25 var(--mono); letter-spacing:-.02em; margin:3rem 0 .9rem;
+        padding-top:1.5rem; border-top:1px solid var(--line); }
+  h3 { font:600 1.02rem/1.35 var(--sans); margin:2rem 0 .6rem; }
+  h4 { font:600 .95rem/1.35 var(--sans); margin:1.5rem 0 .5rem; }
+  p { margin:0 0 1.1rem; color:var(--body); }
+  strong { color:var(--ink); font-weight:600; }
+  hr { border:0; border-top:1px solid var(--line); margin:2.5rem 0; }
+  /* The Markdown uses `---` before major sections and h2 already draws its own
+     rule, which renders as two lines a few pixels apart. */
+  hr + h2 { border-top:0; padding-top:0; margin-top:0; }
+
+  ul, ol { margin:0 0 1.2rem; padding-left:1.3rem; color:var(--body); }
+  li { margin:.45rem 0; }
+  li::marker { color:var(--noise); }
+
+  code { font:.88em/1.5 var(--mono); background:var(--surface); padding:.12em .35em;
+          border-radius:4px; word-break:break-word; }
+  pre { background:var(--ink); color:var(--paper); border-radius:10px;
+         padding:1rem 1.15rem; overflow-x:auto; margin:0 0 1.4rem; }
+  pre code { background:none; padding:0; color:inherit; font-size:.84rem; line-height:1.7; }
+  @media (prefers-color-scheme: dark) { pre { background:#12121C; border:1px solid var(--line); } }
+
+  blockquote { margin:0 0 1.4rem; padding:1.1rem 1.3rem; background:var(--surface);
+                border:1px solid var(--line); border-left:3px solid var(--noise); border-radius:10px; }
+  blockquote > :last-child { margin-bottom:0; }
+  blockquote h2, blockquote h3 { border-top:0; padding-top:0; margin-top:0; }
+
+  .scroll { overflow-x:auto; margin:0 0 1.4rem; }
+  table { border-collapse:collapse; width:100%; font-size:.93rem; }
+  th, td { text-align:left; vertical-align:top; padding:.6rem .8rem; border-top:1px solid var(--line); }
+  th { font:600 .72rem/1.2 var(--mono); letter-spacing:.08em; text-transform:uppercase;
+        color:var(--muted); border-top:0; }
+  td { color:var(--body); }
+
+  footer { margin-top:4rem; padding-top:1.5rem; border-top:1px solid var(--line);
+            font-size:.88rem; color:var(--muted); }
+  footer a { margin-right:1.1rem; }
+</style>
+</head>
+<body>
+
+<div class="top"><div class="wrap"><a href="index.html">← ThreadMapper</a></div></div>
+
+<div class="wrap">
+<h1>Setting up a ThreadMapper probe on a Raspberry Pi</h1>
+<p>Step by step, from an empty desk to measured Thread data in the app.</p>
+<p>Budget an evening. Most of it is waiting for downloads and one ~20 minute build.</p>
+<hr>
+<h2>Read this before you buy anything</h2>
+<p>Two things decide whether this is worth doing for <em>your</em> setup. Both are easy to miss until the parts arrive.</p>
+<h3>1. A Raspberry Pi cannot do Thread on its own</h3>
+<p>There is no 802.15.4 radio in a Raspberry Pi. Wi-Fi and Bluetooth are different radios and cannot speak Thread. <strong>You need a USB dongle</strong>, and it needs RCP firmware on it — which is not what these dongles ship with.</p>
+<h3>2. Joining <em>your</em> Thread network is the hard part</h3>
+<p>A border router that forms its own new network will sit there seeing nothing but itself. Your actual devices are on the network your HomePod, Apple TV or Nest hub created, and to observe them the probe has to <strong>join that network</strong> — which means getting its credentials (the Active Operational Dataset).</p>
+<div class="scroll"><table><thead><tr><th>Your setup</th><th>Can the probe join your real network?</th></tr></thead><tbody><tr><td>You run <strong>Home Assistant</strong></td><td><strong>Yes.</strong> HA&#x27;s iOS Companion app can pull Apple&#x27;s Thread credentials — <em>Settings → Devices &amp; services → Thread → Configure → Send credentials to Home Assistant</em> — and you can hand the dataset to the probe from there.</td></tr><tr><td>You already run an <strong>OTBR</strong> (e.g. HA&#x27;s add-on)</td><td><strong>Yes.</strong> Read the dataset off it directly.</td></tr><tr><td><strong>Apple or Google border routers only</strong>, no Home Assistant</td><td><strong>Not today.</strong> There is no user-facing way to export Apple&#x27;s Thread credentials. You can still form a <em>new</em> network on the probe and commission some accessories onto it to see the app working end to end, but it will not show you your existing mesh.</td></tr></tbody></table></div>
+<p>That third row is a real wall, and it is not one this project can knock down from the outside: the sanctioned route is Apple&#x27;s <code>com.apple.developer.thread-network-credentials</code> entitlement, which ThreadMapper has applied for but does not hold. If that comes through, the app can hand your credentials to the probe directly and this whole section disappears.</p>
+<p><strong>If you are in the third row and only want to monitor your existing Apple mesh, consider stopping here until that entitlement lands.</strong></p>
+<hr>
+<h2>Shopping list</h2>
+<div class="scroll"><table><thead><tr><th>Item</th><th>Notes</th></tr></thead><tbody><tr><td>Raspberry Pi 4 or 5</td><td>2 GB RAM is plenty. A Pi Zero 2 W will work but the build in step 4 takes far longer.</td></tr><tr><td>microSD card, 16 GB+</td><td>Anything reputable.</td></tr><tr><td>USB-C power supply</td><td>The official one; Thread dongles are picky about brown-outs.</td></tr><tr><td><strong>An 802.15.4 dongle</strong></td><td>Pick one — see below.</td></tr></tbody></table></div>
+<p><strong>Dongle options</strong>, either is fine:</p>
+<ul><li><strong>Nordic nRF52840 dongle</strong> (~$10) — cheapest, and the firmware is built from source so there is no hunting for a download.</li><li><strong>SkyConnect / Sonoff ZBDongle-E</strong> (~$25) — Silicon Labs. If you already own one for Home Assistant, use it. Flashing is a one-line tool.</li></ul>
+<hr>
+<h2>Step 1 — Put RCP firmware on the dongle</h2>
+<p>Do this <strong>before</strong> touching the Pi, on your Mac or PC. It is the only step the installer deliberately does not automate: flashing the wrong image bricks the dongle, and the vendor tools do it properly.</p>
+<p>RCP (&quot;Radio Co-Processor&quot;) firmware makes the dongle a dumb radio that <code>otbr-agent</code> drives. A dongle shipped for Zigbee has different firmware and will not work until reflashed.</p>
+<h3>Silicon Labs (SkyConnect, Sonoff ZBDongle-E)</h3>
+<pre class="lang-bash"><code>pipx install universal-silabs-flasher     # or: pip install universal-silabs-flasher
+universal-silabs-flasher --device /dev/tty.usbserial-XXXX probe
+universal-silabs-flasher --device /dev/tty.usbserial-XXXX flash --firmware &lt;ot-rcp-firmware.gbl&gt;</code></pre>
+<p>Get the <code>ot-rcp</code> <code>.gbl</code> from the Home Assistant silabs firmware releases — the same images the OTBR add-on uses. Match the file to your exact dongle model; SkyConnect and ZBDongle-E are <strong>not</strong> interchangeable.</p>
+<h3>Nordic nRF52840</h3>
+<p>Build the firmware from OpenThread&#x27;s Nordic port, then flash over USB DFU:</p>
+<pre class="lang-bash"><code>git clone --recurse-submodules https://github.com/openthread/ot-nrf528xx.git
+cd ot-nrf528xx &amp;&amp; ./script/bootstrap &amp;&amp; ./script/build nrf52840 USB_trans
+# → build/bin/ot-rcp  (convert to .hex/.zip per the repo&#x27;s README, then:)
+nrfutil dfu usb-serial -pkg ot-rcp.zip -p /dev/tty.usbmodemXXXX</code></pre>
+<p>Follow that repo&#x27;s README for the current packaging step — it changes occasionally and is better read there than copied here.</p>
+<p><strong>Check it worked:</strong> plug the dongle into the Pi later and <code>install.sh</code> will report <code>Found &lt;family&gt; radio at /dev/serial/by-id/...</code>. If it finds nothing, the firmware did not take.</p>
+<hr>
+<h2>Step 2 — Flash Raspberry Pi OS</h2>
+<ol><li>Install <strong>Raspberry Pi Imager</strong>.</li><li>Choose <strong>Raspberry Pi OS Lite (64-bit)</strong>. Lite — there is no need for a desktop.</li><li>Click the <strong>gear / Edit Settings</strong> button <em>before</em> writing, and set: - hostname: <code>threadmapper-probe</code> - <strong>Enable SSH</strong>, with password or key - username and password - Wi-Fi credentials, if you are not using Ethernet</li><li>Write the card, put it in the Pi, attach the dongle, power on.</li></ol>
+<p>Ethernet is more reliable than Wi-Fi here, and a border router benefits from a stable uplink. Use it if you can.</p>
+<hr>
+<h2>Step 3 — Log in</h2>
+<pre class="lang-bash"><code>ssh &lt;your-username&gt;@threadmapper-probe.local</code></pre>
+<p>If the hostname does not resolve, find the Pi&#x27;s IP in your router&#x27;s client list and <code>ssh &lt;user&gt;@&lt;ip&gt;</code> instead.</p>
+<p>Confirm the dongle is visible before going further:</p>
+<pre class="lang-bash"><code>ls -l /dev/serial/by-id/</code></pre>
+<p>You should see one entry naming your dongle. <strong>If this is empty, stop</strong> — the rest will not work. Re-seat it, try another USB port, and re-check step 1.</p>
+<hr>
+<h2>Step 4 — Install the probe</h2>
+<pre class="lang-bash"><code>sudo apt-get update &amp;&amp; sudo apt-get install -y git
+git clone https://github.com/tintronix-lab/ThreadMapper.git
+sudo ./ThreadMapper/tools/pi-image/install.sh</code></pre>
+<p>It detects the dongle, installs <code>otbr-agent</code> and the probe agent, and enables both as systemd services.</p>
+<p><strong>This takes ~20 minutes on a Pi 4</strong>, almost all of it compiling <code>otbr-agent</code>. It is not stuck. When it finishes it prints the probe&#x27;s address.</p>
+<p>If detection fails but you know the device path:</p>
+<pre class="lang-bash"><code>sudo ./ThreadMapper/tools/pi-image/install.sh --radio-url spinel+hdlc+uart:///dev/ttyACM0</code></pre>
+<p>Re-running is safe — it is idempotent, and it is how you upgrade the agent later.</p>
+<hr>
+<h2>Step 5 — Get onto a Thread network</h2>
+<p>Pick the row that matched you in &quot;Before you buy&quot;.</p>
+<h3>Path A — Join your existing network (what you actually want)</h3>
+<p>Get the Active Operational Dataset as a hex string from whatever already holds your credentials.</p>
+<p>From an existing OTBR (including Home Assistant&#x27;s add-on):</p>
+<pre class="lang-bash"><code>curl -s http://&lt;existing-otbr&gt;:8081/node/dataset/active \
+     -H &#x27;Accept: text/plain&#x27;</code></pre>
+<p>That returns one long hex string. On the Pi:</p>
+<pre class="lang-bash"><code>sudo ot-ctl dataset set active &lt;that-long-hex-string&gt;
+sudo ot-ctl ifconfig up
+sudo ot-ctl thread start</code></pre>
+<p>Wait ~30 seconds, then:</p>
+<pre class="lang-bash"><code>sudo ot-ctl state</code></pre>
+<p>Expect <code>child</code> or <code>router</code> — it joined. <code>leader</code> here would mean it formed its own network instead, which is not what you want on this path.</p>
+<h3>Path B — Form a new network (testing, or no way to get credentials)</h3>
+<pre class="lang-bash"><code>sudo ot-ctl dataset init new
+sudo ot-ctl dataset commit active
+sudo ot-ctl ifconfig up
+sudo ot-ctl thread start
+sudo ot-ctl state          # expect: leader</code></pre>
+<p>You now have an empty network with one node. To see anything interesting you must commission accessories onto it — which means removing them from your Apple network first. <strong>Do not do this with devices you rely on.</strong></p>
+<p>Print the dataset if you want to join other things to it later:</p>
+<pre class="lang-bash"><code>sudo ot-ctl dataset active -x</code></pre>
+<hr>
+<h2>Step 6 — Point the app at it</h2>
+<pre class="lang-bash"><code>curl http://localhost:8099/health</code></pre>
+<p>Expect <code>&quot;otCtlReachable&quot;: true</code> and a <code>role</code>. Then, from your phone on the same network, in <strong>ThreadMapper → Settings → ThreadMapper Probe</strong>:</p>
+<pre><code>http://threadmapper-probe.local:8099</code></pre>
+<p>Use the Pi&#x27;s IP address instead if <code>.local</code> does not resolve on iOS. Tap <strong>Test Connection</strong> — it names the failure if something is wrong rather than just showing a red X.</p>
+<hr>
+<h2>Step 7 — See what you got</h2>
+<ul><li><strong>Dashboard → ⋯ → Thread Network</strong> — measured per-node RSSI, link quality, and the routing table with path cost and next hop. Nodes appear by Thread address, not by name; see &quot;What will not work yet&quot; below.</li><li><strong>Mesh → tools → Channel Scanner</strong> — now badged <strong>Measured</strong>. Bar height is the real noise floor across all 16 channels, and the recommended channels are the quietest ones actually observed rather than a guess from a table of Wi-Fi overlap.</li></ul>
+<p>The Channel Scanner is the one to look at first. It is the clearest difference between what the app could show before and what it can show now.</p>
+<hr>
+<h2>Troubleshooting</h2>
+<div class="scroll"><table><thead><tr><th>Symptom</th><th>Cause and fix</th></tr></thead><tbody><tr><td><code>install.sh</code> says &quot;No 802.15.4 dongle detected&quot;</td><td>The dongle is absent, or step 1 did not take. Check <code>ls /dev/serial/by-id/</code>.</td></tr><tr><td>Test Connection: <em>&quot;can&#x27;t reach the border router beside it&quot;</em></td><td>The agent is up but <code>otbr-agent</code> is not. <code>sudo systemctl status otbr-agent</code>, then <code>journalctl -u otbr-agent -n 50</code>. Usually a wrong radio URL or a dongle that lost power.</td></tr><tr><td>Test Connection: <em>&quot;isn&#x27;t a ThreadMapper probe agent&quot;</em></td><td>Something else is answering on that port. The agent is 8099; 8081 is the border router&#x27;s own REST API.</td></tr><tr><td>Test Connection: <em>&quot;couldn&#x27;t reach that address&quot;</em></td><td>Wrong IP, or the phone is on a different subnet or a guest VLAN.</td></tr><tr><td><code>ot-ctl state</code> says <code>detached</code></td><td>It has credentials but cannot find the network. Wrong dataset, or out of radio range of any other node.</td></tr><tr><td><code>ot-ctl state</code> says <code>disabled</code></td><td><code>ifconfig up</code> / <code>thread start</code> did not run, or the radio failed to come up.</td></tr><tr><td>Thread Network screen is empty of peers</td><td>The probe is on its own network — check you are not <code>leader</code> when you meant to join one.</td></tr><tr><td>Everything works, then dies after a reboot</td><td><code>systemctl is-enabled otbr-agent threadmapper-probe</code> — both should say <code>enabled</code>.</td></tr></tbody></table></div>
+<p>Logs for both services together:</p>
+<pre class="lang-bash"><code>journalctl -u threadmapper-probe -u otbr-agent -f</code></pre>
+<hr>
+<h2>What will not work yet</h2>
+<p><strong>Nodes appear unnamed.</strong> Thread identifies a node by its extended address; HomeKit identifies an accessory by an opaque identifier, and nothing links the two. So you will see a real, correct topology of anonymous nodes rather than &quot;the kitchen lamp&quot;.</p>
+<p>The fix is built but not finished: the agent&#x27;s <code>/traffic</code> endpoint reports per-node activity, so actuating a device through HomeKit and watching which node responds would bind them. That interaction needs real accessories on a real mesh to develop against, which is exactly what you will have once this is running. Tracked as <strong>H1</strong> in <code>WORKPLAN.md</code>.</p>
+<p><strong>The Mesh tab is still inferred.</strong> Its graph is built from HomeKit accessories, so it cannot use probe data until the above is solved. The Thread Network screen and the Channel Scanner are the ones showing measurements.</p>
+<hr>
+<h2>If something here is wrong</h2>
+<p>This guide has not been walked end to end on real hardware — nobody on the project has a Pi or a dongle yet. The provisioning script is tested against Debian Bookworm arm64, and every agent endpoint is tested against a real <code>otbr-agent</code> on a simulated radio, but the physical steps above are written from the vendor documentation rather than from having done them.</p>
+<p>If a step is wrong, that is worth fixing in this file.</p>
+
+<footer>
+  <a href="index.html">Home</a>
+  <a href="support.html">Support</a>
+  <a href="privacy.html">Privacy</a>
+  <a href="https://github.com/tintronix-lab/ThreadMapper">Source</a>
+</footer>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ThreadMapper — Your Thread network, measured</title>
+<meta name="description" content="ThreadMapper shows you every Thread device, which rooms have weak coverage, and the moment something drops offline. Add a probe and it stops estimating: real signal, real routing, real interference. Private by design.">
+<meta name="theme-color" content="#0B1020">
+<style>
+  /* ── Tokens ───────────────────────────────────────────────────────────────
+     Colours are taken from the product, not from a palette generator: the
+     navy and blue are the app icon's, the violet ramp is the one the Channel
+     Scanner uses to paint measured noise. */
+  :root {
+    color-scheme: light dark;
+    --ink:      #0B1020;
+    --paper:    #FBFAFD;
+    --surface:  #F3F1F9;
+    --line:     #E2DEEE;
+    --body:     #3A3A46;
+    /* Measured against the card surface, not the page: most muted text sits on
+       a card, which is the tighter of the two. These clear 5.5:1 there. */
+    --muted:    #5C5C6E;
+    --signal:   #1D5DBF;   /* node blue, darkened until links clear 5.5:1 */
+    --pulse:    #0090B0;
+    --noise:    #4A2C9C;   /* the busy end of the waterfall ramp */
+    --quiet:    #E9E3FA;
+    --measured: #17683F;
+    --shadow:   0 1px 2px rgba(11,16,32,.05), 0 8px 24px -12px rgba(11,16,32,.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink:      #F2F1F7;
+      --paper:    #08090F;
+      --surface:  #14141F;
+      --line:     #262636;
+      --body:     #B9B9C6;
+      --muted:    #85859A;
+      --signal:   #6FB2FF;
+      --pulse:    #46D8F5;
+      --noise:    #9878DE;
+      --quiet:    #221A36;
+      --measured: #5FD39B;
+      --shadow:   none;
+    }
+  }
+
+  /* Monospace as the *display* face. This is an instrument, and instruments
+     have readouts — prose gets the quiet sans, readings get the mono. */
+  :root {
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font: 16.5px/1.65 var(--sans);
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  }
+  .wrap { max-width: 68rem; margin: 0 auto; padding: 0 1.5rem; }
+  a { color: var(--signal); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 4px;
+  }
+
+  /* ── Eyebrow: the recurring structural device ─────────────────────────────
+     Set in mono and phrased as a reading, because every section of this page
+     is about a measurement or the absence of one. */
+  .eyebrow {
+    font: 600 .72rem/1 var(--mono); letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 .9rem; display: flex; align-items: center; gap: .6rem;
+  }
+  .eyebrow::before {
+    content: ""; width: 1.6rem; height: 2px; background: var(--noise); border-radius: 2px;
+  }
+
+  /* ── Hero ─────────────────────────────────────────────────────────────── */
+  .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+  /* Texture, not content. It should read as "this page is about radio" from
+     the corner of the eye and never compete with the headline sitting on it —
+     hence the low opacity and the fade that clears the type entirely. */
+  .band {
+    position: absolute; top: 0; left: 0; right: 0; height: 58%; z-index: 0; opacity: .22;
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.55) 45%, transparent 100%);
+            mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.55) 45%, transparent 100%);
+  }
+  @media (prefers-color-scheme: dark) { .band { opacity: .3; } }
+  .band img {
+    width: 200%; height: 100%; display: block; object-fit: fill;
+    animation: drift 140s linear infinite;
+  }
+  @keyframes drift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce) { .band img { animation: none; } }
+
+  /* Vertical only — the shorthand would reset `.wrap`'s horizontal padding and
+     push the hero flush to the viewport edge while every other section keeps
+     its gutter. */
+  .hero-inner { position: relative; z-index: 1; padding-top: 5.5rem; padding-bottom: 4rem; }
+  .mark { display: flex; align-items: center; gap: .7rem; margin-bottom: 3.5rem; }
+  .mark svg { width: 30px; height: 30px; }
+  .mark span { font: 600 .95rem/1 var(--mono); letter-spacing: .02em; }
+
+  h1 {
+    font: 500 clamp(2.3rem, 6vw, 4rem)/1.04 var(--mono);
+    letter-spacing: -.035em; margin: 0 0 1.3rem; max-width: 18ch;
+  }
+  h1 em { font-style: normal; color: var(--noise); }
+  .lede { font-size: clamp(1.05rem, 2vw, 1.22rem); color: var(--body); max-width: 46ch; margin: 0 0 2rem; }
+  .platforms {
+    display: flex; flex-wrap: wrap; gap: .5rem; margin: 0;
+    font: 500 .78rem/1 var(--mono); letter-spacing: .04em;
+  }
+  .platforms li { list-style: none; padding: .45rem .7rem; border: 1px solid var(--line);
+                  border-radius: 999px; background: var(--paper); color: var(--muted); }
+
+  /* ── Sections ─────────────────────────────────────────────────────────── */
+  section { padding: 4.5rem 0; border-bottom: 1px solid var(--line); }
+  h2 { font: 500 clamp(1.5rem, 3vw, 2rem)/1.15 var(--mono); letter-spacing: -.025em; margin: 0 0 1rem; max-width: 24ch; }
+  .section-lede { color: var(--body); max-width: 54ch; margin: 0 0 2.2rem; }
+
+  /* ── The claim tag: the page labels its own assertions ────────────────── */
+  .tag {
+    display: inline-flex; align-items: center; gap: .35rem; flex: none;
+    font: 600 .62rem/1 var(--mono); letter-spacing: .1em; text-transform: uppercase;
+    padding: .3rem .5rem; border-radius: 5px; white-space: nowrap;
+  }
+  .tag.measured  { color: var(--measured); background: color-mix(in srgb, var(--measured) 12%, transparent); }
+  .tag.estimated { color: var(--muted);    background: var(--surface); }
+  .tag.probe     { color: var(--noise);    background: color-mix(in srgb, var(--noise) 14%, transparent); }
+
+  /* ── Cards ────────────────────────────────────────────────────────────── */
+  .grid { display: grid; gap: .9rem; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.15rem 1.2rem 1.25rem;
+  }
+  .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; margin-bottom: .4rem; }
+  .card h3 { font: 600 1rem/1.3 var(--sans); margin: 0; }
+  .card p { margin: 0; font-size: .93rem; color: var(--muted); }
+
+  /* ── Comparison: the clearest way to explain the probe ────────────────── */
+  .compare { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+  .compare-row { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); }
+  .compare-row:first-child { border-top: 0; }
+  .compare-head { background: var(--paper); font: 600 .72rem/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .compare-cell { padding: .95rem 1.1rem; font-size: .92rem; }
+  .compare-cell + .compare-cell { border-left: 1px solid var(--line); }
+  .compare-cell b { display: block; font: 500 .95rem/1.4 var(--mono); color: var(--ink); margin-bottom: .1rem; letter-spacing: -.01em; }
+  .compare-cell.with b { color: var(--noise); }
+  .compare-cell.without { color: var(--muted); }
+  @media (max-width: 34rem) {
+    .compare-row { grid-template-columns: 1fr; }
+    .compare-cell + .compare-cell { border-left: 0; border-top: 1px solid var(--line); }
+    .compare-head { display: none; }
+  }
+
+  /* ── Screenshots ──────────────────────────────────────────────────────── */
+  .shots {
+    display: flex; gap: 1.1rem; overflow-x: auto; padding: .25rem .25rem 1.25rem;
+    scroll-snap-type: x mandatory; scrollbar-width: thin;
+  }
+  .shot { flex: 0 0 auto; scroll-snap-align: center; margin: 0; width: 226px; }
+  .shot img {
+    width: 100%; height: auto; display: block; border-radius: 16px;
+    border: 1px solid var(--line); box-shadow: var(--shadow); background: var(--surface);
+  }
+  .shot figcaption { margin-top: .65rem; font: 500 .78rem/1.35 var(--mono); color: var(--muted); letter-spacing: -.01em; }
+
+  /* ── Readout: quoted machine output ───────────────────────────────────── */
+  .readout {
+    font: .84rem/1.75 var(--mono); background: var(--ink); color: var(--paper);
+    border-radius: 10px; padding: 1.1rem 1.25rem; margin: 0 0 1.5rem;
+    /* Terminal output is column-aligned; without `pre` the whole capture
+       collapses into one wrapped paragraph and stops looking like a reading.
+       `overflow-x` keeps the long lines scrollable on a phone rather than
+       widening the page. */
+    white-space: pre; overflow-x: auto;
+  }
+  .readout .dim { color: #8A8AA8; }
+  .readout .hot { color: #C9B5F5; }
+
+  ul.plain { padding: 0; margin: 0; list-style: none; }
+  ul.plain li { margin: .7rem 0; color: var(--body); padding-left: 1.1rem; position: relative; }
+  ul.plain li::before {
+    content: ""; position: absolute; left: 0; top: .62em;
+    width: 5px; height: 5px; border-radius: 1px; background: var(--noise);
+  }
+  ul.plain strong { color: var(--ink); font-weight: 600; }
+
+  .note { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--noise);
+          border-radius: 10px; padding: 1.25rem 1.4rem; }
+  .note p { margin: 0 0 .8rem; color: var(--body); font-size: .95rem; }
+  .note p:last-child { margin: 0; }
+
+  .cols { display: grid; gap: 2.5rem; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); }
+
+  footer { padding: 3rem 0 4rem; font-size: .88rem; color: var(--muted); }
+  footer nav { display: flex; flex-wrap: wrap; gap: 1.25rem; margin-bottom: 1rem; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="band" aria-hidden="true"><img src="waterfall.svg" alt=""></div>
+  <div class="wrap hero-inner">
+    <div class="mark">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g stroke="currentColor" stroke-width="4" opacity=".45">
+          <line x1="50" y1="50" x2="50" y2="18"/><line x1="50" y1="50" x2="78" y2="34"/>
+          <line x1="50" y1="50" x2="78" y2="66"/><line x1="50" y1="50" x2="50" y2="82"/>
+          <line x1="50" y1="50" x2="22" y2="66"/><line x1="50" y1="50" x2="22" y2="34"/>
+        </g>
+        <g fill="currentColor" opacity=".75">
+          <circle cx="50" cy="18" r="7"/><circle cx="78" cy="34" r="7"/><circle cx="78" cy="66" r="7"/>
+          <circle cx="50" cy="82" r="7"/><circle cx="22" cy="66" r="7"/><circle cx="22" cy="34" r="7"/>
+        </g>
+        <circle cx="50" cy="50" r="12" fill="currentColor"/>
+      </svg>
+      <span>ThreadMapper</span>
+    </div>
+
+    <h1>Your Thread network, <em>measured</em>.</h1>
+    <p class="lede">
+      Thread devices are invisible by design. They just work — until one doesn't, and
+      nothing will tell you why. ThreadMapper maps every device, grades every room, and
+      says plainly which of its numbers are readings and which are estimates.
+    </p>
+    <ul class="platforms">
+      <li>iPhone</li><li>iPad</li><li>Apple&nbsp;Watch</li><li>iOS&nbsp;17+</li><li>No account</li>
+    </ul>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section>
+    <p class="eyebrow">The problem</p>
+    <h2>“It worked yesterday.”</h2>
+    <p class="section-lede">
+      A sensor stops reporting. An hour later it comes back. Your hub says everything is
+      fine, because from where it stands everything is. The information that would explain
+      it — signal, routing, what else was on the air — is never shown to you at all.
+    </p>
+    <div class="grid">
+      <div class="card">
+        <div class="card-head"><h3>Health grade</h3><span class="tag estimated">Estimated</span></div>
+        <p>An A–F score with the specific issues pulling it down, not just a number.</p>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Mesh map</h3><span class="tag estimated">Estimated</span></div>
+        <p>Every device grouped by room, showing how each one reaches a border router.</p>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Room survey</h3><span class="tag estimated">Estimated</span></div>
+        <p>Walk a room, get a coverage grade. Drivable from your wrist so both hands stay free.</p>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Offline alerts</h3><span class="tag measured">Measured</span></div>
+        <p>Know the moment a device drops, with a grace period and quiet hours you set.</p>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Device history</h3><span class="tag estimated">Estimated</span></div>
+        <p>30 days of signal trend, uptime and firmware changes for every accessory.</p>
+      </div>
+      <div class="card">
+        <!-- No tag: this one is a platform, not a claim about data. Tagging it
+             would make the tags decoration instead of information. -->
+        <div class="card-head"><h3>Watch &amp; iPad</h3></div>
+        <p>Grade and complications on the wrist; a proper sidebar layout on iPad, not a stretched phone.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Where those tags come from</p>
+    <h2>Most Thread apps guess. This one admits it.</h2>
+    <div class="cols">
+      <div>
+        <p class="section-lede" style="margin-bottom:1.25rem">
+          iOS gives third-party apps no radio signal strength for Thread accessories, no
+          parent-child relationships and no routing table. Any app showing you dBm for a
+          HomeKit device is showing you something it cannot read.
+        </p>
+        <p class="section-lede" style="margin-bottom:0">
+          ThreadMapper measures how quickly each accessory answers, calls that an
+          <strong>estimate</strong> wherever it appears, and infers the mesh layout from
+          what HomeKit does expose. It works, and it is honest about being an inference.
+        </p>
+      </div>
+      <div class="note">
+        <p><strong>An OpenThread Border Router alone does not fix this.</strong></p>
+        <p>
+          Its REST API reports real network facts — name, channel, PAN ID — and
+          ThreadMapper uses them. But we tested its diagnostics endpoints against a live
+          two-node mesh: the requests complete and return nothing usable. Per-node routing
+          is not available that way, whatever the documentation implies.
+        </p>
+        <p>Which is why the probe exists.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">The probe</p>
+    <h2>A small box that stops the guessing.</h2>
+    <p class="section-lede">
+      Run a lightweight agent on a Raspberry Pi with an 802.15.4 dongle and it joins your
+      Thread mesh as a real node. From inside, everything the phone cannot see becomes
+      readable — and because it never sleeps, it sees the 3&nbsp;a.m. failures you don't.
+    </p>
+
+    <div class="readout" role="img" aria-label="Example probe output showing a router at minus 20 dBm with link quality 3 of 3, and a route with path cost 0.">
+<span class="dim">$ curl probe.local:8099/topology</span>
+  extAddress   <span class="hot">1666d5453afe68c6</span>   rloc16  0x5400
+  averageRssi  <span class="hot">-20 dBm</span>            lastRssi  -20 dBm
+  linkQualityIn <span class="hot">3</span>/3               role  router
+  <span class="dim">route</span>  nextHop 63   pathCost 0   linkQuality 3/3
+    </div>
+
+    <div class="compare">
+      <div class="compare-row compare-head">
+        <div class="compare-cell">Without a probe</div>
+        <div class="compare-cell">With a probe</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell without"><b>Response timing</b>How fast an accessory replies, bucketed into a signal estimate.</div>
+        <div class="compare-cell with"><b>Radio RSSI</b>Actual per-neighbour signal and link quality, off the radio.</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell without"><b>Inferred layout</b>Mesh shape guessed from accessory type and room name.</div>
+        <div class="compare-cell with"><b>Real routing</b>Route table with next hop and path cost — what makes a mesh multi-hop.</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell without"><b>Channel theory</b>Interference risk from a table of which channels overlap Wi-Fi.</div>
+        <div class="compare-cell with"><b>Measured noise</b>An energy scan of all 16 channels. What the band actually sounds like.</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell without"><b>While the app is open</b>The phone only watches when you're looking at it.</div>
+        <div class="compare-cell with"><b>Continuously</b>Recorded to disk, so the overnight partition is still there in the morning.</div>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:1.5rem">
+      <div class="card">
+        <div class="card-head"><h3>Noise over time</h3><span class="tag probe">Probe</span></div>
+        <p>A waterfall of the whole band. You can see the microwave at dinner and the neighbour's Wi-Fi in the evening.</p>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Why it dropped</h3><span class="tag probe">Probe</span></div>
+        <p>Departures lined up against noise and radio error counters — with the readings shown, and “no clear cause” when there isn't one.</p>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>While you were away</h3><span class="tag probe">Probe</span></div>
+        <p>What happened since you last opened the app. Silent when nothing did.</p>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Reliability counters</h3><span class="tag probe">Probe</span></div>
+        <p>Transmit retries and channel-busy failures — congestion shows here long before anything looks offline.</p>
+      </div>
+    </div>
+
+    <p style="margin:1.75rem 0 0;color:var(--muted);font-size:.93rem">
+      The agent is open source and runs on hardware you already own — a Pi 4 or 5 plus a
+      dongle costs about the price of a takeaway.
+      <a href="probe-setup.html">Setup guide →</a>
+      <br>
+      <span style="font-size:.88rem">
+        Read that first: a Raspberry Pi has no Thread radio of its own, and joining an
+        existing Apple or Google mesh needs credentials those platforms don't yet let you
+        export. It is not a product you can buy — it's a build.
+      </span>
+    </p>
+  </section>
+
+  <section>
+    <p class="eyebrow">In the app</p>
+    <h2>Screens</h2>
+    <div class="shots">
+      <figure class="shot">
+        <img src="screenshots/01_dashboard.jpg" alt="Dashboard showing an A-grade network score and per-room coverage cards" loading="lazy" width="226" height="490">
+        <figcaption>Health at a glance</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="screenshots/02_mesh_topology.jpg" alt="Mesh map with devices grouped by room and linked to border routers" loading="lazy" width="226" height="490">
+        <figcaption>Live mesh map</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="screenshots/channel_measured.jpg" alt="Channel Scanner with a Measured badge, bar heights showing real noise floor per channel" loading="lazy" width="226" height="490">
+        <figcaption>Channel scanner, measured</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="screenshots/probe_routing.jpg" alt="Thread Network screen listing nodes with real RSSI and a routing table" loading="lazy" width="226" height="490">
+        <figcaption>Real nodes and routing</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="screenshots/incidents.jpg" alt="Event list showing a node that changed role, with reliability counters above" loading="lazy" width="226" height="490">
+        <figcaption>What happened, and why</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="screenshots/03_survey.jpg" alt="Survey screen listing live signal quality per device" loading="lazy" width="226" height="490">
+        <figcaption>Room-by-room survey</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Privacy</p>
+    <h2>No account. No servers. No analytics.</h2>
+    <div class="cols">
+      <ul class="plain">
+        <li><strong>Nothing to sign up for.</strong> The app has no login because it has nowhere to log in to.</li>
+        <li><strong>No tracking of any kind.</strong> No analytics, no third-party SDKs — the only network request the app makes is to a border router or probe you configured yourself.</li>
+        <li><strong>iCloud sync is yours, not ours.</strong> Optional, off by default, and it uses your own private iCloud. Your notes and settings follow you; we never see them.</li>
+        <li><strong>AI runs on device.</strong> On iOS 26 with Apple Intelligence. Your network is never uploaded to be summarised.</li>
+      </ul>
+      <div>
+        <div class="note">
+          <p><strong>Signal history deliberately doesn't sync.</strong></p>
+          <p>
+            Readings depend on where the device taking them is standing. Merging an iPad in
+            a drawer with an iPhone in your pocket would produce a history describing a
+            place nobody is. Notes and settings sync; measurements stay put.
+          </p>
+        </div>
+        <p style="margin:1.25rem 0 0"><a href="privacy.html">Full privacy policy →</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Pro</p>
+    <h2>One purchase. Not a subscription.</h2>
+    <div class="cols">
+      <ul class="plain">
+        <li><strong>AI Insights and Network Assistant</strong> — reads your device's actual history, on device.</li>
+        <li><strong>Resilience Simulator</strong> — which devices would be orphaned if a specific router failed.</li>
+        <li><strong>30-day timeline and topology time-lapse.</strong></li>
+        <li><strong>Diagnostic PDF export</strong> for installers, landlords or your own records.</li>
+        <li><strong>Weekly reports, streaks, scene triggers</strong> and Watch complications.</li>
+      </ul>
+      <div class="note">
+        <p><strong>Probe features aren't behind the paywall.</strong></p>
+        <p>
+          If you've gone to the trouble of building a probe, hitting a second paywall would
+          be a poor way to say thank you. Everything the probe unlocks is included.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section style="border-bottom:0">
+    <p class="eyebrow">Getting started</p>
+    <h2>What you need</h2>
+    <p class="section-lede">
+      A home with at least one Thread border router — a HomePod mini, Apple TV 4K or
+      similar — since ThreadMapper reads your network through HomeKit. AI features need
+      iOS 26 on an Apple Intelligence–capable device. The probe is entirely optional.
+    </p>
+    <p class="section-lede" style="margin-bottom:0">
+      Want to look around first? Turn on <strong>Demo Mode</strong> and the whole app runs
+      on a simulated network — no hardware, no HomeKit, nothing to set up.
+    </p>
+  </section>
+
+  <footer>
+    <nav>
+      <a href="support.html">Support</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="https://github.com/tintronix-lab/ThreadMapper">Source</a>
+      <a href="probe-setup.html">Build a probe</a>
+    </nav>
+    ThreadMapper is made by Tintronix Lab. Thread is a trademark of the Thread Group.
+    Apple, HomeKit, iPhone, iPad and Apple Watch are trademarks of Apple Inc.
+  </footer>
+
+</div>
+
+</body>
+</html>
