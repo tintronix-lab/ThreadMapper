@@ -12,11 +12,11 @@ Due cose decidono se ne vale la pena per la *tua* installazione. Sono entrambe f
 
 ### 1. Un Raspberry Pi non sa fare Thread da solo
 
-In un Raspberry Pi non c’è nessuna radio 802.15.4. Il Wi-Fi e il Bluetooth sono radio diverse e non sanno parlare Thread. **Ti serve una chiavetta USB**, e sopra le serve il firmware RCP — che non è quello con cui queste chiavette vengono vendute.
+In un Raspberry Pi non c’è nessuna radio 802.15.4. Il Wi-Fi e il Bluetooth sono radio diverse e non sanno parlare Thread. **Ti serve una chiavetta USB**, e sopra ci deve stare il firmware RCP — che non è quello con cui queste chiavette vengono vendute.
 
 ### 2. Entrare nella *tua* rete Thread è la parte difficile
 
-Un border router che forma una rete nuova tutta sua se ne starà lì a vedere soltanto se stesso. I tuoi dispositivi veri sono sulla rete creata dal tuo HomePod, dalla tua Apple TV o dal tuo hub Nest, e per osservarli la sonda deve **entrare in quella rete** — il che significa procurarsi le sue credenziali (l’Active Operational Dataset).
+Un border router che forma una rete nuova tutta sua se ne starà lì a vedere soltanto se stesso. I tuoi dispositivi veri sono sulla rete creata dal tuo HomePod, dalla tua Apple TV o dal tuo hub Nest, e per osservarli la sonda deve **entrare in quella rete** — il che significa procurarsene le credenziali (l’Active Operational Dataset).
 
 | La tua installazione | La sonda può entrare nella tua rete vera? |
 |---|---|
@@ -48,7 +48,7 @@ Quella terza riga è un muro vero, e non è uno che questo progetto possa abbatt
 
 ## Passo 1 — Scrivi il firmware RCP sulla chiavetta
 
-Fallo **prima** di toccare il Pi, sul tuo Mac o PC. È l’unico passo che l’installatore deliberatamente non automatizza: scrivere l’immagine sbagliata rende la chiavetta inservibile, e gli strumenti del produttore lo fanno come si deve.
+Fallo **prima** di toccare il Pi, sul tuo Mac o PC. È l’unico passo che lo script di installazione deliberatamente non automatizza: scrivere l’immagine sbagliata rende la chiavetta inservibile, e gli strumenti del produttore lo fanno come si deve.
 
 Il firmware RCP («Radio Co-Processor») trasforma la chiavetta in una radio stupida pilotata da `otbr-agent`. Una chiavetta venduta per Zigbee ha un firmware diverso e non funzionerà finché non la riscrivi.
 
@@ -108,7 +108,7 @@ Prima di andare avanti, conferma che la chiavetta sia visibile:
 ls -l /dev/serial/by-id/
 ```
 
-Dovresti vedere una voce che nomina la tua chiavetta. **Se è vuoto, fermati** — il resto non funzionerà. Riestraila e rinseriscila, prova un’altra porta USB e ricontrolla il passo 1.
+Dovresti vedere una voce che nomina la tua chiavetta. **Se è vuoto, fermati** — il resto non funzionerà. Scollegala e ricollegala, prova un’altra porta USB e ricontrolla il passo 1.
 
 ---
 
@@ -185,7 +185,7 @@ sudo ot-ctl dataset active -x
 
 ---
 
-## Passo 6 — Punta l’app su di essa
+## Passo 6 — Punta l’app sulla sonda
 
 ```bash
 curl http://localhost:8099/health
@@ -220,7 +220,7 @@ Lo Scanner dei canali è quello da guardare per primo. È la differenza più net
 | Prova la connessione: *«Impossibile raggiungere quell’indirizzo»* | IP sbagliato, oppure il telefono è su una subnet diversa o su una VLAN ospiti. |
 | `ot-ctl state` dice `detached` | Ha le credenziali ma non trova la rete. Dataset sbagliato, oppure fuori dalla portata radio di ogni altro nodo. |
 | `ot-ctl state` dice `disabled` | `ifconfig up` / `thread start` non sono stati eseguiti, oppure la radio non è riuscita a partire. |
-| La schermata Rete Thread non ha nessun peer | La sonda è sulla sua rete — controlla di non essere `leader` quando volevi entrare in una rete esistente. |
+| La schermata Rete Thread non mostra nessun peer | La sonda è su una rete tutta sua — controlla di non essere `leader` quando volevi entrare in una rete esistente. |
 | Funziona tutto, poi dopo un riavvio muore | `systemctl is-enabled otbr-agent threadmapper-probe` — entrambi devono dire `enabled`. |
 
 I log di entrambi i servizi insieme:

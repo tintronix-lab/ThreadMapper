@@ -41,14 +41,14 @@ Cette troisième ligne est un vrai mur, et ce n’est pas un mur que ce projet p
 
 **Options de dongle**, les deux conviennent :
 
-- **Dongle Nordic nRF52840** (environ 10 $) — le moins cher, et le micrologiciel se compile depuis les sources, donc pas de téléchargement à chercher.
-- **SkyConnect / Sonoff ZBDongle-E** (environ 25 $) — Silicon Labs. Si vous en possédez déjà un pour Home Assistant, utilisez-le. Le flashage tient en une ligne de commande.
+- **Dongle Nordic nRF52840** (environ 10 $) — le moins cher, et le micrologiciel se compile depuis les sources, donc pas de téléchargement à chercher.
+- **SkyConnect / Sonoff ZBDongle-E** (environ 25 $) — Silicon Labs. Si vous en possédez déjà un pour Home Assistant, utilisez-le. Le flashage tient en une ligne de commande.
 
 ---
 
 ## Étape 1 — Installer le micrologiciel RCP sur le dongle
 
-Faites-le **avant** de toucher au Pi, depuis votre Mac ou votre PC. C’est la seule étape que l’installateur n’automatise délibérément pas : flasher la mauvaise image transforme le dongle en presse-papier, et les outils du fabricant font le travail correctement.
+Faites-le **avant** de toucher au Pi, depuis votre Mac ou votre PC. C’est la seule étape que le script d’installation n’automatise délibérément pas : flasher la mauvaise image rend le dongle inutilisable, et les outils du fabricant font le travail correctement.
 
 Le micrologiciel RCP (« Radio Co-Processor ») fait du dongle une simple radio pilotée par `otbr-agent`. Un dongle livré pour Zigbee a un micrologiciel différent et ne fonctionnera pas tant qu’il n’est pas reflashé.
 
@@ -75,7 +75,7 @@ nrfutil dfu usb-serial -pkg ot-rcp.zip -p /dev/tty.usbmodemXXXX
 
 Suivez le README de ce dépôt pour l’étape d’empaquetage actuelle — elle change de temps en temps et il vaut mieux la lire là-bas que la recopier ici.
 
-**Vérifier que ça a marché :** branchez plus tard le dongle sur le Pi et `install.sh` signalera `Found <family> radio at /dev/serial/by-id/...`. S’il ne trouve rien, le micrologiciel n’est pas passé.
+**Vérifiez que ça a marché :** branchez plus tard le dongle sur le Pi et `install.sh` signalera `Found <family> radio at /dev/serial/by-id/...`. S’il ne trouve rien, le micrologiciel n’est pas passé.
 
 ---
 
@@ -197,14 +197,14 @@ Attendez-vous à `"otCtlReachable": true` et à un `role`. Ensuite, depuis votre
 http://threadmapper-probe.local:8099
 ```
 
-Utilisez plutôt l’adresse IP du Pi si `.local` ne se résout pas sur iOS. Touchez **Tester la connexion** — en cas de problème, l’app nomme la panne au lieu d’afficher seulement une croix rouge.
+Utilisez plutôt l’adresse IP du Pi si `.local` ne se résout pas sur iOS. Touchez **Tester la connexion** — en cas de problème, l’app nomme l’échec au lieu d’afficher seulement une croix rouge.
 
 ---
 
 ## Étape 7 — Voir ce que vous avez obtenu
 
 - **Tableau de bord → ⋯ → Réseau Thread** — le RSSI mesuré par nœud, la qualité de liaison et la table de routage avec coût du chemin et saut suivant. Les nœuds apparaissent par adresse Thread, pas par nom ; voir « Ce qui ne fonctionne pas encore » plus bas.
-- **Réseau → outils → Scanner de canaux** — désormais badgé **Mesuré**. La hauteur des barres correspond au plancher de bruit réel sur les 16 canaux, et les canaux recommandés sont les plus calmes réellement observés plutôt qu’une supposition tirée d’un tableau de chevauchement Wi-Fi.
+- **Réseau → outils → Scanner de canaux** — désormais marqué du badge **Mesuré**. La hauteur des barres correspond au plancher de bruit réel sur les 16 canaux, et les canaux recommandés sont les plus calmes réellement observés plutôt qu’une supposition tirée d’un tableau de chevauchement Wi-Fi.
 
 Le scanner de canaux est le premier à regarder. C’est la différence la plus nette entre ce que l’app pouvait montrer avant et ce qu’elle peut montrer maintenant.
 

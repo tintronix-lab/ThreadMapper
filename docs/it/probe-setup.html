@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Costruisci una sonda ThreadMapper — ThreadMapper</title>
-<meta name="description" content="Passo dopo passo: trasforma un Raspberry Pi e una chiavetta 802.15.4 in una sonda ThreadMapper, così l’app può mostrare segnale Thread, instradamento e interferenze misurati.">
+<meta name="description" content="Passo dopo passo: trasforma un Raspberry Pi e una chiavetta 802.15.4 in una sonda ThreadMapper, così l’app può mostrare dati misurati su segnale Thread, instradamento e interferenze.">
 <meta name="theme-color" content="#0B1020">
 <!-- Generated from tools/pi-image/SETUP.it.md by tools/build-docs.py — edit the Markdown, not this file. -->
 <link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/it/probe-setup.html">
@@ -109,9 +109,9 @@
 <h2>Leggi questo prima di comprare qualsiasi cosa</h2>
 <p>Due cose decidono se ne vale la pena per la <em>tua</em> installazione. Sono entrambe facili da non notare finché non arrivano i pezzi.</p>
 <h3>1. Un Raspberry Pi non sa fare Thread da solo</h3>
-<p>In un Raspberry Pi non c’è nessuna radio 802.15.4. Il Wi-Fi e il Bluetooth sono radio diverse e non sanno parlare Thread. <strong>Ti serve una chiavetta USB</strong>, e sopra le serve il firmware RCP — che non è quello con cui queste chiavette vengono vendute.</p>
+<p>In un Raspberry Pi non c’è nessuna radio 802.15.4. Il Wi-Fi e il Bluetooth sono radio diverse e non sanno parlare Thread. <strong>Ti serve una chiavetta USB</strong>, e sopra ci deve stare il firmware RCP — che non è quello con cui queste chiavette vengono vendute.</p>
 <h3>2. Entrare nella <em>tua</em> rete Thread è la parte difficile</h3>
-<p>Un border router che forma una rete nuova tutta sua se ne starà lì a vedere soltanto se stesso. I tuoi dispositivi veri sono sulla rete creata dal tuo HomePod, dalla tua Apple TV o dal tuo hub Nest, e per osservarli la sonda deve <strong>entrare in quella rete</strong> — il che significa procurarsi le sue credenziali (l’Active Operational Dataset).</p>
+<p>Un border router che forma una rete nuova tutta sua se ne starà lì a vedere soltanto se stesso. I tuoi dispositivi veri sono sulla rete creata dal tuo HomePod, dalla tua Apple TV o dal tuo hub Nest, e per osservarli la sonda deve <strong>entrare in quella rete</strong> — il che significa procurarsene le credenziali (l’Active Operational Dataset).</p>
 <div class="scroll"><table><thead><tr><th>La tua installazione</th><th>La sonda può entrare nella tua rete vera?</th></tr></thead><tbody><tr><td>Usi <strong>Home Assistant</strong></td><td><strong>Sì.</strong> L’app Companion di HA per iOS può estrarre le credenziali Thread di Apple — <em>Impostazioni → Dispositivi e servizi → Thread → Configura → Invia credenziali a Home Assistant</em> — e da lì puoi passare il dataset alla sonda.</td></tr><tr><td>Hai già un <strong>OTBR</strong> in funzione (per es. il componente aggiuntivo di HA)</td><td><strong>Sì.</strong> Leggi il dataset direttamente da lì.</td></tr><tr><td><strong>Solo border router Apple o Google</strong>, senza Home Assistant</td><td><strong>Oggi no.</strong> Non esiste alcun modo accessibile all’utente per esportare le credenziali Thread di Apple. Puoi comunque formare una rete <em>nuova</em> sulla sonda e aggregarvi qualche accessorio per vedere l’app funzionare da un capo all’altro, ma non ti mostrerà la tua rete mesh esistente.</td></tr></tbody></table></div>
 <p>Quella terza riga è un muro vero, e non è uno che questo progetto possa abbattere dall’esterno: la via autorizzata è l’entitlement <code>com.apple.developer.thread-network-credentials</code> di Apple, che ThreadMapper ha richiesto ma non possiede. Se venisse concesso, l’app potrebbe passare le tue credenziali direttamente alla sonda e tutta questa sezione sparirebbe.</p>
 <p><strong>Se ti trovi nella terza riga e vuoi soltanto tenere d’occhio la tua mesh Apple esistente, valuta di fermarti qui finché quell’entitlement non arriva.</strong></p>
@@ -122,7 +122,7 @@
 <ul><li><strong>Chiavetta Nordic nRF52840</strong> (circa 10 $) — la più economica, e il firmware si compila dai sorgenti, quindi non c’è nessun download da cercare.</li><li><strong>SkyConnect / Sonoff ZBDongle-E</strong> (circa 25 $) — di Silicon Labs. Se ne hai già una per Home Assistant, usa quella. Per scriverle il firmware basta uno strumento da una riga.</li></ul>
 <hr>
 <h2>Passo 1 — Scrivi il firmware RCP sulla chiavetta</h2>
-<p>Fallo <strong>prima</strong> di toccare il Pi, sul tuo Mac o PC. È l’unico passo che l’installatore deliberatamente non automatizza: scrivere l’immagine sbagliata rende la chiavetta inservibile, e gli strumenti del produttore lo fanno come si deve.</p>
+<p>Fallo <strong>prima</strong> di toccare il Pi, sul tuo Mac o PC. È l’unico passo che lo script di installazione deliberatamente non automatizza: scrivere l’immagine sbagliata rende la chiavetta inservibile, e gli strumenti del produttore lo fanno come si deve.</p>
 <p>Il firmware RCP («Radio Co-Processor») trasforma la chiavetta in una radio stupida pilotata da <code>otbr-agent</code>. Una chiavetta venduta per Zigbee ha un firmware diverso e non funzionerà finché non la riscrivi.</p>
 <h3>Silicon Labs (SkyConnect, Sonoff ZBDongle-E)</h3>
 <pre class="lang-bash"><code>pipx install universal-silabs-flasher     # or: pip install universal-silabs-flasher
@@ -147,7 +147,7 @@ nrfutil dfu usb-serial -pkg ot-rcp.zip -p /dev/tty.usbmodemXXXX</code></pre>
 <p>Se l’hostname non si risolve, trova l’IP del Pi nell’elenco dei client del tuo router e usa invece <code>ssh &lt;user&gt;@&lt;ip&gt;</code>.</p>
 <p>Prima di andare avanti, conferma che la chiavetta sia visibile:</p>
 <pre class="lang-bash"><code>ls -l /dev/serial/by-id/</code></pre>
-<p>Dovresti vedere una voce che nomina la tua chiavetta. <strong>Se è vuoto, fermati</strong> — il resto non funzionerà. Riestraila e rinseriscila, prova un’altra porta USB e ricontrolla il passo 1.</p>
+<p>Dovresti vedere una voce che nomina la tua chiavetta. <strong>Se è vuoto, fermati</strong> — il resto non funzionerà. Scollegala e ricollegala, prova un’altra porta USB e ricontrolla il passo 1.</p>
 <hr>
 <h2>Passo 4 — Installa la sonda</h2>
 <pre class="lang-bash"><code>sudo apt-get update &amp;&amp; sudo apt-get install -y git
@@ -183,7 +183,7 @@ sudo ot-ctl state          # expect: leader</code></pre>
 <p>Stampa il dataset se più avanti vuoi aggiungerci altre cose:</p>
 <pre class="lang-bash"><code>sudo ot-ctl dataset active -x</code></pre>
 <hr>
-<h2>Passo 6 — Punta l’app su di essa</h2>
+<h2>Passo 6 — Punta l’app sulla sonda</h2>
 <pre class="lang-bash"><code>curl http://localhost:8099/health</code></pre>
 <p>Aspettati <code>&quot;otCtlReachable&quot;: true</code> e un <code>role</code>. Poi, dal telefono collegato alla stessa rete, in <strong>ThreadMapper → Impostazioni → Sonda ThreadMapper</strong>:</p>
 <pre><code>http://threadmapper-probe.local:8099</code></pre>
@@ -194,7 +194,7 @@ sudo ot-ctl state          # expect: leader</code></pre>
 <p>Lo Scanner dei canali è quello da guardare per primo. È la differenza più netta fra quello che l’app poteva mostrare prima e quello che può mostrare adesso.</p>
 <hr>
 <h2>Risoluzione dei problemi</h2>
-<div class="scroll"><table><thead><tr><th>Sintomo</th><th>Causa e rimedio</th></tr></thead><tbody><tr><td><code>install.sh</code> dice «No 802.15.4 dongle detected»</td><td>La chiavetta non c’è, oppure il passo 1 non è andato a buon fine. Controlla <code>ls /dev/serial/by-id/</code>.</td></tr><tr><td>Prova la connessione: <em>«non raggiunge il border router accanto»</em></td><td>L’agente è attivo ma <code>otbr-agent</code> no. <code>sudo systemctl status otbr-agent</code>, poi <code>journalctl -u otbr-agent -n 50</code>. Di solito è un radio URL sbagliato, o una chiavetta rimasta senza alimentazione.</td></tr><tr><td>Prova la connessione: <em>«non è un agente sonda di ThreadMapper»</em></td><td>Su quella porta sta rispondendo qualcos’altro. L’agente è sulla 8099; la 8081 è l’API REST del border router stesso.</td></tr><tr><td>Prova la connessione: <em>«Impossibile raggiungere quell’indirizzo»</em></td><td>IP sbagliato, oppure il telefono è su una subnet diversa o su una VLAN ospiti.</td></tr><tr><td><code>ot-ctl state</code> dice <code>detached</code></td><td>Ha le credenziali ma non trova la rete. Dataset sbagliato, oppure fuori dalla portata radio di ogni altro nodo.</td></tr><tr><td><code>ot-ctl state</code> dice <code>disabled</code></td><td><code>ifconfig up</code> / <code>thread start</code> non sono stati eseguiti, oppure la radio non è riuscita a partire.</td></tr><tr><td>La schermata Rete Thread non ha nessun peer</td><td>La sonda è sulla sua rete — controlla di non essere <code>leader</code> quando volevi entrare in una rete esistente.</td></tr><tr><td>Funziona tutto, poi dopo un riavvio muore</td><td><code>systemctl is-enabled otbr-agent threadmapper-probe</code> — entrambi devono dire <code>enabled</code>.</td></tr></tbody></table></div>
+<div class="scroll"><table><thead><tr><th>Sintomo</th><th>Causa e rimedio</th></tr></thead><tbody><tr><td><code>install.sh</code> dice «No 802.15.4 dongle detected»</td><td>La chiavetta non c’è, oppure il passo 1 non è andato a buon fine. Controlla <code>ls /dev/serial/by-id/</code>.</td></tr><tr><td>Prova la connessione: <em>«non raggiunge il border router accanto»</em></td><td>L’agente è attivo ma <code>otbr-agent</code> no. <code>sudo systemctl status otbr-agent</code>, poi <code>journalctl -u otbr-agent -n 50</code>. Di solito è un radio URL sbagliato, o una chiavetta rimasta senza alimentazione.</td></tr><tr><td>Prova la connessione: <em>«non è un agente sonda di ThreadMapper»</em></td><td>Su quella porta sta rispondendo qualcos’altro. L’agente è sulla 8099; la 8081 è l’API REST del border router stesso.</td></tr><tr><td>Prova la connessione: <em>«Impossibile raggiungere quell’indirizzo»</em></td><td>IP sbagliato, oppure il telefono è su una subnet diversa o su una VLAN ospiti.</td></tr><tr><td><code>ot-ctl state</code> dice <code>detached</code></td><td>Ha le credenziali ma non trova la rete. Dataset sbagliato, oppure fuori dalla portata radio di ogni altro nodo.</td></tr><tr><td><code>ot-ctl state</code> dice <code>disabled</code></td><td><code>ifconfig up</code> / <code>thread start</code> non sono stati eseguiti, oppure la radio non è riuscita a partire.</td></tr><tr><td>La schermata Rete Thread non mostra nessun peer</td><td>La sonda è su una rete tutta sua — controlla di non essere <code>leader</code> quando volevi entrare in una rete esistente.</td></tr><tr><td>Funziona tutto, poi dopo un riavvio muore</td><td><code>systemctl is-enabled otbr-agent threadmapper-probe</code> — entrambi devono dire <code>enabled</code>.</td></tr></tbody></table></div>
 <p>I log di entrambi i servizi insieme:</p>
 <pre class="lang-bash"><code>journalctl -u threadmapper-probe -u otbr-agent -f</code></pre>
 <hr>

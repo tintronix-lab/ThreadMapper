@@ -20,7 +20,7 @@ Um roteador de borda que forma uma rede nova só vai ficar ali enxergando a si m
 
 | A sua instalação | A sonda consegue entrar na sua rede real? |
 |---|---|
-| Você usa o **Home Assistant** | **Sim.** O app Companion do HA para iOS consegue extrair as credenciais Thread da Apple — *Ajustes → Dispositivos e serviços → Thread → Configurar → Enviar credenciais para o Home Assistant* — e dali você entrega o dataset para a sonda. |
+| Você usa o **Home Assistant** | **Sim.** O app Companion do HA para iOS consegue extrair as credenciais Thread da Apple — *Configurações → Dispositivos e serviços → Thread → Configurar → Enviar credenciais para o Home Assistant* — e dali você entrega o dataset para a sonda. |
 | Você já roda um **OTBR** (o complemento do HA, por exemplo) | **Sim.** Leia o dataset direto dele. |
 | **Só roteadores de borda da Apple ou do Google**, sem Home Assistant | **Hoje não.** Não existe nenhum caminho acessível ao usuário para exportar as credenciais Thread da Apple. Você ainda pode formar uma rede *nova* na sonda e comissionar alguns acessórios nela para ver o app funcionando de ponta a ponta, mas ela não vai mostrar a sua malha atual. |
 
@@ -42,7 +42,7 @@ Essa terceira linha é uma parede de verdade, e não é uma que este projeto con
 **Opções de dongle**, qualquer uma das duas serve:
 
 - **Dongle Nordic nRF52840** (cerca de US$ 10) — o mais barato, e o firmware é compilado a partir do código-fonte, então não há download nenhum para caçar.
-- **SkyConnect / Sonoff ZBDongle-E** (cerca de US$ 25) — da Silicon Labs. Se você já tem um para o Home Assistant, use-o. A gravação é uma ferramenta de uma linha só.
+- **SkyConnect / Sonoff ZBDongle-E** (cerca de US$ 25) — da Silicon Labs. Se você já tem um para o Home Assistant, use-o. A gravação é feita por uma ferramenta de uma linha só.
 
 ---
 
