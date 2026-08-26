@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ThreadMapper — integritetspolicy</title>
+<meta name="description" content="ThreadMapper samlar inte in några personuppgifter. Inga konton, ingen analys, inga servrar. Vad appen läser, var det lagras och de två valfria iCloud-funktionerna — i klartext.">
+<!-- Generated from site/privacy.html.tmpl by tools/build-docs.py — edit the template
+     and site/strings/privacy.*.json, not this file. -->
+<link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/sv/privacy.html">
+<link rel="alternate" hreflang="en" href="https://tintronix-lab.github.io/ThreadMapper/privacy.html">
+<link rel="alternate" hreflang="sv" href="https://tintronix-lab.github.io/ThreadMapper/sv/privacy.html">
+<link rel="alternate" hreflang="de" href="https://tintronix-lab.github.io/ThreadMapper/de/privacy.html">
+<link rel="alternate" hreflang="fr" href="https://tintronix-lab.github.io/ThreadMapper/fr/privacy.html">
+<link rel="alternate" hreflang="es" href="https://tintronix-lab.github.io/ThreadMapper/es/privacy.html">
+<link rel="alternate" hreflang="it" href="https://tintronix-lab.github.io/ThreadMapper/it/privacy.html">
+<link rel="alternate" hreflang="ja" href="https://tintronix-lab.github.io/ThreadMapper/ja/privacy.html">
+<link rel="alternate" hreflang="nl" href="https://tintronix-lab.github.io/ThreadMapper/nl/privacy.html">
+<link rel="alternate" hreflang="pt-BR" href="https://tintronix-lab.github.io/ThreadMapper/pt-br/privacy.html">
+<link rel="alternate" hreflang="x-default" href="https://tintronix-lab.github.io/ThreadMapper/privacy.html">
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    max-width: 44rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem;
+    color: #1c1c1e; background: #fff;
+  }
+  @media (prefers-color-scheme: dark) { body { color: #f2f2f7; background: #000; } }
+  h1 { font-size: 1.9rem; margin-bottom: .25rem; }
+  h2 { font-size: 1.15rem; margin-top: 2.25rem; }
+  /* Without this, the browser default (1.17em) renders h3 *larger* than h2. */
+  h3 { font-size: 1rem; margin-top: 1.75rem; margin-bottom: .35rem; }
+  .updated { color: #8e8e93; font-size: .9rem; margin-top: 0; }
+  .highlight { border-left: 3px solid #0a84ff; padding: .6rem 0 .6rem 1rem; margin: 1.5rem 0; }
+  ul { padding-left: 1.2rem; }
+  li { margin: .4rem 0; }
+  a { color: #0a84ff; }
+  footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid #d1d1d6; font-size: .9rem; color: #8e8e93; }
+  /* Translated headings run longer than English, so let a compound break rather
+     than overflow. No auto-hyphenation: measured across all nine catalogs, no
+     headline word comes near its container, and it cost a mid-word break in a
+     display face. */
+  h1, h2, h3 { overflow-wrap: break-word; }
+  /* The switcher is a plain link row: no JS, and it works as a list for screen readers. */
+  .langs { margin-top: 1.25rem; display: flex; flex-wrap: wrap; gap: .35rem .9rem; }
+  .langs a { text-decoration: none; }
+  .langs a:hover { text-decoration: underline; }
+  .langs [aria-current] { color: #1c1c1e; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { .langs [aria-current] { color: #f2f2f7; } }
+  :lang(ja) h1, :lang(ja) h2 { letter-spacing: 0; }
+</style>
+</head>
+<body>
+
+<h1>Integritetspolicy</h1>
+<p class="updated">ThreadMapper · Senast uppdaterad 26 augusti 2026</p>
+
+<div class="highlight">
+  <strong>ThreadMapper varken samlar in, överför eller säljer dina personuppgifter.</strong> Det finns inga konton, inga analys-SDK:er och inga tredjepartsspårare. Allt appen registrerar stannar på din enhet — eller, om du använder någon av de två valfria iCloud-funktionerna, i ditt eget iCloud-konto. Hur som helst når det aldrig oss.
+</div>
+
+<h2>Vad ThreadMapper läser</h2>
+<ul>
+  <li><strong>HomeKit-tillbehörsdata</strong> — namn, rum, tillverkare, modell, nåbarhet och batterinivå för tillbehören i ditt hem. Detta läses från Apples HomeKit-ramverk med ditt tillstånd och används för att bygga vyn över ditt Thread-mesh-nät.</li>
+  <li><strong>Ungefärlig plats</strong> — endast medan du aktivt genomför en mätningspromenad, och endast för att märka signalavläsningar så att de kan visas på en värmekarta. Plats begärs när en mätning börjar, aldrig vid start. Avläsningar utan platsbestämning lagras utan koordinater i stället för att tilldelas påhittade sådana.</li>
+  <li><strong>Signalmätningar</strong> — uppskattningar av svarskvalitet som appen härleder själv genom att ta tid på tillbehörens svar.</li>
+  <li><strong>Ditt lokala nätverk</strong> — appen letar efter Thread-gränsroutrar och Matter-enheter som annonserar sig på ditt nätverk, och läser vad de publicerar om sig själva där: deras namn, modeller och om de redan är parkopplade. Det är så den kan beskriva hårdvara som Apple Hem inte listar. Det är en avläsning av det de enheterna sänder ut; appen ansluter inte till dem.</li>
+  <li><strong>Kamera</strong> — för att läsa QR-koder för Matter-installation, för att spåra din position inomhus under en AR-mätningspromenad och, när du startar en rumsskanning, för att mäta rummets form och bygga en planritning. Ingen bild och ingen video spelas in eller lagras.</li>
+  <li><strong>Bluetooth</strong> — för att se Matter-enheter som annonserar sig i närheten inför installation, så att appen kan visa vad som väntar på att driftsättas. Den skannar bara medan du tittar på den skärmen.</li>
+  <li><strong>Barometer</strong> — endast under en AR-mätningspromenad, för att avgöra vilket våningsplan en avläsning gjordes på.</li>
+</ul>
+<p>Var och en av dessa begärs i det ögonblick den först behövs, i stället för vid start, och var och en är valfri utom HomeKit, som är det enda sätt appen över huvud taget läser ditt Thread-nätverk på. Att neka någon av de andra stänger av den funktion som bad om den, och ingenting annat.</p>
+
+<h2>Var det lagras</h2>
+<p>Som standard lagras allt — enhetshistorik, mätpunkter, aktivitetshändelser, anteckningar och inställningar — lokalt på din enhet (i appens egen behållare, en App Group som delas med widgeten och Apple Watch-appen, samt vanliga användarinställningar). Ingenting av det laddas upp till oss. Vi driver inga servrar och tar emot ingen kopia av det. Det enda som någonsin lämnar enheten är de två valfria iCloud-funktionerna nedan, och båda går till ditt eget Apple-konto snarare än till oss.</p>
+
+<h2>iCloud</h2>
+<p>Det finns två separata iCloud-funktioner, båda valfria, båda på väg till <em>ditt eget</em> Apple-konto. Ingen av dem är en tjänst från oss: vi har ingen åtkomst till någon av dem och tar emot ingen kopia.</p>
+<h3>iCloud-synk (ett reglage, kontinuerlig)</h3>
+<p>Om du slår på <strong>iCloud-synk</strong> — den är avstängd om du inte aktiverar den — kopieras dina enhetsanteckningar, Thread-överstyrningar och appinställningar till ditt privata nyckel–värde-lager i iCloud, så att de dyker upp på dina andra enheter.</p>
+<p>Signalhistorik, mätvärden från mätningar och sondinspelningar är medvetet undantagna från den här kontinuerliga synkningen och stannar på den enhet som samlade in dem. Avläsningar beror på var den enheten stod, så att slå ihop dem mellan enheter skulle ge en historik som beskriver ingendera.</p>
+<h3>Spara i iCloud (en knapp, manuell)</h3>
+<p>Separat tar <strong>Spara i iCloud</strong> i Inställningar en fullständig säkerhetskopia av den här enheten som ett paket: dina inställningar, anteckningar, skannade rum, planritningar, de positioner du placerade enheter på, det sparade AR-utrymmet och <strong>dina mätavläsningar</strong> — inklusive de koordinater, tidsstämplar och rumsnamn som hör till dem. Det finns för att du ska kunna flytta ditt arbete till en annan iPhone.</p>
+<p>Det här är den enda plats där dina mätvärden någonsin lämnar enheten, och det är medvetet manuellt: ingenting laddas upp förrän du trycker på Spara. Det går till ditt eget iCloud Drive, där din Filer-app kan se det och du kan radera det, och där ingen annan kan läsa det. Trycker du aldrig på Spara skrivs ingenting någonsin.</p>
+
+<h2>Funktioner med artificiell intelligens</h2>
+<p>På iOS 26 och senare körs ThreadMappers AI-funktioner (Insikter, Nätverksassistent, felsökning och rapporter) helt och hållet <strong>på enheten</strong> med Apples ramverk Foundation Models. Dina nätverksdata skickas inte till oss eller till någon AI-tjänst från tredje part.</p>
+
+<h2>Nätverksanslutningar</h2>
+<p>ThreadMapper gör inga analys- eller annonsförfrågningar och kontaktar ingen server hos oss, eftersom det inte finns någon. Det appen gör på nätverket är:</p>
+<ul>
+  <li><strong>Lyssnar efter enheter som annonserar sig på ditt lokala nätverk</strong> — den vanliga Bonjour-upptäckt som iOS tillhandahåller. Det är så appen hittar gränsroutrar och Matter-enheter, inklusive sådana som Apple Hem inte listar. Den läser vad de enheterna sänder ut om sig själva; den ansluter inte till dem och skickar ingenting till dem.</li>
+  <li>Ansluter till en <strong>OpenThread-gränsrouter</strong>, om du ställer in en — på ditt eget lokala nätverk, på en adress du själv anger;</li>
+  <li>Ansluter till en <strong>ThreadMapper-sond</strong>, om du kör en — också på ditt eget lokala nätverk, på en adress du själv anger;</li>
+  <li>Når <strong>Apples iCloud</strong>, bara för de två valfria funktionerna ovan, och bara ditt eget konto.</li>
+</ul>
+<p>Det finns ingen ThreadMapper-server att ansluta till. Det har det aldrig funnits.</p>
+
+<h2>Köp</h2>
+<p>ThreadMapper Pro hanteras helt och hållet av Apples system för köp inuti appar. Vi varken ser eller lagrar dina betalningsuppgifter. Apples egen integritetspolicy styr den transaktionen.</p>
+
+<h2>Datadelning</h2>
+<p>Vi varken delar, säljer, hyr ut eller lämnar ut dina data till någon, eftersom vi aldrig tar emot dem. Allt du väljer att exportera (en CSV-fil med mätdata eller en diagnostisk PDF) lämnar appen först när du medvetet delar det, och går dit du skickar det.</p>
+
+<h2>Barn</h2>
+<p>ThreadMapper är ett nätverksverktyg och riktar sig inte till barn. Den samlar inte in några personuppgifter från någon, inte heller från barn.</p>
+
+<h2>Din kontroll</h2>
+<p>Du kan när som helst återkalla vilket tillstånd som helst — HomeKit, Plats, Kamera, Bluetooth eller Rörelse — i Inställningar i iOS. Att radera appen tar bort alla lokalt lagrade data. Appen har också inbyggda reglage för att rensa aktivitetshistorik och sparade mätdata. Om du har använt <strong>Spara i iCloud</strong> ligger den säkerhetskopian i ditt iCloud Drive snarare än inuti appen — den syns i appen Filer som en mapp med namnet ThreadMapper — så att radera appen raderar den inte. Ta bort den från Filer när du vill bli av med den.</p>
+
+<h2>Ändringar</h2>
+<p>Om den här policyn ändras publiceras den uppdaterade versionen på den här sidan med ett nytt datum.</p>
+
+<h2>Kontakt</h2>
+<p>Frågor om integritet: <a href="mailto:tintronix@gmail.com">tintronix@gmail.com</a></p>
+
+<footer>
+  ThreadMapper utvecklas av Tintronix Lab.
+  <a href="support.html">Support</a>
+  <nav class="langs" aria-label="Språk"><a href="../privacy.html" hreflang="en" lang="en">English</a><span aria-current="true">Svenska</span><a href="../de/privacy.html" hreflang="de" lang="de">Deutsch</a><a href="../fr/privacy.html" hreflang="fr" lang="fr">Français</a><a href="../es/privacy.html" hreflang="es" lang="es">Español</a><a href="../it/privacy.html" hreflang="it" lang="it">Italiano</a><a href="../ja/privacy.html" hreflang="ja" lang="ja">日本語</a><a href="../nl/privacy.html" hreflang="nl" lang="nl">Nederlands</a><a href="../pt-br/privacy.html" hreflang="pt-BR" lang="pt-BR">Português (BR)</a></nav>
+</footer>
+
+</body>
+</html>

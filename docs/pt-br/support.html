@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ThreadMapper — Suporte</title>
+<meta name="description" content="Ajuda para o ThreadMapper: por que nenhum dispositivo é encontrado, o que significa a estimativa de sinal, em que as conexões da malha diferem do roteamento Thread real, como fazer uma medição por cômodo, sincronização com o iCloud, compras do Pro e o app do Apple Watch.">
+<!-- Generated from site/support.html.tmpl by tools/build-docs.py — edit the template
+     and site/strings/support.*.json, not this file. -->
+<link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/pt-br/support.html">
+<link rel="alternate" hreflang="en" href="https://tintronix-lab.github.io/ThreadMapper/support.html">
+<link rel="alternate" hreflang="sv" href="https://tintronix-lab.github.io/ThreadMapper/sv/support.html">
+<link rel="alternate" hreflang="de" href="https://tintronix-lab.github.io/ThreadMapper/de/support.html">
+<link rel="alternate" hreflang="fr" href="https://tintronix-lab.github.io/ThreadMapper/fr/support.html">
+<link rel="alternate" hreflang="es" href="https://tintronix-lab.github.io/ThreadMapper/es/support.html">
+<link rel="alternate" hreflang="it" href="https://tintronix-lab.github.io/ThreadMapper/it/support.html">
+<link rel="alternate" hreflang="ja" href="https://tintronix-lab.github.io/ThreadMapper/ja/support.html">
+<link rel="alternate" hreflang="nl" href="https://tintronix-lab.github.io/ThreadMapper/nl/support.html">
+<link rel="alternate" hreflang="pt-BR" href="https://tintronix-lab.github.io/ThreadMapper/pt-br/support.html">
+<link rel="alternate" hreflang="x-default" href="https://tintronix-lab.github.io/ThreadMapper/support.html">
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    max-width: 44rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem;
+    color: #1c1c1e; background: #fff;
+  }
+  @media (prefers-color-scheme: dark) { body { color: #f2f2f7; background: #000; } }
+  h1 { font-size: 2rem; margin-bottom: .25rem; }
+  h2 { font-size: 1.15rem; margin-top: 2.25rem; }
+  .tagline { color: #8e8e93; margin-top: 0; }
+  .contact { border-left: 3px solid #0a84ff; padding: .6rem 0 .6rem 1rem; margin: 1.5rem 0; }
+  details { margin: .6rem 0; padding: .6rem 0; border-bottom: 1px solid #d1d1d6; }
+  summary { cursor: pointer; font-weight: 600; }
+  details p { margin: .6rem 0 0; }
+  a { color: #0a84ff; }
+  footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid #d1d1d6; font-size: .9rem; color: #8e8e93; }
+  /* Translated headings run longer than English, so let a compound break rather
+     than overflow. No auto-hyphenation: measured across all nine catalogs, no
+     headline word comes near its container, and it cost a mid-word break in a
+     display face. */
+  h1, h2, summary { overflow-wrap: break-word; }
+  /* The switcher is a plain link row: no JS, and it works as a list for screen readers. */
+  .langs { margin-top: 1.25rem; display: flex; flex-wrap: wrap; gap: .35rem .9rem; }
+  .langs a { text-decoration: none; }
+  .langs a:hover { text-decoration: underline; }
+  .langs [aria-current] { color: #1c1c1e; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { .langs [aria-current] { color: #f2f2f7; } }
+  :lang(ja) h1, :lang(ja) h2 { letter-spacing: 0; }
+</style>
+</head>
+<body>
+
+<h1>Suporte do ThreadMapper</h1>
+<p class="tagline">Monitor de rede em malha Thread para iPhone, iPad e Apple Watch.</p>
+
+<div class="contact">
+  <strong>Precisa de ajuda?</strong> Escreva para <a href="mailto:tintronix@gmail.com">tintronix@gmail.com</a>. Inclua a sua versão do iOS, o modelo do iPhone e uma breve descrição do que você estava fazendo.
+</div>
+
+<h2>Perguntas frequentes</h2>
+
+<details>
+  <summary>O app diz “Nenhum dispositivo encontrado”</summary>
+  <p>
+    O ThreadMapper lê seus dispositivos Thread através do HomeKit, então ele precisa de duas coisas: o acesso ao HomeKit precisa estar liberado (Ajustes do iOS → Privacidade e Segurança → HomeKit → ThreadMapper) e você precisa de pelo menos um roteador de borda Thread em casa — por exemplo um HomePod mini, uma Apple TV 4K ou um hub compatível. Se você só quer explorar o app, ative o <em>Modo demo</em> nos Ajustes.
+  </p>
+</details>
+
+<details>
+  <summary>Por que a intensidade do sinal é chamada de “estimativa”?</summary>
+  <p>
+    O iOS não expõe a apps de terceiros o RSSI de rádio real dos acessórios Thread. O ThreadMapper deriva uma estimativa de qualidade de resposta cronometrando a rapidez com que cada acessório responde. É uma forma confiável de comparar dispositivos e cômodos, mas não é um valor em dBm medido pelo rádio — e é por isso que o app a rotula como estimada em todo lugar.
+  </p>
+</details>
+
+<details>
+  <summary>As conexões da malha são roteamento Thread real?</summary>
+  <p>
+    Na aba Malha, não — são estimativas lógicas: os dispositivos são ligados ao roteador de borda mais próximo ou a um roteador do mesmo cômodo.
+  </p>
+  <p>
+    Conectar um OpenThread Border Router traz fatos reais da <em>rede</em> (nome, canal, PAN ID), mas não o roteamento. Seus endpoints de diagnóstico não devolvem dados por nó — nós os testamos contra uma malha real e as requisições são concluídas sem nada dentro.
+  </p>
+  <p>
+    O roteamento real exige uma <a href="probe-setup.html">sonda do ThreadMapper</a>: um pequeno agente num Raspberry Pi que entra na malha e lê a tabela de rotas diretamente. Com uma conectada, a tela Rede Thread mostra sinal medido, qualidade da conexão, próximo salto e custo do caminho. Esses nós aparecem pelo endereço Thread, e não pelos nomes dos seus dispositivos — ainda não há nada que ligue um endereço Thread a um acessório do HomeKit.
+  </p>
+</details>
+
+<details>
+  <summary>Como faço uma medição por cômodo?</summary>
+  <p>
+    Abra a aba Medição e escolha Medição guiada. Fique em pé num cômodo, toque em Iniciar, ande por ele enquanto o app coleta amostras e depois toque em Concluído para salvar aquele cômodo e passar para o próximo. Se você tiver um Apple Watch, dá para acionar Iniciar / Concluído / Pular pelo pulso enquanto a medição roda no seu iPhone.
+  </p>
+</details>
+
+<details>
+  <summary>Os recursos de IA enviam meus dados para algum lugar?</summary>
+  <p>
+    Não. No iOS 26 e posterior, eles rodam inteiramente no dispositivo usando a Apple Intelligence. Nada sobre a sua rede sai do seu iPhone. Eles exigem um dispositivo compatível com Apple Intelligence.
+  </p>
+</details>
+
+<details>
+  <summary>O que a sincronização com o iCloud sincroniza de verdade?</summary>
+  <p>
+    As notas dos seus dispositivos, as substituições de Thread e os ajustes do app — as coisas que você digitou ou escolheu. Fica desligada até você ativá-la nos Ajustes, e usa o seu próprio iCloud privado, então nada disso chega até nós.
+  </p>
+  <p>
+    O histórico de sinal e as medições ficam deliberadamente no dispositivo que os registrou. Uma leitura depende de onde aquele dispositivo estava, então juntar um iPad esquecido numa gaveta com um iPhone no seu bolso produziria um histórico que não descreve nenhum dos dois.
+  </p>
+</details>
+
+<details>
+  <summary>Comprei o Pro, mas os recursos continuam bloqueados</summary>
+  <p>
+    Abra os Ajustes no ThreadMapper e toque em <em>Restaurar compras</em>. Confirme que você está conectado com a mesma Conta Apple usada na compra original.
+  </p>
+</details>
+
+<details>
+  <summary>O app do Apple Watch está sem dados</summary>
+  <p>
+    O relógio espelha o seu iPhone. Abra o ThreadMapper no iPhone pelo menos uma vez para que ele envie um instantâneo, e confirme, no app Watch do seu iPhone, que o app do relógio está instalado.
+  </p>
+</details>
+
+<h2>Privacidade</h2>
+<p>
+  O ThreadMapper não coleta dados pessoais e não tem contas nem análise de uso. Leia a <a href="privacy.html">Política de Privacidade</a> completa.
+</p>
+
+<footer>
+  O ThreadMapper é desenvolvido pela Tintronix Lab.
+  <a href="privacy.html">Política de Privacidade</a>
+  <nav class="langs" aria-label="Idioma"><a href="../support.html" hreflang="en" lang="en">English</a><a href="../sv/support.html" hreflang="sv" lang="sv">Svenska</a><a href="../de/support.html" hreflang="de" lang="de">Deutsch</a><a href="../fr/support.html" hreflang="fr" lang="fr">Français</a><a href="../es/support.html" hreflang="es" lang="es">Español</a><a href="../it/support.html" hreflang="it" lang="it">Italiano</a><a href="../ja/support.html" hreflang="ja" lang="ja">日本語</a><a href="../nl/support.html" hreflang="nl" lang="nl">Nederlands</a><span aria-current="true">Português (BR)</span></nav>
+</footer>
+
+</body>
+</html>

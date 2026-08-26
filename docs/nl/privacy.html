@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ThreadMapper — Privacybeleid</title>
+<meta name="description" content="ThreadMapper verzamelt geen persoonsgegevens. Geen accounts, geen analytics, geen servers. Wat de app leest, waar het wordt bewaard en de twee optionele iCloud-functies — in gewone taal.">
+<!-- Generated from site/privacy.html.tmpl by tools/build-docs.py — edit the template
+     and site/strings/privacy.*.json, not this file. -->
+<link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/nl/privacy.html">
+<link rel="alternate" hreflang="en" href="https://tintronix-lab.github.io/ThreadMapper/privacy.html">
+<link rel="alternate" hreflang="sv" href="https://tintronix-lab.github.io/ThreadMapper/sv/privacy.html">
+<link rel="alternate" hreflang="de" href="https://tintronix-lab.github.io/ThreadMapper/de/privacy.html">
+<link rel="alternate" hreflang="fr" href="https://tintronix-lab.github.io/ThreadMapper/fr/privacy.html">
+<link rel="alternate" hreflang="es" href="https://tintronix-lab.github.io/ThreadMapper/es/privacy.html">
+<link rel="alternate" hreflang="it" href="https://tintronix-lab.github.io/ThreadMapper/it/privacy.html">
+<link rel="alternate" hreflang="ja" href="https://tintronix-lab.github.io/ThreadMapper/ja/privacy.html">
+<link rel="alternate" hreflang="nl" href="https://tintronix-lab.github.io/ThreadMapper/nl/privacy.html">
+<link rel="alternate" hreflang="pt-BR" href="https://tintronix-lab.github.io/ThreadMapper/pt-br/privacy.html">
+<link rel="alternate" hreflang="x-default" href="https://tintronix-lab.github.io/ThreadMapper/privacy.html">
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    max-width: 44rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem;
+    color: #1c1c1e; background: #fff;
+  }
+  @media (prefers-color-scheme: dark) { body { color: #f2f2f7; background: #000; } }
+  h1 { font-size: 1.9rem; margin-bottom: .25rem; }
+  h2 { font-size: 1.15rem; margin-top: 2.25rem; }
+  /* Without this, the browser default (1.17em) renders h3 *larger* than h2. */
+  h3 { font-size: 1rem; margin-top: 1.75rem; margin-bottom: .35rem; }
+  .updated { color: #8e8e93; font-size: .9rem; margin-top: 0; }
+  .highlight { border-left: 3px solid #0a84ff; padding: .6rem 0 .6rem 1rem; margin: 1.5rem 0; }
+  ul { padding-left: 1.2rem; }
+  li { margin: .4rem 0; }
+  a { color: #0a84ff; }
+  footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid #d1d1d6; font-size: .9rem; color: #8e8e93; }
+  /* Translated headings run longer than English, so let a compound break rather
+     than overflow. No auto-hyphenation: measured across all nine catalogs, no
+     headline word comes near its container, and it cost a mid-word break in a
+     display face. */
+  h1, h2, h3 { overflow-wrap: break-word; }
+  /* The switcher is a plain link row: no JS, and it works as a list for screen readers. */
+  .langs { margin-top: 1.25rem; display: flex; flex-wrap: wrap; gap: .35rem .9rem; }
+  .langs a { text-decoration: none; }
+  .langs a:hover { text-decoration: underline; }
+  .langs [aria-current] { color: #1c1c1e; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { .langs [aria-current] { color: #f2f2f7; } }
+  :lang(ja) h1, :lang(ja) h2 { letter-spacing: 0; }
+</style>
+</head>
+<body>
+
+<h1>Privacybeleid</h1>
+<p class="updated">ThreadMapper · Laatst bijgewerkt 26 augustus 2026</p>
+
+<div class="highlight">
+  <strong>ThreadMapper verzamelt, verzendt of verkoopt je persoonsgegevens niet.</strong> Er zijn geen accounts, geen analytics-SDK’s en geen trackers van derden. Alles wat de app vastlegt blijft op je apparaat — of, als je een van de twee optionele iCloud-functies gebruikt, in je eigen iCloud-account. Hoe dan ook bereikt het ons nooit.
+</div>
+
+<h2>Wat ThreadMapper leest</h2>
+<ul>
+  <li><strong>HomeKit-accessoiregegevens</strong> — namen, kamers, fabrikant, model, bereikbaarheid en batterijniveau van de accessoires in je woning. Dit wordt met je toestemming uit Apple’s HomeKit-framework gelezen en gebruikt om de weergave van je Thread-mesh op te bouwen.</li>
+  <li><strong>Globale locatie</strong> — alleen terwijl je actief een loopmeting uitvoert, en alleen om signaalmetingen te labelen zodat ze op een heatmap getoond kunnen worden. Locatie wordt gevraagd wanneer een meting begint, nooit bij het starten van de app. Metingen zonder locatiebepaling worden zonder coördinaten bewaard in plaats van dat er verzonnen coördinaten aan worden gehangen.</li>
+  <li><strong>Signaalmetingen</strong> — schattingen van de reactiekwaliteit die de app zelf afleidt door de reactietijd van accessoires te klokken.</li>
+  <li><strong>Je lokale netwerk</strong> — de app kijkt uit naar Thread border routers en Matter-apparaten die zichzelf op je netwerk aankondigen, en leest wat zij daar over zichzelf publiceren: hun namen, modellen en of ze al gekoppeld zijn. Zo kan de app hardware beschrijven die Apple Home niet toont. Het is een uitlezing van wat die apparaten uitzenden; de app maakt er geen verbinding mee.</li>
+  <li><strong>Camera</strong> — om QR-codes voor het instellen van Matter te lezen, om je positie binnenshuis te volgen tijdens een AR-wandeling en, wanneer je een kamerscan start, om de vorm van de kamer te meten en een plattegrond te bouwen. Er wordt geen foto of video opgenomen of bewaard.</li>
+  <li><strong>Bluetooth</strong> — om Matter-apparaten te zien die zich in de buurt aankondigen om ingesteld te worden, zodat de app kan tonen wat er klaarstaat om toegevoegd te worden. Er wordt alleen gescand terwijl je naar dat scherm kijkt.</li>
+  <li><strong>Barometer</strong> — alleen tijdens een AR-wandeling, om te bepalen op welke verdieping een meting is gedaan.</li>
+</ul>
+<p>Elk hiervan wordt gevraagd op het moment dat het voor het eerst nodig is in plaats van bij het starten, en elk is optioneel behalve HomeKit — dat is hoe de app je Thread-netwerk überhaupt uitleest. Weiger je een van de andere, dan gaat alleen de functie uit die erom vroeg, en verder niets.</p>
+
+<h2>Waar het wordt bewaard</h2>
+<p>Standaard blijft alles — apparaatgeschiedenis, meetpunten, activiteitsgebeurtenissen, notities en instellingen — lokaal op je apparaat bewaard (in de eigen container van de app, een App Group die met de widget en de Apple Watch-app wordt gedeeld, en de standaard gebruikersvoorkeuren). Niets daarvan wordt naar ons geüpload. Wij hebben geen servers en ontvangen er geen kopie van. Het enige wat het apparaat ooit verlaat zijn de twee optionele iCloud-functies hieronder, en beide gaan naar je eigen Apple-account in plaats van naar ons.</p>
+
+<h2>iCloud</h2>
+<p>Er zijn twee losse iCloud-functies, beide optioneel, beide naar <em>je eigen</em> Apple-account. Geen van beide is een dienst van ons: wij hebben tot geen van beide toegang en ontvangen er geen kopie van.</p>
+<h3>iCloud-synchronisatie (een schakelaar, doorlopend)</h3>
+<p>Zet je <strong>iCloud-synchronisatie</strong> aan — die staat uit tenzij je hem inschakelt — dan worden je apparaatnotities, Thread-overschrijvingen en app-instellingen naar je privé-sleutelwaardeopslag in iCloud gekopieerd, zodat ze op je andere apparaten verschijnen.</p>
+<p>Signaalgeschiedenis, meetgegevens en probe-opnames zijn met opzet uitgesloten van deze doorlopende synchronisatie en blijven op het apparaat dat ze heeft vastgelegd. Metingen hangen af van waar dat apparaat stond, dus ze tussen apparaten samenvoegen zou een geschiedenis opleveren die geen van beide beschrijft.</p>
+<h3>Opslaan in iCloud (een knop, handmatig)</h3>
+<p>Los daarvan maakt <strong>Opslaan in iCloud</strong> in Instellingen één volledige reservekopie van dit apparaat als bundel: je instellingen, notities, gescande kamers, plattegronden, de posities waarop je apparaten hebt geplaatst, de bewaarde AR-ruimte en <strong>je meetgegevens</strong> — inclusief de coördinaten, tijdstempels en kamernamen die eraan hangen. Het bestaat zodat je je werk naar een andere iPhone kunt meenemen.</p>
+<p>Dit is de enige plek waar je metingen het apparaat ooit verlaten, en het is met opzet handmatig: er wordt niets geüpload tot jij op Opslaan tikt. Het gaat naar je eigen iCloud Drive, waar je Bestanden-app het kan zien en jij het kunt verwijderen, en niemand anders het kan lezen. Tik je nooit op Opslaan, dan wordt er nooit iets weggeschreven.</p>
+
+<h2>AI-functies</h2>
+<p>Op iOS 26 en nieuwer draaien de AI-functies van ThreadMapper (inzichten, netwerkassistent, probleemoplossing en rapporten) volledig <strong>op het apparaat</strong> met Apple’s Foundation Models-framework. Je netwerkgegevens worden niet naar ons of naar een AI-dienst van derden gestuurd.</p>
+
+<h2>Netwerkverbindingen</h2>
+<p>ThreadMapper doet geen analytics- of advertentieverzoeken en neemt met geen enkele server van ons contact op, want die bestaat niet. Wat de app wél op het netwerk doet:</p>
+<ul>
+  <li><strong>Luistert naar apparaten die zichzelf op je lokale netwerk aankondigen</strong> — de standaard Bonjour-detectie die iOS biedt. Zo vindt de app border routers en Matter-apparaten, ook die welke Apple Home niet toont. Het leest wat die apparaten over zichzelf uitzenden; het maakt er geen verbinding mee en stuurt ze niets.</li>
+  <li>Maakt verbinding met een <strong>OpenThread border router</strong>, als je er een instelt — op je eigen lokale netwerk, op een adres dat je zelf invoert;</li>
+  <li>Maakt verbinding met een <strong>ThreadMapper-probe</strong>, als je er een draait — ook op je eigen lokale netwerk, op een adres dat je zelf invoert;</li>
+  <li>Bereikt <strong>Apple’s iCloud</strong>, alleen voor de twee optionele functies hierboven, en alleen je eigen account.</li>
+</ul>
+<p>Er is geen ThreadMapper-server om verbinding mee te maken. Die is er ook nooit geweest.</p>
+
+<h2>Aankopen</h2>
+<p>ThreadMapper Pro wordt volledig afgehandeld door het In-App Purchase-systeem van Apple. Wij zien of bewaren je betaalgegevens nooit. Op die transactie is het eigen privacybeleid van Apple van toepassing.</p>
+
+<h2>Gegevens delen</h2>
+<p>Wij delen, verkopen, verhuren of verstrekken je gegevens aan niemand, omdat wij ze nooit ontvangen. Alles wat je zelf exporteert (een CSV met meetgegevens of een diagnose-pdf) verlaat de app alleen wanneer je het bewust deelt, en gaat waarheen jij het stuurt.</p>
+
+<h2>Kinderen</h2>
+<p>ThreadMapper is een netwerkhulpprogramma en is niet gericht op kinderen. Het verzamelt van niemand persoonlijke gegevens, ook niet van kinderen.</p>
+
+<h2>Jouw controle</h2>
+<p>Je kunt elke toestemming — HomeKit, Locatie, Camera, Bluetooth of Beweging en fitness — op elk moment intrekken in de iOS-instellingen. De app verwijderen wist alle lokaal bewaarde gegevens. De app biedt daarnaast eigen knoppen om de activiteitengeschiedenis en bewaarde meetgegevens te wissen. Heb je <strong>Opslaan in iCloud</strong> gebruikt, dan staat die reservekopie in je iCloud Drive en niet in de app — hij verschijnt in de Bestanden-app als een map met de naam ThreadMapper — dus de app verwijderen verwijdert hem niet. Haal hem uit Bestanden wanneer je hem kwijt wilt.</p>
+
+<h2>Wijzigingen</h2>
+<p>Wijzigt dit beleid, dan wordt de bijgewerkte versie met een nieuwe datum op deze pagina geplaatst.</p>
+
+<h2>Contact</h2>
+<p>Vragen over privacy: <a href="mailto:tintronix@gmail.com">tintronix@gmail.com</a></p>
+
+<footer>
+  ThreadMapper wordt ontwikkeld door Tintronix Lab.
+  <a href="support.html">Ondersteuning</a>
+  <nav class="langs" aria-label="Taal"><a href="../privacy.html" hreflang="en" lang="en">English</a><a href="../sv/privacy.html" hreflang="sv" lang="sv">Svenska</a><a href="../de/privacy.html" hreflang="de" lang="de">Deutsch</a><a href="../fr/privacy.html" hreflang="fr" lang="fr">Français</a><a href="../es/privacy.html" hreflang="es" lang="es">Español</a><a href="../it/privacy.html" hreflang="it" lang="it">Italiano</a><a href="../ja/privacy.html" hreflang="ja" lang="ja">日本語</a><span aria-current="true">Nederlands</span><a href="../pt-br/privacy.html" hreflang="pt-BR" lang="pt-BR">Português (BR)</a></nav>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ThreadMapper — プライバシーポリシー</title>
+<meta name="description" content="ThreadMapperは個人データを収集しません。アカウントも、解析も、サーバーもありません。アプリが何を読み取り、どこに保存し、任意のiCloud機能2つが何をするのかを、平易な言葉で説明します。">
+<!-- Generated from site/privacy.html.tmpl by tools/build-docs.py — edit the template
+     and site/strings/privacy.*.json, not this file. -->
+<link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/ja/privacy.html">
+<link rel="alternate" hreflang="en" href="https://tintronix-lab.github.io/ThreadMapper/privacy.html">
+<link rel="alternate" hreflang="sv" href="https://tintronix-lab.github.io/ThreadMapper/sv/privacy.html">
+<link rel="alternate" hreflang="de" href="https://tintronix-lab.github.io/ThreadMapper/de/privacy.html">
+<link rel="alternate" hreflang="fr" href="https://tintronix-lab.github.io/ThreadMapper/fr/privacy.html">
+<link rel="alternate" hreflang="es" href="https://tintronix-lab.github.io/ThreadMapper/es/privacy.html">
+<link rel="alternate" hreflang="it" href="https://tintronix-lab.github.io/ThreadMapper/it/privacy.html">
+<link rel="alternate" hreflang="ja" href="https://tintronix-lab.github.io/ThreadMapper/ja/privacy.html">
+<link rel="alternate" hreflang="nl" href="https://tintronix-lab.github.io/ThreadMapper/nl/privacy.html">
+<link rel="alternate" hreflang="pt-BR" href="https://tintronix-lab.github.io/ThreadMapper/pt-br/privacy.html">
+<link rel="alternate" hreflang="x-default" href="https://tintronix-lab.github.io/ThreadMapper/privacy.html">
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    max-width: 44rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem;
+    color: #1c1c1e; background: #fff;
+  }
+  @media (prefers-color-scheme: dark) { body { color: #f2f2f7; background: #000; } }
+  h1 { font-size: 1.9rem; margin-bottom: .25rem; }
+  h2 { font-size: 1.15rem; margin-top: 2.25rem; }
+  /* Without this, the browser default (1.17em) renders h3 *larger* than h2. */
+  h3 { font-size: 1rem; margin-top: 1.75rem; margin-bottom: .35rem; }
+  .updated { color: #8e8e93; font-size: .9rem; margin-top: 0; }
+  .highlight { border-left: 3px solid #0a84ff; padding: .6rem 0 .6rem 1rem; margin: 1.5rem 0; }
+  ul { padding-left: 1.2rem; }
+  li { margin: .4rem 0; }
+  a { color: #0a84ff; }
+  footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid #d1d1d6; font-size: .9rem; color: #8e8e93; }
+  /* Translated headings run longer than English, so let a compound break rather
+     than overflow. No auto-hyphenation: measured across all nine catalogs, no
+     headline word comes near its container, and it cost a mid-word break in a
+     display face. */
+  h1, h2, h3 { overflow-wrap: break-word; }
+  /* The switcher is a plain link row: no JS, and it works as a list for screen readers. */
+  .langs { margin-top: 1.25rem; display: flex; flex-wrap: wrap; gap: .35rem .9rem; }
+  .langs a { text-decoration: none; }
+  .langs a:hover { text-decoration: underline; }
+  .langs [aria-current] { color: #1c1c1e; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { .langs [aria-current] { color: #f2f2f7; } }
+  :lang(ja) h1, :lang(ja) h2 { letter-spacing: 0; }
+</style>
+</head>
+<body>
+
+<h1>プライバシーポリシー</h1>
+<p class="updated">ThreadMapper・最終更新 2026年8月26日</p>
+
+<div class="highlight">
+  <strong>ThreadMapperは、あなたの個人データを収集も送信も販売もしません。</strong> アカウントも、解析SDKも、サードパーティのトラッカーもありません。アプリが記録するものはすべてあなたのデバイスに留まります。任意のiCloud機能2つのいずれかを使う場合は、あなた自身のiCloudアカウントに保存されます。いずれにせよ、私たちのもとには届きません。
+</div>
+
+<h2>ThreadMapperが読み取るもの</h2>
+<ul>
+  <li><strong>HomeKitのアクセサリ情報</strong>——家にあるアクセサリの名前、部屋、メーカー、モデル、到達性、バッテリー残量です。あなたの許可のもとAppleのHomeKitフレームワークから読み取り、Threadメッシュの表示を組み立てるために使います。</li>
+  <li><strong>おおよその位置情報</strong>——測定ウォークを実際に実行している間だけ、そして信号の測定値にタグを付けてヒートマップに表示するためだけに使います。位置情報は測定の開始時に要求し、起動時には要求しません。位置が取得できなかった測定値は、架空の座標を与えるのではなく、座標なしで保存します。</li>
+  <li><strong>信号の測定値</strong>——アクセサリの応答時間を計ってアプリ自身が導き出す、応答品質の推定値です。</li>
+  <li><strong>ローカルネットワーク</strong>——アプリは、ネットワーク上で自分を通知しているThreadボーダールーターやMatterデバイスを探し、そこで公開されている内容——名前、モデル、すでにペアリング済みかどうか——を読み取ります。Appleのホームアプリが一覧に出さない機器についても説明できるのは、このためです。読み取るのは各機器が公開している内容であり、アプリがそれらに接続することはありません。</li>
+  <li><strong>カメラ</strong>——MatterのセットアップQRコードの読み取り、AR測定ウォーク中の屋内での位置の追跡、そして部屋のスキャンを開始したときに部屋の形を測って間取り図を作るために使います。写真や動画を記録・保存することはありません。</li>
+  <li><strong>Bluetooth</strong>——近くでセットアップ待ちを通知しているMatterデバイスを見つけ、コミッショニングを待っている機器を表示するために使います。スキャンするのは、その画面を開いている間だけです。</li>
+  <li><strong>気圧計</strong>——AR測定ウォークの最中だけ、その測定値がどの階で取られたかを判別するために使います。</li>
+</ul>
+<p>いずれも起動時ではなく、最初に必要になった時点で許可を求めます。HomeKitを除き、すべて任意です。HomeKitは、アプリがThreadネットワークを読み取る唯一の手段だからです。ほかの許可を断った場合は、その許可を求めた機能がオフになるだけで、それ以外には影響しません。</p>
+
+<h2>保存される場所</h2>
+<p>初期状態では、すべて——デバイス履歴、測定点、アクティビティのイベント、メモ、設定——があなたのデバイス内に保存されます（アプリ専用のコンテナ、ウィジェットおよびApple Watchアプリと共有するApp Group、標準のユーザ設定）。私たちにアップロードされるものは一つもありません。私たちはサーバーを一切運用しておらず、その複製を受け取ることもありません。デバイスの外に出るのは以下の任意のiCloud機能2つだけで、どちらも私たちではなく、あなた自身のAppleアカウントへ向かいます。</p>
+
+<h2>iCloud</h2>
+<p>iCloudの機能は2つあり、それぞれ別のものです。どちらも任意で、どちらも、<em>あなた自身の</em>Appleアカウントへ向かいます。いずれも私たちのサービスではありません。私たちはどちらにもアクセスできず、複製を受け取ることもありません。</p>
+<h3>iCloud同期（スイッチ、継続的）</h3>
+<p><strong>iCloud同期</strong>をオンにすると——自分でオンにしない限りオフです——デバイスのメモ、Threadの上書き設定、アプリの設定が、あなたのプライベートなiCloudキーバリューストアにコピーされ、ほかのデバイスにも表示されます。</p>
+<p>信号の履歴、測定データ、プローブの記録は、この継続的な同期から意図的に除外され、それを取得したデバイスに留まります。測定値はその端末がどこに置かれていたかに左右されるため、デバイス間で混ぜ合わせると、どちらの場所も表さない履歴ができてしまいます。</p>
+<h3>iCloudに保存（ボタン、手動）</h3>
+<p>これとは別に、設定にある<strong>iCloudに保存</strong>は、この端末の全体を1つのまとまりとしてバックアップします。設定、メモ、スキャンした部屋、間取り図、デバイスを配置した位置、保存したAR空間、そして<strong>あなたの測定値</strong>——それに紐づく座標、時刻、部屋名を含みます——をまとめて扱います。別のiPhoneへ作業を引き継ぐためのものです。</p>
+<p>測定値がデバイスの外に出るのはここだけで、意図的に手動にしてあります。「保存」をタップするまで、何もアップロードされません。保存先はあなた自身のiCloud Driveで、ファイルAppから見え、削除もでき、ほかの誰にも読めません。「保存」を一度もタップしなければ、何も書き込まれません。</p>
+
+<h2>人工知能（AI）の機能</h2>
+<p>iOS 26以降では、ThreadMapperのAI機能（インサイト、ネットワークアシスタント、トラブルシューティング、レポート）は、AppleのFoundation Modelsフレームワークを使って完全に<strong>デバイス内</strong>で動作します。ネットワークのデータが私たちや第三者のAIサービスへ送られることはありません。</p>
+
+<h2>ネットワーク接続</h2>
+<p>ThreadMapperは解析や広告のリクエストを一切行わず、私たちのサーバーに接続することもありません。そもそも存在しないからです。ネットワーク上で行うのは次のことだけです:</p>
+<ul>
+  <li><strong>ローカルネットワーク上で自分を通知しているデバイスを待ち受けます</strong>——iOSが標準で備えるBonjour検出です。ボーダールーターやMatterデバイス、さらにAppleのホームアプリが一覧に出さないものまで見つけられるのは、このためです。読み取るのは各機器が自分について公開している内容だけで、それらに接続することも、何かを送ることもありません。</li>
+  <li><strong>OpenThreadボーダールーター</strong>を設定した場合は、それに接続します——あなた自身のローカルネットワーク上の、あなたが自分で入力したアドレスへ。</li>
+  <li><strong>ThreadMapperプローブ</strong>を動かしている場合は、それに接続します——これもあなた自身のローカルネットワーク上の、あなたが自分で入力したアドレスへ。</li>
+  <li><strong>AppleのiCloud</strong>に接続します——上記の任意の機能2つのためだけ、しかもあなた自身のアカウントに限られます。</li>
+</ul>
+<p>接続先となるThreadMapperのサーバーは存在しません。これまで一度も存在したことがありません。</p>
+
+<h2>購入について</h2>
+<p>ThreadMapper Proの取り扱いは、すべてAppleのApp内課金の仕組みに委ねられています。私たちがあなたの支払い情報を見ることも、保存することもありません。その取引にはApple自身のプライバシーポリシーが適用されます。</p>
+
+<h2>データの共有</h2>
+<p>私たちはあなたのデータを誰にも共有・販売・貸与・開示しません。そもそも受け取っていないからです。あなたが書き出したもの（測定データのCSVや診断PDF）は、あなたが自分の意思で共有したときにだけアプリの外に出て、あなたが送った先へ届きます。</p>
+
+<h2>お子様について</h2>
+<p>ThreadMapperはネットワークのユーティリティであり、お子様を対象としていません。お子様を含め、誰からも個人情報を収集しません。</p>
+
+<h2>あなたが管理できること</h2>
+<p>許可はいつでもiOSの設定で取り消せます——HomeKit、位置情報、カメラ、Bluetooth、モーションのいずれもです。アプリを削除すると、ローカルに保存されたデータはすべて消えます。アクティビティ履歴や保存済みの測定データを消去する操作も、アプリ内に用意しています。<strong>iCloudに保存</strong>を使った場合、そのバックアップはアプリの中ではなくiCloud Driveにあり——ファイルAppにThreadMapperという名前のフォルダとして表示されます——アプリを削除しても消えません。不要になったら、ファイルAppから削除してください。</p>
+
+<h2>変更について</h2>
+<p>このポリシーを変更した場合は、新しい日付とともに更新版をこのページに掲載します。</p>
+
+<h2>お問い合わせ</h2>
+<p>プライバシーに関するお問い合わせ: <a href="mailto:tintronix@gmail.com">tintronix@gmail.com</a></p>
+
+<footer>
+  ThreadMapperはTintronix Labが開発しています。
+  <a href="support.html">サポート</a>
+  <nav class="langs" aria-label="言語"><a href="../privacy.html" hreflang="en" lang="en">English</a><a href="../sv/privacy.html" hreflang="sv" lang="sv">Svenska</a><a href="../de/privacy.html" hreflang="de" lang="de">Deutsch</a><a href="../fr/privacy.html" hreflang="fr" lang="fr">Français</a><a href="../es/privacy.html" hreflang="es" lang="es">Español</a><a href="../it/privacy.html" hreflang="it" lang="it">Italiano</a><span aria-current="true">日本語</span><a href="../nl/privacy.html" hreflang="nl" lang="nl">Nederlands</a><a href="../pt-br/privacy.html" hreflang="pt-BR" lang="pt-BR">Português (BR)</a></nav>
+</footer>
+
+</body>
+</html>

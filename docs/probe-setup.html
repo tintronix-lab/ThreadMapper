@@ -7,6 +7,17 @@
 <meta name="description" content="Step by step: turn a Raspberry Pi and an 802.15.4 dongle into a ThreadMapper probe, so the app can show measured Thread signal, routing and interference.">
 <meta name="theme-color" content="#0B1020">
 <!-- Generated from tools/pi-image/SETUP.md by tools/build-docs.py — edit the Markdown, not this file. -->
+<link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/probe-setup.html">
+<link rel="alternate" hreflang="en" href="https://tintronix-lab.github.io/ThreadMapper/probe-setup.html">
+<link rel="alternate" hreflang="sv" href="https://tintronix-lab.github.io/ThreadMapper/sv/probe-setup.html">
+<link rel="alternate" hreflang="de" href="https://tintronix-lab.github.io/ThreadMapper/de/probe-setup.html">
+<link rel="alternate" hreflang="fr" href="https://tintronix-lab.github.io/ThreadMapper/fr/probe-setup.html">
+<link rel="alternate" hreflang="es" href="https://tintronix-lab.github.io/ThreadMapper/es/probe-setup.html">
+<link rel="alternate" hreflang="it" href="https://tintronix-lab.github.io/ThreadMapper/it/probe-setup.html">
+<link rel="alternate" hreflang="ja" href="https://tintronix-lab.github.io/ThreadMapper/ja/probe-setup.html">
+<link rel="alternate" hreflang="nl" href="https://tintronix-lab.github.io/ThreadMapper/nl/probe-setup.html">
+<link rel="alternate" hreflang="pt-BR" href="https://tintronix-lab.github.io/ThreadMapper/pt-br/probe-setup.html">
+<link rel="alternate" hreflang="x-default" href="https://tintronix-lab.github.io/ThreadMapper/probe-setup.html">
 <style>
   :root {
     color-scheme: light dark;
@@ -69,6 +80,21 @@
   footer { margin-top:4rem; padding-top:1.5rem; border-top:1px solid var(--line);
             font-size:.88rem; color:var(--muted); }
   footer a { margin-right:1.1rem; }
+
+  /* Translated headings run longer than English, so let a compound break
+     rather than overflow. No auto-hyphenation — it bought nothing here and
+     cost a mid-word break in a display face. */
+  h1, h2, h3, h4 { overflow-wrap:break-word; }
+  /* The display face is tracked tight (-.035em) for Latin. That is wrong for
+     CJK, where it crowds the glyphs, and uppercase/letter-spacing tricks do
+     nothing for kana. */
+  :lang(ja) h1, :lang(ja) h2 { letter-spacing:0; }
+
+  /* Language switcher: a plain link row, no JS. */
+  .langs { margin-top:1rem; display:flex; flex-wrap:wrap; gap:.35rem 1.1rem; }
+  .langs a { margin-right:0; text-decoration:none; }
+  .langs a:hover { text-decoration:underline; }
+  .langs [aria-current] { color:var(--ink); font-weight:600; }
 </style>
 </head>
 <body>
@@ -186,6 +212,7 @@ sudo ot-ctl state          # expect: leader</code></pre>
   <a href="support.html">Support</a>
   <a href="privacy.html">Privacy</a>
   <a href="https://github.com/tintronix-lab/ThreadMapper">Source</a>
+  <nav class="langs" aria-label="Language"><span aria-current="true">English</span><a href="sv/probe-setup.html" hreflang="sv" lang="sv">Svenska</a><a href="de/probe-setup.html" hreflang="de" lang="de">Deutsch</a><a href="fr/probe-setup.html" hreflang="fr" lang="fr">Français</a><a href="es/probe-setup.html" hreflang="es" lang="es">Español</a><a href="it/probe-setup.html" hreflang="it" lang="it">Italiano</a><a href="ja/probe-setup.html" hreflang="ja" lang="ja">日本語</a><a href="nl/probe-setup.html" hreflang="nl" lang="nl">Nederlands</a><a href="pt-br/probe-setup.html" hreflang="pt-BR" lang="pt-BR">Português (BR)</a></nav>
 </footer>
 </div>
 

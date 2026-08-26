@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ThreadMapper — Assistance</title>
+<meta name="description" content="Aide pour ThreadMapper : pourquoi aucun appareil n’est trouvé, ce que signifie l’estimation du signal, en quoi les liaisons du réseau diffèrent du vrai routage Thread, comment faire un relevé de pièce, la synchronisation iCloud, les achats Pro et l’app Apple Watch.">
+<!-- Generated from site/support.html.tmpl by tools/build-docs.py — edit the template
+     and site/strings/support.*.json, not this file. -->
+<link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/fr/support.html">
+<link rel="alternate" hreflang="en" href="https://tintronix-lab.github.io/ThreadMapper/support.html">
+<link rel="alternate" hreflang="sv" href="https://tintronix-lab.github.io/ThreadMapper/sv/support.html">
+<link rel="alternate" hreflang="de" href="https://tintronix-lab.github.io/ThreadMapper/de/support.html">
+<link rel="alternate" hreflang="fr" href="https://tintronix-lab.github.io/ThreadMapper/fr/support.html">
+<link rel="alternate" hreflang="es" href="https://tintronix-lab.github.io/ThreadMapper/es/support.html">
+<link rel="alternate" hreflang="it" href="https://tintronix-lab.github.io/ThreadMapper/it/support.html">
+<link rel="alternate" hreflang="ja" href="https://tintronix-lab.github.io/ThreadMapper/ja/support.html">
+<link rel="alternate" hreflang="nl" href="https://tintronix-lab.github.io/ThreadMapper/nl/support.html">
+<link rel="alternate" hreflang="pt-BR" href="https://tintronix-lab.github.io/ThreadMapper/pt-br/support.html">
+<link rel="alternate" hreflang="x-default" href="https://tintronix-lab.github.io/ThreadMapper/support.html">
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    max-width: 44rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem;
+    color: #1c1c1e; background: #fff;
+  }
+  @media (prefers-color-scheme: dark) { body { color: #f2f2f7; background: #000; } }
+  h1 { font-size: 2rem; margin-bottom: .25rem; }
+  h2 { font-size: 1.15rem; margin-top: 2.25rem; }
+  .tagline { color: #8e8e93; margin-top: 0; }
+  .contact { border-left: 3px solid #0a84ff; padding: .6rem 0 .6rem 1rem; margin: 1.5rem 0; }
+  details { margin: .6rem 0; padding: .6rem 0; border-bottom: 1px solid #d1d1d6; }
+  summary { cursor: pointer; font-weight: 600; }
+  details p { margin: .6rem 0 0; }
+  a { color: #0a84ff; }
+  footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid #d1d1d6; font-size: .9rem; color: #8e8e93; }
+  /* Translated headings run longer than English, so let a compound break rather
+     than overflow. No auto-hyphenation: measured across all nine catalogs, no
+     headline word comes near its container, and it cost a mid-word break in a
+     display face. */
+  h1, h2, summary { overflow-wrap: break-word; }
+  /* The switcher is a plain link row: no JS, and it works as a list for screen readers. */
+  .langs { margin-top: 1.25rem; display: flex; flex-wrap: wrap; gap: .35rem .9rem; }
+  .langs a { text-decoration: none; }
+  .langs a:hover { text-decoration: underline; }
+  .langs [aria-current] { color: #1c1c1e; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { .langs [aria-current] { color: #f2f2f7; } }
+  :lang(ja) h1, :lang(ja) h2 { letter-spacing: 0; }
+</style>
+</head>
+<body>
+
+<h1>Assistance ThreadMapper</h1>
+<p class="tagline">Moniteur de réseau maillé Thread pour iPhone, iPad et Apple Watch.</p>
+
+<div class="contact">
+  <strong>Besoin d’aide ?</strong> Écrivez à <a href="mailto:tintronix@gmail.com">tintronix@gmail.com</a>. Merci d’indiquer votre version d’iOS, votre modèle d’iPhone et une brève description de ce que vous étiez en train de faire.
+</div>
+
+<h2>Questions fréquentes</h2>
+
+<details>
+  <summary>L’app affiche « Aucun appareil trouvé »</summary>
+  <p>
+    ThreadMapper lit vos appareils Thread à travers HomeKit ; il lui faut donc deux choses : l’accès à HomeKit doit être accordé (Réglages iOS → Confidentialité et sécurité → HomeKit → ThreadMapper), et il vous faut au moins un routeur de bordure Thread chez vous — par exemple un HomePod mini, une Apple TV 4K ou un hub compatible. Si vous voulez simplement explorer l’app, activez le <em>Mode démo</em> dans les Réglages.
+  </p>
+</details>
+
+<details>
+  <summary>Pourquoi la puissance du signal est-elle appelée « estimation » ?</summary>
+  <p>
+    iOS n’expose pas le vrai RSSI radio des accessoires Thread aux apps tierces. ThreadMapper en déduit une estimation de qualité de réponse en chronométrant la vitesse à laquelle chaque accessoire répond. C’est un moyen fiable de comparer des appareils et des pièces, mais ce n’est pas une valeur en dBm mesurée par la radio — c’est pourquoi l’app la présente partout comme estimée.
+  </p>
+</details>
+
+<details>
+  <summary>Les liaisons du réseau correspondent-elles au vrai routage Thread ?</summary>
+  <p>
+    Dans l’onglet Réseau, non — ce sont des estimations logiques : chaque appareil est relié au routeur de bordure le plus proche, ou à un routeur situé dans la même pièce.
+  </p>
+  <p>
+    Connecter un routeur de bordure OpenThread vous donne de vraies informations sur le <em>réseau</em> (nom, canal, PAN ID), mais pas le routage. Ses points de terminaison de diagnostic ne renvoient pas de données par nœud — nous les avons testés sur un réseau réel et les requêtes aboutissent sans rien contenir.
+  </p>
+  <p>
+    Le vrai routage exige une <a href="probe-setup.html">sonde ThreadMapper</a> : un petit agent sur un Raspberry Pi qui rejoint le réseau et lit directement la table de routage. Une fois la sonde connectée, l’écran Réseau Thread affiche le signal mesuré, la qualité de liaison, le saut suivant et le coût du chemin. Ces nœuds apparaissent par adresse Thread plutôt que par les noms de vos appareils — rien ne relie encore une adresse Thread à un accessoire HomeKit.
+  </p>
+</details>
+
+<details>
+  <summary>Comment faire un relevé de pièce ?</summary>
+  <p>
+    Ouvrez l’onglet Relevé et choisissez Relevé guidé. Placez-vous dans une pièce, touchez Démarrer, déplacez-vous pendant l’échantillonnage, puis touchez Terminé pour enregistrer cette pièce et passer à la suivante. Si vous avez une Apple Watch, vous pouvez commander Démarrer / Terminé / Ignorer depuis votre poignet pendant que le relevé se déroule sur votre iPhone.
+  </p>
+</details>
+
+<details>
+  <summary>Les fonctions d’IA envoient-elles mes données quelque part ?</summary>
+  <p>
+    Non. Sur iOS 26 et versions ultérieures, elles s’exécutent entièrement sur l’appareil grâce à Apple Intelligence. Rien de ce qui concerne votre réseau ne quitte votre iPhone. Elles exigent un appareil compatible Apple Intelligence.
+  </p>
+</details>
+
+<details>
+  <summary>Que synchronise réellement la synchronisation iCloud ?</summary>
+  <p>
+    Vos notes d’appareil, vos remplacements Thread et vos réglages de l’app — ce que vous avez saisi ou choisi. Elle est désactivée tant que vous ne l’activez pas dans les Réglages, et elle passe par votre iCloud privé, si bien qu’elle ne nous parvient jamais.
+  </p>
+  <p>
+    L’historique du signal et les mesures de relevé restent délibérément sur l’appareil qui les a enregistrés. Un relevé dépend de l’endroit où se trouvait cet appareil ; fusionner un iPad rangé dans un tiroir avec un iPhone dans votre poche produirait un historique qui ne décrit ni l’un ni l’autre.
+  </p>
+</details>
+
+<details>
+  <summary>J’ai acheté Pro mais des fonctions restent verrouillées</summary>
+  <p>
+    Ouvrez les Réglages dans ThreadMapper et touchez <em>Restaurer les achats</em>. Vérifiez que vous êtes connecté avec le même compte Apple que celui utilisé pour l’achat initial.
+  </p>
+</details>
+
+<details>
+  <summary>L’app Apple Watch n’affiche aucune donnée</summary>
+  <p>
+    La montre reflète votre iPhone. Ouvrez ThreadMapper sur l’iPhone au moins une fois pour qu’il puisse envoyer un instantané, et vérifiez que l’app pour la montre est bien installée depuis l’app Apple Watch sur votre iPhone.
+  </p>
+</details>
+
+<h2>Confidentialité</h2>
+<p>
+  ThreadMapper ne collecte aucune donnée personnelle et n’a ni comptes ni analyse d’usage. Lisez la <a href="privacy.html">politique de confidentialité</a> complète.
+</p>
+
+<footer>
+  ThreadMapper est développé par Tintronix Lab.
+  <a href="privacy.html">Politique de confidentialité</a>
+  <nav class="langs" aria-label="Langue"><a href="../support.html" hreflang="en" lang="en">English</a><a href="../sv/support.html" hreflang="sv" lang="sv">Svenska</a><a href="../de/support.html" hreflang="de" lang="de">Deutsch</a><span aria-current="true">Français</span><a href="../es/support.html" hreflang="es" lang="es">Español</a><a href="../it/support.html" hreflang="it" lang="it">Italiano</a><a href="../ja/support.html" hreflang="ja" lang="ja">日本語</a><a href="../nl/support.html" hreflang="nl" lang="nl">Nederlands</a><a href="../pt-br/support.html" hreflang="pt-BR" lang="pt-BR">Português (BR)</a></nav>
+</footer>
+
+</body>
+</html>

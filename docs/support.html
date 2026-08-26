@@ -4,6 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ThreadMapper — Support</title>
+<meta name="description" content="Help for ThreadMapper: why no devices are found, what the signal estimate means, how mesh links and real Thread routing differ, running a room survey, iCloud sync, Pro purchases and the Apple Watch app.">
+<!-- Generated from site/support.html.tmpl by tools/build-docs.py — edit the template
+     and site/strings/support.*.json, not this file. -->
+<link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/support.html">
+<link rel="alternate" hreflang="en" href="https://tintronix-lab.github.io/ThreadMapper/support.html">
+<link rel="alternate" hreflang="sv" href="https://tintronix-lab.github.io/ThreadMapper/sv/support.html">
+<link rel="alternate" hreflang="de" href="https://tintronix-lab.github.io/ThreadMapper/de/support.html">
+<link rel="alternate" hreflang="fr" href="https://tintronix-lab.github.io/ThreadMapper/fr/support.html">
+<link rel="alternate" hreflang="es" href="https://tintronix-lab.github.io/ThreadMapper/es/support.html">
+<link rel="alternate" hreflang="it" href="https://tintronix-lab.github.io/ThreadMapper/it/support.html">
+<link rel="alternate" hreflang="ja" href="https://tintronix-lab.github.io/ThreadMapper/ja/support.html">
+<link rel="alternate" hreflang="nl" href="https://tintronix-lab.github.io/ThreadMapper/nl/support.html">
+<link rel="alternate" hreflang="pt-BR" href="https://tintronix-lab.github.io/ThreadMapper/pt-br/support.html">
+<link rel="alternate" hreflang="x-default" href="https://tintronix-lab.github.io/ThreadMapper/support.html">
 <style>
   :root { color-scheme: light dark; }
   body {
@@ -21,6 +35,18 @@
   details p { margin: .6rem 0 0; }
   a { color: #0a84ff; }
   footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid #d1d1d6; font-size: .9rem; color: #8e8e93; }
+  /* Translated headings run longer than English, so let a compound break rather
+     than overflow. No auto-hyphenation: measured across all nine catalogs, no
+     headline word comes near its container, and it cost a mid-word break in a
+     display face. */
+  h1, h2, summary { overflow-wrap: break-word; }
+  /* The switcher is a plain link row: no JS, and it works as a list for screen readers. */
+  .langs { margin-top: 1.25rem; display: flex; flex-wrap: wrap; gap: .35rem .9rem; }
+  .langs a { text-decoration: none; }
+  .langs a:hover { text-decoration: underline; }
+  .langs [aria-current] { color: #1c1c1e; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { .langs [aria-current] { color: #f2f2f7; } }
+  :lang(ja) h1, :lang(ja) h2 { letter-spacing: 0; }
 </style>
 </head>
 <body>
@@ -29,109 +55,85 @@
 <p class="tagline">Thread mesh network monitor for iPhone, iPad and Apple Watch.</p>
 
 <div class="contact">
-  <strong>Need help?</strong> Email <a href="mailto:tintronix@gmail.com">tintronix@gmail.com</a>.
-  Please include your iOS version, iPhone model, and a short description of what you were doing.
+  <strong>Need help?</strong> Email <a href="mailto:tintronix@gmail.com">tintronix@gmail.com</a>. Please include your iOS version, iPhone model, and a short description of what you were doing.
 </div>
 
 <h2>Frequently asked questions</h2>
 
 <details>
-  <summary>The app says "No devices found"</summary>
+  <summary>The app says &quot;No devices found&quot;</summary>
   <p>
-    ThreadMapper reads your Thread devices through HomeKit, so it needs two things: HomeKit
-    access must be granted (iOS Settings → Privacy &amp; Security → HomeKit → ThreadMapper),
-    and you need at least one Thread border router in your home — for example a HomePod mini,
-    Apple TV 4K, or a compatible hub. If you just want to explore the app, turn on
-    <em>Demo Mode</em> in Settings.
+    ThreadMapper reads your Thread devices through HomeKit, so it needs two things: HomeKit access must be granted (iOS Settings → Privacy &amp; Security → HomeKit → ThreadMapper), and you need at least one Thread border router in your home — for example a HomePod mini, Apple TV 4K, or a compatible hub. If you just want to explore the app, turn on <em>Demo Mode</em> in Settings.
   </p>
 </details>
 
 <details>
-  <summary>Why is signal strength called an "estimate"?</summary>
+  <summary>Why is signal strength called an &quot;estimate&quot;?</summary>
   <p>
-    iOS does not expose real radio RSSI for Thread accessories to third-party apps. ThreadMapper
-    derives a response-quality estimate by timing how quickly each accessory replies. It is a
-    reliable way to compare devices and rooms, but it is not a radio-measured dBm value — which
-    is why the app labels it as estimated throughout.
+    iOS does not expose real radio RSSI for Thread accessories to third-party apps. ThreadMapper derives a response-quality estimate by timing how quickly each accessory replies. It is a reliable way to compare devices and rooms, but it is not a radio-measured dBm value — which is why the app labels it as estimated throughout.
   </p>
 </details>
 
 <details>
   <summary>Are the mesh links real Thread routing?</summary>
   <p>
-    In the Mesh tab, no — they are logical estimates: devices are linked to the nearest border
-    router or a router in the same room.
+    In the Mesh tab, no — they are logical estimates: devices are linked to the nearest border router or a router in the same room.
   </p>
   <p>
-    Connecting an OpenThread Border Router gets you real <em>network</em> facts (name, channel,
-    PAN ID) but not routing. Its diagnostics endpoints do not return per-node data — we tested
-    them against a live mesh and the requests complete with nothing in them.
+    Connecting an OpenThread Border Router gets you real <em>network</em> facts (name, channel, PAN ID) but not routing. Its diagnostics endpoints do not return per-node data — we tested them against a live mesh and the requests complete with nothing in them.
   </p>
   <p>
-    Real routing needs a <a href="probe-setup.html">ThreadMapper
-    probe</a>: a small agent on a Raspberry Pi that joins the mesh and reads the route table
-    directly. With one connected, the Thread Network screen shows measured signal, link quality,
-    next hop and path cost. Those nodes appear by Thread address rather than by your device
-    names — nothing links a Thread address to a HomeKit accessory yet.
+    Real routing needs a <a href="probe-setup.html">ThreadMapper probe</a>: a small agent on a Raspberry Pi that joins the mesh and reads the route table directly. With one connected, the Thread Network screen shows measured signal, link quality, next hop and path cost. Those nodes appear by Thread address rather than by your device names — nothing links a Thread address to a HomeKit accessory yet.
   </p>
 </details>
 
 <details>
   <summary>How do I run a room survey?</summary>
   <p>
-    Open the Survey tab and choose Guided Survey. Stand in a room, tap Start, walk around while
-    it samples, then tap Done to save that room and move to the next. If you have an Apple Watch,
-    you can drive Start / Done / Skip from your wrist while the survey runs on your iPhone.
+    Open the Survey tab and choose Guided Survey. Stand in a room, tap Start, walk around while it samples, then tap Done to save that room and move to the next. If you have an Apple Watch, you can drive Start / Done / Skip from your wrist while the survey runs on your iPhone.
   </p>
 </details>
 
 <details>
   <summary>Do the AI features send my data anywhere?</summary>
   <p>
-    No. On iOS 26 and later they run entirely on device using Apple Intelligence. Nothing about
-    your network leaves your iPhone. They require an Apple Intelligence–capable device.
+    No. On iOS 26 and later they run entirely on device using Apple Intelligence. Nothing about your network leaves your iPhone. They require an Apple Intelligence–capable device.
   </p>
 </details>
 
 <details>
   <summary>What does iCloud sync actually sync?</summary>
   <p>
-    Your device notes, Thread overrides and app settings — the things you typed or chose. It is
-    off until you turn it on in Settings, and it uses your own private iCloud, so it never
-    reaches us.
+    Your device notes, Thread overrides and app settings — the things you typed or chose. It is off until you turn it on in Settings, and it uses your own private iCloud, so it never reaches us.
   </p>
   <p>
-    Signal history and survey measurements deliberately stay on the device that recorded them.
-    A reading depends on where that device was standing, so merging an iPad in a drawer with an
-    iPhone in your pocket would produce a history describing neither.
+    Signal history and survey measurements deliberately stay on the device that recorded them. A reading depends on where that device was standing, so merging an iPad in a drawer with an iPhone in your pocket would produce a history describing neither.
   </p>
 </details>
 
 <details>
   <summary>I bought Pro but features are still locked</summary>
   <p>
-    Open Settings in ThreadMapper and tap <em>Restore Purchases</em>. Make sure you are signed in
-    with the same Apple Account used for the original purchase.
+    Open Settings in ThreadMapper and tap <em>Restore Purchases</em>. Make sure you are signed in with the same Apple Account used for the original purchase.
   </p>
 </details>
 
 <details>
   <summary>The Apple Watch app has no data</summary>
   <p>
-    The watch mirrors your iPhone. Open ThreadMapper on the iPhone at least once so it can send a
-    snapshot, and make sure the watch app is installed in the Watch app on your iPhone.
+    The watch mirrors your iPhone. Open ThreadMapper on the iPhone at least once so it can send a snapshot, and make sure the watch app is installed in the Watch app on your iPhone.
   </p>
 </details>
 
 <h2>Privacy</h2>
 <p>
-  ThreadMapper collects no personal data and has no accounts or analytics.
-  Read the full <a href="privacy.html">Privacy Policy</a>.
+  ThreadMapper collects no personal data and has no accounts or analytics. Read the full <a href="privacy.html">Privacy Policy</a>.
 </p>
 
 <footer>
   ThreadMapper is developed by Tintronix Lab.
   <a href="privacy.html">Privacy Policy</a>
+  <nav class="langs" aria-label="Language"><span aria-current="true">English</span><a href="sv/support.html" hreflang="sv" lang="sv">Svenska</a><a href="de/support.html" hreflang="de" lang="de">Deutsch</a><a href="fr/support.html" hreflang="fr" lang="fr">Français</a><a href="es/support.html" hreflang="es" lang="es">Español</a><a href="it/support.html" hreflang="it" lang="it">Italiano</a><a href="ja/support.html" hreflang="ja" lang="ja">日本語</a><a href="nl/support.html" hreflang="nl" lang="nl">Nederlands</a><a href="pt-br/support.html" hreflang="pt-BR" lang="pt-BR">Português (BR)</a></nav>
 </footer>
 
 </body>

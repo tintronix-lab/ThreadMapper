@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ThreadMapper — support</title>
+<meta name="description" content="Hjälp för ThreadMapper: varför inga enheter hittas, vad signaluppskattningen betyder, hur mesh-länkar och verklig Thread-routing skiljer sig åt, hur du gör en rumsmätning, iCloud-synk, Pro-köp och appen till Apple Watch.">
+<!-- Generated from site/support.html.tmpl by tools/build-docs.py — edit the template
+     and site/strings/support.*.json, not this file. -->
+<link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/sv/support.html">
+<link rel="alternate" hreflang="en" href="https://tintronix-lab.github.io/ThreadMapper/support.html">
+<link rel="alternate" hreflang="sv" href="https://tintronix-lab.github.io/ThreadMapper/sv/support.html">
+<link rel="alternate" hreflang="de" href="https://tintronix-lab.github.io/ThreadMapper/de/support.html">
+<link rel="alternate" hreflang="fr" href="https://tintronix-lab.github.io/ThreadMapper/fr/support.html">
+<link rel="alternate" hreflang="es" href="https://tintronix-lab.github.io/ThreadMapper/es/support.html">
+<link rel="alternate" hreflang="it" href="https://tintronix-lab.github.io/ThreadMapper/it/support.html">
+<link rel="alternate" hreflang="ja" href="https://tintronix-lab.github.io/ThreadMapper/ja/support.html">
+<link rel="alternate" hreflang="nl" href="https://tintronix-lab.github.io/ThreadMapper/nl/support.html">
+<link rel="alternate" hreflang="pt-BR" href="https://tintronix-lab.github.io/ThreadMapper/pt-br/support.html">
+<link rel="alternate" hreflang="x-default" href="https://tintronix-lab.github.io/ThreadMapper/support.html">
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    max-width: 44rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem;
+    color: #1c1c1e; background: #fff;
+  }
+  @media (prefers-color-scheme: dark) { body { color: #f2f2f7; background: #000; } }
+  h1 { font-size: 2rem; margin-bottom: .25rem; }
+  h2 { font-size: 1.15rem; margin-top: 2.25rem; }
+  .tagline { color: #8e8e93; margin-top: 0; }
+  .contact { border-left: 3px solid #0a84ff; padding: .6rem 0 .6rem 1rem; margin: 1.5rem 0; }
+  details { margin: .6rem 0; padding: .6rem 0; border-bottom: 1px solid #d1d1d6; }
+  summary { cursor: pointer; font-weight: 600; }
+  details p { margin: .6rem 0 0; }
+  a { color: #0a84ff; }
+  footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid #d1d1d6; font-size: .9rem; color: #8e8e93; }
+  /* Translated headings run longer than English, so let a compound break rather
+     than overflow. No auto-hyphenation: measured across all nine catalogs, no
+     headline word comes near its container, and it cost a mid-word break in a
+     display face. */
+  h1, h2, summary { overflow-wrap: break-word; }
+  /* The switcher is a plain link row: no JS, and it works as a list for screen readers. */
+  .langs { margin-top: 1.25rem; display: flex; flex-wrap: wrap; gap: .35rem .9rem; }
+  .langs a { text-decoration: none; }
+  .langs a:hover { text-decoration: underline; }
+  .langs [aria-current] { color: #1c1c1e; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { .langs [aria-current] { color: #f2f2f7; } }
+  :lang(ja) h1, :lang(ja) h2 { letter-spacing: 0; }
+</style>
+</head>
+<body>
+
+<h1>ThreadMapper-support</h1>
+<p class="tagline">Övervakning av Thread-mesh-nät för iPhone, iPad och Apple Watch.</p>
+
+<div class="contact">
+  <strong>Behöver du hjälp?</strong> Mejla <a href="mailto:tintronix@gmail.com">tintronix@gmail.com</a>. Ange gärna din iOS-version, din iPhone-modell och en kort beskrivning av vad du höll på med.
+</div>
+
+<h2>Vanliga frågor</h2>
+
+<details>
+  <summary>Appen säger ”Inga enheter hittade”</summary>
+  <p>
+    ThreadMapper läser dina Thread-enheter genom HomeKit, så den behöver två saker: HomeKit-åtkomst måste vara beviljad (Inställningar → Integritet och säkerhet → HomeKit → ThreadMapper), och du behöver minst en Thread-gränsrouter i ditt hem — till exempel en HomePod mini, en Apple TV 4K eller en kompatibel hubb. Vill du bara utforska appen slår du på <em>Demoläge</em> i Inställningar.
+  </p>
+</details>
+
+<details>
+  <summary>Varför kallas signalstyrkan en ”uppskattning”?</summary>
+  <p>
+    iOS exponerar inte verklig radio-RSSI för Thread-tillbehör för tredjepartsappar. ThreadMapper härleder en uppskattning av svarskvaliteten genom att ta tid på hur snabbt varje tillbehör svarar. Det är ett tillförlitligt sätt att jämföra enheter och rum, men det är inget radiomätt dBm-värde — och därför märker appen det som uppskattat rakt igenom.
+  </p>
+</details>
+
+<details>
+  <summary>Är mesh-länkarna verklig Thread-routing?</summary>
+  <p>
+    I fliken Mesh, nej — de är logiska uppskattningar: enheter kopplas till närmaste gränsrouter eller till en router i samma rum.
+  </p>
+  <p>
+    Att ansluta en OpenThread-gränsrouter ger dig verkliga <em>nätverksfakta</em> (namn, kanal, PAN ID) men inte routing. Dess diagnostikslutpunkter returnerar inga data per nod — vi testade dem mot ett levande mesh-nät, och förfrågningarna går igenom men kommer tillbaka tomma.
+  </p>
+  <p>
+    Verklig routing kräver en <a href="probe-setup.html">ThreadMapper-sond</a>: en liten agent på en Raspberry Pi som går med i mesh-nätet och läser ruttabellen direkt. Med en ansluten visar skärmen Thread-nätverk uppmätt signal, länkkvalitet, nästa hopp och vägkostnad. De noderna dyker upp med Thread-adress i stället för med dina enhetsnamn — ännu finns det ingenting som kopplar en Thread-adress till ett HomeKit-tillbehör.
+  </p>
+</details>
+
+<details>
+  <summary>Hur gör jag en rumsmätning?</summary>
+  <p>
+    Öppna fliken Mätning och välj Guidad mätning. Ställ dig i ett rum, tryck på Start, gå runt medan appen samlar in mätvärden och tryck sedan på Klar för att spara rummet och gå vidare till nästa. Har du en Apple Watch kan du styra Start/Klar/Hoppa över från handleden medan mätningen körs på din iPhone.
+  </p>
+</details>
+
+<details>
+  <summary>Skickar AI-funktionerna mina data någonstans?</summary>
+  <p>
+    Nej. På iOS 26 och senare körs de helt och hållet på enheten med Apple Intelligence. Ingenting om ditt nätverk lämnar din iPhone. De kräver en enhet som klarar Apple Intelligence.
+  </p>
+</details>
+
+<details>
+  <summary>Vad synkar iCloud-synk egentligen?</summary>
+  <p>
+    Dina enhetsanteckningar, Thread-överstyrningar och appinställningar — det du skrev eller valde. Den är avstängd tills du slår på den i Inställningar, och den använder ditt eget privata iCloud, så den når aldrig oss.
+  </p>
+  <p>
+    Signalhistorik och mätvärden stannar medvetet på den enhet som spelade in dem. En avläsning beror på var den enheten stod, så att slå ihop en iPad i en låda med en iPhone i fickan skulle ge en historik som beskriver ingendera.
+  </p>
+</details>
+
+<details>
+  <summary>Jag har köpt Pro men funktionerna är fortfarande låsta</summary>
+  <p>
+    Öppna Inställningar i ThreadMapper och tryck på <em>Återställ köp</em>. Se till att du är inloggad med samma Apple-konto som användes vid det ursprungliga köpet.
+  </p>
+</details>
+
+<details>
+  <summary>Appen till Apple Watch har inga data</summary>
+  <p>
+    Klockan speglar din iPhone. Öppna ThreadMapper på din iPhone minst en gång så att den kan skicka en ögonblicksbild, och kontrollera att klockappen är installerad i appen Watch på din iPhone.
+  </p>
+</details>
+
+<h2>Integritet</h2>
+<p>
+  ThreadMapper samlar inte in några personuppgifter och har inga konton eller någon analys. Läs hela <a href="privacy.html">integritetspolicyn</a>.
+</p>
+
+<footer>
+  ThreadMapper utvecklas av Tintronix Lab.
+  <a href="privacy.html">Integritetspolicy</a>
+  <nav class="langs" aria-label="Språk"><a href="../support.html" hreflang="en" lang="en">English</a><span aria-current="true">Svenska</span><a href="../de/support.html" hreflang="de" lang="de">Deutsch</a><a href="../fr/support.html" hreflang="fr" lang="fr">Français</a><a href="../es/support.html" hreflang="es" lang="es">Español</a><a href="../it/support.html" hreflang="it" lang="it">Italiano</a><a href="../ja/support.html" hreflang="ja" lang="ja">日本語</a><a href="../nl/support.html" hreflang="nl" lang="nl">Nederlands</a><a href="../pt-br/support.html" hreflang="pt-BR" lang="pt-BR">Português (BR)</a></nav>
+</footer>
+
+</body>
+</html>

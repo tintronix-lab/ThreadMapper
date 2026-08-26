@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ThreadMapper — サポート</title>
+<meta name="description" content="ThreadMapperのヘルプ: デバイスが見つからない理由、信号の推定値の意味、メッシュのリンクと本物のThreadルーティングの違い、部屋の測定の進め方、iCloud同期、Proの購入、Apple Watchアプリについて。">
+<!-- Generated from site/support.html.tmpl by tools/build-docs.py — edit the template
+     and site/strings/support.*.json, not this file. -->
+<link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/ja/support.html">
+<link rel="alternate" hreflang="en" href="https://tintronix-lab.github.io/ThreadMapper/support.html">
+<link rel="alternate" hreflang="sv" href="https://tintronix-lab.github.io/ThreadMapper/sv/support.html">
+<link rel="alternate" hreflang="de" href="https://tintronix-lab.github.io/ThreadMapper/de/support.html">
+<link rel="alternate" hreflang="fr" href="https://tintronix-lab.github.io/ThreadMapper/fr/support.html">
+<link rel="alternate" hreflang="es" href="https://tintronix-lab.github.io/ThreadMapper/es/support.html">
+<link rel="alternate" hreflang="it" href="https://tintronix-lab.github.io/ThreadMapper/it/support.html">
+<link rel="alternate" hreflang="ja" href="https://tintronix-lab.github.io/ThreadMapper/ja/support.html">
+<link rel="alternate" hreflang="nl" href="https://tintronix-lab.github.io/ThreadMapper/nl/support.html">
+<link rel="alternate" hreflang="pt-BR" href="https://tintronix-lab.github.io/ThreadMapper/pt-br/support.html">
+<link rel="alternate" hreflang="x-default" href="https://tintronix-lab.github.io/ThreadMapper/support.html">
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    max-width: 44rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem;
+    color: #1c1c1e; background: #fff;
+  }
+  @media (prefers-color-scheme: dark) { body { color: #f2f2f7; background: #000; } }
+  h1 { font-size: 2rem; margin-bottom: .25rem; }
+  h2 { font-size: 1.15rem; margin-top: 2.25rem; }
+  .tagline { color: #8e8e93; margin-top: 0; }
+  .contact { border-left: 3px solid #0a84ff; padding: .6rem 0 .6rem 1rem; margin: 1.5rem 0; }
+  details { margin: .6rem 0; padding: .6rem 0; border-bottom: 1px solid #d1d1d6; }
+  summary { cursor: pointer; font-weight: 600; }
+  details p { margin: .6rem 0 0; }
+  a { color: #0a84ff; }
+  footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid #d1d1d6; font-size: .9rem; color: #8e8e93; }
+  /* Translated headings run longer than English, so let a compound break rather
+     than overflow. No auto-hyphenation: measured across all nine catalogs, no
+     headline word comes near its container, and it cost a mid-word break in a
+     display face. */
+  h1, h2, summary { overflow-wrap: break-word; }
+  /* The switcher is a plain link row: no JS, and it works as a list for screen readers. */
+  .langs { margin-top: 1.25rem; display: flex; flex-wrap: wrap; gap: .35rem .9rem; }
+  .langs a { text-decoration: none; }
+  .langs a:hover { text-decoration: underline; }
+  .langs [aria-current] { color: #1c1c1e; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { .langs [aria-current] { color: #f2f2f7; } }
+  :lang(ja) h1, :lang(ja) h2 { letter-spacing: 0; }
+</style>
+</head>
+<body>
+
+<h1>ThreadMapperサポート</h1>
+<p class="tagline">iPhone、iPad、Apple Watch向けのThreadメッシュネットワークモニタ。</p>
+
+<div class="contact">
+  <strong>お困りですか？</strong> <a href="mailto:tintronix@gmail.com">tintronix@gmail.com</a> までメールをお送りください。iOSのバージョン、iPhoneの機種、そのとき何をしていたかの簡単な説明を添えてください。
+</div>
+
+<h2>よくある質問</h2>
+
+<details>
+  <summary>「デバイスが見つかりません」と表示される</summary>
+  <p>
+    ThreadMapperはHomeKit経由でThreadデバイスを読み取るため、2つの条件が必要です。HomeKitへのアクセスが許可されていること（iOSの設定 → プライバシーとセキュリティ → HomeKit → ThreadMapper）、そして家にThreadボーダールーターが1台以上あること——たとえばHomePod mini、Apple TV 4K、対応するハブです。アプリを試してみたいだけなら、<em>デモモード</em>を設定でオンにしてください。
+  </p>
+</details>
+
+<details>
+  <summary>信号強度が「推定」と表示されるのはなぜですか？</summary>
+  <p>
+    iOSは、Threadアクセサリの実際の無線RSSIをサードパーティアプリに公開していません。ThreadMapperは、各アクセサリが返事をする速さを計って応答品質の推定値を求めます。デバイスや部屋どうしを比べるには十分に信頼できますが、無線で実測したdBmの値ではありません。だからこそアプリは、これを一貫して推定と表示しています。
+  </p>
+</details>
+
+<details>
+  <summary>メッシュのリンクは本物のThreadルーティングですか？</summary>
+  <p>
+    「メッシュ」タブでは違います。あれは論理的な推定で、デバイスは最も近いボーダールーター、または同じ部屋のルーターに結び付けられています。
+  </p>
+  <p>
+    OpenThreadボーダールーターをつなぐと、<em>ネットワーク</em>そのものの実際の情報（名前、チャンネル、PAN ID）は得られますが、ルーティングは得られません。診断エンドポイントはノードごとのデータを返しません——実際に動いているメッシュで試したところ、リクエストは完了するのに中身は空でした。
+  </p>
+  <p>
+    本物のルーティングには<a href="probe-setup.html">ThreadMapperプローブ</a>が必要です。Raspberry Pi上で動く小さなエージェントがメッシュに参加し、経路表を直接読み取ります。接続すると、Threadネットワーク画面に実測の信号、リンク品質、次のホップ、パスコストが表示されます。それらのノードはデバイス名ではなくThreadアドレスで並びます——ThreadアドレスとHomeKitアクセサリを結び付ける手段は、まだありません。
+  </p>
+</details>
+
+<details>
+  <summary>部屋の測定はどうやって行いますか？</summary>
+  <p>
+    「測定」タブを開き、「ガイド付き測定」を選びます。部屋に立って「開始」をタップし、サンプリングの間は歩き回り、終わったら「完了」をタップするとその部屋が保存され、次の部屋へ進みます。Apple Watchがあれば、測定はiPhoneで動かしたまま、「開始」「完了」「スキップ」を手首から操作できます。
+  </p>
+</details>
+
+<details>
+  <summary>AI機能はデータをどこかへ送りますか？</summary>
+  <p>
+    送りません。iOS 26以降では、Apple Intelligenceを使って完全にデバイス内で動作します。ネットワークに関する情報がiPhoneの外に出ることはありません。Apple Intelligence対応のデバイスが必要です。
+  </p>
+</details>
+
+<details>
+  <summary>iCloud同期は実際には何を同期しますか？</summary>
+  <p>
+    デバイスのメモ、Threadの上書き設定、アプリの設定——あなたが入力したり選んだりしたものです。設定でオンにするまではオフで、使うのはあなた自身のプライベートなiCloudなので、私たちのもとに届くことはありません。
+  </p>
+  <p>
+    信号の履歴と測定データは、意図的に、それを記録したデバイスに留まります。測定値はその端末がどこに置かれていたかに左右されるため、引き出しの中のiPadとポケットの中のiPhoneを混ぜ合わせると、どちらの場所も表さない履歴ができてしまいます。
+  </p>
+</details>
+
+<details>
+  <summary>Proを購入したのに機能がロックされたまま</summary>
+  <p>
+    ThreadMapperの設定を開き、<em>購入を復元</em>をタップしてください。最初に購入したときと同じAppleアカウントでサインインしているか確認してください。
+  </p>
+</details>
+
+<details>
+  <summary>Apple Watchアプリにデータが表示されない</summary>
+  <p>
+    WatchはiPhoneの内容を映しています。スナップショットを送れるように、iPhoneでThreadMapperを一度は開いてください。また、iPhoneのWatch Appでウォッチアプリがインストールされているか確認してください。
+  </p>
+</details>
+
+<h2>プライバシー</h2>
+<p>
+  ThreadMapperは個人データを収集せず、アカウントも解析もありません。<a href="privacy.html">プライバシーポリシー</a>の全文をお読みください。
+</p>
+
+<footer>
+  ThreadMapperはTintronix Labが開発しています。
+  <a href="privacy.html">プライバシーポリシー</a>
+  <nav class="langs" aria-label="言語"><a href="../support.html" hreflang="en" lang="en">English</a><a href="../sv/support.html" hreflang="sv" lang="sv">Svenska</a><a href="../de/support.html" hreflang="de" lang="de">Deutsch</a><a href="../fr/support.html" hreflang="fr" lang="fr">Français</a><a href="../es/support.html" hreflang="es" lang="es">Español</a><a href="../it/support.html" hreflang="it" lang="it">Italiano</a><span aria-current="true">日本語</span><a href="../nl/support.html" hreflang="nl" lang="nl">Nederlands</a><a href="../pt-br/support.html" hreflang="pt-BR" lang="pt-BR">Português (BR)</a></nav>
+</footer>
+
+</body>
+</html>

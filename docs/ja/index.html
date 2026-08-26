@@ -1,14 +1,14 @@
 <!doctype html>
-<html lang="en">
+<html lang="ja">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ThreadMapper — Your Thread network, measured</title>
-<meta name="description" content="ThreadMapper shows you every Thread device, which rooms have weak coverage, and the moment something drops offline. Add a probe and it stops estimating: real signal, real routing, real interference. Private by design.">
+<title>ThreadMapper — Threadネットワークを、推測から計測へ</title>
+<meta name="description" content="ThreadMapperは、すべてのThreadデバイス、カバレッジの弱い部屋、そして何かがオフラインになった瞬間を映し出します。プローブを足せば推定は終わり、信号もルーティングも干渉も実測になります。設計からしてプライベートです。">
 <meta name="theme-color" content="#0B1020">
 <!-- Generated from site/index.html.tmpl by tools/build-docs.py — edit the template
      and site/strings/index.*.json, not this file. -->
-<link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/index.html">
+<link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/ja/index.html">
 <link rel="alternate" hreflang="en" href="https://tintronix-lab.github.io/ThreadMapper/index.html">
 <link rel="alternate" hreflang="sv" href="https://tintronix-lab.github.io/ThreadMapper/sv/index.html">
 <link rel="alternate" hreflang="de" href="https://tintronix-lab.github.io/ThreadMapper/de/index.html">
@@ -246,7 +246,7 @@
 <body>
 
 <header class="hero">
-  <div class="band" aria-hidden="true"><img src="waterfall.svg" alt=""></div>
+  <div class="band" aria-hidden="true"><img src="../waterfall.svg" alt=""></div>
   <div class="wrap hero-inner">
     <div class="mark">
       <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -264,12 +264,12 @@
       <span>ThreadMapper</span>
     </div>
 
-    <h1>Your Thread network, <em>measured</em>.</h1>
+    <h1>Threadネットワークを、<em>推測から計測へ</em>。</h1>
     <p class="lede">
-      Thread devices are invisible by design. They just work — until one doesn't, and nothing will tell you why. ThreadMapper maps every device, grades every room, and says plainly which of its numbers are readings and which are estimates.
+      Threadデバイスは、見えないように作られています。何も言わずに動き続け、そして1台が止まったとき、理由を教えてくれるものは何もありません。ThreadMapperはすべてのデバイスを地図に描き、部屋ごとに評価を付け、どの数字が実測でどれが推定かをはっきり示します。
     </p>
     <ul class="platforms">
-      <li>iPhone</li><li>iPad</li><li>Apple Watch</li><li>iOS 17+</li><li>No account</li>
+      <li>iPhone</li><li>iPad</li><li>Apple Watch</li><li>iOS 17+</li><li>アカウント不要</li>
     </ul>
   </div>
 </header>
@@ -277,71 +277,71 @@
 <div class="wrap">
 
   <section>
-    <p class="eyebrow">The problem</p>
-    <h2>“It worked yesterday.”</h2>
+    <p class="eyebrow">課題</p>
+    <h2>「昨日までは動いていたのに。」</h2>
     <p class="section-lede">
-      A sensor stops reporting. An hour later it comes back. Your hub says everything is fine, because from where it stands everything is. The information that would explain it — signal, routing, what else was on the air — is never shown to you at all.
+      センサーが報告をやめます。1時間後、何事もなかったように戻ります。ハブは異常なしと言います。ハブの居場所から見れば、実際に異常はないからです。それを説明できるはずの情報——信号、ルーティング、そのとき電波に何がいたか——は、そもそも表示されません。
     </p>
     <div class="grid">
       <div class="card">
-        <div class="card-head"><h3>Health grade</h3><span class="tag estimated">Estimated</span></div>
-        <p>An A–F score with the specific issues pulling it down, not just a number.</p>
+        <div class="card-head"><h3>状態の評価</h3><span class="tag estimated">推定</span></div>
+        <p>A〜Fの評価に、点数を下げている具体的な原因を添えて。ただの数字では終わりません。</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Mesh map</h3><span class="tag estimated">Estimated</span></div>
-        <p>Every device grouped by room, showing how each one reaches a border router.</p>
+        <div class="card-head"><h3>メッシュマップ</h3><span class="tag estimated">推定</span></div>
+        <p>すべてのデバイスを部屋ごとにまとめ、それぞれがどうボーダールーターに届いているかを示します。</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Room survey</h3><span class="tag estimated">Estimated</span></div>
-        <p>Walk a room, get a coverage grade. Drivable from your wrist so both hands stay free.</p>
+        <div class="card-head"><h3>部屋の測定</h3><span class="tag estimated">推定</span></div>
+        <p>部屋を歩けば、カバレッジの評価が出ます。手首から操作できるので、両手は空いたままです。</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Offline alerts</h3><span class="tag measured">Measured</span></div>
-        <p>Know the moment a device drops, with a grace period and quiet hours you set.</p>
+        <div class="card-head"><h3>オフライン通知</h3><span class="tag measured">実測</span></div>
+        <p>デバイスが落ちた瞬間に気づけます。猶予時間と通知停止時間は自分で決められます。</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Device history</h3><span class="tag estimated">Estimated</span></div>
-        <p>30 days of signal trend, uptime and firmware changes for every accessory.</p>
+        <div class="card-head"><h3>デバイス履歴</h3><span class="tag estimated">推定</span></div>
+        <p>アクセサリごとに、信号の傾向・連続稼働時間・ファームウェアの変化を30日分。</p>
       </div>
       <div class="card">
         <!-- No tag: this one is a platform, not a claim about data. Tagging it
              would make the tags decoration instead of information. -->
-        <div class="card-head"><h3>Watch &amp; iPad</h3></div>
-        <p>Grade and complications on the wrist; a proper sidebar layout on iPad, not a stretched phone.</p>
+        <div class="card-head"><h3>Apple WatchとiPad</h3></div>
+        <p>手首には評価とコンプリケーション。iPadにはサイドバー構成の本来のレイアウトを——引き伸ばしたiPhone画面ではありません。</p>
       </div>
     </div>
   </section>
 
   <section>
-    <p class="eyebrow">Where those tags come from</p>
-    <h2>Where a number is a guess, it says so.</h2>
+    <p class="eyebrow">バッジの根拠</p>
+    <h2>その数字が推測なら、そう明記します。</h2>
     <div class="cols">
       <div>
         <p class="section-lede" style="margin-bottom:1.25rem">
-          iOS gives third-party apps no radio signal strength for Thread accessories, no parent-child relationships and no routing table. Any app showing you dBm for a HomeKit device is showing you something it cannot read.
+          iOSはサードパーティアプリに対して、Threadアクセサリの無線信号強度も、親子関係も、ルーティングテーブルも公開していません。HomeKitデバイスのdBmを表示するアプリは、読み取れないはずの値を見せていることになります。
         </p>
         <p class="section-lede" style="margin-bottom:0">
-          ThreadMapper measures how quickly each accessory answers, calls that an <strong>estimate</strong> wherever it appears, and infers the mesh layout from what HomeKit does expose. It works, and it is honest about being an inference.
+          ThreadMapperは各アクセサリの応答の速さを測り、その値が現れる場所ではすべて<strong>推定</strong>と呼び、メッシュの構成はHomeKitが公開している情報から推論します。実用になりますし、推論であることを隠しません。
         </p>
       </div>
       <div class="note">
-        <p><strong>An OpenThread Border Router alone does not fix this.</strong></p>
+        <p><strong>OpenThreadボーダールーターだけでは、これは解決しません。</strong></p>
         <p>
-          Its REST API reports real network facts — name, channel, PAN ID — and ThreadMapper uses them. But we tested its diagnostics endpoints against a live two-node mesh: the requests complete and return nothing usable. Per-node routing is not available that way, whatever the documentation implies.
+          そのREST APIはネットワークの実際の情報——名前、チャンネル、PAN ID——を返し、ThreadMapperもそれを使っています。ただし診断エンドポイントは、実際に動作している2ノードのメッシュで試しました。リクエストは完了しますが、使える中身は何も返ってきません。ノードごとのルーティングはこの方法では取得できません。ドキュメントが何を示唆していようとも。
         </p>
-        <p>Which is why the probe exists.</p>
+        <p>プローブがあるのは、そのためです。</p>
       </div>
     </div>
   </section>
 
   <section>
-    <p class="eyebrow">The probe</p>
-    <h2>A small box that stops the guessing.</h2>
+    <p class="eyebrow">プローブ</p>
+    <h2>推測を終わらせる、小さな箱。</h2>
     <p class="section-lede">
-      Run a lightweight agent on a Raspberry Pi with an 802.15.4 dongle and it joins your Thread mesh as a real node. From inside, everything the phone cannot see becomes readable — and because it never sleeps, it sees the 3 a.m. failures you don't.
+      802.15.4ドングルを挿したRaspberry Piで軽量なエージェントを動かすと、それが本物のノードとしてThreadメッシュに参加します。内側からなら、iPhoneに見えないものがすべて読めます。しかも眠らないので、あなたが見ていない午前3時の障害も見ています。
     </p>
 
-    <div class="readout" role="img" aria-label="Example probe output showing a router at minus 20 dBm with link quality 3 of 3, and a route with path cost 0.">
+    <div class="readout" role="img" aria-label="プローブ出力の例。ルーターがマイナス20 dBm、リンク品質は3段階中3、経路のパスコストは0と表示されています。">
 <span class="dim">$ curl probe.local:8099/topology</span>
   extAddress   <span class="hot">1666d5453afe68c6</span>   rloc16  0x5400
   averageRssi  <span class="hot">-20 dBm</span>            lastRssi  -20 dBm
@@ -351,148 +351,148 @@
 
     <div class="compare">
       <div class="compare-row compare-head">
-        <div class="compare-cell">Without a probe</div>
-        <div class="compare-cell">With a probe</div>
+        <div class="compare-cell">プローブなし</div>
+        <div class="compare-cell">プローブあり</div>
       </div>
       <div class="compare-row">
-        <div class="compare-cell without"><b>Response timing</b>How fast an accessory replies, bucketed into a signal estimate.</div>
-        <div class="compare-cell with"><b>Radio RSSI</b>Actual per-neighbour signal and link quality, off the radio.</div>
+        <div class="compare-cell without"><b>応答の速さ</b>アクセサリが返事をする速さを、信号の推定値に置き換えたもの。</div>
+        <div class="compare-cell with"><b>無線のRSSI</b>無線から直接読んだ、隣接ごとの実際の信号とリンク品質。</div>
       </div>
       <div class="compare-row">
-        <div class="compare-cell without"><b>Inferred layout</b>Mesh shape guessed from accessory type and room name.</div>
-        <div class="compare-cell with"><b>Real routing</b>Route table with next hop and path cost — what makes a mesh multi-hop.</div>
+        <div class="compare-cell without"><b>推論した構成</b>アクセサリの種別と部屋名から推測したメッシュの形。</div>
+        <div class="compare-cell with"><b>本物のルーティング</b>次のホップとパスコストを含む経路表——メッシュがマルチホップであることの中身です。</div>
       </div>
       <div class="compare-row">
-        <div class="compare-cell without"><b>Channel theory</b>Interference risk from a table of which channels overlap Wi-Fi.</div>
-        <div class="compare-cell with"><b>Measured noise</b>An energy scan of all 16 channels. What the band actually sounds like.</div>
+        <div class="compare-cell without"><b>チャンネルの理屈</b>どのチャンネルがWi-Fiと重なるかの表から求めた干渉リスク。</div>
+        <div class="compare-cell with"><b>実測のノイズ</b>全16チャンネルのエネルギースキャン。その帯域が実際にどう聞こえているか。</div>
       </div>
       <div class="compare-row">
-        <div class="compare-cell without"><b>While the app is open</b>The phone only watches when you're looking at it.</div>
-        <div class="compare-cell with"><b>Continuously</b>Recorded to disk, so the overnight partition is still there in the morning.</div>
+        <div class="compare-cell without"><b>アプリを開いている間だけ</b>iPhoneは、あなたが見ているときしか見ていません。</div>
+        <div class="compare-cell with"><b>継続的に</b>ディスクに記録するので、夜中に起きたメッシュの分断も朝には残っています。</div>
       </div>
     </div>
 
     <div class="grid" style="margin-top:1.5rem">
       <div class="card">
-        <div class="card-head"><h3>Noise over time</h3><span class="tag probe">Probe</span></div>
-        <p>A waterfall of the whole band. You can see the microwave at dinner and the neighbour's Wi-Fi in the evening.</p>
+        <div class="card-head"><h3>ノイズの推移</h3><span class="tag probe">プローブ</span></div>
+        <p>帯域全体をウォーターフォールで表示します。夕食どきの電子レンジも、夜の隣家のWi-Fiも見えます。</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Why it dropped</h3><span class="tag probe">Probe</span></div>
-        <p>Departures lined up against noise and radio error counters — with the readings shown, and “no clear cause” when there isn't one.</p>
+        <div class="card-head"><h3>なぜ落ちたか</h3><span class="tag probe">プローブ</span></div>
+        <p>離脱の瞬間をノイズと無線のエラーカウンタに突き合わせます。根拠となる測定値を添えて示し、原因がはっきりしないときは「明確な原因なし」と表示します。</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>While you were away</h3><span class="tag probe">Probe</span></div>
-        <p>What happened since you last opened the app. Silent when nothing did.</p>
+        <div class="card-head"><h3>留守のあいだに</h3><span class="tag probe">プローブ</span></div>
+        <p>前回アプリを開いてから何が起きたか。何も起きていなければ、何も言いません。</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Reliability counters</h3><span class="tag probe">Probe</span></div>
-        <p>Transmit retries and channel-busy failures — congestion shows here long before anything looks offline.</p>
+        <div class="card-head"><h3>信頼性カウンタ</h3><span class="tag probe">プローブ</span></div>
+        <p>送信の再送と、チャンネル混雑による送信失敗。混み合いは、何かがオフラインに見えるずっと前にここへ現れます。</p>
       </div>
     </div>
 
     <p style="margin:1.75rem 0 0;color:var(--muted);font-size:.93rem">
-      The agent is open source and runs on a Raspberry Pi 4 or 5 you may already own — the 802.15.4 dongle it needs costs about $10–25. <a href="probe-setup.html">Setup guide →</a>
+      エージェントはオープンソースで、すでにお持ちかもしれないRaspberry Pi 4または5で動きます。必要な802.15.4ドングルは10〜25ドル程度です。<a href="probe-setup.html">セットアップガイド →</a>
       <br>
       <span style="font-size:.88rem">
-        Read that first: a Raspberry Pi has no Thread radio of its own, and joining an existing Apple or Google mesh needs credentials those platforms don't yet let you export. It is not a product you can buy — it's a build.
+        先に目を通してください。Raspberry Pi自体にThread無線はなく、既存のAppleやGoogleのメッシュに参加するには、それらのプラットフォームがまだ書き出させてくれない認証情報が必要です。買える製品ではなく、作るものです。
       </span>
     </p>
   </section>
 
   <section>
-    <p class="eyebrow">In the app</p>
-    <h2>Screens</h2>
+    <p class="eyebrow">アプリの中</p>
+    <h2>画面</h2>
     <div class="shots">
       <figure class="shot">
-        <img src="screenshots/01_dashboard.jpg" alt="Dashboard showing an A-grade network score and per-room coverage cards" loading="lazy" width="226" height="490">
-        <figcaption>Health at a glance</figcaption>
+        <img src="../screenshots/01_dashboard.jpg" alt="ネットワークスコアが評価Aで、部屋ごとのカバレッジカードが並ぶダッシュボード" loading="lazy" width="226" height="490">
+        <figcaption>状態がひと目で</figcaption>
       </figure>
       <figure class="shot">
-        <img src="screenshots/02_mesh_topology.jpg" alt="Mesh map with devices grouped by room and linked to border routers" loading="lazy" width="226" height="490">
-        <figcaption>Live mesh map</figcaption>
+        <img src="../screenshots/02_mesh_topology.jpg" alt="デバイスが部屋ごとにまとまり、ボーダールーターとつながっているメッシュマップ" loading="lazy" width="226" height="490">
+        <figcaption>リアルタイムのメッシュマップ</figcaption>
       </figure>
       <figure class="shot">
-        <img src="screenshots/channel_measured.jpg" alt="Channel Scanner with a Measured badge, bar heights showing real noise floor per channel" loading="lazy" width="226" height="490">
-        <figcaption>Channel scanner, measured</figcaption>
+        <img src="../screenshots/channel_measured.jpg" alt="実測バッジ付きのチャンネルスキャナ。棒の高さはチャンネルごとの実際のノイズフロアを表します" loading="lazy" width="226" height="490">
+        <figcaption>チャンネルスキャナ、実測</figcaption>
       </figure>
       <figure class="shot">
-        <img src="screenshots/probe_routing.jpg" alt="Thread Network screen listing nodes with real RSSI and a routing table" loading="lazy" width="226" height="490">
-        <figcaption>Real nodes and routing</figcaption>
+        <img src="../screenshots/probe_routing.jpg" alt="実測のRSSIとルーティングテーブルとともにノードを並べるThreadネットワーク画面" loading="lazy" width="226" height="490">
+        <figcaption>本物のノードとルーティング</figcaption>
       </figure>
       <figure class="shot">
-        <img src="screenshots/incidents.jpg" alt="Event list showing a node that changed role, with reliability counters above" loading="lazy" width="226" height="490">
-        <figcaption>What happened, and why</figcaption>
+        <img src="../screenshots/incidents.jpg" alt="役割が変わったノードを示すイベント一覧。上には信頼性カウンタ" loading="lazy" width="226" height="490">
+        <figcaption>何が起きたか、そしてなぜか</figcaption>
       </figure>
       <figure class="shot">
-        <img src="screenshots/03_survey.jpg" alt="Survey screen listing live signal quality per device" loading="lazy" width="226" height="490">
-        <figcaption>Room-by-room survey</figcaption>
+        <img src="../screenshots/03_survey.jpg" alt="デバイスごとの信号品質をリアルタイムで並べる測定画面" loading="lazy" width="226" height="490">
+        <figcaption>部屋ごとの測定</figcaption>
       </figure>
     </div>
   </section>
 
   <section>
-    <p class="eyebrow">Privacy</p>
-    <h2>No account. No servers. No analytics.</h2>
+    <p class="eyebrow">プライバシー</p>
+    <h2>アカウントなし。サーバーなし。解析なし。</h2>
     <div class="cols">
       <ul class="plain">
-        <li><strong>Nothing to sign up for.</strong> The app has no login because it has nowhere to log in to.</li>
-        <li><strong>No tracking of any kind.</strong> No analytics, no third-party SDKs — the only network request the app makes is to a border router or probe you configured yourself.</li>
-        <li><strong>iCloud sync is yours, not ours.</strong> Optional, off by default, and it uses your own private iCloud. Your notes and settings follow you; we never see them.</li>
-        <li><strong>AI runs on device.</strong> On iOS 26 with Apple Intelligence. Your network is never uploaded to be summarised.</li>
+        <li><strong>登録するものがありません。</strong> ログインする先がないので、アプリにログインはありません。</li>
+        <li><strong>いっさい追跡しません。</strong> 解析もサードパーティSDKもありません。アプリが出すネットワークリクエストは、あなた自身が設定したボーダールーターかプローブ宛てのものだけです。</li>
+        <li><strong>iCloud同期はあなたのもので、私たちのものではありません。</strong> 任意で、初期状態はオフ。使うのはあなた自身のプライベートなiCloudです。メモと設定は端末をまたいで付いてきますが、私たちがそれを見ることはありません。</li>
+        <li><strong>AIはデバイス内で動きます。</strong> Apple Intelligenceを備えたiOS 26で。要約のためにネットワークがアップロードされることはありません。</li>
       </ul>
       <div>
         <div class="note">
-          <p><strong>Signal history deliberately doesn't sync.</strong></p>
+          <p><strong>信号の履歴は、意図的に同期しません。</strong></p>
           <p>
-            Readings depend on where the device taking them is standing. Merging an iPad in a drawer with an iPhone in your pocket would produce a history describing a place nobody is. Notes and settings sync; measurements stay put.
+            測定値は、測った端末がどこに置かれていたかに左右されます。引き出しの中のiPadと、ポケットの中のiPhoneを混ぜ合わせれば、誰もいない場所を語る履歴ができあがります。メモと設定は同期し、測定値はその場に留まります。
           </p>
         </div>
-        <p style="margin:1.25rem 0 0"><a href="privacy.html">Full privacy policy →</a></p>
+        <p style="margin:1.25rem 0 0"><a href="privacy.html">プライバシーポリシー全文 →</a></p>
       </div>
     </div>
   </section>
 
   <section>
     <p class="eyebrow">Pro</p>
-    <h2>One purchase. Not a subscription.</h2>
+    <h2>買い切りです。サブスクリプションではありません。</h2>
     <div class="cols">
       <ul class="plain">
-        <li><strong>AI Insights and Network Assistant</strong> — reads your device's actual history, on device.</li>
-        <li><strong>Resilience Simulator</strong> — which devices would be orphaned if a specific router failed.</li>
-        <li><strong>30-day timeline and topology time-lapse.</strong></li>
-        <li><strong>Diagnostic PDF export</strong> for installers, landlords or your own records.</li>
-        <li><strong>Weekly reports, streaks, scene triggers</strong> and Watch complications.</li>
+        <li><strong>AIインサイトとネットワークアシスタント</strong>——デバイスの実際の履歴を、デバイス内で読み取ります。</li>
+        <li><strong>耐障害性シミュレータ</strong>——特定のルーターが落ちたとき、どのデバイスが孤立するか。</li>
+        <li><strong>30日間のタイムラインと、トポロジーのタイムラプス。</strong></li>
+        <li><strong>診断PDFの書き出し</strong>——施工業者や家主に、あるいは自分の記録のために。</li>
+        <li><strong>週次レポート、連続記録、シーンのトリガー</strong>、そしてWatchのコンプリケーション。</li>
       </ul>
       <div class="note">
-        <p><strong>Probe features aren't behind the paywall.</strong></p>
+        <p><strong>プローブの機能に、追加の課金はありません。</strong></p>
         <p>
-          If you've gone to the trouble of building a probe, hitting a second paywall would be a poor way to say thank you. Everything the probe unlocks is included.
+          わざわざプローブを組み上げた方にもう一度支払いを求めるのは、お礼の仕方として筋が通りません。プローブで解放されるものは、すべて含まれています。
         </p>
       </div>
     </div>
   </section>
 
   <section style="border-bottom:0">
-    <p class="eyebrow">Getting started</p>
-    <h2>What you need</h2>
+    <p class="eyebrow">はじめに</p>
+    <h2>必要なもの</h2>
     <p class="section-lede">
-      A home with at least one Thread border router — a HomePod mini, Apple TV 4K or similar — since ThreadMapper reads your network through HomeKit. AI features need iOS 26 on an Apple Intelligence–capable device. The probe is entirely optional.
+      Threadボーダールーターが1台以上ある住まい——HomePod miniやApple TV 4Kなど。ThreadMapperはHomeKit経由でネットワークを読むためです。AI機能には、Apple Intelligence対応デバイスでのiOS 26が必要です。プローブは完全に任意です。
     </p>
     <p class="section-lede" style="margin-bottom:0">
-      Want to look around first? Turn on <strong>Demo Mode</strong> and the whole app runs on a simulated network — no hardware, no HomeKit, nothing to set up.
+      まず中を見てみたいなら、<strong>デモモード</strong>をオンにしてください。アプリ全体が模擬ネットワークで動きます。ハードウェアもHomeKitも、用意するものは何もありません。
     </p>
   </section>
 
   <footer>
     <nav>
-      <a href="support.html">Support</a>
-      <a href="privacy.html">Privacy</a>
-      <a href="https://github.com/tintronix-lab/ThreadMapper">Source</a>
-      <a href="probe-setup.html">Build a probe</a>
+      <a href="support.html">サポート</a>
+      <a href="privacy.html">プライバシー</a>
+      <a href="https://github.com/tintronix-lab/ThreadMapper">ソースコード</a>
+      <a href="probe-setup.html">プローブを作る</a>
     </nav>
-    ThreadMapper is made by Tintronix Lab. Thread is a trademark of the Thread Group. Matter is a trademark of the Connectivity Standards Alliance. Apple, HomeKit, iPhone, iPad, Apple Watch, HomePod, Apple TV and Apple Intelligence are trademarks of Apple Inc.
-    <nav class="langs" aria-label="Language"><span aria-current="true">English</span><a href="sv/index.html" hreflang="sv" lang="sv">Svenska</a><a href="de/index.html" hreflang="de" lang="de">Deutsch</a><a href="fr/index.html" hreflang="fr" lang="fr">Français</a><a href="es/index.html" hreflang="es" lang="es">Español</a><a href="it/index.html" hreflang="it" lang="it">Italiano</a><a href="ja/index.html" hreflang="ja" lang="ja">日本語</a><a href="nl/index.html" hreflang="nl" lang="nl">Nederlands</a><a href="pt-br/index.html" hreflang="pt-BR" lang="pt-BR">Português (BR)</a></nav>
+    ThreadMapperはTintronix Labが制作しています。ThreadはThread Groupの商標です。MatterはConnectivity Standards Allianceの商標です。Apple、HomeKit、iPhone、iPad、Apple Watch、HomePod、Apple TV、Apple IntelligenceはApple Inc.の商標です。
+    <nav class="langs" aria-label="言語"><a href="../index.html" hreflang="en" lang="en">English</a><a href="../sv/index.html" hreflang="sv" lang="sv">Svenska</a><a href="../de/index.html" hreflang="de" lang="de">Deutsch</a><a href="../fr/index.html" hreflang="fr" lang="fr">Français</a><a href="../es/index.html" hreflang="es" lang="es">Español</a><a href="../it/index.html" hreflang="it" lang="it">Italiano</a><span aria-current="true">日本語</span><a href="../nl/index.html" hreflang="nl" lang="nl">Nederlands</a><a href="../pt-br/index.html" hreflang="pt-BR" lang="pt-BR">Português (BR)</a></nav>
   </footer>
 
 </div>

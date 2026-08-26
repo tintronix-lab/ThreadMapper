@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Costruisci una sonda ThreadMapper — ThreadMapper</title>
+<meta name="description" content="Passo dopo passo: trasforma un Raspberry Pi e una chiavetta 802.15.4 in una sonda ThreadMapper, così l’app può mostrare segnale Thread, instradamento e interferenze misurati.">
+<meta name="theme-color" content="#0B1020">
+<!-- Generated from tools/pi-image/SETUP.it.md by tools/build-docs.py — edit the Markdown, not this file. -->
+<link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/it/probe-setup.html">
+<link rel="alternate" hreflang="en" href="https://tintronix-lab.github.io/ThreadMapper/probe-setup.html">
+<link rel="alternate" hreflang="sv" href="https://tintronix-lab.github.io/ThreadMapper/sv/probe-setup.html">
+<link rel="alternate" hreflang="de" href="https://tintronix-lab.github.io/ThreadMapper/de/probe-setup.html">
+<link rel="alternate" hreflang="fr" href="https://tintronix-lab.github.io/ThreadMapper/fr/probe-setup.html">
+<link rel="alternate" hreflang="es" href="https://tintronix-lab.github.io/ThreadMapper/es/probe-setup.html">
+<link rel="alternate" hreflang="it" href="https://tintronix-lab.github.io/ThreadMapper/it/probe-setup.html">
+<link rel="alternate" hreflang="ja" href="https://tintronix-lab.github.io/ThreadMapper/ja/probe-setup.html">
+<link rel="alternate" hreflang="nl" href="https://tintronix-lab.github.io/ThreadMapper/nl/probe-setup.html">
+<link rel="alternate" hreflang="pt-BR" href="https://tintronix-lab.github.io/ThreadMapper/pt-br/probe-setup.html">
+<link rel="alternate" hreflang="x-default" href="https://tintronix-lab.github.io/ThreadMapper/probe-setup.html">
+<style>
+  :root {
+    color-scheme: light dark;
+    --ink:#0B1020; --paper:#FBFAFD; --surface:#F3F1F9; --line:#E2DEEE;
+    --body:#3A3A46; --muted:#5C5C6E; --signal:#1D5DBF; --noise:#4A2C9C;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink:#F2F1F7; --paper:#08090F; --surface:#14141F; --line:#262636;
+             --body:#B9B9C6; --muted:#85859A; --signal:#6FB2FF; --noise:#9878DE; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+          font:16.5px/1.7 var(--sans); -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:46rem; margin:0 auto; padding:0 1.5rem 5rem; }
+  a { color:var(--signal); text-underline-offset:2px; }
+  a:focus-visible { outline:2px solid var(--signal); outline-offset:3px; border-radius:3px; }
+
+  .top { border-bottom:1px solid var(--line); margin-bottom:3rem; }
+  .top .wrap { padding-top:1.25rem; padding-bottom:1.25rem; }
+  .top a { font:600 .8rem/1 var(--mono); letter-spacing:.04em; text-decoration:none; color:var(--muted); }
+  .top a:hover { color:var(--ink); }
+
+  h1 { font:500 clamp(1.9rem,4.5vw,2.6rem)/1.1 var(--mono); letter-spacing:-.035em; margin:0 0 2rem; }
+  h2 { font:500 1.35rem/1.25 var(--mono); letter-spacing:-.02em; margin:3rem 0 .9rem;
+        padding-top:1.5rem; border-top:1px solid var(--line); }
+  h3 { font:600 1.02rem/1.35 var(--sans); margin:2rem 0 .6rem; }
+  h4 { font:600 .95rem/1.35 var(--sans); margin:1.5rem 0 .5rem; }
+  p { margin:0 0 1.1rem; color:var(--body); }
+  strong { color:var(--ink); font-weight:600; }
+  hr { border:0; border-top:1px solid var(--line); margin:2.5rem 0; }
+  /* The Markdown uses `---` before major sections and h2 already draws its own
+     rule, which renders as two lines a few pixels apart. */
+  hr + h2 { border-top:0; padding-top:0; margin-top:0; }
+
+  ul, ol { margin:0 0 1.2rem; padding-left:1.3rem; color:var(--body); }
+  li { margin:.45rem 0; }
+  li::marker { color:var(--noise); }
+
+  code { font:.88em/1.5 var(--mono); background:var(--surface); padding:.12em .35em;
+          border-radius:4px; word-break:break-word; }
+  pre { background:var(--ink); color:var(--paper); border-radius:10px;
+         padding:1rem 1.15rem; overflow-x:auto; margin:0 0 1.4rem; }
+  pre code { background:none; padding:0; color:inherit; font-size:.84rem; line-height:1.7; }
+  @media (prefers-color-scheme: dark) { pre { background:#12121C; border:1px solid var(--line); } }
+
+  blockquote { margin:0 0 1.4rem; padding:1.1rem 1.3rem; background:var(--surface);
+                border:1px solid var(--line); border-left:3px solid var(--noise); border-radius:10px; }
+  blockquote > :last-child { margin-bottom:0; }
+  blockquote h2, blockquote h3 { border-top:0; padding-top:0; margin-top:0; }
+
+  .scroll { overflow-x:auto; margin:0 0 1.4rem; }
+  table { border-collapse:collapse; width:100%; font-size:.93rem; }
+  th, td { text-align:left; vertical-align:top; padding:.6rem .8rem; border-top:1px solid var(--line); }
+  th { font:600 .72rem/1.2 var(--mono); letter-spacing:.08em; text-transform:uppercase;
+        color:var(--muted); border-top:0; }
+  td { color:var(--body); }
+
+  footer { margin-top:4rem; padding-top:1.5rem; border-top:1px solid var(--line);
+            font-size:.88rem; color:var(--muted); }
+  footer a { margin-right:1.1rem; }
+
+  /* Translated headings run longer than English, so let a compound break
+     rather than overflow. No auto-hyphenation — it bought nothing here and
+     cost a mid-word break in a display face. */
+  h1, h2, h3, h4 { overflow-wrap:break-word; }
+  /* The display face is tracked tight (-.035em) for Latin. That is wrong for
+     CJK, where it crowds the glyphs, and uppercase/letter-spacing tricks do
+     nothing for kana. */
+  :lang(ja) h1, :lang(ja) h2 { letter-spacing:0; }
+
+  /* Language switcher: a plain link row, no JS. */
+  .langs { margin-top:1rem; display:flex; flex-wrap:wrap; gap:.35rem 1.1rem; }
+  .langs a { margin-right:0; text-decoration:none; }
+  .langs a:hover { text-decoration:underline; }
+  .langs [aria-current] { color:var(--ink); font-weight:600; }
+</style>
+</head>
+<body>
+
+<div class="top"><div class="wrap"><a href="index.html">← ThreadMapper</a></div></div>
+
+<div class="wrap">
+<h1>Configurare una sonda ThreadMapper su un Raspberry Pi</h1>
+<p>Passo dopo passo, da una scrivania vuota ai dati Thread misurati nell’app.</p>
+<p>Mettici in conto una serata. Per la maggior parte è attesa: i download e una compilazione da circa 20 minuti.</p>
+<hr>
+<h2>Leggi questo prima di comprare qualsiasi cosa</h2>
+<p>Due cose decidono se ne vale la pena per la <em>tua</em> installazione. Sono entrambe facili da non notare finché non arrivano i pezzi.</p>
+<h3>1. Un Raspberry Pi non sa fare Thread da solo</h3>
+<p>In un Raspberry Pi non c’è nessuna radio 802.15.4. Il Wi-Fi e il Bluetooth sono radio diverse e non sanno parlare Thread. <strong>Ti serve una chiavetta USB</strong>, e sopra le serve il firmware RCP — che non è quello con cui queste chiavette vengono vendute.</p>
+<h3>2. Entrare nella <em>tua</em> rete Thread è la parte difficile</h3>
+<p>Un border router che forma una rete nuova tutta sua se ne starà lì a vedere soltanto se stesso. I tuoi dispositivi veri sono sulla rete creata dal tuo HomePod, dalla tua Apple TV o dal tuo hub Nest, e per osservarli la sonda deve <strong>entrare in quella rete</strong> — il che significa procurarsi le sue credenziali (l’Active Operational Dataset).</p>
+<div class="scroll"><table><thead><tr><th>La tua installazione</th><th>La sonda può entrare nella tua rete vera?</th></tr></thead><tbody><tr><td>Usi <strong>Home Assistant</strong></td><td><strong>Sì.</strong> L’app Companion di HA per iOS può estrarre le credenziali Thread di Apple — <em>Impostazioni → Dispositivi e servizi → Thread → Configura → Invia credenziali a Home Assistant</em> — e da lì puoi passare il dataset alla sonda.</td></tr><tr><td>Hai già un <strong>OTBR</strong> in funzione (per es. il componente aggiuntivo di HA)</td><td><strong>Sì.</strong> Leggi il dataset direttamente da lì.</td></tr><tr><td><strong>Solo border router Apple o Google</strong>, senza Home Assistant</td><td><strong>Oggi no.</strong> Non esiste alcun modo accessibile all’utente per esportare le credenziali Thread di Apple. Puoi comunque formare una rete <em>nuova</em> sulla sonda e aggregarvi qualche accessorio per vedere l’app funzionare da un capo all’altro, ma non ti mostrerà la tua rete mesh esistente.</td></tr></tbody></table></div>
+<p>Quella terza riga è un muro vero, e non è uno che questo progetto possa abbattere dall’esterno: la via autorizzata è l’entitlement <code>com.apple.developer.thread-network-credentials</code> di Apple, che ThreadMapper ha richiesto ma non possiede. Se venisse concesso, l’app potrebbe passare le tue credenziali direttamente alla sonda e tutta questa sezione sparirebbe.</p>
+<p><strong>Se ti trovi nella terza riga e vuoi soltanto tenere d’occhio la tua mesh Apple esistente, valuta di fermarti qui finché quell’entitlement non arriva.</strong></p>
+<hr>
+<h2>Lista della spesa</h2>
+<div class="scroll"><table><thead><tr><th>Componente</th><th>Note</th></tr></thead><tbody><tr><td>Raspberry Pi 4 o 5</td><td>2 GB di RAM sono più che sufficienti. Un Pi Zero 2 W funziona, ma la compilazione del passo 4 richiede molto più tempo.</td></tr><tr><td>Scheda microSD, 16 GB o più</td><td>Una qualsiasi di marca affidabile.</td></tr><tr><td>Alimentatore USB-C</td><td>Quello ufficiale; le chiavette Thread sono schizzinose sui cali di tensione.</td></tr><tr><td><strong>Una chiavetta 802.15.4</strong></td><td>Scegline una — vedi sotto.</td></tr></tbody></table></div>
+<p><strong>Le chiavette possibili</strong>, vanno bene entrambe:</p>
+<ul><li><strong>Chiavetta Nordic nRF52840</strong> (circa 10 $) — la più economica, e il firmware si compila dai sorgenti, quindi non c’è nessun download da cercare.</li><li><strong>SkyConnect / Sonoff ZBDongle-E</strong> (circa 25 $) — di Silicon Labs. Se ne hai già una per Home Assistant, usa quella. Per scriverle il firmware basta uno strumento da una riga.</li></ul>
+<hr>
+<h2>Passo 1 — Scrivi il firmware RCP sulla chiavetta</h2>
+<p>Fallo <strong>prima</strong> di toccare il Pi, sul tuo Mac o PC. È l’unico passo che l’installatore deliberatamente non automatizza: scrivere l’immagine sbagliata rende la chiavetta inservibile, e gli strumenti del produttore lo fanno come si deve.</p>
+<p>Il firmware RCP («Radio Co-Processor») trasforma la chiavetta in una radio stupida pilotata da <code>otbr-agent</code>. Una chiavetta venduta per Zigbee ha un firmware diverso e non funzionerà finché non la riscrivi.</p>
+<h3>Silicon Labs (SkyConnect, Sonoff ZBDongle-E)</h3>
+<pre class="lang-bash"><code>pipx install universal-silabs-flasher     # or: pip install universal-silabs-flasher
+universal-silabs-flasher --device /dev/tty.usbserial-XXXX probe
+universal-silabs-flasher --device /dev/tty.usbserial-XXXX flash --firmware &lt;ot-rcp-firmware.gbl&gt;</code></pre>
+<p>Prendi il <code>.gbl</code> di <code>ot-rcp</code> dalle release del firmware silabs di Home Assistant — le stesse immagini che usa il componente aggiuntivo OTBR. Fai corrispondere il file al modello esatto della tua chiavetta; SkyConnect e ZBDongle-E <strong>non</strong> sono intercambiabili.</p>
+<h3>Nordic nRF52840</h3>
+<p>Compila il firmware dal port Nordic di OpenThread, poi scrivilo via USB DFU:</p>
+<pre class="lang-bash"><code>git clone --recurse-submodules https://github.com/openthread/ot-nrf528xx.git
+cd ot-nrf528xx &amp;&amp; ./script/bootstrap &amp;&amp; ./script/build nrf52840 USB_trans
+# → build/bin/ot-rcp  (convert to .hex/.zip per the repo&#x27;s README, then:)
+nrfutil dfu usb-serial -pkg ot-rcp.zip -p /dev/tty.usbmodemXXXX</code></pre>
+<p>Per il passo di impacchettamento attuale segui il README di quel repository — cambia ogni tanto ed è meglio leggerlo lì che copiarlo qui.</p>
+<p><strong>Verifica che abbia funzionato:</strong> più avanti collega la chiavetta al Pi e <code>install.sh</code> riporterà <code>Found &lt;family&gt; radio at /dev/serial/by-id/...</code>. Se non trova nulla, il firmware non è stato scritto.</p>
+<hr>
+<h2>Passo 2 — Scrivi Raspberry Pi OS sulla scheda</h2>
+<ol><li>Installa <strong>Raspberry Pi Imager</strong>.</li><li>Scegli <strong>Raspberry Pi OS Lite (64 bit)</strong>. Lite — un desktop non serve.</li><li>Premi il pulsante <strong>dell’ingranaggio / Modifica impostazioni</strong> <em>prima</em> di scrivere, e imposta: - hostname: <code>threadmapper-probe</code> - <strong>Abilita SSH</strong>, con password o chiave - nome utente e password - le credenziali Wi-Fi, se non usi l’Ethernet</li><li>Scrivi la scheda, mettila nel Pi, collega la chiavetta, accendi.</li></ol>
+<p>Qui l’Ethernet è più affidabile del Wi-Fi, e un border router trae vantaggio da un collegamento a monte stabile. Usala se puoi.</p>
+<hr>
+<h2>Passo 3 — Accedi</h2>
+<pre class="lang-bash"><code>ssh &lt;your-username&gt;@threadmapper-probe.local</code></pre>
+<p>Se l’hostname non si risolve, trova l’IP del Pi nell’elenco dei client del tuo router e usa invece <code>ssh &lt;user&gt;@&lt;ip&gt;</code>.</p>
+<p>Prima di andare avanti, conferma che la chiavetta sia visibile:</p>
+<pre class="lang-bash"><code>ls -l /dev/serial/by-id/</code></pre>
+<p>Dovresti vedere una voce che nomina la tua chiavetta. <strong>Se è vuoto, fermati</strong> — il resto non funzionerà. Riestraila e rinseriscila, prova un’altra porta USB e ricontrolla il passo 1.</p>
+<hr>
+<h2>Passo 4 — Installa la sonda</h2>
+<pre class="lang-bash"><code>sudo apt-get update &amp;&amp; sudo apt-get install -y git
+git clone https://github.com/tintronix-lab/ThreadMapper.git
+sudo ./ThreadMapper/tools/pi-image/install.sh</code></pre>
+<p>Rileva la chiavetta, installa <code>otbr-agent</code> e l’agente della sonda, e abilita entrambi come servizi systemd.</p>
+<p><strong>Su un Pi 4 ci vogliono circa 20 minuti</strong>, quasi tutti spesi a compilare <code>otbr-agent</code>. Non è bloccato. Quando finisce stampa l’indirizzo della sonda.</p>
+<p>Se il rilevamento fallisce ma conosci il percorso del dispositivo:</p>
+<pre class="lang-bash"><code>sudo ./ThreadMapper/tools/pi-image/install.sh --radio-url spinel+hdlc+uart:///dev/ttyACM0</code></pre>
+<p>Rieseguirlo è sicuro — è idempotente, ed è così che aggiornerai l’agente più avanti.</p>
+<hr>
+<h2>Passo 5 — Entra in una rete Thread</h2>
+<p>Scegli la riga che ti corrispondeva in «Leggi questo prima di comprare qualsiasi cosa».</p>
+<h3>Percorso A — Entra nella tua rete esistente (quello che vuoi davvero)</h3>
+<p>Procurati l’Active Operational Dataset come stringa esadecimale da qualunque cosa già detenga le tue credenziali.</p>
+<p>Da un OTBR esistente (compreso il componente aggiuntivo di Home Assistant):</p>
+<pre class="lang-bash"><code>curl -s http://&lt;existing-otbr&gt;:8081/node/dataset/active \
+     -H &#x27;Accept: text/plain&#x27;</code></pre>
+<p>Restituisce una sola lunga stringa esadecimale. Sul Pi:</p>
+<pre class="lang-bash"><code>sudo ot-ctl dataset set active &lt;that-long-hex-string&gt;
+sudo ot-ctl ifconfig up
+sudo ot-ctl thread start</code></pre>
+<p>Aspetta circa 30 secondi, poi:</p>
+<pre class="lang-bash"><code>sudo ot-ctl state</code></pre>
+<p>Aspettati <code>child</code> oppure <code>router</code> — è entrata. <code>leader</code> qui vorrebbe dire che ha formato una rete tutta sua, che non è quello che vuoi su questo percorso.</p>
+<h3>Percorso B — Forma una rete nuova (per prova, o se non c’è modo di ottenere le credenziali)</h3>
+<pre class="lang-bash"><code>sudo ot-ctl dataset init new
+sudo ot-ctl dataset commit active
+sudo ot-ctl ifconfig up
+sudo ot-ctl thread start
+sudo ot-ctl state          # expect: leader</code></pre>
+<p>Ora hai una rete vuota con un solo nodo. Per vedere qualcosa di interessante devi aggregarvi degli accessori — il che significa prima toglierli dalla tua rete Apple. <strong>Non farlo con dispositivi su cui fai affidamento.</strong></p>
+<p>Stampa il dataset se più avanti vuoi aggiungerci altre cose:</p>
+<pre class="lang-bash"><code>sudo ot-ctl dataset active -x</code></pre>
+<hr>
+<h2>Passo 6 — Punta l’app su di essa</h2>
+<pre class="lang-bash"><code>curl http://localhost:8099/health</code></pre>
+<p>Aspettati <code>&quot;otCtlReachable&quot;: true</code> e un <code>role</code>. Poi, dal telefono collegato alla stessa rete, in <strong>ThreadMapper → Impostazioni → Sonda ThreadMapper</strong>:</p>
+<pre><code>http://threadmapper-probe.local:8099</code></pre>
+<p>Se <code>.local</code> non si risolve su iOS, usa invece l’indirizzo IP del Pi. Tocca <strong>Prova la connessione</strong> — se qualcosa non va dice qual è il problema, invece di mostrare solo una X rossa.</p>
+<hr>
+<h2>Passo 7 — Guarda che cosa hai ottenuto</h2>
+<ul><li><strong>Pannello → ⋯ → Rete Thread</strong> — RSSI misurato per singolo nodo, qualità del collegamento e la tabella di instradamento con costo del percorso e hop successivo. I nodi compaiono con l’indirizzo Thread, non con il nome; vedi «Che cosa non funziona ancora» più sotto.</li><li><strong>Rete mesh → strumenti → Scanner dei canali</strong> — ora con il badge <strong>Misurato</strong>. L’altezza delle barre è il livello di rumore reale su tutti e 16 i canali, e i canali consigliati sono i più silenziosi osservati davvero, non un’ipotesi ricavata da una tabella di sovrapposizioni con il Wi-Fi.</li></ul>
+<p>Lo Scanner dei canali è quello da guardare per primo. È la differenza più netta fra quello che l’app poteva mostrare prima e quello che può mostrare adesso.</p>
+<hr>
+<h2>Risoluzione dei problemi</h2>
+<div class="scroll"><table><thead><tr><th>Sintomo</th><th>Causa e rimedio</th></tr></thead><tbody><tr><td><code>install.sh</code> dice «No 802.15.4 dongle detected»</td><td>La chiavetta non c’è, oppure il passo 1 non è andato a buon fine. Controlla <code>ls /dev/serial/by-id/</code>.</td></tr><tr><td>Prova la connessione: <em>«non raggiunge il border router accanto»</em></td><td>L’agente è attivo ma <code>otbr-agent</code> no. <code>sudo systemctl status otbr-agent</code>, poi <code>journalctl -u otbr-agent -n 50</code>. Di solito è un radio URL sbagliato, o una chiavetta rimasta senza alimentazione.</td></tr><tr><td>Prova la connessione: <em>«non è un agente sonda di ThreadMapper»</em></td><td>Su quella porta sta rispondendo qualcos’altro. L’agente è sulla 8099; la 8081 è l’API REST del border router stesso.</td></tr><tr><td>Prova la connessione: <em>«Impossibile raggiungere quell’indirizzo»</em></td><td>IP sbagliato, oppure il telefono è su una subnet diversa o su una VLAN ospiti.</td></tr><tr><td><code>ot-ctl state</code> dice <code>detached</code></td><td>Ha le credenziali ma non trova la rete. Dataset sbagliato, oppure fuori dalla portata radio di ogni altro nodo.</td></tr><tr><td><code>ot-ctl state</code> dice <code>disabled</code></td><td><code>ifconfig up</code> / <code>thread start</code> non sono stati eseguiti, oppure la radio non è riuscita a partire.</td></tr><tr><td>La schermata Rete Thread non ha nessun peer</td><td>La sonda è sulla sua rete — controlla di non essere <code>leader</code> quando volevi entrare in una rete esistente.</td></tr><tr><td>Funziona tutto, poi dopo un riavvio muore</td><td><code>systemctl is-enabled otbr-agent threadmapper-probe</code> — entrambi devono dire <code>enabled</code>.</td></tr></tbody></table></div>
+<p>I log di entrambi i servizi insieme:</p>
+<pre class="lang-bash"><code>journalctl -u threadmapper-probe -u otbr-agent -f</code></pre>
+<hr>
+<h2>Che cosa non funziona ancora</h2>
+<p><strong>I nodi compaiono senza nome.</strong> Thread identifica un nodo tramite il suo indirizzo esteso; HomeKit identifica un accessorio tramite un identificatore opaco, e niente collega i due. Vedrai quindi una topologia reale e corretta fatta di nodi anonimi, invece di «la lampada della cucina».</p>
+<p>La soluzione è costruita ma non finita: l’endpoint <code>/traffic</code> dell’agente riporta l’attività per singolo nodo, quindi azionare un dispositivo tramite HomeKit e guardare quale nodo risponde li legherebbe insieme. Per sviluppare quell’interazione servono accessori veri su una mesh vera, che è esattamente ciò che avrai una volta che tutto questo sarà in funzione. Tracciato come <strong>H1</strong> in <code>WORKPLAN.md</code>.</p>
+<p><strong>La scheda Rete mesh resta dedotta.</strong> Il suo grafico è costruito a partire dagli accessori HomeKit, quindi non può usare i dati della sonda finché non si risolve quanto sopra. Le schermate che mostrano misure sono Rete Thread e Scanner dei canali.</p>
+<hr>
+<h2>Se qui c’è qualcosa di sbagliato</h2>
+<p>Questa guida non è stata percorsa da capo a fondo su hardware reale — nel progetto nessuno ha ancora un Pi o una chiavetta. Lo script di provisioning è testato su Debian Bookworm arm64 e ogni endpoint dell’agente è testato contro un <code>otbr-agent</code> vero su una radio simulata, ma i passi fisici qui sopra sono scritti a partire dalla documentazione dei produttori, non dall’averli eseguiti.</p>
+<p>Se un passo è sbagliato, vale la pena correggerlo in questo file.</p>
+
+<footer>
+  <a href="index.html">Home</a>
+  <a href="support.html">Assistenza</a>
+  <a href="privacy.html">Privacy</a>
+  <a href="https://github.com/tintronix-lab/ThreadMapper">Codice sorgente</a>
+  <nav class="langs" aria-label="Lingua"><a href="../probe-setup.html" hreflang="en" lang="en">English</a><a href="../sv/probe-setup.html" hreflang="sv" lang="sv">Svenska</a><a href="../de/probe-setup.html" hreflang="de" lang="de">Deutsch</a><a href="../fr/probe-setup.html" hreflang="fr" lang="fr">Français</a><a href="../es/probe-setup.html" hreflang="es" lang="es">Español</a><span aria-current="true">Italiano</span><a href="../ja/probe-setup.html" hreflang="ja" lang="ja">日本語</a><a href="../nl/probe-setup.html" hreflang="nl" lang="nl">Nederlands</a><a href="../pt-br/probe-setup.html" hreflang="pt-BR" lang="pt-BR">Português (BR)</a></nav>
+</footer>
+</div>
+
+</body>
+</html>

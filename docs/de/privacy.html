@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ThreadMapper — Datenschutzerklärung</title>
+<meta name="description" content="ThreadMapper erhebt keine personenbezogenen Daten. Keine Accounts, keine Analyse, keine Server. Was die App liest, wo es gespeichert wird und die zwei optionalen iCloud-Funktionen – in verständlicher Sprache.">
+<!-- Generated from site/privacy.html.tmpl by tools/build-docs.py — edit the template
+     and site/strings/privacy.*.json, not this file. -->
+<link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/de/privacy.html">
+<link rel="alternate" hreflang="en" href="https://tintronix-lab.github.io/ThreadMapper/privacy.html">
+<link rel="alternate" hreflang="sv" href="https://tintronix-lab.github.io/ThreadMapper/sv/privacy.html">
+<link rel="alternate" hreflang="de" href="https://tintronix-lab.github.io/ThreadMapper/de/privacy.html">
+<link rel="alternate" hreflang="fr" href="https://tintronix-lab.github.io/ThreadMapper/fr/privacy.html">
+<link rel="alternate" hreflang="es" href="https://tintronix-lab.github.io/ThreadMapper/es/privacy.html">
+<link rel="alternate" hreflang="it" href="https://tintronix-lab.github.io/ThreadMapper/it/privacy.html">
+<link rel="alternate" hreflang="ja" href="https://tintronix-lab.github.io/ThreadMapper/ja/privacy.html">
+<link rel="alternate" hreflang="nl" href="https://tintronix-lab.github.io/ThreadMapper/nl/privacy.html">
+<link rel="alternate" hreflang="pt-BR" href="https://tintronix-lab.github.io/ThreadMapper/pt-br/privacy.html">
+<link rel="alternate" hreflang="x-default" href="https://tintronix-lab.github.io/ThreadMapper/privacy.html">
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    max-width: 44rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem;
+    color: #1c1c1e; background: #fff;
+  }
+  @media (prefers-color-scheme: dark) { body { color: #f2f2f7; background: #000; } }
+  h1 { font-size: 1.9rem; margin-bottom: .25rem; }
+  h2 { font-size: 1.15rem; margin-top: 2.25rem; }
+  /* Without this, the browser default (1.17em) renders h3 *larger* than h2. */
+  h3 { font-size: 1rem; margin-top: 1.75rem; margin-bottom: .35rem; }
+  .updated { color: #8e8e93; font-size: .9rem; margin-top: 0; }
+  .highlight { border-left: 3px solid #0a84ff; padding: .6rem 0 .6rem 1rem; margin: 1.5rem 0; }
+  ul { padding-left: 1.2rem; }
+  li { margin: .4rem 0; }
+  a { color: #0a84ff; }
+  footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid #d1d1d6; font-size: .9rem; color: #8e8e93; }
+  /* Translated headings run longer than English, so let a compound break rather
+     than overflow. No auto-hyphenation: measured across all nine catalogs, no
+     headline word comes near its container, and it cost a mid-word break in a
+     display face. */
+  h1, h2, h3 { overflow-wrap: break-word; }
+  /* The switcher is a plain link row: no JS, and it works as a list for screen readers. */
+  .langs { margin-top: 1.25rem; display: flex; flex-wrap: wrap; gap: .35rem .9rem; }
+  .langs a { text-decoration: none; }
+  .langs a:hover { text-decoration: underline; }
+  .langs [aria-current] { color: #1c1c1e; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { .langs [aria-current] { color: #f2f2f7; } }
+  :lang(ja) h1, :lang(ja) h2 { letter-spacing: 0; }
+</style>
+</head>
+<body>
+
+<h1>Datenschutzerklärung</h1>
+<p class="updated">ThreadMapper · Zuletzt aktualisiert am 26. August 2026</p>
+
+<div class="highlight">
+  <strong>ThreadMapper erhebt Ihre personenbezogenen Daten nicht, überträgt sie nicht und verkauft sie nicht.</strong> Es gibt keine Accounts, keine Analyse-SDKs und keine Tracker von Drittanbietern. Alles, was die App aufzeichnet, bleibt auf Ihrem Gerät – oder, wenn Sie eine der beiden optionalen iCloud-Funktionen nutzen, in Ihrem eigenen iCloud-Account. In beiden Fällen erreicht es uns nie.
+</div>
+
+<h2>Was ThreadMapper liest</h2>
+<ul>
+  <li><strong>HomeKit-Zubehördaten</strong> – Namen, Räume, Hersteller, Modell, Erreichbarkeit und Batteriestand des Zubehörs in Ihrem Zuhause. Das wird mit Ihrer Erlaubnis aus Apples HomeKit-Framework gelesen und dient dazu, die Ansicht Ihres Thread-Netzes aufzubauen.</li>
+  <li><strong>Ungefährer Standort</strong> – nur während Sie aktiv einen Messrundgang durchführen, und nur, um Signalmesswerte zu kennzeichnen, damit sie auf einer Heatmap dargestellt werden können. Der Standort wird zu Beginn einer Messung angefragt, nie beim Start der App. Messwerte ohne Standortbestimmung werden ohne Koordinaten gespeichert, statt erfundene zu bekommen.</li>
+  <li><strong>Signalmessungen</strong> – Schätzungen der Antwortqualität, die die App selbst ableitet, indem sie die Antwortzeiten des Zubehörs misst.</li>
+  <li><strong>Ihr lokales Netzwerk</strong> – die App sucht nach Thread Border Routern und Matter-Geräten, die sich in Ihrem Netzwerk ankündigen, und liest, was sie dort über sich selbst veröffentlichen: ihre Namen, Modelle und ob sie bereits gekoppelt sind. So kann sie Hardware beschreiben, die Apple Home nicht auflistet. Es ist ein Lesen dessen, was diese Geräte aussenden; die App verbindet sich nicht mit ihnen.</li>
+  <li><strong>Kamera</strong> – um QR-Codes für die Matter-Einrichtung zu lesen, um Ihre Position in Innenräumen während eines AR-Messrundgangs zu verfolgen und, wenn Sie einen Raumscan starten, um die Form des Raums zu vermessen und einen Grundriss zu erstellen. Es werden weder Fotos noch Videos aufgenommen oder gespeichert.</li>
+  <li><strong>Bluetooth</strong> – um Matter-Geräte zu sehen, die sich in der Nähe zur Einrichtung ankündigen, damit die App zeigen kann, was auf die Inbetriebnahme wartet. Die App sucht nur, solange Sie diese Ansicht geöffnet haben.</li>
+  <li><strong>Barometer</strong> – nur während eines AR-Messrundgangs, um zu erkennen, auf welchem Stockwerk ein Messwert aufgenommen wurde.</li>
+</ul>
+<p>Jede dieser Berechtigungen wird in dem Moment angefragt, in dem sie zum ersten Mal gebraucht wird, und nicht beim Start; und jede ist optional außer HomeKit, denn nur darüber liest die App Ihr Thread-Netzwerk überhaupt. Wenn Sie eine der anderen ablehnen, schaltet das genau die Funktion ab, die danach gefragt hat, und sonst nichts.</p>
+
+<h2>Wo es gespeichert wird</h2>
+<p>Standardmäßig wird alles – Geräteverlauf, Messpunkte, Aktivitätsereignisse, Notizen und Einstellungen – lokal auf Ihrem Gerät gespeichert (im eigenen Container der App, in einer App-Gruppe, die sie mit dem Widget und der Apple-Watch-App teilt, und in den üblichen Benutzereinstellungen). Nichts davon wird zu uns hochgeladen. Wir betreiben keine Server und erhalten keine Kopie davon. Das Einzige, was das Gerät jemals verlässt, sind die beiden optionalen iCloud-Funktionen weiter unten, und beide gehen an Ihren eigenen Apple-Account statt an uns.</p>
+
+<h2>iCloud</h2>
+<p>Es gibt zwei getrennte iCloud-Funktionen, beide optional, beide gehen an <em>Ihren eigenen</em> Apple-Account. Keine davon ist ein Dienst von uns: Wir haben auf keine von beiden Zugriff und erhalten keine Kopie.</p>
+<h3>iCloud-Synchronisierung (ein Schalter, fortlaufend)</h3>
+<p>Wenn Sie die <strong>iCloud-Synchronisierung</strong> einschalten – sie ist aus, solange Sie sie nicht aktivieren –, werden Ihre Gerätenotizen, Thread-Überschreibungen und App-Einstellungen in Ihren privaten iCloud-Schlüssel-Wert-Speicher kopiert, damit sie auf Ihren anderen Geräten erscheinen.</p>
+<p>Signalverlauf, Messwerte aus Messungen und Aufzeichnungen der Sonde sind von dieser fortlaufenden Synchronisierung bewusst ausgenommen und bleiben auf dem Gerät, das sie aufgenommen hat. Messwerte hängen davon ab, wo dieses Gerät stand; sie zwischen Geräten zusammenzuführen, ergäbe daher einen Verlauf, der keines von beiden beschreibt.</p>
+<h3>In iCloud speichern (eine Taste, manuell)</h3>
+<p>Davon getrennt erstellt <strong>In iCloud speichern</strong> in den Einstellungen eine vollständige Sicherung dieses Geräts als ein Bündel: Ihre Einstellungen, Notizen, gescannten Räume, Grundrisse, die Positionen, an denen Sie Geräte platziert haben, den gesicherten AR-Raum und <strong>Ihre Messwerte</strong> – einschließlich der Koordinaten, Zeitstempel und Raumnamen, die daran hängen. Es gibt sie, damit Sie Ihre Arbeit auf ein anderes iPhone übertragen können.</p>
+<p>Nur hier verlassen Ihre Messwerte jemals das Gerät, und das ist bewusst manuell: Es wird nichts hochgeladen, bis Sie auf „Speichern“ tippen. Die Sicherung liegt dann in Ihrem eigenen iCloud Drive, wo Ihre Dateien-App sie sehen kann und Sie sie löschen können – und niemand sonst sie lesen kann. Wenn Sie nie auf „Speichern“ tippen, wird auch nie etwas geschrieben.</p>
+
+<h2>Funktionen mit künstlicher Intelligenz</h2>
+<p>Unter iOS 26 und neuer laufen die KI-Funktionen von ThreadMapper (Erkenntnisse, Netzwerkassistent, Fehlersuche und Berichte) vollständig <strong>auf dem Gerät</strong>, über Apples Foundation-Models-Framework. Ihre Netzwerkdaten werden weder an uns noch an einen KI-Dienst von Drittanbietern gesendet.</p>
+
+<h2>Netzwerkverbindungen</h2>
+<p>ThreadMapper sendet keine Analyse- oder Werbeanfragen und kontaktiert keinen Server von uns, weil es keinen gibt. Im Netzwerk tut die App Folgendes:</p>
+<ul>
+  <li><strong>Hört auf Geräte, die sich in Ihrem lokalen Netzwerk ankündigen</strong> – die Standard-Bonjour-Erkennung, die iOS bereitstellt. So findet die App Border Router und Matter-Geräte, auch solche, die Apple Home nicht auflistet. Sie liest, was diese Geräte über sich aussenden; sie verbindet sich nicht mit ihnen und sendet ihnen nichts.</li>
+  <li>Verbindet sich mit einem <strong>OpenThread Border Router</strong>, falls Sie einen einrichten – in Ihrem eigenen lokalen Netzwerk, unter einer Adresse, die Sie selbst eingeben;</li>
+  <li>Verbindet sich mit einer <strong>ThreadMapper-Sonde</strong>, falls Sie eine betreiben – ebenfalls in Ihrem eigenen lokalen Netzwerk, unter einer Adresse, die Sie selbst eingeben;</li>
+  <li>Erreicht <strong>Apples iCloud</strong>, nur für die beiden optionalen Funktionen oben und nur Ihren eigenen Account.</li>
+</ul>
+<p>Es gibt keinen ThreadMapper-Server, mit dem sich die App verbinden könnte. Es hat nie einen gegeben.</p>
+
+<h2>Käufe</h2>
+<p>ThreadMapper Pro wird vollständig über Apples System für In-App-Käufe abgewickelt. Wir sehen und speichern Ihre Zahlungsdaten nie. Für diesen Vorgang gilt Apples eigene Datenschutzerklärung.</p>
+
+<h2>Weitergabe von Daten</h2>
+<p>Wir geben Ihre Daten an niemanden weiter, verkaufen sie nicht, vermieten sie nicht und legen sie niemandem offen – weil wir sie nie erhalten. Alles, was Sie exportieren (eine CSV-Datei mit Messdaten oder ein Diagnose-PDF), verlässt die App nur, wenn Sie es bewusst teilen, und geht dorthin, wohin Sie es senden.</p>
+
+<h2>Kinder</h2>
+<p>ThreadMapper ist ein Netzwerkwerkzeug und richtet sich nicht an Kinder. Die App erhebt von niemandem personenbezogene Daten, auch nicht von Kindern.</p>
+
+<h2>Ihre Kontrolle</h2>
+<p>Sie können jede Berechtigung – HomeKit, Ortungsdienste, Kamera, Bluetooth oder Bewegung &amp; Fitness – jederzeit in den iOS-Einstellungen widerrufen. Wenn Sie die App löschen, werden alle lokal gespeicherten Daten entfernt. Die App bietet außerdem eigene Bedienelemente, um den Aktivitätsverlauf und gespeicherte Messdaten zu löschen. Wenn Sie <strong>In iCloud speichern</strong> verwendet haben, liegt diese Sicherung in Ihrem iCloud Drive und nicht in der App – sie erscheint in der App „Dateien“ als Ordner namens ThreadMapper –, sodass das Löschen der App sie nicht löscht. Entfernen Sie sie in „Dateien“, wann immer Sie sie loswerden möchten.</p>
+
+<h2>Änderungen</h2>
+<p>Wenn sich diese Erklärung ändert, wird die aktualisierte Fassung mit neuem Datum auf dieser Seite veröffentlicht.</p>
+
+<h2>Kontakt</h2>
+<p>Fragen zum Datenschutz: <a href="mailto:tintronix@gmail.com">tintronix@gmail.com</a></p>
+
+<footer>
+  ThreadMapper wird von Tintronix Lab entwickelt.
+  <a href="support.html">Support</a>
+  <nav class="langs" aria-label="Sprache"><a href="../privacy.html" hreflang="en" lang="en">English</a><a href="../sv/privacy.html" hreflang="sv" lang="sv">Svenska</a><span aria-current="true">Deutsch</span><a href="../fr/privacy.html" hreflang="fr" lang="fr">Français</a><a href="../es/privacy.html" hreflang="es" lang="es">Español</a><a href="../it/privacy.html" hreflang="it" lang="it">Italiano</a><a href="../ja/privacy.html" hreflang="ja" lang="ja">日本語</a><a href="../nl/privacy.html" hreflang="nl" lang="nl">Nederlands</a><a href="../pt-br/privacy.html" hreflang="pt-BR" lang="pt-BR">Português (BR)</a></nav>
+</footer>
+
+</body>
+</html>

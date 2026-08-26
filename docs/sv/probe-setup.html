@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bygg en ThreadMapper-sond — ThreadMapper</title>
+<meta name="description" content="Steg för steg: gör en Raspberry Pi och en 802.15.4-dongel till en ThreadMapper-sond, så att appen kan visa uppmätt Thread-signal, routing och störningar.">
+<meta name="theme-color" content="#0B1020">
+<!-- Generated from tools/pi-image/SETUP.sv.md by tools/build-docs.py — edit the Markdown, not this file. -->
+<link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/sv/probe-setup.html">
+<link rel="alternate" hreflang="en" href="https://tintronix-lab.github.io/ThreadMapper/probe-setup.html">
+<link rel="alternate" hreflang="sv" href="https://tintronix-lab.github.io/ThreadMapper/sv/probe-setup.html">
+<link rel="alternate" hreflang="de" href="https://tintronix-lab.github.io/ThreadMapper/de/probe-setup.html">
+<link rel="alternate" hreflang="fr" href="https://tintronix-lab.github.io/ThreadMapper/fr/probe-setup.html">
+<link rel="alternate" hreflang="es" href="https://tintronix-lab.github.io/ThreadMapper/es/probe-setup.html">
+<link rel="alternate" hreflang="it" href="https://tintronix-lab.github.io/ThreadMapper/it/probe-setup.html">
+<link rel="alternate" hreflang="ja" href="https://tintronix-lab.github.io/ThreadMapper/ja/probe-setup.html">
+<link rel="alternate" hreflang="nl" href="https://tintronix-lab.github.io/ThreadMapper/nl/probe-setup.html">
+<link rel="alternate" hreflang="pt-BR" href="https://tintronix-lab.github.io/ThreadMapper/pt-br/probe-setup.html">
+<link rel="alternate" hreflang="x-default" href="https://tintronix-lab.github.io/ThreadMapper/probe-setup.html">
+<style>
+  :root {
+    color-scheme: light dark;
+    --ink:#0B1020; --paper:#FBFAFD; --surface:#F3F1F9; --line:#E2DEEE;
+    --body:#3A3A46; --muted:#5C5C6E; --signal:#1D5DBF; --noise:#4A2C9C;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink:#F2F1F7; --paper:#08090F; --surface:#14141F; --line:#262636;
+             --body:#B9B9C6; --muted:#85859A; --signal:#6FB2FF; --noise:#9878DE; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+          font:16.5px/1.7 var(--sans); -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:46rem; margin:0 auto; padding:0 1.5rem 5rem; }
+  a { color:var(--signal); text-underline-offset:2px; }
+  a:focus-visible { outline:2px solid var(--signal); outline-offset:3px; border-radius:3px; }
+
+  .top { border-bottom:1px solid var(--line); margin-bottom:3rem; }
+  .top .wrap { padding-top:1.25rem; padding-bottom:1.25rem; }
+  .top a { font:600 .8rem/1 var(--mono); letter-spacing:.04em; text-decoration:none; color:var(--muted); }
+  .top a:hover { color:var(--ink); }
+
+  h1 { font:500 clamp(1.9rem,4.5vw,2.6rem)/1.1 var(--mono); letter-spacing:-.035em; margin:0 0 2rem; }
+  h2 { font:500 1.35rem/1.25 var(--mono); letter-spacing:-.02em; margin:3rem 0 .9rem;
+        padding-top:1.5rem; border-top:1px solid var(--line); }
+  h3 { font:600 1.02rem/1.35 var(--sans); margin:2rem 0 .6rem; }
+  h4 { font:600 .95rem/1.35 var(--sans); margin:1.5rem 0 .5rem; }
+  p { margin:0 0 1.1rem; color:var(--body); }
+  strong { color:var(--ink); font-weight:600; }
+  hr { border:0; border-top:1px solid var(--line); margin:2.5rem 0; }
+  /* The Markdown uses `---` before major sections and h2 already draws its own
+     rule, which renders as two lines a few pixels apart. */
+  hr + h2 { border-top:0; padding-top:0; margin-top:0; }
+
+  ul, ol { margin:0 0 1.2rem; padding-left:1.3rem; color:var(--body); }
+  li { margin:.45rem 0; }
+  li::marker { color:var(--noise); }
+
+  code { font:.88em/1.5 var(--mono); background:var(--surface); padding:.12em .35em;
+          border-radius:4px; word-break:break-word; }
+  pre { background:var(--ink); color:var(--paper); border-radius:10px;
+         padding:1rem 1.15rem; overflow-x:auto; margin:0 0 1.4rem; }
+  pre code { background:none; padding:0; color:inherit; font-size:.84rem; line-height:1.7; }
+  @media (prefers-color-scheme: dark) { pre { background:#12121C; border:1px solid var(--line); } }
+
+  blockquote { margin:0 0 1.4rem; padding:1.1rem 1.3rem; background:var(--surface);
+                border:1px solid var(--line); border-left:3px solid var(--noise); border-radius:10px; }
+  blockquote > :last-child { margin-bottom:0; }
+  blockquote h2, blockquote h3 { border-top:0; padding-top:0; margin-top:0; }
+
+  .scroll { overflow-x:auto; margin:0 0 1.4rem; }
+  table { border-collapse:collapse; width:100%; font-size:.93rem; }
+  th, td { text-align:left; vertical-align:top; padding:.6rem .8rem; border-top:1px solid var(--line); }
+  th { font:600 .72rem/1.2 var(--mono); letter-spacing:.08em; text-transform:uppercase;
+        color:var(--muted); border-top:0; }
+  td { color:var(--body); }
+
+  footer { margin-top:4rem; padding-top:1.5rem; border-top:1px solid var(--line);
+            font-size:.88rem; color:var(--muted); }
+  footer a { margin-right:1.1rem; }
+
+  /* Translated headings run longer than English, so let a compound break
+     rather than overflow. No auto-hyphenation — it bought nothing here and
+     cost a mid-word break in a display face. */
+  h1, h2, h3, h4 { overflow-wrap:break-word; }
+  /* The display face is tracked tight (-.035em) for Latin. That is wrong for
+     CJK, where it crowds the glyphs, and uppercase/letter-spacing tricks do
+     nothing for kana. */
+  :lang(ja) h1, :lang(ja) h2 { letter-spacing:0; }
+
+  /* Language switcher: a plain link row, no JS. */
+  .langs { margin-top:1rem; display:flex; flex-wrap:wrap; gap:.35rem 1.1rem; }
+  .langs a { margin-right:0; text-decoration:none; }
+  .langs a:hover { text-decoration:underline; }
+  .langs [aria-current] { color:var(--ink); font-weight:600; }
+</style>
+</head>
+<body>
+
+<div class="top"><div class="wrap"><a href="index.html">← ThreadMapper</a></div></div>
+
+<div class="wrap">
+<h1>Ställa in en ThreadMapper-sond på en Raspberry Pi</h1>
+<p>Steg för steg, från ett tomt skrivbord till uppmätta Thread-data i appen.</p>
+<p>Räkna med en kväll. Det mesta är väntan på nedladdningar och ett bygge på cirka 20 minuter.</p>
+<hr>
+<h2>Läs det här innan du köper något</h2>
+<p>Två saker avgör om det här är värt att göra för <em>din</em> uppsättning. Båda är lätta att missa tills delarna ligger på bordet.</p>
+<h3>1. En Raspberry Pi klarar inte Thread på egen hand</h3>
+<p>Det finns ingen 802.15.4-radio i en Raspberry Pi. Wi-Fi och Bluetooth är andra radiosystem och kan inte tala Thread. <strong>Du behöver en USB-dongel</strong>, och den behöver RCP-firmware — vilket inte är vad de här donglarna levereras med.</p>
+<h3>2. Att gå med i <em>ditt</em> Thread-nätverk är den svåra biten</h3>
+<p>En gränsrouter som bildar sitt eget nya nätverk kommer bara att sitta där och se ingenting annat än sig själv. Dina verkliga enheter finns på det nätverk som din HomePod, Apple TV eller Nest-hubb skapade, och för att kunna observera dem måste sonden <strong>gå med i det nätverket</strong> — vilket innebär att få tag på dess autentiseringsuppgifter (Active Operational Dataset).</p>
+<div class="scroll"><table><thead><tr><th>Din uppsättning</th><th>Kan sonden gå med i ditt riktiga nätverk?</th></tr></thead><tbody><tr><td>Du kör <strong>Home Assistant</strong></td><td><strong>Ja.</strong> HA:s iOS Companion-app kan hämta Apples Thread-autentiseringsuppgifter — <em>Settings → Devices &amp; services → Thread → Configure → Send credentials to Home Assistant</em> — och därifrån kan du lämna över datasetet till sonden.</td></tr><tr><td>Du kör redan en <strong>OTBR</strong> (t.ex. HA:s tillägg)</td><td><strong>Ja.</strong> Läs av datasetet direkt från den.</td></tr><tr><td><strong>Enbart gränsroutrar från Apple eller Google</strong>, ingen Home Assistant</td><td><strong>Inte idag.</strong> Det finns inget sätt för användare att exportera Apples Thread-autentiseringsuppgifter. Du kan fortfarande bilda ett <em>nytt</em> nätverk på sonden och driftsätta några tillbehör i det för att se appen fungera hela vägen, men det visar dig inte ditt befintliga mesh-nät.</td></tr></tbody></table></div>
+<p>Den tredje raden är en verklig vägg, och inte en som det här projektet kan riva utifrån: den sanktionerade vägen är Apples rättighet <code>com.apple.developer.thread-network-credentials</code>, som ThreadMapper har ansökt om men inte har. Om den beviljas kan appen lämna över dina autentiseringsuppgifter direkt till sonden och hela det här avsnittet försvinner.</p>
+<p><strong>Hamnar du på den tredje raden och bara vill övervaka ditt befintliga Apple-mesh-nät, bör du överväga att stanna här tills den rättigheten är på plats.</strong></p>
+<hr>
+<h2>Inköpslista</h2>
+<div class="scroll"><table><thead><tr><th>Artikel</th><th>Kommentar</th></tr></thead><tbody><tr><td>Raspberry Pi 4 eller 5</td><td>2 GB RAM räcker gott. En Pi Zero 2 W fungerar, men bygget i steg 4 tar mycket längre tid.</td></tr><tr><td>microSD-kort, 16 GB+</td><td>Vilket välrenommerat märke som helst.</td></tr><tr><td>USB-C-nätaggregat</td><td>Det officiella; Thread-donglar är känsliga för spänningsfall.</td></tr><tr><td><strong>En 802.15.4-dongel</strong></td><td>Välj en — se nedan.</td></tr></tbody></table></div>
+<p><strong>Dongelalternativ</strong>, båda fungerar:</p>
+<ul><li><strong>Nordic nRF52840-dongel</strong> (~10 dollar) — billigast, och firmware byggs från källkod så du slipper leta efter en nedladdning.</li><li><strong>SkyConnect / Sonoff ZBDongle-E</strong> (~25 dollar) — Silicon Labs. Har du redan en för Home Assistant, använd den. Flashningen sköts av ett verktyg med ett enda kommando.</li></ul>
+<hr>
+<h2>Steg 1 — Lägg RCP-firmware på dongeln</h2>
+<p>Gör det här <strong>innan</strong> du rör din Pi, på din Mac eller PC. Det är det enda steget som installationsprogrammet medvetet inte automatiserar: att flasha fel avbild förstör dongeln, och tillverkarnas egna verktyg gör det ordentligt.</p>
+<p>RCP-firmware (”Radio Co-Processor”) gör dongeln till en dum radio som <code>otbr-agent</code> styr. En dongel som levererats för Zigbee har annan firmware och fungerar inte förrän den flashas om.</p>
+<h3>Silicon Labs (SkyConnect, Sonoff ZBDongle-E)</h3>
+<pre class="lang-bash"><code>pipx install universal-silabs-flasher     # or: pip install universal-silabs-flasher
+universal-silabs-flasher --device /dev/tty.usbserial-XXXX probe
+universal-silabs-flasher --device /dev/tty.usbserial-XXXX flash --firmware &lt;ot-rcp-firmware.gbl&gt;</code></pre>
+<p>Hämta <code>.gbl</code>-filen för <code>ot-rcp</code> från releaserna av Home Assistants silabs-firmware — samma avbilder som OTBR-tillägget använder. Matcha filen mot din exakta dongelmodell; SkyConnect och ZBDongle-E är <strong>inte</strong> utbytbara.</p>
+<h3>Nordic nRF52840</h3>
+<p>Bygg firmware från OpenThreads Nordic-port och flasha sedan över USB DFU:</p>
+<pre class="lang-bash"><code>git clone --recurse-submodules https://github.com/openthread/ot-nrf528xx.git
+cd ot-nrf528xx &amp;&amp; ./script/bootstrap &amp;&amp; ./script/build nrf52840 USB_trans
+# → build/bin/ot-rcp  (convert to .hex/.zip per the repo&#x27;s README, then:)
+nrfutil dfu usb-serial -pkg ot-rcp.zip -p /dev/tty.usbmodemXXXX</code></pre>
+<p>Följ README i det repot för det aktuella paketeringssteget — det ändras då och då och är bättre att läsa där än att kopiera hit.</p>
+<p><strong>Kontrollera att det gick vägen:</strong> sätt i dongeln i din Pi längre fram, så rapporterar <code>install.sh</code> <code>Found &lt;family&gt; radio at /dev/serial/by-id/...</code>. Hittar den ingenting, gick flashningen inte igenom.</p>
+<hr>
+<h2>Steg 2 — Flasha Raspberry Pi OS</h2>
+<ol><li>Installera <strong>Raspberry Pi Imager</strong>.</li><li>Välj <strong>Raspberry Pi OS Lite (64-bit)</strong>. Lite — det behövs inget skrivbord.</li><li>Klicka på knappen <strong>kugghjul / Edit Settings</strong> <em>innan</em> du skriver, och ställ in: - värdnamn: <code>threadmapper-probe</code> - <strong>Enable SSH</strong>, med lösenord eller nyckel - användarnamn och lösenord - Wi-Fi-uppgifter, om du inte använder Ethernet</li><li>Skriv kortet, sätt i det i din Pi, anslut dongeln och slå på strömmen.</li></ol>
+<p>Ethernet är mer tillförlitligt än Wi-Fi här, och en gränsrouter mår bra av en stabil upplänk. Använd det om du kan.</p>
+<hr>
+<h2>Steg 3 — Logga in</h2>
+<pre class="lang-bash"><code>ssh &lt;your-username&gt;@threadmapper-probe.local</code></pre>
+<p>Om värdnamnet inte går att slå upp, leta rätt på din Pis IP-adress i routerns klientlista och kör <code>ssh &lt;user&gt;@&lt;ip&gt;</code> i stället.</p>
+<p>Bekräfta att dongeln syns innan du går vidare:</p>
+<pre class="lang-bash"><code>ls -l /dev/serial/by-id/</code></pre>
+<p>Du bör se en post som namnger din dongel. <strong>Är listan tom, stanna</strong> — resten kommer inte att fungera. Sätt i den på nytt, prova en annan USB-port och gå igenom steg 1 igen.</p>
+<hr>
+<h2>Steg 4 — Installera sonden</h2>
+<pre class="lang-bash"><code>sudo apt-get update &amp;&amp; sudo apt-get install -y git
+git clone https://github.com/tintronix-lab/ThreadMapper.git
+sudo ./ThreadMapper/tools/pi-image/install.sh</code></pre>
+<p>Det identifierar dongeln, installerar <code>otbr-agent</code> och sondagenten och aktiverar båda som systemd-tjänster.</p>
+<p><strong>Det här tar ~20 minuter på en Pi 4</strong>, nästan allt av det kompilering av <code>otbr-agent</code>. Installationen har inte hängt sig. När den är klar skriver den ut sondens adress.</p>
+<p>Om identifieringen misslyckas men du känner till enhetssökvägen:</p>
+<pre class="lang-bash"><code>sudo ./ThreadMapper/tools/pi-image/install.sh --radio-url spinel+hdlc+uart:///dev/ttyACM0</code></pre>
+<p>Det är säkert att köra om — skriptet är idempotent, och det är så du uppgraderar agenten längre fram.</p>
+<hr>
+<h2>Steg 5 — Kom in på ett Thread-nätverk</h2>
+<p>Välj den rad som stämde in på dig i ”Läs det här innan du köper något”.</p>
+<h3>Väg A — Gå med i ditt befintliga nätverk (det du egentligen vill)</h3>
+<p>Hämta Active Operational Dataset som en hexsträng från det som redan har dina autentiseringsuppgifter.</p>
+<p>Från en befintlig OTBR (inklusive Home Assistants tillägg):</p>
+<pre class="lang-bash"><code>curl -s http://&lt;existing-otbr&gt;:8081/node/dataset/active \
+     -H &#x27;Accept: text/plain&#x27;</code></pre>
+<p>Det ger tillbaka en enda lång hexsträng. På din Pi:</p>
+<pre class="lang-bash"><code>sudo ot-ctl dataset set active &lt;that-long-hex-string&gt;
+sudo ot-ctl ifconfig up
+sudo ot-ctl thread start</code></pre>
+<p>Vänta ~30 sekunder och kör sedan:</p>
+<pre class="lang-bash"><code>sudo ot-ctl state</code></pre>
+<p>Förvänta dig <code>child</code> eller <code>router</code> — då gick den med. <code>leader</code> här skulle betyda att den bildade ett eget nätverk i stället, vilket inte är vad du vill på den här vägen.</p>
+<h3>Väg B — Bilda ett nytt nätverk (för test, eller när du inte kommer åt några autentiseringsuppgifter)</h3>
+<pre class="lang-bash"><code>sudo ot-ctl dataset init new
+sudo ot-ctl dataset commit active
+sudo ot-ctl ifconfig up
+sudo ot-ctl thread start
+sudo ot-ctl state          # expect: leader</code></pre>
+<p>Nu har du ett tomt nätverk med en enda nod. För att se något intressant måste du driftsätta tillbehör i det — vilket innebär att du först måste ta bort dem från ditt Apple-nätverk. <strong>Gör inte det här med enheter du är beroende av.</strong></p>
+<p>Skriv ut datasetet om du vill ansluta annat till det senare:</p>
+<pre class="lang-bash"><code>sudo ot-ctl dataset active -x</code></pre>
+<hr>
+<h2>Steg 6 — Rikta appen mot den</h2>
+<pre class="lang-bash"><code>curl http://localhost:8099/health</code></pre>
+<p>Förvänta dig <code>&quot;otCtlReachable&quot;: true</code> och ett <code>role</code>. Sedan, från din telefon på samma nätverk, i <strong>ThreadMapper → Inställningar → ThreadMapper-sond</strong>:</p>
+<pre><code>http://threadmapper-probe.local:8099</code></pre>
+<p>Använd din Pis IP-adress i stället om <code>.local</code> inte går att slå upp på iOS. Tryck på <strong>Testa anslutning</strong> — den namnger felet om något är fel i stället för att bara visa ett rött kryss.</p>
+<hr>
+<h2>Steg 7 — Se vad du fick</h2>
+<ul><li><strong>Instrumentpanel → ⋯ → Thread-nätverk</strong> — uppmätt RSSI per nod, länkkvalitet och routingtabellen med vägkostnad och nästa hopp. Noder visas med sin Thread-adress, inte med namn; se ”Det här fungerar inte än” nedan.</li><li><strong>Mesh → verktyg → Kanalskanner</strong> — nu märkt <strong>Uppmätt</strong>. Stapelhöjden är den verkliga brusnivån över alla 16 kanaler, och de rekommenderade kanalerna är de tystaste som faktiskt observerats snarare än en gissning ur en tabell över Wi-Fi-överlapp.</li></ul>
+<p>Kanalskannern är den du ska titta på först. Den är den tydligaste skillnaden mellan vad appen kunde visa förut och vad den kan visa nu.</p>
+<hr>
+<h2>Felsökning</h2>
+<div class="scroll"><table><thead><tr><th>Symtom</th><th>Orsak och åtgärd</th></tr></thead><tbody><tr><td><code>install.sh</code> säger ”No 802.15.4 dongle detected”</td><td>Dongeln saknas, eller så gick steg 1 inte igenom. Kontrollera med <code>ls /dev/serial/by-id/</code>.</td></tr><tr><td>Testa anslutning: <em>”den når inte gränsroutern bredvid”</em></td><td>Agenten är igång men inte <code>otbr-agent</code>. Kör <code>sudo systemctl status otbr-agent</code> och sedan <code>journalctl -u otbr-agent -n 50</code>. Oftast en felaktig radio-URL eller en dongel som tappat strömmen.</td></tr><tr><td>Testa anslutning: <em>”det är inte en ThreadMapper-sondagent”</em></td><td>Något annat svarar på den porten. Agenten är 8099; 8081 är gränsrouterns eget REST-API.</td></tr><tr><td>Testa anslutning: <em>”kunde inte nå adressen”</em></td><td>Fel IP-adress, eller så är telefonen på ett annat subnät eller ett gäst-VLAN.</td></tr><tr><td><code>ot-ctl state</code> säger <code>detached</code></td><td>Den har autentiseringsuppgifter men hittar inte nätverket. Fel dataset, eller utom radioräckhåll för alla andra noder.</td></tr><tr><td><code>ot-ctl state</code> säger <code>disabled</code></td><td><code>ifconfig up</code> / <code>thread start</code> kördes inte, eller så kom radion inte igång.</td></tr><tr><td>Skärmen Thread-nätverk visar inga andra noder</td><td>Sonden är på ett eget nätverk — kontrollera att den inte är <code>leader</code> när du menade att gå med i ett.</td></tr><tr><td>Allt fungerar, men dör efter en omstart</td><td><code>systemctl is-enabled otbr-agent threadmapper-probe</code> — båda ska säga <code>enabled</code>.</td></tr></tbody></table></div>
+<p>Loggar för båda tjänsterna tillsammans:</p>
+<pre class="lang-bash"><code>journalctl -u threadmapper-probe -u otbr-agent -f</code></pre>
+<hr>
+<h2>Det här fungerar inte än</h2>
+<p><strong>Noder visas utan namn.</strong> Thread identifierar en nod med dess utökade adress; HomeKit identifierar ett tillbehör med en ogenomskinlig identifierare, och ingenting kopplar ihop de två. Du får alltså se en verklig, korrekt topologi av anonyma noder i stället för ”kökslampan”.</p>
+<p>Lösningen är byggd men inte färdig: agentens slutpunkt <code>/traffic</code> rapporterar aktivitet per nod, så att styra en enhet via HomeKit och se vilken nod som svarar skulle koppla ihop dem. Den funktionen behöver riktiga tillbehör på ett riktigt mesh-nät att utvecklas mot, vilket är precis vad du kommer att ha när det här väl är igång. Följs som <strong>H1</strong> i <code>WORKPLAN.md</code>.</p>
+<p><strong>Fliken Mesh är fortfarande härledd.</strong> Dess graf byggs från HomeKit-tillbehör, så den kan inte använda sonddata förrän det ovanstående är löst. Det är skärmen Thread-nätverk och Kanalskannern som visar mätvärden.</p>
+<hr>
+<h2>Om något här är fel</h2>
+<p>Den här guiden har inte gåtts igenom hela vägen på riktig hårdvara — ingen i projektet har en Pi eller en dongel än. Provisioneringsskriptet är testat mot Debian Bookworm arm64, och varje slutpunkt i agenten är testad mot en riktig <code>otbr-agent</code> på en simulerad radio, men de fysiska stegen ovan är skrivna utifrån tillverkarnas dokumentation snarare än utifrån att någon gjort dem.</p>
+<p>Om ett steg är fel är det värt att rätta i den här filen.</p>
+
+<footer>
+  <a href="index.html">Hem</a>
+  <a href="support.html">Support</a>
+  <a href="privacy.html">Integritet</a>
+  <a href="https://github.com/tintronix-lab/ThreadMapper">Källkod</a>
+  <nav class="langs" aria-label="Språk"><a href="../probe-setup.html" hreflang="en" lang="en">English</a><span aria-current="true">Svenska</span><a href="../de/probe-setup.html" hreflang="de" lang="de">Deutsch</a><a href="../fr/probe-setup.html" hreflang="fr" lang="fr">Français</a><a href="../es/probe-setup.html" hreflang="es" lang="es">Español</a><a href="../it/probe-setup.html" hreflang="it" lang="it">Italiano</a><a href="../ja/probe-setup.html" hreflang="ja" lang="ja">日本語</a><a href="../nl/probe-setup.html" hreflang="nl" lang="nl">Nederlands</a><a href="../pt-br/probe-setup.html" hreflang="pt-BR" lang="pt-BR">Português (BR)</a></nav>
+</footer>
+</div>
+
+</body>
+</html>
