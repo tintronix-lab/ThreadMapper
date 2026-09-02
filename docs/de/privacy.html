@@ -62,7 +62,7 @@
 <h2>Was ThreadMapper liest</h2>
 <ul>
   <li><strong>HomeKit-Zubehördaten</strong> – Namen, Räume, Hersteller, Modell, Erreichbarkeit und Batteriestand des Zubehörs in Ihrem Zuhause. Das wird mit Ihrer Erlaubnis aus Apples HomeKit-Framework gelesen und dient dazu, die Ansicht Ihres Thread-Netzes aufzubauen.</li>
-  <li><strong>Ungefährer Standort</strong> – nur während Sie aktiv einen Messrundgang durchführen, und nur, um Signalmesswerte zu kennzeichnen, damit sie auf einer Heatmap dargestellt werden können. Der Standort wird zu Beginn einer Messung angefragt, nie beim Start der App. Messwerte ohne Standortbestimmung werden ohne Koordinaten gespeichert, statt erfundene zu bekommen.</li>
+  <li><strong>Standort</strong> – genau, auf etwa zehn Meter, und nur während Sie aktiv einen Messrundgang durchführen, und nur, um Signalmesswerte zu kennzeichnen, damit sie auf einer Heatmap dargestellt werden können. Der Standort wird zu Beginn einer Messung angefragt, nie beim Start der App. Messwerte ohne Standortbestimmung werden ohne Koordinaten gespeichert, statt erfundene zu bekommen.</li>
   <li><strong>Signalmessungen</strong> – Schätzungen der Antwortqualität, die die App selbst ableitet, indem sie die Antwortzeiten des Zubehörs misst.</li>
   <li><strong>Ihr lokales Netzwerk</strong> – die App sucht nach Thread Border Routern und Matter-Geräten, die sich in Ihrem Netzwerk ankündigen, und liest, was sie dort über sich selbst veröffentlichen: ihre Namen, Modelle und ob sie bereits gekoppelt sind. So kann sie Hardware beschreiben, die Apple Home nicht auflistet. Es ist ein Lesen dessen, was diese Geräte aussenden; die App verbindet sich nicht mit ihnen.</li>
   <li><strong>Kamera</strong> – um QR-Codes für die Matter-Einrichtung zu lesen, um Ihre Position in Innenräumen während eines AR-Messrundgangs zu verfolgen und, wenn Sie einen Raumscan starten, um die Form des Raums zu vermessen und einen Grundriss zu erstellen. Es werden weder Fotos noch Videos aufgenommen oder gespeichert.</li>
@@ -89,9 +89,10 @@
 <h2>Netzwerkverbindungen</h2>
 <p>ThreadMapper sendet keine Analyse- oder Werbeanfragen und kontaktiert keinen Server von uns, weil es keinen gibt. Im Netzwerk tut die App Folgendes:</p>
 <ul>
-  <li><strong>Hört auf Geräte, die sich in Ihrem lokalen Netzwerk ankündigen</strong> – die Standard-Bonjour-Erkennung, die iOS bereitstellt. So findet die App Border Router und Matter-Geräte, auch solche, die Apple Home nicht auflistet. Sie liest, was diese Geräte über sich aussenden; sie verbindet sich nicht mit ihnen und sendet ihnen nichts.</li>
+  <li><strong>Hört auf Geräte, die sich in Ihrem lokalen Netzwerk ankündigen</strong> – die Standard-Bonjour-Erkennung, die iOS bereitstellt. So findet die App Border Router und Matter-Geräte, auch solche, die Apple Home nicht auflistet. Sie liest, was diese Geräte über sich aussenden; abgesehen von einer Hue Bridge, die Sie selbst koppeln, verbindet sie sich nicht mit ihnen und sendet ihnen nichts.</li>
   <li>Verbindet sich mit einem <strong>OpenThread Border Router</strong>, falls Sie einen einrichten – in Ihrem eigenen lokalen Netzwerk, unter einer Adresse, die Sie selbst eingeben;</li>
   <li>Verbindet sich mit einer <strong>ThreadMapper-Sonde</strong>, falls Sie eine betreiben – ebenfalls in Ihrem eigenen lokalen Netzwerk, unter einer Adresse, die Sie selbst eingeben;</li>
+  <li>Verbindet sich mit einer <strong>Philips Hue Bridge</strong>, falls Sie eine koppeln – in Ihrem eigenen lokalen Netzwerk, um zu lesen, welche Lampen sie über Zigbee noch erreicht. Der von der Bridge ausgestellte Schlüssel bleibt im Schlüsselbund dieses Geräts und wird nirgendwohin gesendet;</li>
   <li>Erreicht <strong>Apples iCloud</strong>, nur für die beiden optionalen Funktionen oben und nur Ihren eigenen Account.</li>
 </ul>
 <p>Es gibt keinen ThreadMapper-Server, mit dem sich die App verbinden könnte. Es hat nie einen gegeben.</p>

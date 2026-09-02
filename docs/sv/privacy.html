@@ -62,7 +62,7 @@
 <h2>Vad ThreadMapper läser</h2>
 <ul>
   <li><strong>HomeKit-tillbehörsdata</strong> — namn, rum, tillverkare, modell, nåbarhet och batterinivå för tillbehören i ditt hem. Detta läses från Apples HomeKit-ramverk med ditt tillstånd och används för att bygga vyn över ditt Thread-mesh-nät.</li>
-  <li><strong>Ungefärlig plats</strong> — endast medan du aktivt genomför en mätningspromenad, och endast för att märka signalavläsningar så att de kan visas på en värmekarta. Plats begärs när en mätning börjar, aldrig vid start. Avläsningar utan platsbestämning lagras utan koordinater i stället för att tilldelas påhittade sådana.</li>
+  <li><strong>Plats</strong> — exakt, på ungefär tio meters när, och endast medan du aktivt genomför en mätningspromenad, och endast för att märka signalavläsningar så att de kan visas på en värmekarta. Plats begärs när en mätning börjar, aldrig vid start. Avläsningar utan platsbestämning lagras utan koordinater i stället för att tilldelas påhittade sådana.</li>
   <li><strong>Signalmätningar</strong> — uppskattningar av svarskvalitet som appen härleder själv genom att ta tid på tillbehörens svar.</li>
   <li><strong>Ditt lokala nätverk</strong> — appen letar efter Thread-gränsroutrar och Matter-enheter som annonserar sig på ditt nätverk, och läser vad de publicerar om sig själva där: deras namn, modeller och om de redan är parkopplade. Det är så den kan beskriva hårdvara som Apple Hem inte listar. Det är en avläsning av det de enheterna sänder ut; appen ansluter inte till dem.</li>
   <li><strong>Kamera</strong> — för att läsa QR-koder för Matter-installation, för att spåra din position inomhus under en AR-mätningspromenad och, när du startar en rumsskanning, för att mäta rummets form och bygga en planritning. Ingen bild och ingen video spelas in eller lagras.</li>
@@ -89,9 +89,10 @@
 <h2>Nätverksanslutningar</h2>
 <p>ThreadMapper gör inga analys- eller annonsförfrågningar och kontaktar ingen server hos oss, eftersom det inte finns någon. Det appen gör på nätverket är:</p>
 <ul>
-  <li><strong>Lyssnar efter enheter som annonserar sig på ditt lokala nätverk</strong> — den vanliga Bonjour-upptäckt som iOS tillhandahåller. Det är så appen hittar gränsroutrar och Matter-enheter, inklusive sådana som Apple Hem inte listar. Den läser vad de enheterna sänder ut om sig själva; den ansluter inte till dem och skickar ingenting till dem.</li>
+  <li><strong>Lyssnar efter enheter som annonserar sig på ditt lokala nätverk</strong> — den vanliga Bonjour-upptäckt som iOS tillhandahåller. Det är så appen hittar gränsroutrar och Matter-enheter, inklusive sådana som Apple Hem inte listar. Den läser vad de enheterna sänder ut om sig själva; bortsett från en Hue-brygga som du själv parkopplar ansluter den inte till dem och skickar ingenting till dem.</li>
   <li>Ansluter till en <strong>OpenThread-gränsrouter</strong>, om du ställer in en — på ditt eget lokala nätverk, på en adress du själv anger;</li>
   <li>Ansluter till en <strong>ThreadMapper-sond</strong>, om du kör en — också på ditt eget lokala nätverk, på en adress du själv anger;</li>
+  <li>Ansluter till en <strong>Philips Hue-brygga</strong>, om du parkopplar en — på ditt eget lokala nätverk, för att läsa vilka lampor den fortfarande når via Zigbee. Nyckeln som bryggan utfärdar stannar i den här enhetens nyckelring och skickas aldrig någonstans;</li>
   <li>Når <strong>Apples iCloud</strong>, bara för de två valfria funktionerna ovan, och bara ditt eget konto.</li>
 </ul>
 <p>Det finns ingen ThreadMapper-server att ansluta till. Det har det aldrig funnits.</p>
