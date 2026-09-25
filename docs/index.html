@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ThreadMapper — Your Thread network, measured</title>
-<meta name="description" content="ThreadMapper shows you every Thread device, which rooms have weak coverage, and the moment something drops offline. Add a probe and it stops estimating: real signal, real routing, real interference. Private by design.">
+<meta name="description" content="ThreadMapper shows which of your devices are on Thread, which border routers your network has, and when a device has really gone offline — and nothing it cannot read. Add a probe and it reads the radio itself. Private by design.">
 <meta name="theme-color" content="#0B1020">
 <meta name="apple-itunes-app" content="app-id=6794255629, app-clip-bundle-id=com.tintronixlab.ThreadMapper.Clip, app-clip-display=card">
 <!-- Generated from site/index.html.tmpl by tools/build-docs.py — edit the template
@@ -148,7 +148,7 @@
     padding: .3rem .5rem; border-radius: 5px; white-space: nowrap;
   }
   .tag.measured  { color: var(--measured); background: color-mix(in srgb, var(--measured) 12%, transparent); }
-  .tag.estimated { color: var(--muted);    background: var(--surface); }
+  .tag.reported  { color: var(--ink);      background: var(--surface); }
   .tag.probe     { color: var(--noise);    background: color-mix(in srgb, var(--noise) 14%, transparent); }
 
   /* ── Cards ────────────────────────────────────────────────────────────── */
@@ -267,7 +267,7 @@
 
     <h1>Your Thread network, <em>measured</em>.</h1>
     <p class="lede">
-      Thread devices are invisible by design. They just work — until one doesn't, and nothing will tell you why. ThreadMapper maps every device, grades every room, and says plainly which of its numbers are readings and which are estimates.
+      Thread devices are invisible by design. They just work — until one doesn't, and nothing will tell you why. ThreadMapper shows what your devices and your network say about themselves: which devices are on Thread, which border routers you have, which links they report. Nothing it cannot read is shown.
     </p>
     <p class="cta">
       <a href="https://apps.apple.com/app/id6794255629">Download on the App Store →</a>
@@ -288,24 +288,24 @@
     </p>
     <div class="grid">
       <div class="card">
-        <div class="card-head"><h3>Health grade</h3><span class="tag estimated">Estimated</span></div>
+        <div class="card-head"><h3>Health grade</h3><span class="tag reported">Reported</span></div>
         <p>An A–F score with the specific issues pulling it down, not just a number.</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Mesh map</h3><span class="tag estimated">Estimated</span></div>
-        <p>Every device grouped by room, showing how each one reaches a border router.</p>
+        <div class="card-head"><h3>Mesh map</h3><span class="tag reported">Reported</span></div>
+        <p>Your Thread devices by room, with the links they report. Where no device reported a link, none is drawn.</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Room survey</h3><span class="tag estimated">Estimated</span></div>
-        <p>Walk a room, get a coverage grade. Drivable from your wrist so both hands stay free.</p>
+        <div class="card-head"><h3>Thread, and the rest</h3><span class="tag reported">Reported</span></div>
+        <p>A device is on Thread when it says so — in its Matter diagnostics or its HomeKit Thread status — never because of its brand. Everything else is listed apart, for what it is.</p>
       </div>
       <div class="card">
         <div class="card-head"><h3>Offline alerts</h3><span class="tag measured">Measured</span></div>
-        <p>Know the moment a device drops, with a grace period and quiet hours you set.</p>
+        <p>Offline when it is really gone: a sleepy battery sensor gets two hours, a mains-powered device fifteen minutes, and devices that go quiet together are one alert.</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Device history</h3><span class="tag estimated">Estimated</span></div>
-        <p>30 days of signal trend, uptime and firmware changes for every accessory.</p>
+        <div class="card-head"><h3>Device history</h3><span class="tag reported">Reported</span></div>
+        <p>Uptime, reboots and firmware changes for every accessory.</p>
       </div>
       <div class="card">
         <!-- No tag: this one is a platform, not a claim about data. Tagging it
@@ -318,14 +318,14 @@
 
   <section>
     <p class="eyebrow">Where those tags come from</p>
-    <h2>Where a number is a guess, it says so.</h2>
+    <h2>What it cannot read, it does not show.</h2>
     <div class="cols">
       <div>
         <p class="section-lede" style="margin-bottom:1.25rem">
           iOS gives third-party apps no radio signal strength for Thread accessories, no parent-child relationships and no routing table. Any app showing you dBm for a HomeKit device is showing you something it cannot read.
         </p>
         <p class="section-lede" style="margin-bottom:0">
-          ThreadMapper measures how quickly each accessory answers, calls that an <strong>estimate</strong> wherever it appears, and infers the mesh layout from what HomeKit does expose. It works, and it is honest about being an inference.
+          So ThreadMapper shows no signal at all. A device is on Thread when it says so, a border router is one the network proves, and a line on the map is a link a device reported. What the phone can time — how quickly an accessory answers — is shown as exactly that, in milliseconds.
         </p>
       </div>
       <div class="note">
@@ -359,11 +359,11 @@
         <div class="compare-cell">With a probe</div>
       </div>
       <div class="compare-row">
-        <div class="compare-cell without"><b>Response timing</b>How fast an accessory replies, bucketed into a signal estimate.</div>
+        <div class="compare-cell without"><b>Response timing</b>How fast an accessory answers, in milliseconds — never passed off as signal.</div>
         <div class="compare-cell with"><b>Radio RSSI</b>Actual per-neighbour signal and link quality, off the radio.</div>
       </div>
       <div class="compare-row">
-        <div class="compare-cell without"><b>Inferred layout</b>Mesh shape guessed from accessory type and room name.</div>
+        <div class="compare-cell without"><b>Reported links</b>The links a device reports about itself, and nothing guessed from rooms or accessory types.</div>
         <div class="compare-cell with"><b>Real routing</b>Route table with next hop and path cost — what makes a mesh multi-hop.</div>
       </div>
       <div class="compare-row">
@@ -409,11 +409,11 @@
     <h2>Screens</h2>
     <div class="shots">
       <figure class="shot">
-        <img src="screenshots/01_dashboard.jpg" alt="Dashboard showing an A-grade network score and per-room coverage cards" loading="lazy" width="226" height="490">
+        <img src="screenshots/01_dashboard.jpg" alt="Dashboard showing the network grade, the counts behind it and the one thing to fix first" loading="lazy" width="226" height="490">
         <figcaption>Health at a glance</figcaption>
       </figure>
       <figure class="shot">
-        <img src="screenshots/02_mesh_topology.jpg" alt="Mesh map with devices grouped by room and linked to border routers" loading="lazy" width="226" height="490">
+        <img src="screenshots/02_mesh_topology.jpg" alt="Mesh map with Thread devices grouped by room and the links they report" loading="lazy" width="226" height="490">
         <figcaption>Live mesh map</figcaption>
       </figure>
       <figure class="shot">
@@ -429,8 +429,8 @@
         <figcaption>What happened, and why</figcaption>
       </figure>
       <figure class="shot">
-        <img src="screenshots/03_survey.jpg" alt="Survey screen listing live signal quality per device" loading="lazy" width="226" height="490">
-        <figcaption>Room-by-room survey</figcaption>
+        <img src="screenshots/03_doctor.jpg" alt="Network Doctor listing what to fix first, each finding with the evidence behind it" loading="lazy" width="226" height="490">
+        <figcaption>What to fix first</figcaption>
       </figure>
     </div>
   </section>
@@ -447,9 +447,9 @@
       </ul>
       <div>
         <div class="note">
-          <p><strong>Signal history deliberately doesn't sync.</strong></p>
+          <p><strong>Measurements deliberately don't sync.</strong></p>
           <p>
-            Readings depend on where the device taking them is standing. Merging an iPad in a drawer with an iPhone in your pocket would produce a history describing a place nobody is. Notes and settings sync; measurements stay put.
+            Each iPhone and iPad keeps what it saw of your network itself. Merging them would produce a history no single device observed. Notes and settings sync; measurements stay put.
           </p>
         </div>
         <p style="margin:1.25rem 0 0"><a href="privacy.html">Full privacy policy →</a></p>
@@ -463,7 +463,7 @@
     <div class="cols">
       <ul class="plain">
         <li><strong>AI Insights, Network Assistant and a troubleshooter</strong> that reads this device's own history — all on your iPhone, nothing uploaded.</li>
-        <li><strong>AR room mapping and X-Ray</strong> — scan rooms into a floor plan, walk the signal onto it, then see the mesh drawn through your real home.</li>
+        <li><strong>AR room mapping and X-Ray</strong> — scan rooms into a floor plan, place each device where it really is, and see the links your devices report drawn through your real home.</li>
         <li><strong>A year of daily grades</strong>, a month of timeline, weekly reports, and what a month of readings says about when your home is at its worst.</li>
         <li><strong>Jobs and evidence sheets</strong> — a page for a client showing exactly what a visit changed, and a page per device for a warranty claim.</li>
         <li><strong>What the radios say</strong> — why a device rebooted, how often it has changed parent router, and how many households can control it.</li>

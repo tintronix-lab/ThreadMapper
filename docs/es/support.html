@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ThreadMapper — Soporte</title>
-<meta name="description" content="Ayuda para ThreadMapper: por qué no aparece ningún dispositivo, qué significa la estimación de señal, en qué se diferencian los enlaces de la malla del enrutamiento Thread real, cómo hacer una medición por habitaciones, la sincronización con iCloud, las compras Pro y la app para Apple Watch.">
+<meta name="description" content="Ayuda para ThreadMapper: por qué no aparece ningún dispositivo, cuáles cuentan como Thread, por qué se espera antes de darlos por sin conexión, qué son las líneas de la malla, iCloud, las compras Pro y el Apple Watch.">
 <!-- Generated from site/support.html.tmpl by tools/build-docs.py — edit the template
      and site/strings/support.*.json, not this file. -->
 <link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/es/support.html">
@@ -68,16 +68,16 @@
 </details>
 
 <details>
-  <summary>¿Por qué la intensidad de señal se llama «estimación»?</summary>
+  <summary>¿Por qué no hay intensidad de señal?</summary>
   <p>
-    iOS no expone a las apps de terceros el RSSI de radio real de los accesorios Thread. ThreadMapper deduce una estimación de la calidad de respuesta cronometrando la rapidez con la que contesta cada accesorio. Es una forma fiable de comparar dispositivos y habitaciones, pero no es un valor en dBm medido por radio, y por eso la app la etiqueta como estimada en toda la interfaz.
+    iOS no da a las apps de terceros la intensidad de señal de radio (RSSI) de los accesorios Thread, así que ThreadMapper no muestra ninguna. Lo que sí puede medir es con qué rapidez le responde cada accesorio, y la página de un dispositivo muestra exactamente eso, en milisegundos. Ese tiempo no cambia según dónde esté tu iPhone, así que nunca se califica ni se llama señal.
   </p>
 </details>
 
 <details>
   <summary>¿Los enlaces de la malla son enrutamiento Thread real?</summary>
   <p>
-    En la pestaña Malla, no: son estimaciones lógicas; los dispositivos se enlazan al router de borde más cercano o a un router de la misma habitación.
+    En la pestaña Malla, cada línea es un enlace que un dispositivo ha indicado en sus propios datos de diagnóstico Thread, o uno que una sonda ha leído de la radio. Donde no se ha indicado nada, no se dibuja ninguna línea: no se deduce nada de las habitaciones ni de los tipos de accesorio.
   </p>
   <p>
     Conectar un router de borde OpenThread te da datos reales de la <em>red</em> (nombre, canal, PAN ID), pero no enrutamiento. Sus endpoints de diagnóstico no devuelven datos por nodo: los probamos contra una malla real y las peticiones se completan sin nada dentro.
@@ -88,9 +88,23 @@
 </details>
 
 <details>
-  <summary>¿Cómo hago una medición por habitaciones?</summary>
+  <summary>¿Por qué un dispositivo no aparece en el mapa de Thread?</summary>
   <p>
-    Abre la pestaña Medición y elige Medición guiada. Colócate en una habitación, toca Iniciar, camina por ella mientras toma muestras y luego toca Listo para guardar esa habitación y pasar a la siguiente. Si tienes un Apple Watch, puedes manejar Iniciar / Listo / Omitir desde la muñeca mientras la medición corre en el iPhone.
+    Un dispositivo aparece ahí en cuanto ha dicho que está en Thread: en sus datos de diagnóstico Matter o en su estado Thread de HomeKit. Los dispositivos que hay detrás de un puente, como un Hue Bridge o un IKEA DIRIGERA, aparecen en Otros accesorios junto al puente por el que se llega a ellos, igual que cualquier dispositivo que aún no lo ha dicho.
+  </p>
+</details>
+
+<details>
+  <summary>¿Por qué ThreadMapper espera antes de dar un dispositivo por sin conexión?</summary>
+  <p>
+    Muchos dispositivos Thread callan a propósito: un sensor a pilas puede responder solo de vez en cuando, para ahorrar energía, y un dispositivo que todavía no ha respondido no se ha ido. ThreadMapper espera dos horas a un dispositivo a pilas dormido (más si el dispositivo dice que duerme más tiempo) y quince minutos a uno enchufado a la corriente, y cuando varios dispositivos se quedan en silencio en el mismo minuto, informa de un solo evento, no de uno por dispositivo.
+  </p>
+</details>
+
+<details>
+  <summary>¿Qué ha pasado con la medición por habitaciones?</summary>
+  <p>
+    La medición cronometraba con qué rapidez respondía cada accesorio mientras caminabas, y ese tiempo no cambia según dónde estés. Por eso la versión 1.9 la retiró, junto con los mapas de calor, las calificaciones de señal por habitación y «Localiza ese sensor», que se basaban en ella, hasta que exista una lectura de radio real. Los recorridos que guardaste se quedan en tu iPhone y en tus copias de seguridad.
   </p>
 </details>
 
@@ -107,7 +121,7 @@
     Las notas de tus dispositivos, los valores de Thread que hayas fijado y los ajustes de la app: lo que has escrito o elegido tú. Está desactivada hasta que la actives en Ajustes, y usa tu propio iCloud privado, así que nunca llega hasta nosotros.
   </p>
   <p>
-    El historial de señal y las mediciones de cobertura se quedan a propósito en el dispositivo que las registró. Una lectura depende de dónde estaba ese dispositivo, así que combinar un iPad metido en un cajón con un iPhone en tu bolsillo produciría un historial que no describe a ninguno de los dos.
+    El historial de señal y las mediciones de cobertura de versiones anteriores, al igual que las grabaciones de la sonda, se quedan en el dispositivo que los registró. Cada uno describe lo que vio ese dispositivo concreto, así que combinarlos produciría un historial que ningún dispositivo observó por sí solo.
   </p>
 </details>
 

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ThreadMapper — Tu red Thread, medida</title>
-<meta name="description" content="ThreadMapper te muestra todos los dispositivos Thread, qué habitaciones tienen mala cobertura y el momento exacto en que algo se queda sin conexión. Añade una sonda y dejará de estimar: señal real, enrutamiento real, interferencias reales. Privado por diseño.">
+<meta name="description" content="ThreadMapper muestra qué dispositivos tuyos están en Thread, qué routers de borde tiene tu red y cuándo uno se ha desconectado de verdad, y nada que no pueda leer. Con una sonda, lee la propia radio. Privado por diseño.">
 <meta name="theme-color" content="#0B1020">
 <meta name="apple-itunes-app" content="app-id=6794255629, app-clip-bundle-id=com.tintronixlab.ThreadMapper.Clip, app-clip-display=card">
 <!-- Generated from site/index.html.tmpl by tools/build-docs.py — edit the template
@@ -148,7 +148,7 @@
     padding: .3rem .5rem; border-radius: 5px; white-space: nowrap;
   }
   .tag.measured  { color: var(--measured); background: color-mix(in srgb, var(--measured) 12%, transparent); }
-  .tag.estimated { color: var(--muted);    background: var(--surface); }
+  .tag.reported  { color: var(--ink);      background: var(--surface); }
   .tag.probe     { color: var(--noise);    background: color-mix(in srgb, var(--noise) 14%, transparent); }
 
   /* ── Cards ────────────────────────────────────────────────────────────── */
@@ -267,7 +267,7 @@
 
     <h1>Tu red Thread, <em>medida</em>.</h1>
     <p class="lede">
-      Los dispositivos Thread son invisibles por diseño. Simplemente funcionan, hasta que uno deja de hacerlo y nada te explica por qué. ThreadMapper mapea cada dispositivo, califica cada habitación y dice con claridad cuáles de sus números son lecturas y cuáles son estimaciones.
+      Los dispositivos Thread son invisibles por diseño. Simplemente funcionan, hasta que uno deja de hacerlo y nada te explica por qué. ThreadMapper muestra lo que tus dispositivos y tu red dicen de sí mismos: qué dispositivos están en Thread, qué routers de borde tienes y qué enlaces indican. No muestra nada que no pueda leer.
     </p>
     <p class="cta">
       <a href="https://apps.apple.com/app/id6794255629">Descárgalo en el App Store →</a>
@@ -288,24 +288,24 @@
     </p>
     <div class="grid">
       <div class="card">
-        <div class="card-head"><h3>Calificación de estado</h3><span class="tag estimated">Estimado</span></div>
+        <div class="card-head"><h3>Calificación de estado</h3><span class="tag reported">Informado</span></div>
         <p>Una puntuación de la A a la F con los problemas concretos que la bajan, no solo un número.</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Mapa de la malla</h3><span class="tag estimated">Estimado</span></div>
-        <p>Todos los dispositivos agrupados por habitación, con la forma en que cada uno llega a un router de borde.</p>
+        <div class="card-head"><h3>Mapa de la malla</h3><span class="tag reported">Informado</span></div>
+        <p>Tus dispositivos Thread por habitación, con los enlaces que indican. Donde ningún dispositivo ha indicado un enlace, no se dibuja ninguno.</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Medición por habitación</h3><span class="tag estimated">Estimado</span></div>
-        <p>Recorre una habitación y obtén una calificación de cobertura. Se maneja desde la muñeca para dejarte las dos manos libres.</p>
+        <div class="card-head"><h3>Thread y el resto</h3><span class="tag reported">Informado</span></div>
+        <p>Un dispositivo está en Thread cuando lo dice —en sus datos de diagnóstico Matter o en su estado Thread de HomeKit—, nunca por su marca. Todo lo demás aparece aparte, identificado como lo que es.</p>
       </div>
       <div class="card">
         <div class="card-head"><h3>Avisos sin conexión</h3><span class="tag measured">Medido</span></div>
-        <p>Entérate en el momento en que un dispositivo se cae, con un periodo de gracia y unas horas de silencio que fijas tú.</p>
+        <p>Sin conexión cuando de verdad se ha ido: un sensor a pilas dormido tiene dos horas; un dispositivo enchufado a la corriente, quince minutos; y los dispositivos que se quedan en silencio a la vez son un solo aviso.</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Historial de dispositivos</h3><span class="tag estimated">Estimado</span></div>
-        <p>30 días de tendencia de señal, tiempo en línea y cambios de firmware de cada accesorio.</p>
+        <div class="card-head"><h3>Historial de dispositivos</h3><span class="tag reported">Informado</span></div>
+        <p>Tiempo en línea, reinicios y cambios de firmware de cada accesorio.</p>
       </div>
       <div class="card">
         <!-- No tag: this one is a platform, not a claim about data. Tagging it
@@ -318,14 +318,14 @@
 
   <section>
     <p class="eyebrow">De dónde salen esas etiquetas</p>
-    <h2>Cuando un número es una suposición, lo dice.</h2>
+    <h2>Lo que no puede leer, no lo muestra.</h2>
     <div class="cols">
       <div>
         <p class="section-lede" style="margin-bottom:1.25rem">
           iOS no da a las apps de terceros ninguna intensidad de señal de radio de los accesorios Thread, ninguna relación padre-hijo y ninguna tabla de enrutamiento. Cualquier app que te enseñe dBm de un dispositivo HomeKit te está enseñando algo que no puede leer.
         </p>
         <p class="section-lede" style="margin-bottom:0">
-          ThreadMapper mide con qué rapidez responde cada accesorio, lo llama <strong>estimación</strong> allí donde aparece e infiere la disposición de la malla a partir de lo que HomeKit sí expone. Funciona, y es honesto al reconocer que es una inferencia.
+          Por eso ThreadMapper no muestra ninguna señal. Un dispositivo está en Thread cuando lo dice, un router de borde lo es cuando la red lo demuestra y una línea en el mapa es un enlace que ha indicado un dispositivo. Lo que el teléfono sí puede cronometrar —con qué rapidez responde un accesorio— se muestra exactamente como eso, en milisegundos.
         </p>
       </div>
       <div class="note">
@@ -359,11 +359,11 @@
         <div class="compare-cell">Con sonda</div>
       </div>
       <div class="compare-row">
-        <div class="compare-cell without"><b>Tiempo de respuesta</b>Con qué rapidez responde un accesorio, agrupado en una estimación de señal.</div>
+        <div class="compare-cell without"><b>Tiempo de respuesta</b>Con qué rapidez responde un accesorio, en milisegundos, sin hacerlo pasar nunca por señal.</div>
         <div class="compare-cell with"><b>RSSI de radio</b>Señal y calidad de enlace reales por vecino, leídas de la radio.</div>
       </div>
       <div class="compare-row">
-        <div class="compare-cell without"><b>Disposición inferida</b>Forma de la malla deducida del tipo de accesorio y del nombre de la habitación.</div>
+        <div class="compare-cell without"><b>Enlaces informados</b>Los enlaces que indica el propio dispositivo, y nada deducido de las habitaciones ni de los tipos de accesorio.</div>
         <div class="compare-cell with"><b>Enrutamiento real</b>Tabla de rutas con el siguiente salto y el coste de ruta: lo que hace que una malla sea multisalto.</div>
       </div>
       <div class="compare-row">
@@ -409,11 +409,11 @@
     <h2>Pantallas</h2>
     <div class="shots">
       <figure class="shot">
-        <img src="../screenshots/01_dashboard.jpg" alt="Panel con una puntuación de red de calificación A y tarjetas de cobertura por habitación" loading="lazy" width="226" height="490">
+        <img src="../screenshots/01_dashboard.jpg" alt="Panel con la calificación de la red, los recuentos en los que se basa y lo primero que hay que arreglar" loading="lazy" width="226" height="490">
         <figcaption>El estado de un vistazo</figcaption>
       </figure>
       <figure class="shot">
-        <img src="../screenshots/02_mesh_topology.jpg" alt="Mapa de la malla con los dispositivos agrupados por habitación y enlazados a routers de borde" loading="lazy" width="226" height="490">
+        <img src="../screenshots/02_mesh_topology.jpg" alt="Mapa de la malla con los dispositivos Thread agrupados por habitación y los enlaces que indican" loading="lazy" width="226" height="490">
         <figcaption>Mapa de la malla en vivo</figcaption>
       </figure>
       <figure class="shot">
@@ -429,8 +429,8 @@
         <figcaption>Qué pasó y por qué</figcaption>
       </figure>
       <figure class="shot">
-        <img src="../screenshots/03_survey.jpg" alt="Pantalla de medición con la calidad de señal en vivo de cada dispositivo" loading="lazy" width="226" height="490">
-        <figcaption>Medición habitación por habitación</figcaption>
+        <img src="../screenshots/03_doctor.jpg" alt="Doctor de Red con lo que hay que arreglar primero, cada hallazgo con las pruebas que lo respaldan" loading="lazy" width="226" height="490">
+        <figcaption>Qué arreglar primero</figcaption>
       </figure>
     </div>
   </section>
@@ -447,9 +447,9 @@
       </ul>
       <div>
         <div class="note">
-          <p><strong>El historial de señal no se sincroniza a propósito.</strong></p>
+          <p><strong>Las mediciones no se sincronizan a propósito.</strong></p>
           <p>
-            Las lecturas dependen de dónde esté el dispositivo que las toma. Combinar un iPad metido en un cajón con un iPhone en tu bolsillo produciría un historial que describe un lugar donde no hay nadie. Las notas y los ajustes se sincronizan; las mediciones se quedan donde están.
+            Cada iPhone y cada iPad guarda por su cuenta lo que vio de tu red. Combinarlos produciría un historial que ningún dispositivo observó por sí solo. Las notas y los ajustes se sincronizan; las mediciones se quedan donde están.
           </p>
         </div>
         <p style="margin:1.25rem 0 0"><a href="privacy.html">Política de privacidad completa →</a></p>
@@ -463,7 +463,7 @@
     <div class="cols">
       <ul class="plain">
         <li><strong>Conclusiones de IA, Asistente de red y un solucionador</strong> que lee el historial real de tu dispositivo: todo en tu iPhone, sin subir nada.</li>
-        <li><strong>Mapeado AR de habitaciones y rayos X</strong>: escanea las habitaciones para formar un plano, camina la señal sobre él y después ve la malla dibujada a través de tu casa real.</li>
+        <li><strong>Mapeado AR de habitaciones y rayos X</strong>: escanea las habitaciones para formar un plano, coloca cada dispositivo donde está de verdad y ve los enlaces que indican tus dispositivos dibujados a través de tu casa real.</li>
         <li><strong>Un año de calificaciones diarias</strong>, un mes de cronología, informes semanales y lo que un mes de lecturas dice sobre cuándo está peor tu casa.</li>
         <li><strong>Trabajos y hojas de pruebas</strong>: una página para el cliente con exactamente lo que cambió en la visita, y una página por dispositivo para una reclamación de garantía.</li>
         <li><strong>Lo que dicen las radios</strong>: por qué se reinició un dispositivo, cuántas veces ha cambiado de router padre y cuántos hogares pueden controlarlo.</li>

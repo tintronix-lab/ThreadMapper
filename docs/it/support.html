@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ThreadMapper — Assistenza</title>
-<meta name="description" content="Aiuto per ThreadMapper: perché non viene trovato nessun dispositivo, che cosa significa la stima del segnale, in che cosa differiscono i collegamenti della mesh e l’instradamento Thread reale, come si esegue un rilevamento per stanza, la sincronizzazione iCloud, gli acquisti Pro e l’app per Apple Watch.">
+<meta name="description" content="Aiuto per ThreadMapper: perché non trova dispositivi, quali contano come Thread, perché aspetta a dichiarare offline un dispositivo, le linee sulla mappa della rete, sincronizzazione iCloud, acquisti Pro e app per Apple Watch.">
 <!-- Generated from site/support.html.tmpl by tools/build-docs.py — edit the template
      and site/strings/support.*.json, not this file. -->
 <link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/it/support.html">
@@ -68,16 +68,16 @@
 </details>
 
 <details>
-  <summary>Perché la potenza del segnale è chiamata «stima»?</summary>
+  <summary>Perché non viene mostrata la potenza del segnale?</summary>
   <p>
-    iOS non espone alle app di terze parti l’RSSI radio reale degli accessori Thread. ThreadMapper ricava una stima della qualità di risposta cronometrando quanto in fretta risponde ogni accessorio. È un modo affidabile per confrontare dispositivi e stanze, ma non è un valore in dBm misurato dalla radio — ed è per questo che l’app lo etichetta ovunque come stimato.
+    iOS non fornisce alle app di terze parti la potenza del segnale radio (RSSI) degli accessori Thread, quindi ThreadMapper non ne mostra alcuna. Ciò che può misurare è quanto in fretta ogni accessorio gli risponde, e la pagina di un dispositivo mostra esattamente questo, in millisecondi. Quel tempo non cambia in base a dove si trova il tuo iPhone, quindi non riceve mai un voto e non viene mai chiamato segnale.
   </p>
 </details>
 
 <details>
   <summary>I collegamenti della mesh sono instradamento Thread reale?</summary>
   <p>
-    Nel pannello Rete mesh no: sono stime logiche, i dispositivi vengono collegati al border router più vicino o a un router nella stessa stanza.
+    Nel pannello Rete mesh ogni linea è un collegamento che un dispositivo ha segnalato su di sé nella propria diagnostica Thread, oppure uno che una sonda ha letto dalla radio. Dove non è stato segnalato nulla non viene disegnata nessuna linea — niente viene ipotizzato da stanze o tipi di accessorio.
   </p>
   <p>
     Collegare un OpenThread Border Router ti dà dati di <em>rete</em> reali (nome, canale, PAN ID) ma non l’instradamento. I suoi endpoint diagnostici non restituiscono dati per singolo nodo: li abbiamo provati su una mesh reale e le richieste si concludono senza nulla dentro.
@@ -88,9 +88,23 @@
 </details>
 
 <details>
-  <summary>Come si esegue un rilevamento per stanza?</summary>
+  <summary>Perché un dispositivo non compare sulla mappa Thread?</summary>
   <p>
-    Apri il pannello Rilevamento e scegli Rilevamento guidato. Mettiti in una stanza, tocca Avvia, cammina mentre l’app campiona, poi tocca Fatto per salvare quella stanza e passare alla successiva. Se hai un Apple Watch, puoi comandare Avvia / Fatto / Salta dal polso mentre il rilevamento gira sull’iPhone.
+    Un dispositivo compare lì quando ha detto di essere su Thread — nella sua diagnostica Matter o nel suo stato Thread di HomeKit. I dispositivi dietro un bridge, come un Hue Bridge o un IKEA DIRIGERA, sono elencati in Altri accessori con il bridge tramite cui vengono raggiunti, e lo stesso vale per ogni dispositivo che non l’ha ancora detto.
+  </p>
+</details>
+
+<details>
+  <summary>Perché ThreadMapper aspetta prima di considerare offline un dispositivo?</summary>
+  <p>
+    Molti dispositivi Thread restano in silenzio di proposito: un sensore a batteria può rispondere solo ogni tanto, per risparmiare energia, e un dispositivo che non ha ancora risposto non se n’è andato. ThreadMapper aspetta due ore per un dispositivo a batteria in standby (di più se il dispositivo dichiara di dormire più a lungo) e quindici minuti per uno alimentato a rete, e quando più dispositivi tacciono nello stesso minuto segnala un solo evento, non uno per dispositivo.
+  </p>
+</details>
+
+<details>
+  <summary>Che fine ha fatto il rilevamento per stanza?</summary>
+  <p>
+    Il rilevamento cronometrava quanto in fretta rispondeva ogni accessorio mentre camminavi, e quel tempo non cambia in base a dove ti trovi. Per questo la versione 1.9 lo ha ritirato, insieme alle mappe termiche, ai voti del segnale per stanza e a Trova quel sensore che si basavano su di esso, finché non ci sarà una vera misura radio. Le camminate che hai salvato restano sul tuo iPhone e nei tuoi backup.
   </p>
 </details>
 
@@ -107,7 +121,7 @@
     Le note sui dispositivi, le personalizzazioni Thread e le impostazioni dell’app — le cose che hai scritto o scelto tu. È disattivata finché non la attivi in Impostazioni, e usa il tuo iCloud privato, quindi non arriva mai a noi.
   </p>
   <p>
-    La cronologia del segnale e le misurazioni dei rilevamenti restano di proposito sul dispositivo che le ha registrate. Una misura dipende da dove si trovava quel dispositivo, quindi unire un iPad chiuso in un cassetto con un iPhone in tasca produrrebbe una cronologia che non descrive né l’uno né l’altro.
+    La cronologia del segnale e le misurazioni dei rilevamenti delle versioni precedenti, come le registrazioni della sonda, restano sul dispositivo che le ha registrate. Ognuna descrive ciò che ha visto quel singolo dispositivo, quindi unirle produrrebbe una cronologia che nessun dispositivo ha osservato.
   </p>
 </details>
 

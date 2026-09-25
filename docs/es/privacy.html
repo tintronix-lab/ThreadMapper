@@ -53,7 +53,7 @@
 <body>
 
 <h1>Política de privacidad</h1>
-<p class="updated">ThreadMapper · Última actualización: 10 de septiembre de 2026</p>
+<p class="updated">ThreadMapper · Última actualización: 24 de septiembre de 2026</p>
 
 <div class="highlight">
   <strong>ThreadMapper no recopila, transmite ni vende tus datos personales.</strong> No hay cuentas, ni SDK de analítica, ni rastreadores de terceros. Todo lo que la app registra se queda en tu dispositivo o, si usas una de las dos funciones opcionales de iCloud, en tu propia cuenta de iCloud. En cualquiera de los dos casos, nunca llega hasta nosotros.
@@ -62,12 +62,12 @@
 <h2>Qué lee ThreadMapper</h2>
 <ul>
   <li><strong>Datos de los accesorios de HomeKit</strong>: nombres, habitaciones, fabricante, modelo, accesibilidad y nivel de batería de los accesorios de tu casa. Se leen del framework HomeKit de Apple con tu permiso y sirven para construir la vista de tu malla Thread.</li>
-  <li><strong>Ubicación</strong>: precisa, con un margen de unos diez metros, y solo mientras estás haciendo un recorrido de medición, y solo para etiquetar las lecturas de señal y poder mostrarlas en un mapa de calor. La ubicación se pide cuando empieza una medición, nunca al abrir la app. Las lecturas que no consiguen posición se guardan sin coordenadas, en lugar de asignarles unas inventadas.</li>
-  <li><strong>Mediciones de señal</strong>: estimaciones de calidad de respuesta que la propia app deduce cronometrando las respuestas de los accesorios.</li>
+  <li><strong>Ubicación</strong>: solo durante un recorrido de medición, y solo para situar sus lecturas en un mapa de calor. La versión 1.9 retiró la medición, así que la app ya no pide tu ubicación. Los recorridos guardados con una versión anterior conservan las coordenadas con las que se tomaron; las lecturas que no consiguieron posición se guardaron sin coordenadas, en lugar de asignarles unas inventadas.</li>
+  <li><strong>Tiempos de respuesta</strong>: con qué rapidez responde cada accesorio a la app, que los cronometra ella misma. Se muestran en milisegundos, nunca como señal.</li>
   <li><strong>Tu red local</strong>: la app busca routers de borde Thread y dispositivos Matter que se anuncian en tu red, y lee lo que publican allí sobre sí mismos: sus nombres, sus modelos y si ya están vinculados. Así es como puede describir hardware que Apple Home no lista. Es una lectura de lo que esos dispositivos emiten; la app no se conecta a ellos.</li>
-  <li><strong>Cámara</strong>: para leer los códigos QR de configuración de Matter, para seguir tu posición en interiores durante un recorrido de medición con AR y, cuando inicias un escaneo de habitación, para medir la forma de la habitación y crear un plano. No se graba ni se guarda ninguna foto ni ningún vídeo.</li>
+  <li><strong>Cámara</strong>: para leer los códigos QR de configuración de Matter y, cuando inicias un escaneo de habitación, para medir la forma de la habitación, crear un plano y seguir dónde estás dentro de él. No se graba ni se guarda ninguna foto ni ningún vídeo.</li>
   <li><strong>Bluetooth</strong>: para ver los dispositivos Matter que se anuncian cerca durante la configuración, de modo que la app pueda mostrar lo que está esperando a vincularse. Solo busca mientras estás mirando esa pantalla.</li>
-  <li><strong>Barómetro</strong>: solo durante un recorrido de medición con AR, para saber en qué planta se tomó una lectura.</li>
+  <li><strong>Barómetro</strong>: solo mientras trazas una habitación con AR, para saber en qué planta está. El recorrido de medición con AR también lo leía, hasta que la versión 1.9 retiró el recorrido.</li>
 </ul>
 <p>Cada uno de estos permisos se pide en el momento en que hace falta por primera vez, y no al abrir la app, y todos son opcionales salvo HomeKit, que es la única forma que tiene la app de leer tu red Thread. Rechazar cualquiera de los demás desactiva la función que lo pidió y nada más.</p>
 
@@ -79,7 +79,7 @@
 <p>Hay dos funciones de iCloud distintas, ambas opcionales y ambas dirigidas a <em>tu propia</em> cuenta de Apple. Ninguna de las dos es un servicio nuestro: no tenemos acceso a ninguna y no recibimos ninguna copia.</p>
 <h3>Sincronización con iCloud (un interruptor, continua)</h3>
 <p>Si activas la <strong>sincronización con iCloud</strong> —está desactivada mientras no la actives tú—, las notas de tus dispositivos, los valores de Thread que hayas fijado y los ajustes de la app se copian a tu almacén privado de clave-valor de iCloud para que aparezcan en tus otros dispositivos.</p>
-<p>El historial de señal, las mediciones de cobertura y las grabaciones de la sonda quedan deliberadamente excluidos de esta sincronización continua y se quedan en el dispositivo que los tomó. Las lecturas dependen de dónde estaba ese dispositivo, así que combinarlas entre dispositivos produciría un historial que no describe a ninguno de los dos.</p>
+<p>El historial de señal, las mediciones de cobertura y las grabaciones de la sonda quedan deliberadamente excluidos de esta sincronización continua y se quedan en el dispositivo que los tomó. Cada uno describe lo que vio ese dispositivo concreto, así que combinarlos entre dispositivos produciría un historial que ningún dispositivo observó por sí solo.</p>
 <h3>Guardar en iCloud (un botón, manual)</h3>
 <p>Aparte de eso, <strong>Guardar en iCloud</strong>, en Ajustes, hace una copia completa de este dispositivo en un solo paquete: tus ajustes, tus notas, las habitaciones escaneadas, los planos, las posiciones en las que colocaste los dispositivos, el espacio AR guardado y <strong>tus lecturas de medición</strong>, incluidas las coordenadas, las marcas de tiempo y los nombres de habitación asociados. Existe para que puedas llevarte tu trabajo a otro iPhone.</p>
 <p>Este es el único sitio por el que tus mediciones salen alguna vez del dispositivo, y es deliberadamente manual: no se sube nada hasta que tocas Guardar. Va a tu propio iCloud Drive, donde tu app Archivos puede verlo y tú puedes borrarlo, y donde nadie más puede leerlo. Si nunca tocas Guardar, no se escribe nada nunca.</p>
@@ -102,13 +102,13 @@
 <p>ThreadMapper Pro se gestiona por completo con el sistema de compras dentro de la app de Apple. Nunca vemos ni almacenamos tus datos de pago. Esa transacción se rige por la política de privacidad de Apple.</p>
 
 <h2>Cesión de datos</h2>
-<p>No compartimos, vendemos, alquilamos ni revelamos tus datos a nadie, porque nunca los recibimos. Todo lo que decidas exportar (un CSV con datos de medición o un PDF de diagnóstico) sale de la app solo cuando tú lo compartes deliberadamente, y va adonde tú lo envíes.</p>
+<p>No compartimos, vendemos, alquilamos ni revelamos tus datos a nadie, porque nunca los recibimos. Todo lo que decidas exportar (un PDF de diagnóstico, un informe o un historial exportado) sale de la app solo cuando tú lo compartes deliberadamente, y va adonde tú lo envíes.</p>
 
 <h2>Menores</h2>
 <p>ThreadMapper es una utilidad de red y no está dirigida a menores. No recopila información personal de nadie, tampoco de menores.</p>
 
 <h2>Tu control</h2>
-<p>Puedes revocar cualquier permiso —HomeKit, Ubicación, Cámara, Bluetooth o Movimiento— cuando quieras, en Ajustes de iOS. Eliminar la app borra todos los datos guardados localmente. La app incluye además controles para borrar el historial de actividad y los datos de medición guardados. Si has usado <strong>Guardar en iCloud</strong>, esa copia vive en tu iCloud Drive y no dentro de la app —aparece en la app Archivos como una carpeta llamada ThreadMapper—, así que eliminar la app no la borra. Quítala de Archivos cuando quieras deshacerte de ella.</p>
+<p>Puedes revocar cualquier permiso —HomeKit, Ubicación, Cámara, Bluetooth o Movimiento— cuando quieras, en Ajustes de iOS. Eliminar la app borra todos los datos guardados localmente. La app incluye además un control para borrar el registro de actividad. Los recorridos de medición guardados por una versión anterior se borran al eliminar la app; los de una red visitada, al olvidar esa red. Si has usado <strong>Guardar en iCloud</strong>, esa copia vive en tu iCloud Drive y no dentro de la app —aparece en la app Archivos como una carpeta llamada ThreadMapper—, así que eliminar la app no la borra. Quítala de Archivos cuando quieras deshacerte de ella.</p>
 
 <h2>Cambios</h2>
 <p>Si esta política cambia, la versión actualizada se publicará en esta página con una fecha nueva.</p>

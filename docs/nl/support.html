@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ThreadMapper — Ondersteuning</title>
-<meta name="description" content="Hulp bij ThreadMapper: waarom er geen apparaten worden gevonden, wat de signaalschatting betekent, hoe meshverbindingen en echte Thread-routering verschillen, een kamermeting uitvoeren, iCloud-synchronisatie, Pro-aankopen en de Apple Watch-app.">
+<meta name="description" content="Hulp bij ThreadMapper: geen apparaten gevonden, welke apparaten als Thread tellen, waarom een apparaat niet meteen offline heet, wat de lijnen op de meshkaart zijn, iCloud-synchronisatie, Pro-aankopen en de Apple Watch-app.">
 <!-- Generated from site/support.html.tmpl by tools/build-docs.py — edit the template
      and site/strings/support.*.json, not this file. -->
 <link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/nl/support.html">
@@ -68,16 +68,16 @@
 </details>
 
 <details>
-  <summary>Waarom heet de signaalsterkte een ‘schatting’?</summary>
+  <summary>Waarom is er geen signaalsterkte?</summary>
   <p>
-    iOS geeft apps van derden geen echte radio-RSSI voor Thread-accessoires. ThreadMapper leidt een schatting van de reactiekwaliteit af door te klokken hoe snel elk accessoire antwoordt. Dat is een betrouwbare manier om apparaten en kamers te vergelijken, maar het is geen door de radio gemeten dBm-waarde — en daarom labelt de app het overal als geschat.
+    iOS geeft apps van derden geen radiosignaalsterkte (RSSI) voor Thread-accessoires, dus ThreadMapper toont die niet. Wat de app wel kan meten, is hoe snel elk accessoire antwoordt, en de pagina van een apparaat toont precies dat, in milliseconden. Die tijd hangt niet af van waar je iPhone is, dus hij krijgt nooit een cijfer en wordt nooit signaal genoemd.
   </p>
 </details>
 
 <details>
   <summary>Zijn de meshverbindingen echte Thread-routering?</summary>
   <p>
-    Op het tabblad Mesh niet — het zijn logische schattingen: apparaten worden gekoppeld aan de dichtstbijzijnde border router of aan een router in dezelfde kamer.
+    Op het tabblad Mesh is elke lijn een verbinding die een apparaat in zijn eigen Thread-diagnose over zichzelf heeft gemeld, of een die een probe van de radio heeft uitgelezen. Waar niets is gemeld, wordt geen lijn getekend — er wordt niets geraden uit kamers of accessoiretypes.
   </p>
   <p>
     Een OpenThread border router aansluiten levert echte <em>netwerk</em>feiten op (naam, kanaal, PAN ID), maar geen routering. De diagnose-endpoints geven geen gegevens per knooppunt terug — we hebben ze op een levende mesh getest en de verzoeken slagen, maar er zit niets in.
@@ -88,9 +88,23 @@
 </details>
 
 <details>
-  <summary>Hoe voer ik een kamermeting uit?</summary>
+  <summary>Waarom staat een apparaat niet op de Thread-kaart?</summary>
   <p>
-    Open het tabblad Meting en kies Begeleide meting. Ga in een kamer staan, tik op Start, loop rond terwijl de app bemonstert en tik op Klaar om die kamer te bewaren en naar de volgende te gaan. Heb je een Apple Watch, dan kun je Start, Klaar en Overslaan vanaf je pols bedienen terwijl de meting op je iPhone loopt.
+    Een apparaat verschijnt daar zodra het heeft gezegd dat het op Thread zit — in zijn Matter-diagnose of zijn Thread-status in HomeKit. Apparaten achter een bridge, zoals een Hue Bridge of een IKEA DIRIGERA, staan onder Overige accessoires met de bridge waarlangs ze bereikt worden, en daar staat ook elk apparaat dat het nog niet heeft gezegd.
+  </p>
+</details>
+
+<details>
+  <summary>Waarom wacht ThreadMapper voordat het een apparaat offline noemt?</summary>
+  <p>
+    Veel Thread-apparaten zijn met opzet stil: een sensor op batterij antwoordt misschien maar af en toe, om stroom te besparen, en een apparaat dat nog niet heeft geantwoord, is nog niet weg. ThreadMapper wacht twee uur bij een slapend apparaat op batterij (langer als het apparaat zegt dat het langer slaapt) en vijftien minuten bij een apparaat op netstroom, en als meerdere apparaten in dezelfde minuut stilvallen, meldt het één gebeurtenis, niet één per apparaat.
+  </p>
+</details>
+
+<details>
+  <summary>Waar is de kamermeting gebleven?</summary>
+  <p>
+    De meting klokte hoe snel elk accessoire antwoordde terwijl je rondliep, en die tijd hangt niet af van waar je staat. Daarom heeft versie 1.9 de meting uit de app gehaald, samen met de heatmaps, de signaalcijfers per kamer en ‘Die ene sensor terugvinden’ die erop voortbouwden, tot er een echte meetwaarde van de radio beschikbaar is. Loopmetingen die je hebt bewaard, blijven op je iPhone en in je reservekopieën.
   </p>
 </details>
 
@@ -107,7 +121,7 @@
     Je apparaatnotities, Thread-overschrijvingen en app-instellingen — de dingen die je zelf hebt getypt of gekozen. Het staat uit tot je het aanzet in Instellingen, en het gebruikt je eigen privé-iCloud, dus het bereikt ons nooit.
   </p>
   <p>
-    Signaalgeschiedenis en meetgegevens blijven met opzet op het apparaat dat ze heeft vastgelegd. Een meting hangt af van waar dat apparaat stond, dus een iPad in een la samenvoegen met een iPhone in je zak zou een geschiedenis opleveren die geen van beide beschrijft.
+    Signaalgeschiedenis en meetgegevens uit eerdere versies blijven, net als probe-opnames, op het apparaat dat ze heeft vastgelegd. Elk ervan beschrijft wat dat ene apparaat zag, dus ze samenvoegen zou een geschiedenis opleveren die geen enkel apparaat heeft waargenomen.
   </p>
 </details>
 

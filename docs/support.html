@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ThreadMapper — Support</title>
-<meta name="description" content="Help for ThreadMapper: why no devices are found, what the signal estimate means, how mesh links and real Thread routing differ, running a room survey, iCloud sync, Pro purchases and the Apple Watch app.">
+<meta name="description" content="Help for ThreadMapper: why no devices are found, which devices count as Thread, why a device waits before it is called offline, what the lines on the mesh map are, iCloud sync, Pro purchases and the Apple Watch app.">
 <!-- Generated from site/support.html.tmpl by tools/build-docs.py — edit the template
      and site/strings/support.*.json, not this file. -->
 <link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/support.html">
@@ -68,16 +68,16 @@
 </details>
 
 <details>
-  <summary>Why is signal strength called an &quot;estimate&quot;?</summary>
+  <summary>Why is there no signal strength?</summary>
   <p>
-    iOS does not expose real radio RSSI for Thread accessories to third-party apps. ThreadMapper derives a response-quality estimate by timing how quickly each accessory replies. It is a reliable way to compare devices and rooms, but it is not a radio-measured dBm value — which is why the app labels it as estimated throughout.
+    iOS gives third-party apps no radio signal strength (RSSI) for Thread accessories, so ThreadMapper shows none. What it can measure is how quickly each accessory answers it, and a device's page shows exactly that, in milliseconds. That time does not change with where your iPhone is, so it is never graded and never called a signal.
   </p>
 </details>
 
 <details>
   <summary>Are the mesh links real Thread routing?</summary>
   <p>
-    In the Mesh tab, no — they are logical estimates: devices are linked to the nearest border router or a router in the same room.
+    In the Mesh tab, every line is a link a device reported about itself in its own Thread diagnostics, or one a probe read off the radio. Where nothing was reported, no line is drawn — nothing is guessed from rooms or accessory types.
   </p>
   <p>
     Connecting an OpenThread Border Router gets you real <em>network</em> facts (name, channel, PAN ID) but not routing. Its diagnostics endpoints do not return per-node data — we tested them against a live mesh and the requests complete with nothing in them.
@@ -88,9 +88,23 @@
 </details>
 
 <details>
-  <summary>How do I run a room survey?</summary>
+  <summary>Why isn't a device on the Thread map?</summary>
   <p>
-    Open the Survey tab and choose Guided Survey. Stand in a room, tap Start, walk around while it samples, then tap Done to save that room and move to the next. If you have an Apple Watch, you can drive Start / Done / Skip from your wrist while the survey runs on your iPhone.
+    A device appears there once it has said it is on Thread — in its Matter diagnostics or its HomeKit Thread status. Devices behind a bridge, such as a Hue Bridge or an IKEA DIRIGERA, are listed under Other Accessories with the bridge they are reached through, and so is any device that has not said yet.
+  </p>
+</details>
+
+<details>
+  <summary>Why does ThreadMapper wait before calling a device offline?</summary>
+  <p>
+    Many Thread devices are quiet on purpose: a battery sensor may answer only now and then, to save power, and a device that has not answered yet has not gone. ThreadMapper waits two hours for a sleepy battery device (longer if the device says it sleeps longer) and fifteen minutes for a mains-powered one, and when several devices go quiet in the same minute it reports one event, not one per device.
+  </p>
+</details>
+
+<details>
+  <summary>Where did the room survey go?</summary>
+  <p>
+    The survey timed how quickly each accessory answered while you walked, and that time does not change with where you stand. So version 1.9 withdrew it, with the heatmaps, room signal grades and Find That Sensor built on it, until a real radio reading exists. Walks you saved stay on your iPhone and in your backups.
   </p>
 </details>
 
@@ -107,7 +121,7 @@
     Your device notes, Thread overrides and app settings — the things you typed or chose. It is off until you turn it on in Settings, and it uses your own private iCloud, so it never reaches us.
   </p>
   <p>
-    Signal history and survey measurements deliberately stay on the device that recorded them. A reading depends on where that device was standing, so merging an iPad in a drawer with an iPhone in your pocket would produce a history describing neither.
+    Signal history and survey measurements from earlier versions, like probe recordings, stay on the device that recorded them. Each describes what that one device saw, so merging them would produce a history no single device observed.
   </p>
 </details>
 

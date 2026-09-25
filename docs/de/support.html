@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ThreadMapper — Support</title>
-<meta name="description" content="Hilfe zu ThreadMapper: warum keine Geräte gefunden werden, was die Signalschätzung bedeutet, worin sich Netzverbindungen und echtes Thread-Routing unterscheiden, wie eine Raummessung abläuft, iCloud-Synchronisierung, Pro-Käufe und die Apple-Watch-App.">
+<meta name="description" content="Hilfe zu ThreadMapper: warum keine Geräte gefunden werden, was als Thread zählt, warum ein Gerät erst verzögert als offline gilt, was die Linien der Netzkarte sind, iCloud-Synchronisierung, Pro-Käufe und die Apple-Watch-App.">
 <!-- Generated from site/support.html.tmpl by tools/build-docs.py — edit the template
      and site/strings/support.*.json, not this file. -->
 <link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/de/support.html">
@@ -68,16 +68,16 @@
 </details>
 
 <details>
-  <summary>Warum heißt die Signalstärke „Schätzung“?</summary>
+  <summary>Warum wird keine Signalstärke angezeigt?</summary>
   <p>
-    iOS gibt Apps von Drittanbietern keinen echten Funk-RSSI für Thread-Zubehör heraus. ThreadMapper leitet eine Schätzung der Antwortqualität daraus ab, wie schnell jedes Zubehör antwortet. Das ist eine verlässliche Art, Geräte und Räume zu vergleichen, aber es ist kein per Funk gemessener dBm-Wert – deshalb kennzeichnet die App ihn durchgehend als geschätzt.
+    iOS gibt Apps von Drittanbietern keine Funk-Signalstärke (RSSI) für Thread-Zubehör heraus, deshalb zeigt ThreadMapper keine an. Messen kann es, wie schnell jedes Zubehör ihm antwortet, und die Seite eines Geräts zeigt genau das, in Millisekunden. Diese Zeit ändert sich nicht damit, wo sich Ihr iPhone befindet – deshalb wird sie nie benotet und nie Signal genannt.
   </p>
 </details>
 
 <details>
   <summary>Sind die Netzverbindungen echtes Thread-Routing?</summary>
   <p>
-    Im Tab „Netz“ nicht – sie sind logische Schätzungen: Geräte werden mit dem nächstgelegenen Border Router oder einem Router im selben Raum verbunden.
+    Im Tab „Netz“ ist jede Linie eine Verbindung, die ein Gerät in seiner eigenen Thread-Diagnose über sich selbst gemeldet hat, oder eine, die eine Sonde direkt vom Funk gelesen hat. Wo nichts gemeldet wurde, wird keine Linie gezeichnet – nichts wird aus Räumen oder Zubehörtypen geraten.
   </p>
   <p>
     Ein angeschlossener OpenThread Border Router liefert echte Angaben zum <em>Netzwerk</em> (Name, Kanal, PAN ID), aber kein Routing. Seine Diagnose-Endpunkte geben keine Daten je Knoten zurück – wir haben sie an einem laufenden Netz getestet, und die Anfragen laufen durch, ohne etwas zu enthalten.
@@ -88,9 +88,23 @@
 </details>
 
 <details>
-  <summary>Wie führe ich eine Raummessung durch?</summary>
+  <summary>Warum erscheint ein Gerät nicht auf der Thread-Karte?</summary>
   <p>
-    Öffnen Sie den Tab „Messung“ und wählen Sie „Geführte Messung“. Stellen Sie sich in einen Raum, tippen Sie auf „Start“, gehen Sie umher, während gemessen wird, und tippen Sie dann auf „Fertig“, um diesen Raum zu speichern und zum nächsten zu wechseln. Mit einer Apple Watch steuern Sie „Start“, „Fertig“ und „Überspringen“ vom Handgelenk aus, während die Messung auf Ihrem iPhone läuft.
+    Ein Gerät erscheint dort, sobald es angegeben hat, im Thread-Netz zu sein – in seiner Matter-Diagnose oder seinem HomeKit-Thread-Status. Geräte hinter einer Bridge, etwa einer Hue Bridge oder einem IKEA DIRIGERA, stehen unter „Weiteres Zubehör“, zusammen mit der Bridge, über die sie erreicht werden – ebenso jedes Gerät, das es noch nicht angegeben hat.
+  </p>
+</details>
+
+<details>
+  <summary>Warum wartet ThreadMapper, bevor ein Gerät als offline gilt?</summary>
+  <p>
+    Viele Thread-Geräte sind absichtlich still: Ein Batteriesensor antwortet womöglich nur ab und zu, um Strom zu sparen, und ein Gerät, das noch nicht geantwortet hat, ist deshalb nicht verschwunden. ThreadMapper wartet bei einem schlafenden Batteriegerät zwei Stunden (länger, wenn das Gerät angibt, länger zu schlafen) und bei einem netzbetriebenen fünfzehn Minuten. Verstummen mehrere Geräte in derselben Minute, meldet es ein Ereignis, nicht eines pro Gerät.
+  </p>
+</details>
+
+<details>
+  <summary>Wo ist die Raummessung geblieben?</summary>
+  <p>
+    Die Raummessung maß, wie schnell jedes Zubehör antwortete, während Sie umhergingen – und diese Zeit ändert sich nicht damit, wo Sie stehen. Deshalb hat Version 1.9 sie zurückgezogen, zusammen mit den darauf aufbauenden Heatmaps, Signalnoten der Räume und „Den Sensor aufspüren“, bis es einen echten Funkmesswert gibt. Ihre gespeicherten Messrundgänge bleiben auf Ihrem iPhone und in Ihren Backups.
   </p>
 </details>
 
@@ -107,7 +121,7 @@
     Ihre Gerätenotizen, Thread-Überschreibungen und App-Einstellungen – das, was Sie eingegeben oder ausgewählt haben. Sie ist aus, bis Sie sie in den Einstellungen einschalten, und sie nutzt Ihre eigene private iCloud, sodass nichts davon je zu uns gelangt.
   </p>
   <p>
-    Signalverlauf und Messwerte aus Messungen bleiben bewusst auf dem Gerät, das sie aufgezeichnet hat. Ein Messwert hängt davon ab, wo dieses Gerät stand; ein iPad in der Schublade mit einem iPhone in Ihrer Tasche zusammenzuführen, ergäbe daher einen Verlauf, der keines von beiden beschreibt.
+    Signalverlauf und Messwerte aus Messungen früherer Versionen bleiben, wie die Aufzeichnungen der Sonde, auf dem Gerät, das sie aufgezeichnet hat. Sie beschreiben jeweils, was dieses eine Gerät gesehen hat; sie zusammenzuführen, ergäbe daher einen Verlauf, den kein einzelnes Gerät beobachtet hat.
   </p>
 </details>
 

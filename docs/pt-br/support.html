@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ThreadMapper — Suporte</title>
-<meta name="description" content="Ajuda para o ThreadMapper: por que nenhum dispositivo é encontrado, o que significa a estimativa de sinal, em que as conexões da malha diferem do roteamento Thread real, como fazer uma medição por cômodo, sincronização com o iCloud, compras do Pro e o app do Apple Watch.">
+<meta name="description" content="Ajuda do ThreadMapper: por que nenhum dispositivo aparece, quais contam como Thread, por que o app espera para dar um como offline, as linhas do mapa da malha, sincronização com o iCloud, compras do Pro e o app do Apple Watch.">
 <!-- Generated from site/support.html.tmpl by tools/build-docs.py — edit the template
      and site/strings/support.*.json, not this file. -->
 <link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/pt-br/support.html">
@@ -68,16 +68,16 @@
 </details>
 
 <details>
-  <summary>Por que a intensidade do sinal é chamada de “estimativa”?</summary>
+  <summary>Por que não há intensidade do sinal?</summary>
   <p>
-    O iOS não expõe a apps de terceiros o RSSI de rádio real dos acessórios Thread. O ThreadMapper deriva uma estimativa de qualidade de resposta cronometrando a rapidez com que cada acessório responde. É uma forma confiável de comparar dispositivos e cômodos, mas não é um valor em dBm medido pelo rádio — e é por isso que o app a rotula como estimada em todo lugar.
+    O iOS não dá aos apps de terceiros nenhuma intensidade de sinal de rádio (RSSI) dos acessórios Thread, então o ThreadMapper não mostra nenhuma. O que ele consegue medir é a rapidez com que cada acessório responde a ele, e a página de um dispositivo mostra exatamente isso, em milissegundos. Esse tempo não muda conforme o lugar onde está o seu iPhone, então nunca recebe nota e nunca é chamado de sinal.
   </p>
 </details>
 
 <details>
   <summary>As conexões da malha são roteamento Thread real?</summary>
   <p>
-    Na aba Malha, não — são estimativas lógicas: os dispositivos são ligados ao roteador de borda mais próximo ou a um roteador do mesmo cômodo.
+    Na aba Malha, cada linha é uma conexão que um dispositivo informou sobre si mesmo no próprio diagnóstico Thread, ou que uma sonda leu direto do rádio. Onde nada foi informado, nenhuma linha é desenhada — nada é adivinhado a partir de cômodos ou tipos de acessório.
   </p>
   <p>
     Conectar um OpenThread Border Router traz fatos reais da <em>rede</em> (nome, canal, PAN ID), mas não o roteamento. Seus endpoints de diagnóstico não devolvem dados por nó — nós os testamos contra uma malha real e as requisições são concluídas sem nada dentro.
@@ -88,9 +88,23 @@
 </details>
 
 <details>
-  <summary>Como faço uma medição por cômodo?</summary>
+  <summary>Por que um dispositivo não aparece no mapa Thread?</summary>
   <p>
-    Abra a aba Medição e escolha Medição guiada. Fique em pé num cômodo, toque em Iniciar, ande por ele enquanto o app coleta amostras e depois toque em Concluído para salvar aquele cômodo e passar para o próximo. Se você tiver um Apple Watch, dá para acionar Iniciar / Concluído / Pular pelo pulso enquanto a medição roda no seu iPhone.
+    Um dispositivo aparece lá assim que disser que usa Thread — no diagnóstico Matter ou no status Thread do HomeKit. Dispositivos atrás de uma ponte, como uma Hue Bridge ou um IKEA DIRIGERA, aparecem em Outros acessórios com a ponte pela qual são alcançados, assim como qualquer dispositivo que ainda não tenha dito isso.
+  </p>
+</details>
+
+<details>
+  <summary>Por que o ThreadMapper espera antes de considerar um dispositivo offline?</summary>
+  <p>
+    Muitos dispositivos Thread ficam em silêncio de propósito: um sensor a bateria pode responder só de vez em quando, para economizar energia, e um dispositivo que ainda não respondeu não sumiu. O ThreadMapper espera duas horas por um dispositivo a bateria em repouso (mais, se o dispositivo disser que dorme por mais tempo) e quinze minutos por um ligado à tomada, e quando vários dispositivos ficam em silêncio no mesmo minuto, informa um só evento, e não um por dispositivo.
+  </p>
+</details>
+
+<details>
+  <summary>Para onde foi a medição por cômodo?</summary>
+  <p>
+    A medição cronometrava a rapidez com que cada acessório respondia enquanto você caminhava, e esse tempo não muda conforme o lugar onde você está. Por isso a versão 1.9 a retirou, junto com os mapas de calor, as notas de sinal por cômodo e o recurso Achar aquele sensor, que se baseavam nela, até que exista uma leitura de rádio real. As caminhadas que você salvou continuam no seu iPhone e nos seus backups.
   </p>
 </details>
 
@@ -107,7 +121,7 @@
     As notas dos seus dispositivos, as substituições de Thread e os ajustes do app — as coisas que você digitou ou escolheu. Fica desligada até você ativá-la nos Ajustes, e usa o seu próprio iCloud privado, então nada disso chega até nós.
   </p>
   <p>
-    O histórico de sinal e as medições ficam deliberadamente no dispositivo que os registrou. Uma leitura depende de onde aquele dispositivo estava, então juntar um iPad esquecido numa gaveta com um iPhone no seu bolso produziria um histórico que não descreve nenhum dos dois.
+    O histórico de sinal e as medições de versões anteriores, assim como as gravações da sonda, ficam no dispositivo que os registrou. Cada um descreve o que aquele dispositivo viu, então juntá-los produziria um histórico que nenhum dispositivo observou sozinho.
   </p>
 </details>
 

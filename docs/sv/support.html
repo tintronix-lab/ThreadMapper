@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ThreadMapper — support</title>
-<meta name="description" content="Hjälp för ThreadMapper: varför inga enheter hittas, vad signaluppskattningen betyder, hur mesh-länkar och verklig Thread-routing skiljer sig åt, hur du gör en rumsmätning, iCloud-synk, Pro-köp och appen till Apple Watch.">
+<meta name="description" content="Hjälp för ThreadMapper: varför inga enheter hittas, vilka enheter som räknas som Thread, varför det dröjer innan en enhet kallas offline, vad linjerna på nätverkskartan är, iCloud-synk, Pro-köp och Apple Watch-appen.">
 <!-- Generated from site/support.html.tmpl by tools/build-docs.py — edit the template
      and site/strings/support.*.json, not this file. -->
 <link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/sv/support.html">
@@ -68,16 +68,16 @@
 </details>
 
 <details>
-  <summary>Varför kallas signalstyrkan en ”uppskattning”?</summary>
+  <summary>Varför visas ingen signalstyrka?</summary>
   <p>
-    iOS exponerar inte verklig radio-RSSI för Thread-tillbehör för tredjepartsappar. ThreadMapper härleder en uppskattning av svarskvaliteten genom att ta tid på hur snabbt varje tillbehör svarar. Det är ett tillförlitligt sätt att jämföra enheter och rum, men det är inget radiomätt dBm-värde — och därför märker appen det som uppskattat rakt igenom.
+    iOS ger tredjepartsappar ingen radiosignalstyrka (RSSI) för Thread-tillbehör, så ThreadMapper visar ingen. Det appen kan mäta är hur snabbt varje tillbehör svarar den, och en enhets sida visar precis det, i millisekunder. Den tiden ändras inte beroende på var din iPhone befinner sig, så den betygsätts aldrig och kallas aldrig signal.
   </p>
 </details>
 
 <details>
   <summary>Är mesh-länkarna verklig Thread-routing?</summary>
   <p>
-    I fliken Mesh, nej — de är logiska uppskattningar: enheter kopplas till närmaste gränsrouter eller till en router i samma rum.
+    I fliken Mesh är varje linje en länk som en enhet har rapporterat om sig själv i sin egen Thread-diagnostik, eller en som en sond har läst av direkt från radion. Där inget har rapporterats ritas ingen linje — ingenting gissas utifrån rum eller tillbehörstyper.
   </p>
   <p>
     Att ansluta en OpenThread-gränsrouter ger dig verkliga <em>nätverksfakta</em> (namn, kanal, PAN ID) men inte routing. Dess diagnostikslutpunkter returnerar inga data per nod — vi testade dem mot ett levande mesh-nät, och förfrågningarna går igenom men kommer tillbaka tomma.
@@ -88,9 +88,23 @@
 </details>
 
 <details>
-  <summary>Hur gör jag en rumsmätning?</summary>
+  <summary>Varför syns en enhet inte på Thread-kartan?</summary>
   <p>
-    Öppna fliken Mätning och välj Guidad mätning. Ställ dig i ett rum, tryck på Start, gå runt medan appen samlar in mätvärden och tryck sedan på Klar för att spara rummet och gå vidare till nästa. Har du en Apple Watch kan du styra Start/Klar/Hoppa över från handleden medan mätningen körs på din iPhone.
+    En enhet visas där så snart den har sagt att den är på Thread — i sin Matter-diagnostik eller sin Thread-status i HomeKit. Enheter bakom en brygga, till exempel en Hue Bridge eller en IKEA DIRIGERA, listas under Övriga tillbehör tillsammans med bryggan de nås via, och det gör även varje enhet som inte har sagt det än.
+  </p>
+</details>
+
+<details>
+  <summary>Varför väntar ThreadMapper innan den kallar en enhet offline?</summary>
+  <p>
+    Många Thread-enheter är tysta med avsikt: en batterisensor kanske bara svarar då och då, för att spara ström, och en enhet som inte har svarat än är inte borta. ThreadMapper väntar två timmar på en sovande batterienhet (längre om enheten säger att den sover längre) och femton minuter på en nätansluten, och när flera enheter tystnar under samma minut rapporterar den en enda händelse, inte en per enhet.
+  </p>
+</details>
+
+<details>
+  <summary>Vart tog rumsmätningen vägen?</summary>
+  <p>
+    Rumsmätningen tog tid på hur snabbt varje tillbehör svarade medan du gick, och den tiden ändras inte beroende på var du står. Därför togs den bort i version 1.9, tillsammans med värmekartorna, signalbetygen per rum och Hitta den där sensorn som byggde på den, tills det finns ett riktigt mätvärde från radion. Promenader du har sparat finns kvar på din iPhone och i dina säkerhetskopior.
   </p>
 </details>
 
@@ -107,7 +121,7 @@
     Dina enhetsanteckningar, Thread-överstyrningar och appinställningar — det du skrev eller valde. Den är avstängd tills du slår på den i Inställningar, och den använder ditt eget privata iCloud, så den når aldrig oss.
   </p>
   <p>
-    Signalhistorik och mätvärden stannar medvetet på den enhet som spelade in dem. En avläsning beror på var den enheten stod, så att slå ihop en iPad i en låda med en iPhone i fickan skulle ge en historik som beskriver ingendera.
+    Signalhistorik och mätvärden från rumsmätningar i tidigare versioner stannar, precis som sondinspelningar, på den enhet som spelade in dem. Var och en beskriver vad just den enheten såg, så att slå ihop dem skulle ge en historik som ingen enskild enhet har observerat.
   </p>
 </details>
 

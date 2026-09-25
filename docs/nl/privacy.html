@@ -53,7 +53,7 @@
 <body>
 
 <h1>Privacybeleid</h1>
-<p class="updated">ThreadMapper · Laatst bijgewerkt 10 september 2026</p>
+<p class="updated">ThreadMapper · Laatst bijgewerkt 24 september 2026</p>
 
 <div class="highlight">
   <strong>ThreadMapper verzamelt, verzendt of verkoopt je persoonsgegevens niet.</strong> Er zijn geen accounts, geen analytics-SDK’s en geen trackers van derden. Alles wat de app vastlegt blijft op je apparaat — of, als je een van de twee optionele iCloud-functies gebruikt, in je eigen iCloud-account. Hoe dan ook bereikt het ons nooit.
@@ -62,12 +62,12 @@
 <h2>Wat ThreadMapper leest</h2>
 <ul>
   <li><strong>HomeKit-accessoiregegevens</strong> — namen, kamers, fabrikant, model, bereikbaarheid en batterijniveau van de accessoires in je woning. Dit wordt met je toestemming uit Apple’s HomeKit-framework gelezen en gebruikt om de weergave van je Thread-mesh op te bouwen.</li>
-  <li><strong>Locatie</strong> — nauwkeurig, tot op ongeveer tien meter, en alleen terwijl je actief een loopmeting uitvoert, en alleen om signaalmetingen te labelen zodat ze op een heatmap getoond kunnen worden. Locatie wordt gevraagd wanneer een meting begint, nooit bij het starten van de app. Metingen zonder locatiebepaling worden zonder coördinaten bewaard in plaats van dat er verzonnen coördinaten aan worden gehangen.</li>
-  <li><strong>Signaalmetingen</strong> — schattingen van de reactiekwaliteit die de app zelf afleidt door de reactietijd van accessoires te klokken.</li>
+  <li><strong>Locatie</strong> — alleen tijdens een loopmeting, en alleen om de meetwaarden daarvan op een heatmap te plaatsen. Versie 1.9 heeft de loopmeting uit de app gehaald, dus de app vraagt niet meer om je locatie. Loopmetingen die een eerdere versie heeft bewaard, behouden de coördinaten waarmee ze zijn gedaan; meetwaarden zonder locatiebepaling zijn zonder coördinaten bewaard in plaats van dat er verzonnen coördinaten aan werden gehangen.</li>
+  <li><strong>Reactietijden</strong> — hoe snel elk accessoire de app antwoordt, wat de app zelf klokt. Ze worden getoond in milliseconden, nooit als signaal.</li>
   <li><strong>Je lokale netwerk</strong> — de app kijkt uit naar Thread border routers en Matter-apparaten die zichzelf op je netwerk aankondigen, en leest wat zij daar over zichzelf publiceren: hun namen, modellen en of ze al gekoppeld zijn. Zo kan de app hardware beschrijven die Apple Home niet toont. Het is een uitlezing van wat die apparaten uitzenden; de app maakt er geen verbinding mee.</li>
-  <li><strong>Camera</strong> — om QR-codes voor het instellen van Matter te lezen, om je positie binnenshuis te volgen tijdens een AR-wandeling en, wanneer je een kamerscan start, om de vorm van de kamer te meten en een plattegrond te bouwen. Er wordt geen foto of video opgenomen of bewaard.</li>
+  <li><strong>Camera</strong> — om QR-codes voor het instellen van Matter te lezen en, wanneer je een kamerscan start, om de vorm van de kamer te meten, een plattegrond te bouwen en te volgen waar je erin staat. Er wordt geen foto of video opgenomen of bewaard.</li>
   <li><strong>Bluetooth</strong> — om Matter-apparaten te zien die zich in de buurt aankondigen om ingesteld te worden, zodat de app kan tonen wat er klaarstaat om toegevoegd te worden. Er wordt alleen gescand terwijl je naar dat scherm kijkt.</li>
-  <li><strong>Barometer</strong> — alleen tijdens een AR-wandeling, om te bepalen op welke verdieping een meting is gedaan.</li>
+  <li><strong>Barometer</strong> — alleen terwijl je een kamer in AR tekent, om te bepalen op welke verdieping die kamer ligt. Ook de AR-wandeling las hem uit, tot versie 1.9 de wandeling uit de app haalde.</li>
 </ul>
 <p>Elk hiervan wordt gevraagd op het moment dat het voor het eerst nodig is in plaats van bij het starten, en elk is optioneel behalve HomeKit — dat is hoe de app je Thread-netwerk überhaupt uitleest. Weiger je een van de andere, dan gaat alleen de functie uit die erom vroeg, en verder niets.</p>
 
@@ -79,7 +79,7 @@
 <p>Er zijn twee losse iCloud-functies, beide optioneel, beide naar <em>je eigen</em> Apple-account. Geen van beide is een dienst van ons: wij hebben tot geen van beide toegang en ontvangen er geen kopie van.</p>
 <h3>iCloud-synchronisatie (een schakelaar, doorlopend)</h3>
 <p>Zet je <strong>iCloud-synchronisatie</strong> aan — die staat uit tenzij je hem inschakelt — dan worden je apparaatnotities, Thread-overschrijvingen en app-instellingen naar je privé-sleutelwaardeopslag in iCloud gekopieerd, zodat ze op je andere apparaten verschijnen.</p>
-<p>Signaalgeschiedenis, meetgegevens en probe-opnames zijn met opzet uitgesloten van deze doorlopende synchronisatie en blijven op het apparaat dat ze heeft vastgelegd. Metingen hangen af van waar dat apparaat stond, dus ze tussen apparaten samenvoegen zou een geschiedenis opleveren die geen van beide beschrijft.</p>
+<p>Signaalgeschiedenis, meetgegevens en probe-opnames zijn met opzet uitgesloten van deze doorlopende synchronisatie en blijven op het apparaat dat ze heeft vastgelegd. Elk ervan beschrijft wat dat ene apparaat zag, dus ze tussen apparaten samenvoegen zou een geschiedenis opleveren die geen enkel apparaat heeft waargenomen.</p>
 <h3>Opslaan in iCloud (een knop, handmatig)</h3>
 <p>Los daarvan maakt <strong>Opslaan in iCloud</strong> in Instellingen één volledige reservekopie van dit apparaat als bundel: je instellingen, notities, gescande kamers, plattegronden, de posities waarop je apparaten hebt geplaatst, de bewaarde AR-ruimte en <strong>je meetgegevens</strong> — inclusief de coördinaten, tijdstempels en kamernamen die eraan hangen. Het bestaat zodat je je werk naar een andere iPhone kunt meenemen.</p>
 <p>Dit is de enige plek waar je metingen het apparaat ooit verlaten, en het is met opzet handmatig: er wordt niets geüpload tot jij op Opslaan tikt. Het gaat naar je eigen iCloud Drive, waar je Bestanden-app het kan zien en jij het kunt verwijderen, en niemand anders het kan lezen. Tik je nooit op Opslaan, dan wordt er nooit iets weggeschreven.</p>
@@ -102,13 +102,13 @@
 <p>ThreadMapper Pro wordt volledig afgehandeld door het In-App Purchase-systeem van Apple. Wij zien of bewaren je betaalgegevens nooit. Op die transactie is het eigen privacybeleid van Apple van toepassing.</p>
 
 <h2>Gegevens delen</h2>
-<p>Wij delen, verkopen, verhuren of verstrekken je gegevens aan niemand, omdat wij ze nooit ontvangen. Alles wat je zelf exporteert (een CSV met meetgegevens of een diagnose-pdf) verlaat de app alleen wanneer je het bewust deelt, en gaat waarheen jij het stuurt.</p>
+<p>Wij delen, verkopen, verhuren of verstrekken je gegevens aan niemand, omdat wij ze nooit ontvangen. Alles wat je zelf exporteert (een diagnose-pdf, een rapport of een geëxporteerde geschiedenis) verlaat de app alleen wanneer je het bewust deelt, en gaat waarheen jij het stuurt.</p>
 
 <h2>Kinderen</h2>
 <p>ThreadMapper is een netwerkhulpprogramma en is niet gericht op kinderen. Het verzamelt van niemand persoonlijke gegevens, ook niet van kinderen.</p>
 
 <h2>Jouw controle</h2>
-<p>Je kunt elke toestemming — HomeKit, Locatie, Camera, Bluetooth of Beweging en fitness — op elk moment intrekken in de iOS-instellingen. De app verwijderen wist alle lokaal bewaarde gegevens. De app biedt daarnaast eigen knoppen om de activiteitengeschiedenis en bewaarde meetgegevens te wissen. Heb je <strong>Opslaan in iCloud</strong> gebruikt, dan staat die reservekopie in je iCloud Drive en niet in de app — hij verschijnt in de Bestanden-app als een map met de naam ThreadMapper — dus de app verwijderen verwijdert hem niet. Haal hem uit Bestanden wanneer je hem kwijt wilt.</p>
+<p>Je kunt elke toestemming — HomeKit, Locatie, Camera, Bluetooth of Beweging en fitness — op elk moment intrekken in de iOS-instellingen. De app verwijderen wist alle lokaal bewaarde gegevens. De app biedt daarnaast een eigen knop om het activiteitenoverzicht te wissen. Wandelingen die een eerdere versie heeft bewaard, verdwijnen wanneer je de app verwijdert; die van een bezocht netwerk wanneer je dat netwerk vergeet. Heb je <strong>Opslaan in iCloud</strong> gebruikt, dan staat die reservekopie in je iCloud Drive en niet in de app — hij verschijnt in de Bestanden-app als een map met de naam ThreadMapper — dus de app verwijderen verwijdert hem niet. Haal hem uit Bestanden wanneer je hem kwijt wilt.</p>
 
 <h2>Wijzigingen</h2>
 <p>Wijzigt dit beleid, dan wordt de bijgewerkte versie met een nieuwe datum op deze pagina geplaatst.</p>

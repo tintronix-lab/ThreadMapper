@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ThreadMapper — Assistance</title>
-<meta name="description" content="Aide pour ThreadMapper : pourquoi aucun appareil n’est trouvé, ce que signifie l’estimation du signal, en quoi les liaisons du réseau diffèrent du vrai routage Thread, comment faire un relevé de pièce, la synchronisation iCloud, les achats Pro et l’app Apple Watch.">
+<meta name="description" content="Aide pour ThreadMapper : aucun appareil trouvé, quels appareils comptent comme Thread, pourquoi un délai avant « hors ligne », les traits de la carte du réseau, la synchronisation iCloud, les achats Pro et l’app Apple Watch.">
 <!-- Generated from site/support.html.tmpl by tools/build-docs.py — edit the template
      and site/strings/support.*.json, not this file. -->
 <link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/fr/support.html">
@@ -68,16 +68,16 @@
 </details>
 
 <details>
-  <summary>Pourquoi la puissance du signal est-elle appelée « estimation » ?</summary>
+  <summary>Pourquoi la puissance du signal n’est-elle pas affichée ?</summary>
   <p>
-    iOS n’expose pas le vrai RSSI radio des accessoires Thread aux apps tierces. ThreadMapper en déduit une estimation de qualité de réponse en chronométrant la vitesse à laquelle chaque accessoire répond. C’est un moyen fiable de comparer des appareils et des pièces, mais ce n’est pas une valeur en dBm mesurée par la radio — c’est pourquoi l’app la présente partout comme estimée.
+    iOS ne donne aux apps tierces aucune puissance de signal radio (RSSI) pour les accessoires Thread : ThreadMapper n’en affiche donc aucune. Ce qu’il peut mesurer, c’est la vitesse à laquelle chaque accessoire lui répond, et la page d’un appareil affiche exactement cela, en millisecondes. Ce temps ne change pas selon l’endroit où se trouve votre iPhone : il n’est donc jamais noté ni appelé signal.
   </p>
 </details>
 
 <details>
   <summary>Les liaisons du réseau correspondent-elles au vrai routage Thread ?</summary>
   <p>
-    Dans l’onglet Réseau, non — ce sont des estimations logiques : chaque appareil est relié au routeur de bordure le plus proche, ou à un routeur situé dans la même pièce.
+    Dans l’onglet Réseau, chaque trait est une liaison qu’un appareil a signalée sur lui-même dans ses propres diagnostics Thread, ou qu’une sonde a lue sur la radio. Là où rien n’a été signalé, aucun trait n’est tracé — rien n’est deviné d’après les pièces ou les types d’accessoires.
   </p>
   <p>
     Connecter un routeur de bordure OpenThread vous donne de vraies informations sur le <em>réseau</em> (nom, canal, PAN ID), mais pas le routage. Ses points de terminaison de diagnostic ne renvoient pas de données par nœud — nous les avons testés sur un réseau réel et les requêtes aboutissent sans rien contenir.
@@ -88,9 +88,23 @@
 </details>
 
 <details>
-  <summary>Comment faire un relevé de pièce ?</summary>
+  <summary>Pourquoi un appareil n’est-il pas sur la carte Thread ?</summary>
   <p>
-    Ouvrez l’onglet Relevé et choisissez Relevé guidé. Placez-vous dans une pièce, touchez Démarrer, déplacez-vous pendant l’échantillonnage, puis touchez Terminé pour enregistrer cette pièce et passer à la suivante. Si vous avez une Apple Watch, vous pouvez commander Démarrer / Terminé / Ignorer depuis votre poignet pendant que le relevé se déroule sur votre iPhone.
+    Un appareil y apparaît dès qu’il a dit être sur Thread — dans ses diagnostics Matter ou son état Thread dans HomeKit. Les appareils derrière une passerelle, comme un Hue Bridge ou un IKEA DIRIGERA, sont listés sous Autres accessoires avec la passerelle par laquelle on les atteint, de même que tout appareil qui ne l’a pas encore dit.
+  </p>
+</details>
+
+<details>
+  <summary>Pourquoi ThreadMapper attend-il avant de déclarer un appareil hors ligne ?</summary>
+  <p>
+    Beaucoup d’appareils Thread sont silencieux exprès : un capteur à pile peut ne répondre que de temps en temps, pour économiser l’énergie, et un appareil qui n’a pas encore répondu n’a pas disparu pour autant. ThreadMapper attend deux heures pour un appareil à pile en veille (davantage si l’appareil indique qu’il dort plus longtemps) et quinze minutes pour un appareil sur secteur, et quand plusieurs appareils se taisent dans la même minute, il signale un seul événement, pas un par appareil.
+  </p>
+</details>
+
+<details>
+  <summary>Où est passé le relevé de pièce ?</summary>
+  <p>
+    Le relevé chronométrait la vitesse de réponse de chaque accessoire pendant que vous marchiez, et ce temps ne change pas selon l’endroit où vous vous trouvez. La version 1.9 l’a donc retiré, ainsi que les cartes thermiques, les notes de signal par pièce et Retrouver ce capteur qui en dépendaient, jusqu’à ce qu’une vraie mesure radio existe. Les marches que vous avez enregistrées restent sur votre iPhone et dans vos sauvegardes.
   </p>
 </details>
 
@@ -107,7 +121,7 @@
     Vos notes d’appareil, vos remplacements Thread et vos réglages de l’app — ce que vous avez saisi ou choisi. Elle est désactivée tant que vous ne l’activez pas dans les Réglages, et elle passe par votre iCloud privé, si bien qu’elle ne nous parvient jamais.
   </p>
   <p>
-    L’historique du signal et les mesures de relevé restent délibérément sur l’appareil qui les a enregistrés. Un relevé dépend de l’endroit où se trouvait cet appareil ; fusionner un iPad rangé dans un tiroir avec un iPhone dans votre poche produirait un historique qui ne décrit ni l’un ni l’autre.
+    L’historique du signal et les mesures de relevé des versions précédentes, comme les enregistrements de la sonde, restent sur l’appareil qui les a enregistrés. Chacun décrit ce que cet appareil-là a vu ; les fusionner produirait un historique qu’aucun appareil n’a observé à lui seul.
   </p>
 </details>
 

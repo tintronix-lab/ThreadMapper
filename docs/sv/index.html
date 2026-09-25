@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ThreadMapper — ditt Thread-nätverk, svart på vitt</title>
-<meta name="description" content="ThreadMapper visar dig varje Thread-enhet, vilka rum som har svag täckning och ögonblicket då något går offline. Lägg till en sond så slutar den uppskatta: verklig signal, verklig routing, verkliga störningar. Privat i grunden.">
+<meta name="description" content="ThreadMapper visar vilka av dina enheter som är på Thread, vilka gränsroutrar nätverket har och när en enhet verkligen gått offline — och inget den inte kan läsa. Med en sond läser den radion själv. Privat i grunden.">
 <meta name="theme-color" content="#0B1020">
 <meta name="apple-itunes-app" content="app-id=6794255629, app-clip-bundle-id=com.tintronixlab.ThreadMapper.Clip, app-clip-display=card">
 <!-- Generated from site/index.html.tmpl by tools/build-docs.py — edit the template
@@ -148,7 +148,7 @@
     padding: .3rem .5rem; border-radius: 5px; white-space: nowrap;
   }
   .tag.measured  { color: var(--measured); background: color-mix(in srgb, var(--measured) 12%, transparent); }
-  .tag.estimated { color: var(--muted);    background: var(--surface); }
+  .tag.reported  { color: var(--ink);      background: var(--surface); }
   .tag.probe     { color: var(--noise);    background: color-mix(in srgb, var(--noise) 14%, transparent); }
 
   /* ── Cards ────────────────────────────────────────────────────────────── */
@@ -267,7 +267,7 @@
 
     <h1>Ditt Thread-nätverk, <em>svart på vitt</em>.</h1>
     <p class="lede">
-      Thread-enheter är osynliga av design. De bara fungerar — tills en av dem inte gör det, och då är det ingen som talar om varför. ThreadMapper kartlägger varje enhet, betygsätter varje rum och säger rakt ut vilka av sina siffror som är avläsningar och vilka som är uppskattningar.
+      Thread-enheter är osynliga av design. De bara fungerar — tills en av dem inte gör det, och då är det ingen som talar om varför. ThreadMapper visar vad dina enheter och ditt nätverk säger om sig själva: vilka enheter som är på Thread, vilka gränsroutrar du har, vilka länkar enheterna rapporterar. Det den inte kan läsa visas inte.
     </p>
     <p class="cta">
       <a href="https://apps.apple.com/app/id6794255629">Hämta i App Store →</a>
@@ -288,24 +288,24 @@
     </p>
     <div class="grid">
       <div class="card">
-        <div class="card-head"><h3>Hälsobetyg</h3><span class="tag estimated">Uppskattat</span></div>
+        <div class="card-head"><h3>Hälsobetyg</h3><span class="tag reported">Rapporterat</span></div>
         <p>Ett A–F-betyg med de konkreta problem som drar ner det, inte bara en siffra.</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Nätverkskarta</h3><span class="tag estimated">Uppskattat</span></div>
-        <p>Varje enhet grupperad efter rum, med hur var och en når fram till en gränsrouter.</p>
+        <div class="card-head"><h3>Nätverkskarta</h3><span class="tag reported">Rapporterat</span></div>
+        <p>Dina Thread-enheter efter rum, med länkarna de rapporterar. Där ingen enhet har rapporterat en länk ritas ingen.</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Rumsmätning</h3><span class="tag estimated">Uppskattat</span></div>
-        <p>Gå igenom ett rum, få ett täckningsbetyg. Kan styras från handleden så att båda händerna är fria.</p>
+        <div class="card-head"><h3>Thread och allt annat</h3><span class="tag reported">Rapporterat</span></div>
+        <p>En enhet är på Thread när den säger det — i sin Matter-diagnostik eller sin Thread-status i HomeKit — aldrig på grund av sitt märke. Allt annat listas för sig, märkt efter vad det är.</p>
       </div>
       <div class="card">
         <div class="card-head"><h3>Offlinelarm</h3><span class="tag measured">Uppmätt</span></div>
-        <p>Få veta i samma stund som en enhet försvinner, med en respitperiod och tysta timmar som du själv ställer in.</p>
+        <p>Offline när den verkligen är borta: en sovande batterisensor får två timmar, en nätansluten enhet femton minuter, och enheter som tystnar samtidigt blir ett enda larm.</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Enhetshistorik</h3><span class="tag estimated">Uppskattat</span></div>
-        <p>30 dagars signaltrend, drifttid och firmwareändringar för varje tillbehör.</p>
+        <div class="card-head"><h3>Enhetshistorik</h3><span class="tag reported">Rapporterat</span></div>
+        <p>Drifttid, omstarter och firmwareändringar för varje tillbehör.</p>
       </div>
       <div class="card">
         <!-- No tag: this one is a platform, not a claim about data. Tagging it
@@ -318,14 +318,14 @@
 
   <section>
     <p class="eyebrow">Varifrån etiketterna kommer</p>
-    <h2>Varje gissning är märkt som gissning.</h2>
+    <h2>Det den inte kan läsa visar den inte.</h2>
     <div class="cols">
       <div>
         <p class="section-lede" style="margin-bottom:1.25rem">
           iOS ger tredjepartsappar ingen radiosignalstyrka för Thread-tillbehör, inga förälder–barn-relationer och ingen routingtabell. En app som visar dig dBm för ett HomeKit-tillbehör visar dig något den inte kan läsa.
         </p>
         <p class="section-lede" style="margin-bottom:0">
-          ThreadMapper mäter hur snabbt varje tillbehör svarar, kallar det en <strong>uppskattning</strong> överallt där det förekommer, och härleder mesh-nätets form ur det HomeKit faktiskt exponerar. Det fungerar, och det är ärligt med att vara en slutledning.
+          Därför visar ThreadMapper ingen signal alls. En enhet är på Thread när den säger det, gränsrouter när nätverket bevisar det, och en linje på kartan är en länk som en enhet har rapporterat. Det telefonen kan ta tid på — hur snabbt ett tillbehör svarar — visas som just det, i millisekunder.
         </p>
       </div>
       <div class="note">
@@ -359,11 +359,11 @@
         <div class="compare-cell">Med sond</div>
       </div>
       <div class="compare-row">
-        <div class="compare-cell without"><b>Svarstid</b>Hur snabbt ett tillbehör svarar, indelat i en signaluppskattning.</div>
+        <div class="compare-cell without"><b>Svarstid</b>Hur snabbt ett tillbehör svarar, i millisekunder — aldrig framställt som signal.</div>
         <div class="compare-cell with"><b>Radio-RSSI</b>Verklig signal och länkkvalitet per granne, direkt från radion.</div>
       </div>
       <div class="compare-row">
-        <div class="compare-cell without"><b>Härledd form</b>Mesh-nätets form gissad utifrån tillbehörstyp och rumsnamn.</div>
+        <div class="compare-cell without"><b>Rapporterade länkar</b>Länkarna en enhet rapporterar om sig själv, och inget som gissats utifrån rum eller tillbehörstyper.</div>
         <div class="compare-cell with"><b>Verklig routing</b>Ruttabell med nästa hopp och vägkostnad — det som gör att ett mesh-nät kan gå över flera hopp.</div>
       </div>
       <div class="compare-row">
@@ -409,11 +409,11 @@
     <h2>Skärmar</h2>
     <div class="shots">
       <figure class="shot">
-        <img src="../screenshots/01_dashboard.jpg" alt="Instrumentpanel som visar ett nätverksbetyg på A och täckningskort per rum" loading="lazy" width="226" height="490">
+        <img src="../screenshots/01_dashboard.jpg" alt="Instrumentpanel som visar nätverksbetyget, antalen bakom det och den sak du bör åtgärda först" loading="lazy" width="226" height="490">
         <figcaption>Hälsan i en blick</figcaption>
       </figure>
       <figure class="shot">
-        <img src="../screenshots/02_mesh_topology.jpg" alt="Nätverkskarta med enheter grupperade efter rum och kopplade till gränsroutrar" loading="lazy" width="226" height="490">
+        <img src="../screenshots/02_mesh_topology.jpg" alt="Nätverkskarta med Thread-enheter grupperade efter rum och länkarna de rapporterar" loading="lazy" width="226" height="490">
         <figcaption>Levande nätverkskarta</figcaption>
       </figure>
       <figure class="shot">
@@ -429,8 +429,8 @@
         <figcaption>Vad som hände, och varför</figcaption>
       </figure>
       <figure class="shot">
-        <img src="../screenshots/03_survey.jpg" alt="Mätningsskärm som listar signalkvaliteten per enhet i realtid" loading="lazy" width="226" height="490">
-        <figcaption>Mätning rum för rum</figcaption>
+        <img src="../screenshots/03_doctor.jpg" alt="Nätverksdoktorn som listar vad du bör åtgärda först, varje fynd med underlaget bakom det" loading="lazy" width="226" height="490">
+        <figcaption>Vad du bör åtgärda först</figcaption>
       </figure>
     </div>
   </section>
@@ -447,9 +447,9 @@
       </ul>
       <div>
         <div class="note">
-          <p><strong>Signalhistoriken synkas medvetet inte.</strong></p>
+          <p><strong>Mätvärden synkas medvetet inte.</strong></p>
           <p>
-            Avläsningar beror på var enheten som gör dem står. Att slå ihop en iPad i en låda med en iPhone i fickan skulle ge en historik som beskriver en plats där ingen befinner sig. Anteckningar och inställningar synkas; mätvärden stannar kvar.
+            Varje iPhone och iPad behåller själv det den har sett av ditt nätverk. Att slå ihop dem skulle ge en historik som ingen enskild enhet har observerat. Anteckningar och inställningar synkas; mätvärden stannar kvar.
           </p>
         </div>
         <p style="margin:1.25rem 0 0"><a href="privacy.html">Fullständig integritetspolicy →</a></p>
@@ -463,7 +463,7 @@
     <div class="cols">
       <ul class="plain">
         <li><strong>AI-insikter, Nätverksassistent och en felsökare</strong> som läser enhetens egen historik — allt på din iPhone, inget laddas upp.</li>
-        <li><strong>AR-rumskartläggning och röntgen</strong> — skanna rum för rum till en planritning, gå signalen in på den och se sedan mesh-nätet ritat genom din verkliga bostad.</li>
+        <li><strong>AR-rumskartläggning och röntgen</strong> — skanna rum för rum till en planritning, placera varje enhet där den faktiskt finns och se länkarna som dina enheter rapporterar, ritade genom din verkliga bostad.</li>
         <li><strong>Ett år av dagliga betyg</strong>, en månad i tidslinjen, veckorapporter och vad en månads avläsningar säger om när hemmet är som sämst.</li>
         <li><strong>Jobb och underlag</strong> — en sida till kunden som säger exakt vad besöket ändrade, och en sida per enhet för ett garantiärende.</li>
         <li><strong>Vad radion säger</strong> — varför en enhet startade om, hur ofta den har bytt föräldrarouter och hur många hushåll som kan styra den.</li>

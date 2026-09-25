@@ -53,7 +53,7 @@
 <body>
 
 <h1>Datenschutzerklärung</h1>
-<p class="updated">ThreadMapper · Zuletzt aktualisiert am 10. September 2026</p>
+<p class="updated">ThreadMapper · Zuletzt aktualisiert am 24. September 2026</p>
 
 <div class="highlight">
   <strong>ThreadMapper erhebt Ihre personenbezogenen Daten nicht, überträgt sie nicht und verkauft sie nicht.</strong> Es gibt keine Accounts, keine Analyse-SDKs und keine Tracker von Drittanbietern. Alles, was die App aufzeichnet, bleibt auf Ihrem Gerät – oder, wenn Sie eine der beiden optionalen iCloud-Funktionen nutzen, in Ihrem eigenen iCloud-Account. In beiden Fällen erreicht es uns nie.
@@ -62,12 +62,12 @@
 <h2>Was ThreadMapper liest</h2>
 <ul>
   <li><strong>HomeKit-Zubehördaten</strong> – Namen, Räume, Hersteller, Modell, Erreichbarkeit und Batteriestand des Zubehörs in Ihrem Zuhause. Das wird mit Ihrer Erlaubnis aus Apples HomeKit-Framework gelesen und dient dazu, die Ansicht Ihres Thread-Netzes aufzubauen.</li>
-  <li><strong>Standort</strong> – genau, auf etwa zehn Meter, und nur während Sie aktiv einen Messrundgang durchführen, und nur, um Signalmesswerte zu kennzeichnen, damit sie auf einer Heatmap dargestellt werden können. Der Standort wird zu Beginn einer Messung angefragt, nie beim Start der App. Messwerte ohne Standortbestimmung werden ohne Koordinaten gespeichert, statt erfundene zu bekommen.</li>
-  <li><strong>Signalmessungen</strong> – Schätzungen der Antwortqualität, die die App selbst ableitet, indem sie die Antwortzeiten des Zubehörs misst.</li>
+  <li><strong>Standort</strong> – nur während eines Messrundgangs und nur, um dessen Messwerte auf einer Heatmap darzustellen. Version 1.9 hat die Raummessung zurückgezogen, deshalb fragt die App nicht mehr nach Ihrem Standort. Von einer früheren Version gespeicherte Rundgänge behalten die Koordinaten, mit denen sie aufgenommen wurden; Messwerte ohne Standortbestimmung wurden ohne Koordinaten gespeichert, statt erfundene zu bekommen.</li>
+  <li><strong>Antwortzeiten</strong> – wie schnell jedes Zubehör der App antwortet; das misst die App selbst. Sie werden in Millisekunden angezeigt, nie als Signal.</li>
   <li><strong>Ihr lokales Netzwerk</strong> – die App sucht nach Thread Border Routern und Matter-Geräten, die sich in Ihrem Netzwerk ankündigen, und liest, was sie dort über sich selbst veröffentlichen: ihre Namen, Modelle und ob sie bereits gekoppelt sind. So kann sie Hardware beschreiben, die Apple Home nicht auflistet. Es ist ein Lesen dessen, was diese Geräte aussenden; die App verbindet sich nicht mit ihnen.</li>
-  <li><strong>Kamera</strong> – um QR-Codes für die Matter-Einrichtung zu lesen, um Ihre Position in Innenräumen während eines AR-Messrundgangs zu verfolgen und, wenn Sie einen Raumscan starten, um die Form des Raums zu vermessen und einen Grundriss zu erstellen. Es werden weder Fotos noch Videos aufgenommen oder gespeichert.</li>
+  <li><strong>Kamera</strong> – um QR-Codes für die Matter-Einrichtung zu lesen und, wenn Sie einen Raumscan starten, um die Form des Raums zu vermessen, einen Grundriss zu erstellen und zu verfolgen, wo Sie darin stehen. Es werden weder Fotos noch Videos aufgenommen oder gespeichert.</li>
   <li><strong>Bluetooth</strong> – um Matter-Geräte zu sehen, die sich in der Nähe zur Einrichtung ankündigen, damit die App zeigen kann, was auf die Inbetriebnahme wartet. Die App sucht nur, solange Sie diese Ansicht geöffnet haben.</li>
-  <li><strong>Barometer</strong> – nur während eines AR-Messrundgangs, um zu erkennen, auf welchem Stockwerk ein Messwert aufgenommen wurde.</li>
+  <li><strong>Barometer</strong> – nur während Sie einen Raum in AR erfassen, um zu erkennen, auf welchem Stockwerk der Raum liegt. Auch der AR-Messrundgang hat es ausgelesen, bis Version 1.9 den Rundgang zurückgezogen hat.</li>
 </ul>
 <p>Jede dieser Berechtigungen wird in dem Moment angefragt, in dem sie zum ersten Mal gebraucht wird, und nicht beim Start; und jede ist optional außer HomeKit, denn nur darüber liest die App Ihr Thread-Netzwerk überhaupt. Wenn Sie eine der anderen ablehnen, schaltet das genau die Funktion ab, die danach gefragt hat, und sonst nichts.</p>
 
@@ -79,7 +79,7 @@
 <p>Es gibt zwei getrennte iCloud-Funktionen, beide optional, beide gehen an <em>Ihren eigenen</em> Apple-Account. Keine davon ist ein Dienst von uns: Wir haben auf keine von beiden Zugriff und erhalten keine Kopie.</p>
 <h3>iCloud-Synchronisierung (ein Schalter, fortlaufend)</h3>
 <p>Wenn Sie die <strong>iCloud-Synchronisierung</strong> einschalten – sie ist aus, solange Sie sie nicht aktivieren –, werden Ihre Gerätenotizen, Thread-Überschreibungen und App-Einstellungen in Ihren privaten iCloud-Schlüssel-Wert-Speicher kopiert, damit sie auf Ihren anderen Geräten erscheinen.</p>
-<p>Signalverlauf, Messwerte aus Messungen und Aufzeichnungen der Sonde sind von dieser fortlaufenden Synchronisierung bewusst ausgenommen und bleiben auf dem Gerät, das sie aufgenommen hat. Messwerte hängen davon ab, wo dieses Gerät stand; sie zwischen Geräten zusammenzuführen, ergäbe daher einen Verlauf, der keines von beiden beschreibt.</p>
+<p>Signalverlauf, Messwerte aus Messungen und Aufzeichnungen der Sonde sind von dieser fortlaufenden Synchronisierung bewusst ausgenommen und bleiben auf dem Gerät, das sie aufgenommen hat. Sie beschreiben jeweils, was dieses eine Gerät gesehen hat; sie zwischen Geräten zusammenzuführen, ergäbe daher einen Verlauf, den kein einzelnes Gerät beobachtet hat.</p>
 <h3>In iCloud speichern (eine Taste, manuell)</h3>
 <p>Davon getrennt erstellt <strong>In iCloud speichern</strong> in den Einstellungen eine vollständige Sicherung dieses Geräts als ein Bündel: Ihre Einstellungen, Notizen, gescannten Räume, Grundrisse, die Positionen, an denen Sie Geräte platziert haben, den gesicherten AR-Raum und <strong>Ihre Messwerte</strong> – einschließlich der Koordinaten, Zeitstempel und Raumnamen, die daran hängen. Es gibt sie, damit Sie Ihre Arbeit auf ein anderes iPhone übertragen können.</p>
 <p>Nur hier verlassen Ihre Messwerte jemals das Gerät, und das ist bewusst manuell: Es wird nichts hochgeladen, bis Sie auf „Speichern“ tippen. Die Sicherung liegt dann in Ihrem eigenen iCloud Drive, wo Ihre Dateien-App sie sehen kann und Sie sie löschen können – und niemand sonst sie lesen kann. Wenn Sie nie auf „Speichern“ tippen, wird auch nie etwas geschrieben.</p>
@@ -102,13 +102,13 @@
 <p>ThreadMapper Pro wird vollständig über Apples System für In-App-Käufe abgewickelt. Wir sehen und speichern Ihre Zahlungsdaten nie. Für diesen Vorgang gilt Apples eigene Datenschutzerklärung.</p>
 
 <h2>Weitergabe von Daten</h2>
-<p>Wir geben Ihre Daten an niemanden weiter, verkaufen sie nicht, vermieten sie nicht und legen sie niemandem offen – weil wir sie nie erhalten. Alles, was Sie exportieren (eine CSV-Datei mit Messdaten oder ein Diagnose-PDF), verlässt die App nur, wenn Sie es bewusst teilen, und geht dorthin, wohin Sie es senden.</p>
+<p>Wir geben Ihre Daten an niemanden weiter, verkaufen sie nicht, vermieten sie nicht und legen sie niemandem offen – weil wir sie nie erhalten. Alles, was Sie exportieren (ein Diagnose-PDF, ein Bericht oder ein exportierter Verlauf), verlässt die App nur, wenn Sie es bewusst teilen, und geht dorthin, wohin Sie es senden.</p>
 
 <h2>Kinder</h2>
 <p>ThreadMapper ist ein Netzwerkwerkzeug und richtet sich nicht an Kinder. Die App erhebt von niemandem personenbezogene Daten, auch nicht von Kindern.</p>
 
 <h2>Ihre Kontrolle</h2>
-<p>Sie können jede Berechtigung – HomeKit, Ortungsdienste, Kamera, Bluetooth oder Bewegung &amp; Fitness – jederzeit in den iOS-Einstellungen widerrufen. Wenn Sie die App löschen, werden alle lokal gespeicherten Daten entfernt. Die App bietet außerdem eigene Bedienelemente, um den Aktivitätsverlauf und gespeicherte Messdaten zu löschen. Wenn Sie <strong>In iCloud speichern</strong> verwendet haben, liegt diese Sicherung in Ihrem iCloud Drive und nicht in der App – sie erscheint in der App „Dateien“ als Ordner namens ThreadMapper –, sodass das Löschen der App sie nicht löscht. Entfernen Sie sie in „Dateien“, wann immer Sie sie loswerden möchten.</p>
+<p>Sie können jede Berechtigung – HomeKit, Ortungsdienste, Kamera, Bluetooth oder Bewegung &amp; Fitness – jederzeit in den iOS-Einstellungen widerrufen. Wenn Sie die App löschen, werden alle lokal gespeicherten Daten entfernt. Die App bietet außerdem ein eigenes Bedienelement, um den Aktivitätsverlauf zu löschen. Messrundgänge, die eine frühere Version gespeichert hat, werden entfernt, wenn Sie die App löschen; die Rundgänge eines besuchten Netzwerks, wenn Sie dieses Netzwerk vergessen. Wenn Sie <strong>In iCloud speichern</strong> verwendet haben, liegt diese Sicherung in Ihrem iCloud Drive und nicht in der App – sie erscheint in der App „Dateien“ als Ordner namens ThreadMapper –, sodass das Löschen der App sie nicht löscht. Entfernen Sie sie in „Dateien“, wann immer Sie sie loswerden möchten.</p>
 
 <h2>Änderungen</h2>
 <p>Wenn sich diese Erklärung ändert, wird die aktualisierte Fassung mit neuem Datum auf dieser Seite veröffentlicht.</p>

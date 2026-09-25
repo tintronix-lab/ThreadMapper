@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ThreadMapper — Je Thread-netwerk, zwart op wit</title>
-<meta name="description" content="ThreadMapper laat je elk Thread-apparaat zien, welke kamers zwakke dekking hebben en het moment waarop er iets offline gaat. Voeg een probe toe en het schatten houdt op: echt signaal, echte routering, echte interferentie. Privacy zit in het ontwerp.">
+<meta name="description" content="ThreadMapper toont welke apparaten op Thread zitten, welke border routers je hebt en wanneer een apparaat echt offline is — en niets wat het niet kan uitlezen. Met een probe leest het de radio uit. Privacy zit in het ontwerp.">
 <meta name="theme-color" content="#0B1020">
 <meta name="apple-itunes-app" content="app-id=6794255629, app-clip-bundle-id=com.tintronixlab.ThreadMapper.Clip, app-clip-display=card">
 <!-- Generated from site/index.html.tmpl by tools/build-docs.py — edit the template
@@ -148,7 +148,7 @@
     padding: .3rem .5rem; border-radius: 5px; white-space: nowrap;
   }
   .tag.measured  { color: var(--measured); background: color-mix(in srgb, var(--measured) 12%, transparent); }
-  .tag.estimated { color: var(--muted);    background: var(--surface); }
+  .tag.reported  { color: var(--ink);      background: var(--surface); }
   .tag.probe     { color: var(--noise);    background: color-mix(in srgb, var(--noise) 14%, transparent); }
 
   /* ── Cards ────────────────────────────────────────────────────────────── */
@@ -267,7 +267,7 @@
 
     <h1>Je Thread-netwerk, <em>zwart op wit</em>.</h1>
     <p class="lede">
-      Thread-apparaten zijn met opzet onzichtbaar. Ze werken gewoon — tot er één niet werkt, en niets vertelt je waarom. ThreadMapper brengt elk apparaat in kaart, geeft elke kamer een cijfer en zegt er onomwonden bij welke van zijn getallen metingen zijn en welke schattingen.
+      Thread-apparaten zijn met opzet onzichtbaar. Ze werken gewoon — tot er één niet werkt, en niets vertelt je waarom. ThreadMapper laat zien wat je apparaten en je netwerk over zichzelf zeggen: welke apparaten op Thread zitten, welke border routers je hebt, welke verbindingen ze melden. Wat het niet kan uitlezen, wordt niet getoond.
     </p>
     <p class="cta">
       <a href="https://apps.apple.com/app/id6794255629">Download in de App Store →</a>
@@ -288,24 +288,24 @@
     </p>
     <div class="grid">
       <div class="card">
-        <div class="card-head"><h3>Statuscijfer</h3><span class="tag estimated">Geschat</span></div>
+        <div class="card-head"><h3>Statuscijfer</h3><span class="tag reported">Gemeld</span></div>
         <p>Een cijfer van A tot F, met de concrete problemen die het omlaag halen — niet alleen een getal.</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Meshkaart</h3><span class="tag estimated">Geschat</span></div>
-        <p>Elk apparaat gegroepeerd per kamer, met daarbij hoe het een border router bereikt.</p>
+        <div class="card-head"><h3>Meshkaart</h3><span class="tag reported">Gemeld</span></div>
+        <p>Je Thread-apparaten per kamer, met de verbindingen die ze melden. Waar geen apparaat een verbinding heeft gemeld, wordt er geen getekend.</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Kamermeting</h3><span class="tag estimated">Geschat</span></div>
-        <p>Loop een kamer door en krijg een dekkingscijfer. Te bedienen vanaf je pols, zodat beide handen vrij blijven.</p>
+        <div class="card-head"><h3>Thread en de rest</h3><span class="tag reported">Gemeld</span></div>
+        <p>Een apparaat zit op Thread als het dat zelf zegt — in zijn Matter-diagnose of zijn Thread-status in HomeKit — nooit vanwege zijn merk. Al het andere staat apart, aangeduid als wat het is.</p>
       </div>
       <div class="card">
         <div class="card-head"><h3>Offlinemeldingen</h3><span class="tag measured">Gemeten</span></div>
-        <p>Je hoort het op het moment dat een apparaat wegvalt, met een respijtperiode en stille uren die je zelf instelt.</p>
+        <p>Offline als het echt weg is: een slapende sensor op batterij krijgt twee uur, een apparaat op netstroom vijftien minuten, en apparaten die samen stilvallen, geven één melding.</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Apparaatgeschiedenis</h3><span class="tag estimated">Geschat</span></div>
-        <p>30 dagen signaalverloop, beschikbaarheid en firmwarewijzigingen voor elk accessoire.</p>
+        <div class="card-head"><h3>Apparaatgeschiedenis</h3><span class="tag reported">Gemeld</span></div>
+        <p>Beschikbaarheid, herstarts en firmwarewijzigingen voor elk accessoire.</p>
       </div>
       <div class="card">
         <!-- No tag: this one is a platform, not a claim about data. Tagging it
@@ -318,14 +318,14 @@
 
   <section>
     <p class="eyebrow">Waar die labels vandaan komen</p>
-    <h2>Is een getal een schatting, dan staat dat erbij.</h2>
+    <h2>Wat het niet kan uitlezen, toont het niet.</h2>
     <div class="cols">
       <div>
         <p class="section-lede" style="margin-bottom:1.25rem">
           iOS geeft apps van derden geen radiosignaalsterkte voor Thread-accessoires, geen ouder-kindrelaties en geen routeringstabel. Elke app die je dBm toont voor een HomeKit-apparaat, laat je iets zien wat hij niet kan uitlezen.
         </p>
         <p class="section-lede" style="margin-bottom:0">
-          ThreadMapper meet hoe snel elk accessoire antwoordt, noemt dat overal waar het verschijnt een <strong>schatting</strong>, en leidt de meshindeling af uit wat HomeKit wél prijsgeeft. Het werkt, en het is eerlijk over het feit dat het een gevolgtrekking blijft.
+          Daarom toont ThreadMapper helemaal geen signaal. Een apparaat zit op Thread als het dat zelf zegt, een border router telt pas als het netwerk dat aantoont, en een lijn op de kaart is een verbinding die een apparaat heeft gemeld. Wat de telefoon wél kan klokken — hoe snel een accessoire antwoordt — wordt getoond als precies dat, in milliseconden.
         </p>
       </div>
       <div class="note">
@@ -359,11 +359,11 @@
         <div class="compare-cell">Met probe</div>
       </div>
       <div class="compare-row">
-        <div class="compare-cell without"><b>Reactietijd</b>Hoe snel een accessoire antwoordt, ingedeeld in een signaalschatting.</div>
+        <div class="compare-cell without"><b>Reactietijd</b>Hoe snel een accessoire antwoordt, in milliseconden — nooit als signaal gepresenteerd.</div>
         <div class="compare-cell with"><b>Radio-RSSI</b>Echt signaal en echte verbindingskwaliteit per buur, rechtstreeks van de radio.</div>
       </div>
       <div class="compare-row">
-        <div class="compare-cell without"><b>Afgeleide indeling</b>Meshvorm geraden op basis van apparaattype en kamernaam.</div>
+        <div class="compare-cell without"><b>Gemelde verbindingen</b>De verbindingen die een apparaat over zichzelf meldt, en niets wat uit kamers of accessoiretypes is geraden.</div>
         <div class="compare-cell with"><b>Echte routering</b>Routeringstabel met volgende hop en padkosten — wat een mesh multi-hop maakt.</div>
       </div>
       <div class="compare-row">
@@ -409,11 +409,11 @@
     <h2>Schermen</h2>
     <div class="shots">
       <figure class="shot">
-        <img src="../screenshots/01_dashboard.jpg" alt="Overzicht met een netwerkscore met cijfer A en dekkingskaarten per kamer" loading="lazy" width="226" height="490">
+        <img src="../screenshots/01_dashboard.jpg" alt="Overzicht met het netwerkcijfer, de aantallen erachter en wat je het eerst oplost" loading="lazy" width="226" height="490">
         <figcaption>Status in één oogopslag</figcaption>
       </figure>
       <figure class="shot">
-        <img src="../screenshots/02_mesh_topology.jpg" alt="Meshkaart met apparaten gegroepeerd per kamer en verbonden met border routers" loading="lazy" width="226" height="490">
+        <img src="../screenshots/02_mesh_topology.jpg" alt="Meshkaart met Thread-apparaten gegroepeerd per kamer en de verbindingen die ze melden" loading="lazy" width="226" height="490">
         <figcaption>Live meshkaart</figcaption>
       </figure>
       <figure class="shot">
@@ -429,8 +429,8 @@
         <figcaption>Wat er gebeurde, en waarom</figcaption>
       </figure>
       <figure class="shot">
-        <img src="../screenshots/03_survey.jpg" alt="Meetscherm met de live signaalkwaliteit per apparaat" loading="lazy" width="226" height="490">
-        <figcaption>Meting kamer voor kamer</figcaption>
+        <img src="../screenshots/03_doctor.jpg" alt="Netwerkdokter met een lijst van wat je het eerst oplost, elke bevinding met het bewijs erachter" loading="lazy" width="226" height="490">
+        <figcaption>Wat je het eerst oplost</figcaption>
       </figure>
     </div>
   </section>
@@ -447,9 +447,9 @@
       </ul>
       <div>
         <div class="note">
-          <p><strong>Signaalgeschiedenis synchroniseert met opzet niet.</strong></p>
+          <p><strong>Metingen synchroniseren met opzet niet.</strong></p>
           <p>
-            Metingen hangen af van waar het apparaat stond dat ze deed. Een iPad in een la samenvoegen met een iPhone in je zak zou een geschiedenis opleveren die een plek beschrijft waar niemand is. Notities en instellingen synchroniseren; metingen blijven waar ze zijn.
+            Elke iPhone en iPad houdt zelf bij wat hij van je netwerk zag. Ze samenvoegen zou een geschiedenis opleveren die geen enkel apparaat heeft waargenomen. Notities en instellingen synchroniseren; metingen blijven waar ze zijn.
           </p>
         </div>
         <p style="margin:1.25rem 0 0"><a href="privacy.html">Volledig privacybeleid →</a></p>
@@ -463,7 +463,7 @@
     <div class="cols">
       <ul class="plain">
         <li><strong>AI-inzichten, Netwerkassistent en een probleemoplosser</strong> die de eigen geschiedenis van dit apparaat leest — allemaal op je iPhone, er wordt niets geüpload.</li>
-        <li><strong>AR-ruimtescan en röntgenblik</strong> — scan je kamers tot een plattegrond, loop het signaal af zodat de metingen erop belanden, en zie het mesh vervolgens door je echte woning getekend.</li>
+        <li><strong>AR-ruimtescan en röntgenblik</strong> — scan je kamers tot een plattegrond, plaats elk apparaat waar het echt staat, en zie de verbindingen die je apparaten melden door je echte woning getekend.</li>
         <li><strong>Een jaar aan dagcijfers</strong>, een maand tijdlijn, weekrapporten en wat een maand aan metingen zegt over wanneer je huis op z’n slechtst is.</li>
         <li><strong>Klussen en bewijsbladen</strong> — voor de klant een pagina die precies zegt wat een bezoek veranderde, en één pagina per apparaat voor een garantieclaim.</li>
         <li><strong>Wat de radio’s zeggen</strong> — waarom een apparaat opnieuw startte, hoe vaak het van ouderrouter is gewisseld en hoeveel huishoudens het kunnen bedienen.</li>

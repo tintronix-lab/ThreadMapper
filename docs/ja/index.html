@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ThreadMapper — Threadネットワークを、推測から計測へ</title>
-<meta name="description" content="ThreadMapperは、すべてのThreadデバイス、カバレッジの弱い部屋、そして何かがオフラインになった瞬間を映し出します。プローブを足せば推定は終わり、信号もルーティングも干渉も実測になります。設計からしてプライベートです。">
+<meta name="description" content="ThreadMapperは、どのデバイスがThread上にあるか、ネットワークにどのボーダールーターがあるか、そしてデバイスが本当にオフラインになったのはいつかを映し出します。読み取れないものは表示しません。プローブを足せば、無線そのものを読み取ります。設計からしてプライベートです。">
 <meta name="theme-color" content="#0B1020">
 <meta name="apple-itunes-app" content="app-id=6794255629, app-clip-bundle-id=com.tintronixlab.ThreadMapper.Clip, app-clip-display=card">
 <!-- Generated from site/index.html.tmpl by tools/build-docs.py — edit the template
@@ -148,7 +148,7 @@
     padding: .3rem .5rem; border-radius: 5px; white-space: nowrap;
   }
   .tag.measured  { color: var(--measured); background: color-mix(in srgb, var(--measured) 12%, transparent); }
-  .tag.estimated { color: var(--muted);    background: var(--surface); }
+  .tag.reported  { color: var(--ink);      background: var(--surface); }
   .tag.probe     { color: var(--noise);    background: color-mix(in srgb, var(--noise) 14%, transparent); }
 
   /* ── Cards ────────────────────────────────────────────────────────────── */
@@ -267,7 +267,7 @@
 
     <h1>Threadネットワークを、<em>推測から計測へ</em>。</h1>
     <p class="lede">
-      Threadデバイスは、見えないように作られています。何も言わずに動き続け、そして1台が止まったとき、理由を教えてくれるものは何もありません。ThreadMapperはすべてのデバイスを地図に描き、部屋ごとに評価を付け、どの数字が実測でどれが推定かをはっきり示します。
+      Threadデバイスは、見えないように作られています。何も言わずに動き続け、そして1台が止まったとき、理由を教えてくれるものは何もありません。ThreadMapperは、デバイスとネットワークが自ら語っていることを示します。どのデバイスがThread上にあるか、どのボーダールーターがあるか、どのリンクが報告されているか。読み取れないものは、何ひとつ表示しません。
     </p>
     <p class="cta">
       <a href="https://apps.apple.com/app/id6794255629">App Storeで手に入れよう →</a>
@@ -288,24 +288,24 @@
     </p>
     <div class="grid">
       <div class="card">
-        <div class="card-head"><h3>状態の評価</h3><span class="tag estimated">推定</span></div>
+        <div class="card-head"><h3>状態の評価</h3><span class="tag reported">報告値</span></div>
         <p>A〜Fの評価に、点数を下げている具体的な原因を添えて。ただの数字では終わりません。</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>メッシュマップ</h3><span class="tag estimated">推定</span></div>
-        <p>すべてのデバイスを部屋ごとにまとめ、それぞれがどうボーダールーターに届いているかを示します。</p>
+        <div class="card-head"><h3>メッシュマップ</h3><span class="tag reported">報告値</span></div>
+        <p>Threadデバイスを部屋ごとにまとめ、それらが報告するリンクとともに示します。リンクを報告したデバイスがないところには、線を描きません。</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>部屋の測定</h3><span class="tag estimated">推定</span></div>
-        <p>部屋を歩けば、カバレッジの評価が出ます。手首から操作できるので、両手は空いたままです。</p>
+        <div class="card-head"><h3>Threadと、それ以外</h3><span class="tag reported">報告値</span></div>
+        <p>デバイスがThread上にあるとするのは、そのデバイス自身がMatterの診断情報やHomeKitのThreadステータスでそう申告したときです。ブランドで決めることはありません。それ以外はすべて、ありのままに分けて一覧にします。</p>
       </div>
       <div class="card">
         <div class="card-head"><h3>オフライン通知</h3><span class="tag measured">実測</span></div>
-        <p>デバイスが落ちた瞬間に気づけます。猶予時間と通知停止時間は自分で決められます。</p>
+        <p>オフラインと呼ぶのは、本当にいなくなったときだけ。スリープする電池式センサーには2時間、コンセント給電のデバイスには15分の猶予があり、同時に沈黙したデバイスは1件の通知にまとめます。</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>デバイス履歴</h3><span class="tag estimated">推定</span></div>
-        <p>アクセサリごとに、信号の傾向・連続稼働時間・ファームウェアの変化を30日分。</p>
+        <div class="card-head"><h3>デバイス履歴</h3><span class="tag reported">報告値</span></div>
+        <p>アクセサリごとに、連続稼働時間・再起動・ファームウェアの変化。</p>
       </div>
       <div class="card">
         <!-- No tag: this one is a platform, not a claim about data. Tagging it
@@ -318,14 +318,14 @@
 
   <section>
     <p class="eyebrow">バッジの根拠</p>
-    <h2>その数字が推測なら、そう明記します。</h2>
+    <h2>読み取れないものは、表示しません。</h2>
     <div class="cols">
       <div>
         <p class="section-lede" style="margin-bottom:1.25rem">
           iOSはサードパーティアプリに対して、Threadアクセサリの無線信号強度も、親子関係も、ルーティングテーブルも公開していません。HomeKitデバイスのdBmを表示するアプリは、読み取れないはずの値を見せていることになります。
         </p>
         <p class="section-lede" style="margin-bottom:0">
-          ThreadMapperは各アクセサリの応答の速さを測り、その値が現れる場所ではすべて<strong>推定</strong>と呼び、メッシュの構成はHomeKitが公開している情報から推論します。実用になりますし、推論であることを隠しません。
+          だからThreadMapperは、信号をいっさい表示しません。デバイスがThread上にあるとするのはそう申告したとき、ボーダールーターはネットワークがそう証明したもの、そしてマップ上の線はデバイスが報告したリンクです。iPhoneが計れるもの——アクセサリが応答する速さ——は、あくまでその値として、ミリ秒で表示します。
         </p>
       </div>
       <div class="note">
@@ -359,11 +359,11 @@
         <div class="compare-cell">プローブあり</div>
       </div>
       <div class="compare-row">
-        <div class="compare-cell without"><b>応答の速さ</b>アクセサリが返事をする速さを、信号の推定値に置き換えたもの。</div>
+        <div class="compare-cell without"><b>応答の速さ</b>アクセサリが返事をする速さを、ミリ秒で。信号に見せかけることはありません。</div>
         <div class="compare-cell with"><b>無線のRSSI</b>無線から直接読んだ、隣接ごとの実際の信号とリンク品質。</div>
       </div>
       <div class="compare-row">
-        <div class="compare-cell without"><b>推論した構成</b>アクセサリの種別と部屋名から推測したメッシュの形。</div>
+        <div class="compare-cell without"><b>報告されたリンク</b>デバイスが自ら報告するリンクだけ。部屋名やアクセサリの種別から推測したものは、何も含みません。</div>
         <div class="compare-cell with"><b>本物のルーティング</b>次のホップとパスコストを含む経路表——メッシュがマルチホップであることの中身です。</div>
       </div>
       <div class="compare-row">
@@ -409,11 +409,11 @@
     <h2>画面</h2>
     <div class="shots">
       <figure class="shot">
-        <img src="../screenshots/01_dashboard.jpg" alt="ネットワークスコアが評価Aで、部屋ごとのカバレッジカードが並ぶダッシュボード" loading="lazy" width="226" height="490">
+        <img src="../screenshots/01_dashboard.jpg" alt="ネットワークの評価と、その根拠となる台数、そして最初に直すべき1つを示すダッシュボード" loading="lazy" width="226" height="490">
         <figcaption>状態がひと目で</figcaption>
       </figure>
       <figure class="shot">
-        <img src="../screenshots/02_mesh_topology.jpg" alt="デバイスが部屋ごとにまとまり、ボーダールーターとつながっているメッシュマップ" loading="lazy" width="226" height="490">
+        <img src="../screenshots/02_mesh_topology.jpg" alt="Threadデバイスが部屋ごとにまとまり、それらが報告するリンクが描かれたメッシュマップ" loading="lazy" width="226" height="490">
         <figcaption>リアルタイムのメッシュマップ</figcaption>
       </figure>
       <figure class="shot">
@@ -429,8 +429,8 @@
         <figcaption>何が起きたか、そしてなぜか</figcaption>
       </figure>
       <figure class="shot">
-        <img src="../screenshots/03_survey.jpg" alt="デバイスごとの信号品質をリアルタイムで並べる測定画面" loading="lazy" width="226" height="490">
-        <figcaption>部屋ごとの測定</figcaption>
+        <img src="../screenshots/03_doctor.jpg" alt="最初に直すべきことを、各所見の根拠とともに並べるネットワークドクター" loading="lazy" width="226" height="490">
+        <figcaption>まず直すべきこと</figcaption>
       </figure>
     </div>
   </section>
@@ -447,9 +447,9 @@
       </ul>
       <div>
         <div class="note">
-          <p><strong>信号の履歴は、意図的に同期しません。</strong></p>
+          <p><strong>測定値は、意図的に同期しません。</strong></p>
           <p>
-            測定値は、測った端末がどこに置かれていたかに左右されます。引き出しの中のiPadと、ポケットの中のiPhoneを混ぜ合わせれば、誰もいない場所を語る履歴ができあがります。メモと設定は同期し、測定値はその場に留まります。
+            iPhoneとiPadは、それぞれが見たネットワークの様子を、その端末自身に保持します。それらを混ぜ合わせれば、どの端末も観測していない履歴ができあがります。メモと設定は同期し、測定値はその場に留まります。
           </p>
         </div>
         <p style="margin:1.25rem 0 0"><a href="privacy.html">プライバシーポリシー全文 →</a></p>
@@ -463,7 +463,7 @@
     <div class="cols">
       <ul class="plain">
         <li><strong>AIインサイト、ネットワークアシスタント、トラブルシューター</strong>——そのデバイス自身の履歴を読み取ります。すべてiPhoneの中で完結し、アップロードされるものはありません。</li>
-        <li><strong>AR室内マッピングとARレントゲン</strong>——部屋をスキャンして間取り図にまとめ、歩いて測った電波をその上に載せ、実際の住まいを通したメッシュを描き出します。</li>
+        <li><strong>AR室内マッピングとARレントゲン</strong>——部屋をスキャンして間取り図にまとめ、各デバイスを本当にある場所に配置し、デバイスが報告するリンクを、実際の住まいを通して描き出します。</li>
         <li><strong>1年分の日々の評価</strong>、1か月分のタイムライン、週次レポート、そして1か月分の測定が示す、この家が最も不調になるとき。</li>
         <li><strong>作業記録と証拠シート</strong>——訪問で何が変わったかを正確に記した、お客様にお渡しできる1ページ。そして保証請求のための1台1ページ。</li>
         <li><strong>無線が語ること</strong>——なぜデバイスが再起動したか、親ルーターを何度変えてきたか、そしていくつの家庭がそれを操作できるか。</li>

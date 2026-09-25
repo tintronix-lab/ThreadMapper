@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ThreadMapper — Ihr Thread-Netzwerk in Zahlen</title>
-<meta name="description" content="ThreadMapper zeigt Ihnen jedes Thread-Gerät, welche Räume schwach abgedeckt sind und den Moment, in dem etwas offline geht. Mit einer Sonde hört das Schätzen auf: echtes Signal, echtes Routing, echte Störungen. Datenschutz von Grund auf.">
+<meta name="description" content="ThreadMapper zeigt, welche Geräte Thread nutzen, welche Border Router Sie haben und wann ein Gerät wirklich offline ist – und nichts, was es nicht lesen kann. Mit einer Sonde liest es den Funk selbst. Datenschutz von Grund auf.">
 <meta name="theme-color" content="#0B1020">
 <meta name="apple-itunes-app" content="app-id=6794255629, app-clip-bundle-id=com.tintronixlab.ThreadMapper.Clip, app-clip-display=card">
 <!-- Generated from site/index.html.tmpl by tools/build-docs.py — edit the template
@@ -148,7 +148,7 @@
     padding: .3rem .5rem; border-radius: 5px; white-space: nowrap;
   }
   .tag.measured  { color: var(--measured); background: color-mix(in srgb, var(--measured) 12%, transparent); }
-  .tag.estimated { color: var(--muted);    background: var(--surface); }
+  .tag.reported  { color: var(--ink);      background: var(--surface); }
   .tag.probe     { color: var(--noise);    background: color-mix(in srgb, var(--noise) 14%, transparent); }
 
   /* ── Cards ────────────────────────────────────────────────────────────── */
@@ -267,7 +267,7 @@
 
     <h1>Ihr Thread-Netzwerk, <em>in Zahlen</em>.</h1>
     <p class="lede">
-      Thread-Geräte sind von Haus aus unsichtbar. Sie funktionieren einfach – bis eines das nicht mehr tut und Ihnen niemand sagt, warum. ThreadMapper kartiert jedes Gerät, benotet jeden Raum und sagt klar, welche seiner Zahlen Messwerte sind und welche Schätzungen.
+      Thread-Geräte sind von Haus aus unsichtbar. Sie funktionieren einfach – bis eines das nicht mehr tut und Ihnen niemand sagt, warum. ThreadMapper zeigt, was Ihre Geräte und Ihr Netzwerk über sich selbst sagen: welche Geräte im Thread-Netz sind, welche Border Router Sie haben, welche Verbindungen sie melden. Was ThreadMapper nicht auslesen kann, erscheint nicht.
     </p>
     <p class="cta">
       <a href="https://apps.apple.com/app/id6794255629">Laden im App Store →</a>
@@ -288,24 +288,24 @@
     </p>
     <div class="grid">
       <div class="card">
-        <div class="card-head"><h3>Zustandsnote</h3><span class="tag estimated">Geschätzt</span></div>
+        <div class="card-head"><h3>Zustandsnote</h3><span class="tag reported">Gemeldet</span></div>
         <p>Eine Note von A–F samt der konkreten Probleme, die sie drücken – nicht nur eine Zahl.</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Netzkarte</h3><span class="tag estimated">Geschätzt</span></div>
-        <p>Jedes Gerät nach Raum gruppiert – und wie es jeweils einen Border Router erreicht.</p>
+        <div class="card-head"><h3>Netzkarte</h3><span class="tag reported">Gemeldet</span></div>
+        <p>Ihre Thread-Geräte nach Raum – mit den Verbindungen, die sie melden. Wo kein Gerät eine Verbindung gemeldet hat, wird keine gezeichnet.</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Raummessung</h3><span class="tag estimated">Geschätzt</span></div>
-        <p>Einen Raum abgehen, eine Note für die Abdeckung bekommen. Vom Handgelenk aus steuerbar, damit beide Hände frei bleiben.</p>
+        <div class="card-head"><h3>Thread und der Rest</h3><span class="tag reported">Gemeldet</span></div>
+        <p>Ein Gerät gilt als Thread-Gerät, wenn es das selbst angibt, in seiner Matter-Diagnose oder seinem HomeKit-Thread-Status – nie wegen seiner Marke. Alles andere steht getrennt davon, als das, was es ist.</p>
       </div>
       <div class="card">
         <div class="card-head"><h3>Offline-Warnungen</h3><span class="tag measured">Gemessen</span></div>
-        <p>Erfahren Sie es in dem Moment, in dem ein Gerät ausfällt – mit Karenzzeit und Ruhezeiten, die Sie selbst festlegen.</p>
+        <p>Offline erst, wenn es wirklich weg ist: Ein schlafender Batteriesensor bekommt zwei Stunden, ein netzbetriebenes Gerät fünfzehn Minuten, und Geräte, die gemeinsam verstummen, ergeben eine Warnung.</p>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Geräteverlauf</h3><span class="tag estimated">Geschätzt</span></div>
-        <p>30 Tage Signaltrend, Betriebszeit und Firmware-Änderungen für jedes Zubehör.</p>
+        <div class="card-head"><h3>Geräteverlauf</h3><span class="tag reported">Gemeldet</span></div>
+        <p>Betriebszeit, Neustarts und Firmware-Änderungen für jedes Zubehör.</p>
       </div>
       <div class="card">
         <!-- No tag: this one is a platform, not a claim about data. Tagging it
@@ -318,14 +318,14 @@
 
   <section>
     <p class="eyebrow">Woher diese Kennzeichnungen stammen</p>
-    <h2>Wo geschätzt wird, steht es dran.</h2>
+    <h2>Was es nicht auslesen kann, zeigt es nicht.</h2>
     <div class="cols">
       <div>
         <p class="section-lede" style="margin-bottom:1.25rem">
           iOS gibt Apps von Drittanbietern keine Funk-Signalstärke für Thread-Zubehör heraus, keine Eltern-Kind-Beziehungen und keine Routing-Tabelle. Jede App, die Ihnen dBm für ein HomeKit-Gerät anzeigt, zeigt Ihnen etwas, das sie gar nicht auslesen kann.
         </p>
         <p class="section-lede" style="margin-bottom:0">
-          ThreadMapper misst, wie schnell jedes Zubehör antwortet, nennt das überall, wo es auftaucht, eine <strong>Schätzung</strong> und leitet den Aufbau des Netzes aus dem ab, was HomeKit tatsächlich preisgibt. Das funktioniert – und es sagt offen, dass es eine Ableitung ist.
+          Deshalb zeigt ThreadMapper überhaupt kein Signal. Ein Gerät gilt als Thread-Gerät, wenn es das selbst angibt, als Border Router gilt nur, was das Netzwerk als solchen belegt, und eine Linie auf der Karte ist eine Verbindung, die ein Gerät gemeldet hat. Was das iPhone messen kann, nämlich wie schnell ein Zubehör antwortet, wird genau als das gezeigt: in Millisekunden.
         </p>
       </div>
       <div class="note">
@@ -359,11 +359,11 @@
         <div class="compare-cell">Mit Sonde</div>
       </div>
       <div class="compare-row">
-        <div class="compare-cell without"><b>Antwortzeiten</b>Wie schnell ein Zubehör antwortet, in Stufen zu einer Signalschätzung zusammengefasst.</div>
+        <div class="compare-cell without"><b>Antwortzeiten</b>Wie schnell ein Zubehör antwortet, in Millisekunden – nie als Signal ausgegeben.</div>
         <div class="compare-cell with"><b>Funk-RSSI</b>Tatsächliches Signal und Verbindungsqualität je Nachbar, direkt vom Funkmodul.</div>
       </div>
       <div class="compare-row">
-        <div class="compare-cell without"><b>Abgeleiteter Aufbau</b>Form des Netzes, geraten aus Zubehörtyp und Raumnamen.</div>
+        <div class="compare-cell without"><b>Gemeldete Verbindungen</b>Die Verbindungen, die ein Gerät über sich selbst meldet, und nichts, was aus Räumen oder Zubehörtypen geraten ist.</div>
         <div class="compare-cell with"><b>Echtes Routing</b>Routing-Tabelle mit nächstem Hop und Pfadkosten – erst das macht ein Netz über mehrere Hops aus.</div>
       </div>
       <div class="compare-row">
@@ -409,11 +409,11 @@
     <h2>Ansichten</h2>
     <div class="shots">
       <figure class="shot">
-        <img src="../screenshots/01_dashboard.jpg" alt="Übersicht mit der Note A für das Netzwerk und Karten zur Abdeckung je Raum" loading="lazy" width="226" height="490">
+        <img src="../screenshots/01_dashboard.jpg" alt="Übersicht mit der Note des Netzwerks, den Zahlen dahinter und der einen Sache, die zuerst zu beheben ist" loading="lazy" width="226" height="490">
         <figcaption>Zustand auf einen Blick</figcaption>
       </figure>
       <figure class="shot">
-        <img src="../screenshots/02_mesh_topology.jpg" alt="Netzkarte mit Geräten, nach Raum gruppiert und mit Border Routern verbunden" loading="lazy" width="226" height="490">
+        <img src="../screenshots/02_mesh_topology.jpg" alt="Netzkarte mit Thread-Geräten, nach Raum gruppiert, und den Verbindungen, die sie melden" loading="lazy" width="226" height="490">
         <figcaption>Live-Netzkarte</figcaption>
       </figure>
       <figure class="shot">
@@ -429,8 +429,8 @@
         <figcaption>Was passiert ist – und warum</figcaption>
       </figure>
       <figure class="shot">
-        <img src="../screenshots/03_survey.jpg" alt="Messungsansicht mit der aktuellen Signalqualität je Gerät" loading="lazy" width="226" height="490">
-        <figcaption>Messung Raum für Raum</figcaption>
+        <img src="../screenshots/03_doctor.jpg" alt="Netzwerk-Doktor mit dem, was zuerst zu beheben ist – jeder Befund mit den Belegen dahinter" loading="lazy" width="226" height="490">
+        <figcaption>Was zuerst zu beheben ist</figcaption>
       </figure>
     </div>
   </section>
@@ -447,9 +447,9 @@
       </ul>
       <div>
         <div class="note">
-          <p><strong>Der Signalverlauf wird bewusst nicht synchronisiert.</strong></p>
+          <p><strong>Messwerte werden bewusst nicht synchronisiert.</strong></p>
           <p>
-            Messwerte hängen davon ab, wo das Gerät steht, das sie aufnimmt. Ein iPad in der Schublade mit einem iPhone in Ihrer Tasche zusammenzuführen, ergäbe einen Verlauf, der einen Ort beschreibt, an dem niemand ist. Notizen und Einstellungen werden synchronisiert; Messwerte bleiben, wo sie sind.
+            Jedes iPhone und iPad behält selbst, was es von Ihrem Netzwerk gesehen hat. Diese Daten zusammenzuführen, ergäbe einen Verlauf, den kein einzelnes Gerät beobachtet hat. Notizen und Einstellungen werden synchronisiert; Messwerte bleiben, wo sie sind.
           </p>
         </div>
         <p style="margin:1.25rem 0 0"><a href="privacy.html">Vollständige Datenschutzerklärung →</a></p>
@@ -463,7 +463,7 @@
     <div class="cols">
       <ul class="plain">
         <li><strong>KI-Erkenntnisse, Netzwerkassistent und eine Fehlerbehebung</strong>, die den tatsächlichen Verlauf dieses Geräts liest – alles auf Ihrem iPhone, nichts wird hochgeladen.</li>
-        <li><strong>AR-Raumvermessung und Röntgenblick</strong> – Räume in einen Grundriss scannen, die Signalstärke darauf ablaufen, dann das Netz durch Ihr echtes Zuhause gezeichnet sehen.</li>
+        <li><strong>AR-Raumvermessung und Röntgenblick</strong> – Räume in einen Grundriss scannen, jedes Gerät dort platzieren, wo es wirklich steht, und die Verbindungen, die Ihre Geräte melden, durch Ihr echtes Zuhause gezeichnet sehen.</li>
         <li><strong>Ein Jahr Tagesnoten</strong>, ein Monat Zeitachse, Wochenberichte – und was ein Monat an Messungen darüber sagt, wann Ihr Zuhause am schlechtesten ist.</li>
         <li><strong>Aufträge und Nachweisblätter</strong> – eine Seite für den Kunden, die genau sagt, was ein Besuch verändert hat, und eine Seite pro Gerät für einen Garantiefall.</li>
         <li><strong>Was die Funkmodule sagen</strong> – warum ein Gerät neu startete, wie oft es den Elternrouter gewechselt hat und wie viele Haushalte es steuern können.</li>
