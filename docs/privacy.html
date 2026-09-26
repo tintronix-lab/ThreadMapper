@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ThreadMapper — Privacy Policy</title>
-<meta name="description" content="ThreadMapper collects no personal data. No accounts, no analytics, no servers. What the app reads, where it is stored, and the two optional iCloud features — in plain language.">
+<meta name="description" content="ThreadMapper collects no personal data. No accounts, no analytics, no servers. What the app reads, where it is stored, and the three optional iCloud features — in plain language.">
 <!-- Generated from site/privacy.html.tmpl by tools/build-docs.py — edit the template
      and site/strings/privacy.*.json, not this file. -->
 <link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/privacy.html">
@@ -53,10 +53,10 @@
 <body>
 
 <h1>Privacy Policy</h1>
-<p class="updated">ThreadMapper · Last updated 24 September 2026</p>
+<p class="updated">ThreadMapper · Last updated 26 September 2026</p>
 
 <div class="highlight">
-  <strong>ThreadMapper does not collect, transmit, or sell your personal data.</strong> There are no accounts, no analytics SDKs, and no third-party trackers. Everything the app records stays on your device — or, if you use one of the two optional iCloud features, in your own iCloud account. Either way it never reaches us.
+  <strong>ThreadMapper does not collect, transmit, or sell your personal data.</strong> There are no accounts, no analytics SDKs, and no third-party trackers. Everything the app records stays on your device — or, if you use one of the three optional iCloud features, in your own iCloud account. Either way it never reaches us.
 </div>
 
 <h2>What ThreadMapper reads</h2>
@@ -72,17 +72,19 @@
 <p>Each of these is requested at the moment it is first needed rather than at launch, and each is optional except HomeKit, which is how the app reads your Thread network at all. Declining any of the others turns off the feature that asked for it and nothing else.</p>
 
 <h2>Where it is stored</h2>
-<p>By default, everything — device history, survey points, activity events, notes and settings — is stored locally on your device (in the app's own container, an App Group shared with the widget and Apple Watch app, and standard user preferences). None of it is uploaded to us. We operate no servers and receive no copy of it. The only things that ever leave the device are the two optional iCloud features below, and both go to your own Apple account rather than to us.</p>
+<p>By default, everything — device history, survey points, activity events, notes and settings — is stored locally on your device (in the app's own container, an App Group shared with the widget and Apple Watch app, and standard user preferences). None of it is uploaded to us. We operate no servers and receive no copy of it. The only things that ever leave the device are the three optional iCloud features below, and all three go to your own Apple account rather than to us.</p>
 <p>Survey walks, including their GPS coordinates, are stored on this phone under full protection. Your own home's walks are included in your iCloud or computer backups. A visited network's walks are not, and are deleted when you forget the network.</p>
 
 <h2>iCloud</h2>
-<p>There are two separate iCloud features, both optional, both going to <em>your own</em> Apple account. Neither is a service of ours: we have no access to either and receive no copy.</p>
+<p>There are three separate iCloud features, all optional, all going to <em>your own</em> Apple account. None is a service of ours: we have no access to any of them and receive no copy.</p>
 <h3>iCloud sync (a toggle, continuous)</h3>
 <p>If you turn on <strong>iCloud sync</strong> — it is off unless you enable it — your device notes, Thread overrides and app settings are copied to your private iCloud key-value store so they appear on your other devices.</p>
 <p>Signal history, survey measurements and probe recordings are deliberately excluded from this continuous sync and stay on the device that took them. Each describes what that one device saw, so merging them between devices would produce a history no single device observed.</p>
 <h3>Save to iCloud (a button, manual)</h3>
-<p>Separately, <strong>Save to iCloud</strong> in Settings takes a full backup of this device as one bundle: your settings, notes, scanned rooms, floor plans, the positions you placed devices at, the saved AR space, and <strong>your survey readings</strong> — including the coordinates, timestamps and room names attached to them. It exists so you can move your work to another iPhone.</p>
-<p>This is the only place your measurements ever leave the device, and it is deliberately manual: nothing is uploaded until you tap Save. It goes to your own iCloud Drive, where your Files app can see it and you can delete it, and nobody else can read it. If you never tap Save, nothing is ever written.</p>
+<p>Separately, <strong>Save to iCloud</strong> in Settings takes a full backup of this device as one bundle: your settings, notes, scanned rooms, floor plans, the positions you placed devices at, and the saved AR space. It exists so you can move your work to another iPhone.</p>
+<p>Apart from scheduled reports, if you turn them on, this is the only place your measurements leave the device, and it is deliberately manual: nothing is uploaded until you tap Save. It goes to your own iCloud Drive, where your Files app can see it and you can delete it, and nobody else can read it. If you never tap Save, nothing is ever written.</p>
+<h3>Reports Into iCloud Drive (a toggle, scheduled)</h3>
+<p>If you turn on <strong>Reports Into iCloud Drive</strong>, a Pro feature that is off unless you enable it, each scheduled report is also saved to a ThreadMapper › Reports folder in your own iCloud Drive, and only there. We have no copy, and there is no server of ours in between.</p>
 
 <h2>Artificial intelligence features</h2>
 <p>On iOS 26 and later, ThreadMapper's AI features (Insights, Network Assistant, troubleshooting and reports) run entirely <strong>on device</strong> using Apple's Foundation Models framework. Your network data is not sent to us or to any third-party AI service.</p>
@@ -94,7 +96,7 @@
   <li>Connects to an <strong>OpenThread Border Router</strong>, if you configure one — on your own local network, at an address you enter yourself;</li>
   <li>Connects to a <strong>ThreadMapper probe</strong>, if you run one — also on your own local network, at an address you enter yourself;</li>
   <li>Connects to a <strong>Philips Hue bridge</strong>, if you pair one — on your own local network, to read which lights it still reaches over Zigbee. The key the bridge issues is kept in this device's keychain and is never sent anywhere else;</li>
-  <li>Reaches <strong>Apple's iCloud</strong>, only for the two optional features above, and only your own account.</li>
+  <li>Reaches <strong>Apple's iCloud</strong>, only for the three optional features above, and only your own account.</li>
 </ul>
 <p>There is no ThreadMapper server to connect to. There never has been.</p>
 
@@ -102,13 +104,13 @@
 <p>ThreadMapper Pro is handled entirely by Apple's In-App Purchase system. We never see or store your payment details. Apple's own privacy policy governs that transaction.</p>
 
 <h2>Data sharing</h2>
-<p>We do not share, sell, rent, or disclose your data to anyone, because we never receive it. Anything you choose to export (a diagnostic PDF, a report or an exported history) leaves the app only when you deliberately share it, and goes wherever you send it.</p>
+<p>We do not share, sell, rent, or disclose your data to anyone, because we never receive it. Anything you choose to export (a diagnostic PDF, a report, an exported history or a pack you share with an installer) leaves the app only when you deliberately share it, and goes wherever you send it, and nowhere else.</p>
 
 <h2>Children</h2>
 <p>ThreadMapper is a network utility and is not directed at children. It collects no personal information from anyone, including children.</p>
 
 <h2>Your control</h2>
-<p>You can revoke any permission — HomeKit, Location, Camera, Bluetooth or Motion — at any time in iOS Settings. Deleting the app removes all locally stored data. The app also provides an in-app control to clear the activity feed. Survey walks saved by an earlier version are removed when you delete the app; a visited network's walks are removed when you forget that network. If you have used <strong>Save to iCloud</strong>, that backup lives in your iCloud Drive rather than inside the app — it appears in the Files app as a folder named ThreadMapper — so deleting the app does not delete it. Remove it from Files whenever you want it gone.</p>
+<p>You can revoke any permission — HomeKit, Location, Camera, Bluetooth or Motion — at any time in iOS Settings. Deleting the app removes all locally stored data. The app also provides an in-app control to clear the activity feed. Survey walks saved by an earlier version are removed when you delete the app, or at any time with <strong>Delete Saved Walks</strong> in Settings › Data; a visited network's walks are removed when you forget that network. If you have used <strong>Save to iCloud</strong>, that backup lives in your iCloud Drive rather than inside the app — it appears in the Files app as a folder named ThreadMapper — so deleting the app does not delete it. Remove it from Files whenever you want it gone.</p>
 
 <h2>Changes</h2>
 <p>If this policy changes, the updated version will be posted on this page with a new date.</p>
