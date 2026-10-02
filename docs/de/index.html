@@ -235,6 +235,15 @@
 
   .cols { display: grid; gap: 2.5rem; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); }
 
+  /* The App Clip's code beside its paragraph, and under it on a phone, where
+     it is a link to tap. White ground in dark mode too: a camera reads dark
+     on light. tools/make_clip_qr.py writes the image. */
+  .clip { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 2rem 2.5rem; }
+  .clip .section-lede { flex: 1 1 22rem; }
+  .qr { flex: none; display: block; padding: .5rem; line-height: 0; background: #fff;
+        border: 1px solid var(--line); border-radius: .5rem; }
+  .qr img { display: block; width: 9.25rem; height: 9.25rem; }
+
   footer { padding: 3rem 0 4rem; font-size: .88rem; color: var(--muted); }
   footer nav { display: flex; flex-wrap: wrap; gap: 1.25rem; margin-bottom: 1rem; }
   /* The switcher is a plain link row: no JS, and it reads as a list of links. */
@@ -488,9 +497,14 @@
   <section>
     <p class="eyebrow">Ohne Installation</p>
     <h2>Probieren Sie die App in einem simulierten Zuhause aus, bevor Sie sie installieren.</h2>
-    <p class="section-lede" style="margin-bottom:0">
-      Code scannen oder Link öffnen, und ein kleiner Teil von ThreadMapper läuft, ohne dass Sie die App installieren. Er benotet ein simuliertes Zuhause mit genau der Engine, die er auch auf Ihr eigenes anwenden würde – zwölf Geräte, zwei Border Router, eines offline, eines mit schwacher Batterie – und sagt vor allem anderen, dass jede Zahl darin simuliert ist. Ein App Clip darf weder Apple Home noch Ihr lokales Netzwerk auslesen – und genau daher stammen die Zahlen der echten App. Kostenlos.
-    </p>
+    <div class="clip">
+      <p class="section-lede" style="margin-bottom:0">
+        Code scannen oder Link öffnen, und ein kleiner Teil von ThreadMapper läuft, ohne dass Sie die App installieren. Er benotet ein simuliertes Zuhause mit genau der Engine, die er auch auf Ihr eigenes anwenden würde – zwölf Geräte, zwei Border Router, eines offline, eines mit schwacher Batterie – und sagt vor allem anderen, dass jede Zahl darin simuliert ist. Ein App Clip darf weder Apple Home noch Ihr lokales Netzwerk auslesen – und genau daher stammen die Zahlen der echten App. Kostenlos.
+      </p>
+      <a class="qr" href="https://tintronix-lab.github.io">
+        <img src="../clip-qr.svg" alt="Probieren Sie die App in einem simulierten Zuhause aus, bevor Sie sie installieren." width="148" height="148" loading="lazy">
+      </a>
+    </div>
   </section>
 
   <section style="border-bottom:0">
