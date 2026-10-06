@@ -53,7 +53,7 @@
 <body>
 
 <h1>Integritetspolicy</h1>
-<p class="updated">ThreadMapper · Senast uppdaterad 2 oktober 2026</p>
+<p class="updated">ThreadMapper · Senast uppdaterad 6 oktober 2026</p>
 
 <div class="highlight">
   <strong>ThreadMapper varken samlar in, överför eller säljer dina personuppgifter.</strong> Det finns inga konton, inga analys-SDK:er och inga tredjepartsspårare. Allt appen registrerar stannar på din enhet — eller, om du använder någon av de tre valfria iCloud-funktionerna, i ditt eget iCloud-konto. Hur som helst når det aldrig oss.
@@ -64,12 +64,12 @@
   <li><strong>HomeKit-tillbehörsdata</strong> — namn, rum, tillverkare, modell, nåbarhet och batterinivå för tillbehören i ditt hem. Detta läses från Apples HomeKit-ramverk med ditt tillstånd och används för att bygga vyn över ditt Thread-mesh-nät.</li>
   <li><strong>Plats</strong> — endast under en mätningspromenad, och endast för att placera dess avläsningar på en värmekarta. Version 1.9 tog bort mätningen, så appen frågar inte längre efter din plats. Promenader som sparats av en tidigare version behåller de koordinater de registrerades med; avläsningar utan platsbestämning lagrades utan koordinater i stället för att tilldelas påhittade sådana.</li>
   <li><strong>Svarstider</strong> — hur snabbt varje tillbehör svarar appen, vilket appen själv tar tid på. De visas i millisekunder, aldrig som en signal.</li>
-  <li><strong>Ditt lokala nätverk</strong> — appen letar efter Thread-gränsroutrar och Matter-enheter som annonserar sig på ditt nätverk, och läser vad de publicerar om sig själva där: deras namn, modeller och om de redan är parkopplade. Det är så den kan beskriva hårdvara som Apple Hem inte listar. Det är en avläsning av det de enheterna sänder ut; appen ansluter inte till dem.</li>
+  <li><strong>Ditt lokala nätverk</strong> — appen letar efter Thread-gränsroutrar och Matter-enheter som annonserar sig på ditt nätverk, och läser vad de publicerar om sig själva där: deras namn, modeller och om de redan är parkopplade. Det är så den kan beskriva hårdvara som Apple Home inte listar. Medan appen är öppen anropar den också adresserna på ditt Wi-Fi för att se vilka enheter som svarar, och frågar din router vad den kallar dem. Allt den skickar, och när, listas under <em>Nätverksanslutningar</em> nedan.</li>
   <li><strong>Kamera</strong> — för att läsa QR-koder för Matter-installation och, när du startar en rumsskanning, för att mäta rummets form, bygga en planritning och spåra var du står i den. Ingen bild och ingen video spelas in eller lagras.</li>
   <li><strong>Bluetooth</strong> — för att se Matter-enheter som annonserar sig i närheten inför installation, så att appen kan visa vad som väntar på att driftsättas. Den skannar bara medan du tittar på den skärmen.</li>
   <li><strong>Barometer</strong> — endast medan du ritar ett rum i AR, för att avgöra vilket våningsplan rummet ligger på. AR-mätningspromenaden läste också av den, tills version 1.9 tog bort promenaden.</li>
 </ul>
-<p>Var och en av dessa begärs i det ögonblick den först behövs, i stället för vid start, och var och en är valfri utom HomeKit, som är det enda sätt appen över huvud taget läser ditt Thread-nätverk på. Att neka någon av de andra stänger av den funktion som bad om den, och ingenting annat.</p>
+<p>Den första sidan som appen visar ber om åtkomst till HomeKit och det lokala nätverket, och om aviseringar, och säger vad var och en är till för; trycker du på <strong>Inte nu</strong> där ställs frågorna i stället när de först behövs. Allt annat begärs i det ögonblick det först behövs. Var och en är valfri utom HomeKit, som är det enda sätt appen över huvud taget läser ditt Thread-nätverk på. Att neka någon av de andra stänger av den funktion som bad om den, och ingenting annat.</p>
 
 <h2>Var det lagras</h2>
 <p>Som standard lagras allt — enhetshistorik, mätpunkter, aktivitetshändelser, anteckningar och inställningar — lokalt på din enhet (i appens egen behållare, en App Group som delas med widgeten och Apple Watch-appen, samt vanliga användarinställningar). Ingenting av det laddas upp till oss. Vi driver inga servrar och tar emot ingen kopia av det. Det enda som någonsin lämnar enheten är de tre valfria iCloud-funktionerna nedan, och alla tre går till ditt eget Apple-konto snarare än till oss.</p>
@@ -92,7 +92,9 @@
 <h2>Nätverksanslutningar</h2>
 <p>ThreadMapper gör inga analys- eller annonsförfrågningar och kontaktar ingen server hos oss, eftersom det inte finns någon. Det appen gör på nätverket är:</p>
 <ul>
-  <li><strong>Lyssnar efter enheter som annonserar sig på ditt lokala nätverk</strong> — den vanliga Bonjour-upptäckt som iOS tillhandahåller. Det är så appen hittar gränsroutrar och Matter-enheter, inklusive sådana som Apple Hem inte listar. Den läser vad de enheterna sänder ut om sig själva; bortsett från en Hue-brygga som du själv parkopplar ansluter den inte till dem och skickar ingenting till dem.</li>
+  <li><strong>Lyssnar efter enheter som annonserar sig på ditt lokala nätverk</strong> — den vanliga Bonjour-upptäckt som iOS tillhandahåller. Det är så appen hittar gränsroutrar och Matter-enheter, inklusive sådana som Apple Home inte listar. Den läser vad de enheterna sänder ut om sig själva. För att kontrollera att en tjänst som den har hittat svarar, ansluter den till den adress som tjänsten annonserade och stänger sedan anslutningen direkt utan att skicka något;</li>
+  <li><strong>Anropar adresserna på ditt Wi-Fi</strong> för att se vilka enheter som svarar: högst två pingar till varje adress medan skärmen Lokalt nätverk är öppen, och en enda hälsning som Xiaomi-gateways svarar på när den skärmen eller vyn Allt som finns här öppnas. Sedan frågar den din router, och ingen annan server, vad routern kallar varje enhet som svarade. Har du Pro och Apple Home tappar kontakten med ett tillbehör medan appen är öppen, frågas tillbehörets egen adress på ditt Wi-Fi på samma sätt. Inget av detta sker i bakgrunden;</li>
+  <li><strong>Kontrollerar en enskild enhet, på dess sida, när du trycker</strong>: fem pingar till var och en av dess adresser, och ett anslutningsförsök till varje port på en lista med vanliga portar för smarta hem och till varje port som enheten själv annonserar, där varje anslutning stängs direkt. En säker port som svarar tillfrågas om det certifikat den visar upp, som läses och sedan avvisas;</li>
   <li>Ansluter till en <strong>OpenThread-gränsrouter</strong>, om du ställer in en — på ditt eget lokala nätverk, på en adress du själv anger;</li>
   <li>Ansluter till en <strong>ThreadMapper-sond</strong>, om du kör en — också på ditt eget lokala nätverk, på en adress du själv anger;</li>
   <li>Ansluter till en <strong>Philips Hue-brygga</strong>, om du parkopplar en — på ditt eget lokala nätverk, för att läsa vilka lampor den fortfarande når via Zigbee. Nyckeln som bryggan utfärdar stannar i den här enhetens nyckelring och skickas aldrig någonstans;</li>
