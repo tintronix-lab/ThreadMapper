@@ -351,7 +351,7 @@
     <p class="eyebrow">A sonda</p>
     <h2>Uma caixinha que acaba com o achismo.</h2>
     <p class="section-lede">
-      Rode um agente leve num Raspberry Pi com um dongle 802.15.4 e ele entra na sua malha Thread como um nó de verdade. De dentro, tudo o que o celular não enxerga fica legível — e, como ele nunca dorme, vê as falhas das 3 h da manhã que você não vê.
+      Instale o nosso firmware numa pequena placa ESP32-C6, pelo navegador de um computador, e deixe-a num carregador. Ela mede todos os canais Thread a cada cinco minutos, o que nenhum celular consegue, e guarda um dia de leituras enquanto o app está fechado. Onde consegue entrar na sua malha Thread, ela lê a malha por dentro, como um nó de verdade.
     </p>
 
     <div class="readout" role="img" aria-label="Exemplo de saída da sonda mostrando um roteador a menos 20 dBm com qualidade da conexão 3 de 3 e uma rota com custo do caminho 0.">
@@ -381,7 +381,7 @@
       </div>
       <div class="compare-row">
         <div class="compare-cell without"><b>Enquanto o app está aberto</b>O celular só observa quando você está olhando para ele.</div>
-        <div class="compare-cell with"><b>Continuamente</b>Gravado em disco, então a divisão da malha durante a noite ainda está lá pela manhã.</div>
+        <div class="compare-cell with"><b>Continuamente</b>Gravado na sonda por um dia, então a noite passada ainda está lá pela manhã.</div>
       </div>
     </div>
 
@@ -405,10 +405,10 @@
     </div>
 
     <p style="margin:1.75rem 0 0;color:var(--muted);font-size:.93rem">
-      O agente é de código aberto e roda num Raspberry Pi 4 ou 5 que talvez você já tenha — o dongle 802.15.4 de que ele precisa custa entre US$ 10 e 25. <a href="probe-setup.html">Guia de configuração →</a>
+      A placa é uma Seeed XIAO ESP32C6, de cerca de US$ 5 a 8, e a instalação do firmware leva uns dez minutos. A sonda faz parte do ThreadMapper Pro. <a href="probe-setup.html">Guia de configuração →</a>
       <br>
       <span style="font-size:.88rem">
-        Leia isso antes: um Raspberry Pi não tem rádio Thread próprio, e entrar numa malha Apple ou Google já existente exige credenciais que essas plataformas ainda não deixam você exportar. Não é um produto que se compra — é uma montagem.
+        Leia o guia antes: numa casa em que todos os roteadores de borda são da Apple ou do Google, a sonda só consegue entrar na malha se o Home Assistant entregar as credenciais a ela. Caso contrário, ela mede os canais e o Wi-Fi que está neles, e não lê a malha. Não é um produto que se compra — é uma montagem.
       </span>
     </p>
   </section>
@@ -477,12 +477,6 @@
         <li><strong>Trabalhos e folhas de evidências</strong> — uma página para o cliente que diz exatamente o que a visita mudou, e uma página por dispositivo para uma reclamação de garantia.</li>
         <li><strong>O que os rádios dizem</strong> — por que um dispositivo reiniciou, com que frequência ele trocou de roteador pai e quantos domicílios podem controlá-lo.</li>
       </ul>
-      <div class="note">
-        <p><strong>Os recursos da sonda não ficam atrás do paywall.</strong></p>
-        <p>
-          Se você teve todo o trabalho de montar uma sonda, esbarrar num segundo paywall seria um jeito ruim de agradecer. Tudo o que a sonda libera está incluído.
-        </p>
-      </div>
     </div>
   </section>
 

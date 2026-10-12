@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Eine ThreadMapper-Sonde bauen — ThreadMapper</title>
-<meta name="description" content="Schritt für Schritt: Aus einem Raspberry Pi und einem 802.15.4-Dongle wird eine ThreadMapper-Sonde, damit die App Thread-Signal, Routing und Störungen als Messwerte zeigen kann.">
+<meta name="description" content="Schritt für Schritt: Spielen Sie die ThreadMapper-Firmware aus Ihrem Browser auf einen Seeed XIAO ESP32C6, damit die App gemessenes Kanalrauschen, das WLAN dahinter und das Thread-Netz zeigen kann, dem die Platine beigetreten ist.">
 <meta name="theme-color" content="#0B1020">
-<!-- Generated from tools/pi-image/SETUP.de.md by tools/build-docs.py — edit the Markdown, not this file. -->
+<!-- Generated from tools/probe-esp32c6/SETUP.de.md by tools/build-docs.py — edit the Markdown, not this file. -->
 <link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/de/probe-setup.html">
 <link rel="alternate" hreflang="en" href="https://tintronix-lab.github.io/ThreadMapper/probe-setup.html">
 <link rel="alternate" hreflang="sv" href="https://tintronix-lab.github.io/ThreadMapper/sv/probe-setup.html">
@@ -18,6 +18,7 @@
 <link rel="alternate" hreflang="nl" href="https://tintronix-lab.github.io/ThreadMapper/nl/probe-setup.html">
 <link rel="alternate" hreflang="pt-BR" href="https://tintronix-lab.github.io/ThreadMapper/pt-br/probe-setup.html">
 <link rel="alternate" hreflang="x-default" href="https://tintronix-lab.github.io/ThreadMapper/probe-setup.html">
+<script type="module" src="../flasher/install-button.js"></script>
 <style>
   :root {
     color-scheme: light dark;
@@ -90,6 +91,18 @@
      nothing for kana. */
   :lang(ja) h1, :lang(ja) h2 { letter-spacing:0; }
 
+  /* The install button (#391). The button itself is this page's own, handed
+     to the installer in a slot, so it takes this page's look. */
+  .install { margin:1.6rem 0 1.8rem; }
+  .install button { font:600 1rem/1.2 var(--sans); color:var(--paper); background:var(--signal);
+                     border:0; border-radius:.6rem; padding:.85rem 1.3rem; cursor:pointer; }
+  .install button:focus-visible { outline:2px solid var(--ink); outline-offset:3px; }
+  .install span { display:block; padding:.8rem 1rem; border:1px solid var(--line);
+                   border-radius:.6rem; background:var(--surface); color:var(--body); }
+  /* Until the installer has loaded, its two apologies are not yet its to
+     show or hide, and would both stand under the button. */
+  esp-web-install-button:not(:defined) span { display:none; }
+
   /* Language switcher: a plain link row, no JS. */
   .langs { margin-top:1rem; display:flex; flex-wrap:wrap; gap:.35rem 1.1rem; }
   .langs a { margin-right:0; text-decoration:none; }
@@ -102,110 +115,99 @@
 <div class="top"><div class="wrap"><a href="index.html">← ThreadMapper</a></div></div>
 
 <div class="wrap">
-<h1>Eine ThreadMapper-Sonde auf einem Raspberry Pi einrichten</h1>
-<p>Schritt für Schritt, vom leeren Schreibtisch bis zu gemessenen Thread-Daten in der App.</p>
-<p>Planen Sie einen Abend ein. Das meiste davon ist Warten auf Downloads und ein Build von etwa 20 Minuten.</p>
+<h1>Eine ThreadMapper-Sonde bauen</h1>
+<p>Eine Sonde ist eine kleine Platine in Ihrem WLAN, die den Funk misst, den sich Ihr Smart Home teilt: wie stark jeder Thread-Kanal belegt ist, welche WLAN-Netzwerke darauf liegen und, wo sie Ihrem Thread-Netz beitreten kann, das Netz so, wie seine eigenen Router es melden. ThreadMapper liest sie über Ihr eigenes Netzwerk aus.</p>
+<p>Ein Bauteil, etwa zehn Minuten, kein Löten. Die Sonde gehört zu <strong>ThreadMapper Pro</strong>.</p>
 <hr>
-<h2>Lesen Sie das, bevor Sie etwas kaufen</h2>
-<p>Zwei Dinge entscheiden, ob sich das für <em>Ihre</em> Umgebung lohnt. Beide übersieht man leicht, bis die Teile da sind.</p>
-<h3>1. Ein Raspberry Pi kann Thread nicht von allein</h3>
-<p>In einem Raspberry Pi steckt kein 802.15.4-Funkmodul. WLAN und Bluetooth sind andere Funkmodule und sprechen kein Thread. <strong>Sie brauchen einen USB-Dongle</strong>, und darauf muss RCP-Firmware laufen — die diese Dongles ab Werk nicht mitbringen.</p>
-<h3>2. Der schwierige Teil ist der Beitritt zu <em>Ihrem</em> Thread-Netzwerk</h3>
-<p>Ein Border Router, der ein eigenes neues Netzwerk bildet, sieht dort nichts außer sich selbst. Ihre tatsächlichen Geräte hängen an dem Netzwerk, das Ihr HomePod, Apple TV oder Nest Hub aufgebaut hat, und um sie zu beobachten, muss die Sonde <strong>diesem Netzwerk beitreten</strong> — und dafür braucht sie dessen Zugangsdaten (das Active Operational Dataset).</p>
-<div class="scroll"><table><thead><tr><th>Ihre Umgebung</th><th>Kann die Sonde Ihrem echten Netzwerk beitreten?</th></tr></thead><tbody><tr><td>Sie nutzen <strong>Home Assistant</strong></td><td><strong>Ja.</strong> Die iOS-Companion-App von HA kann Apples Thread-Zugangsdaten abrufen — <em>Settings → Devices &amp; services → Thread → Configure → Send credentials to Home Assistant</em> — und von dort übergeben Sie das Dataset an die Sonde.</td></tr><tr><td>Sie betreiben bereits einen <strong>OTBR</strong> (z. B. das Add-on von HA)</td><td><strong>Ja.</strong> Lesen Sie das Dataset direkt dort aus.</td></tr><tr><td><strong>Nur Border Router von Apple oder Google</strong>, kein Home Assistant</td><td><strong>Derzeit nicht.</strong> Es gibt keinen Weg für Endanwender, Apples Thread-Zugangsdaten zu exportieren. Sie können auf der Sonde trotzdem ein <em>neues</em> Netzwerk bilden und einiges Zubehör darauf anmelden, um die App durchgängig arbeiten zu sehen, aber Ihr bestehendes Netz zeigt sie Ihnen damit nicht.</td></tr></tbody></table></div>
-<p>Die dritte Zeile ist eine echte Wand, und dieses Projekt kann sie nicht von außen einreißen: Der vorgesehene Weg ist Apples Berechtigung <code>com.apple.developer.thread-network-credentials</code>, die ThreadMapper beantragt, aber nicht erhalten hat. Kommt sie durch, kann die App Ihre Zugangsdaten direkt an die Sonde übergeben, und dieser ganze Abschnitt entfällt.</p>
-<p><strong>Wenn Sie in der dritten Zeile stehen und nur Ihr bestehendes Apple-Netz überwachen möchten, hören Sie hier besser auf, bis diese Berechtigung da ist.</strong></p>
+<h2>Lesen Sie das, bevor Sie die Platine kaufen</h2>
+<h3>Was Sie brauchen</h3>
+<div class="scroll"><table><thead><tr><th>Teil</th><th>Hinweise</th></tr></thead><tbody><tr><td><strong>Seeed Studio XIAO ESP32C6</strong></td><td>Etwa 5–8 $. Die Firmware ist für diese Platine gebaut und für keine andere: Sie steuert den Antennenumschalter, die LED und die Taste dieser Platine.</td></tr><tr><td>Ein USB-C-Kabel, das Daten überträgt</td><td>Viele Kabel, die Ladegeräten beiliegen, übertragen nur Strom. Wenn der Computer die Platine nicht sieht, probieren Sie zuerst ein anderes Kabel.</td></tr><tr><td>Ein Computer mit <strong>Chrome</strong>, <strong>Edge</strong> oder <strong>Firefox</strong></td><td>Nur für die Installation. Safari kann nicht auf einen seriellen USB-Port zugreifen, und ein iPhone oder ein iPad kann es auch nicht.</td></tr><tr><td>WLAN auf <strong>2,4 GHz</strong></td><td>Die Platine hat keinen 5-GHz-Funk. Ein Netzwerk, das beide Bänder unter einem Namen anbietet, ist in Ordnung.</td></tr><tr><td>Ein USB-Ladegerät</td><td>Irgendeines. Dort wohnt die Sonde, sobald sie eingerichtet ist.</td></tr></tbody></table></div>
+<h3>Was sie in Ihrem Zuhause lesen kann</h3>
+<p>Das Messen funktioniert in jedem Zuhause. Um das Netz auszulesen, muss die Sonde Ihrem Thread-Netzwerk <em>beitreten</em>, und ob sie das kann, hängt davon ab, was dieses Netzwerk betreibt.</p>
+<div class="scroll"><table><thead><tr><th>Ihr Zuhause</th><th>Kanalrauschen und das WLAN auf jedem Kanal</th><th>Das Thread-Netz selbst</th></tr></thead><tbody><tr><td>Border Router von Apple oder Google und sonst nichts</td><td><strong>Ja</strong></td><td><strong>Nein.</strong> Keiner von beiden lässt Sie die Zugangsdaten Ihres Thread-Netzwerks herausholen. Apple gibt einer App das Recht, sie zu lesen, nur dann, wenn ihr Hersteller auch einen zertifizierten Border Router herstellt, und der Hersteller von ThreadMapper tut das nicht.</td></tr><tr><td>Dasselbe, mit <strong>Home Assistant</strong></td><td><strong>Ja</strong></td><td><strong>Ja.</strong> Die Companion-App von Home Assistant kann die Zugangsdaten hineinkopieren, und Sie kopieren sie von dort auf die Sonde (Schritt 5).</td></tr><tr><td>Ein eigener <strong>OpenThread Border Router</strong></td><td><strong>Ja</strong></td><td><strong>Ja.</strong> Lesen Sie sie dort aus (Schritt 5).</td></tr></tbody></table></div>
+<p><strong>Wenn die erste Zeile Ihr Zuhause ist, zeichnet die Sonde Ihr Netz nicht.</strong> Sie misst trotzdem, was kein Telefon messen kann: das Rauschen auf jedem der sechzehn Thread-Kanäle, alle fünf Minuten, und welche WLAN-Netzwerke dahinterstehen. Entscheiden Sie auf dieser Grundlage, bevor Sie kaufen.</p>
 <hr>
-<h2>Einkaufsliste</h2>
-<div class="scroll"><table><thead><tr><th>Teil</th><th>Hinweise</th></tr></thead><tbody><tr><td>Raspberry Pi 4 oder 5</td><td>2 GB RAM reichen völlig. Ein Pi Zero 2 W funktioniert auch, aber der Build in Schritt 4 dauert dort deutlich länger.</td></tr><tr><td>microSD-Karte, 16 GB+</td><td>Irgendeine von einem seriösen Hersteller.</td></tr><tr><td>USB-C-Netzteil</td><td>Das offizielle; Thread-Dongles reagieren empfindlich auf Spannungseinbrüche.</td></tr><tr><td><strong>Ein 802.15.4-Dongle</strong></td><td>Wählen Sie einen aus — siehe unten.</td></tr></tbody></table></div>
-<p><strong>Dongle-Optionen</strong>, beide sind in Ordnung:</p>
-<ul><li><strong>Nordic nRF52840 Dongle</strong> (ca. 10 $) — am günstigsten, und die Firmware wird aus dem Quellcode gebaut, sodass Sie keinen Download suchen müssen.</li><li><strong>SkyConnect / Sonoff ZBDongle-E</strong> (ca. 25 $) — Silicon Labs. Wenn Sie schon einen für Home Assistant haben, nehmen Sie den. Das Flashen erledigt ein Werkzeug mit einer einzigen Zeile.</li></ul>
+<h2>Schritt 1 — Die Firmware installieren</h2>
+<ol><li>Schließen Sie die Platine an den Computer an.</li><li>Klicken Sie unten auf <strong>Firmware der Sonde installieren</strong> und wählen Sie den Port namens <strong>USB JTAG/serial debug unit</strong>.</li><li>Klicken Sie auf <strong>Install ThreadMapper Probe</strong>. Es wird gefragt, ob das Gerät gelöscht werden soll: Bei einer neuen Platine setzen Sie das Häkchen bei <strong>Erase device</strong>. Dann <strong>Next</strong> und <strong>Install</strong>.</li></ol>
+<p>Nur bei einer neuen Platine. Das Löschen nimmt alles mit, was einer Sonde mitgeteilt wurde: ihr WLAN, ihren Schlüssel und ihr Thread-Netzwerk. Eine Sonde, die bereits funktioniert, wird stattdessen aktualisiert (siehe <em>Aktualisieren</em>), und wenn das Installationsprogramm bei einer solchen danach fragt, lassen Sie das Kästchen leer.</p>
+<div class="install">
+<esp-web-install-button manifest="../firmware/manifest.json">
+<button slot="activate">Firmware der Sonde installieren</button>
+<span slot="unsupported">Dieser Browser kann nicht auf einen seriellen USB-Port zugreifen. Öffnen Sie diese Seite in Chrome, Edge oder Firefox, auf einem Computer.</span>
+<span slot="not-allowed">Das Installationsprogramm funktioniert nur auf einer Seite, die über HTTPS geöffnet wurde.</span>
+</esp-web-install-button>
+</div>
+<p>Das dauert ein, zwei Minuten und endet mit <strong>Installation complete!</strong> Klicken Sie auf <strong>Next</strong>. Das Fenster des Installationsprogramms selbst ist auf Englisch.</p>
+<p>Steht der Port nicht in der Liste, liegt es fast immer am Kabel. Andernfalls halten Sie die Taste <strong>B</strong> der Platine gedrückt, während Sie sie anschließen, und versuchen es erneut.</p>
+<p>Keiner dieser Browser? <code>esptool</code> von Espressif leistet dasselbe. Eine Erstinstallation, die alles löscht, was auf der Platine war:</p>
+<pre><code>esptool.py --chip esp32c6 write_flash 0x0 threadmapper-probe-full.bin</code></pre>
+<p>Eine Aktualisierung, die der Sonde lässt, was ihr mitgeteilt wurde:</p>
+<pre><code>esptool.py --chip esp32c6 write_flash 0x20000 threadmapper-probe.bin</code></pre>
+<p>Die beiden Images sind <a href="https://tintronix-lab.github.io/ThreadMapper/firmware/threadmapper-probe-full.bin">threadmapper-probe-full.bin</a> und <a href="https://tintronix-lab.github.io/ThreadMapper/firmware/threadmapper-probe.bin">threadmapper-probe.bin</a>. Öffnen Sie danach den seriellen Port der Platine mit einem beliebigen Terminalprogramm und geben Sie der Sonde ihr WLAN, indem Sie es eintippen (Schritt 2, <em>Ohne die Liste</em>).</p>
 <hr>
-<h2>Schritt 1 — RCP-Firmware auf den Dongle bringen</h2>
-<p>Erledigen Sie das an Ihrem Mac oder PC, <strong>bevor</strong> Sie den Pi anfassen. Es ist der einzige Schritt, den das Installationsskript bewusst nicht automatisiert: Ein falsches Image macht den Dongle unbrauchbar, und die Werkzeuge der Hersteller machen es richtig.</p>
-<p>RCP-Firmware („Radio Co-Processor“) macht den Dongle zu einem simplen Funkmodul, das <code>otbr-agent</code> ansteuert. Ein für Zigbee ausgelieferter Dongle hat eine andere Firmware und funktioniert erst nach dem Neuflashen.</p>
-<h3>Silicon Labs (SkyConnect, Sonoff ZBDongle-E)</h3>
-<pre class="lang-bash"><code>pipx install universal-silabs-flasher     # or: pip install universal-silabs-flasher
-universal-silabs-flasher --device /dev/tty.usbserial-XXXX probe
-universal-silabs-flasher --device /dev/tty.usbserial-XXXX flash --firmware &lt;ot-rcp-firmware.gbl&gt;</code></pre>
-<p>Holen Sie sich die <code>.gbl</code>-Datei für <code>ot-rcp</code> aus den Silabs-Firmware-Releases von Home Assistant — dieselben Images, die auch das OTBR-Add-on verwendet. Achten Sie darauf, dass die Datei zu Ihrem genauen Dongle-Modell passt; SkyConnect und ZBDongle-E sind <strong>nicht</strong> austauschbar.</p>
-<h3>Nordic nRF52840</h3>
-<p>Bauen Sie die Firmware aus dem Nordic-Port von OpenThread und flashen Sie sie anschließend per USB DFU:</p>
-<pre class="lang-bash"><code>git clone --recurse-submodules https://github.com/openthread/ot-nrf528xx.git
-cd ot-nrf528xx &amp;&amp; ./script/bootstrap &amp;&amp; ./script/build nrf52840 USB_trans
-# → build/bin/ot-rcp  (convert to .hex/.zip per the repo&#x27;s README, then:)
-nrfutil dfu usb-serial -pkg ot-rcp.zip -p /dev/tty.usbmodemXXXX</code></pre>
-<p>Folgen Sie für den aktuellen Verpackungsschritt der README dieses Repos — er ändert sich gelegentlich und wird besser dort gelesen als hier kopiert.</p>
-<p><strong>Prüfen, ob es geklappt hat:</strong> Stecken Sie den Dongle später in den Pi, dann meldet <code>install.sh</code> <code>Found &lt;family&gt; radio at /dev/serial/by-id/...</code>. Findet es nichts, hat die Firmware nicht gegriffen.</p>
+<h2>Schritt 2 — Der Sonde Ihr WLAN geben</h2>
+<p>Nach einer Erstinstallation mit gesetztem Häkchen bei <strong>Erase device</strong> geht das Installationsprogramm von selbst zu <strong>Configure Wi-Fi</strong> weiter. Sehen Sie stattdessen seine Liste mit Auswahlmöglichkeiten, klicken Sie dort auf <strong>Connect to Wi-Fi</strong>.</p>
+<p>Die Sonde listet die Netzwerke auf, die sie hört.</p>
+<ol><li>Wählen Sie unter <strong>Network</strong> Ihres aus.</li><li>Geben Sie sein Passwort ein.</li><li>Klicken Sie auf <strong>Connect</strong>.</li></ol>
+<p>Das Installationsprogramm meldet <strong>Trying to connect</strong>, was fast eine Minute dauern kann, und dann <strong>Device connected to the network!</strong> Die LED der Sonde leuchtet dann und bleibt an. Klicken Sie auf <strong>Continue</strong>.</p>
+<p>Die Sonde behält ein Netzwerk erst, wenn sie ihm beigetreten ist. <strong>Unable to connect</strong> bedeutet, dass sie es versucht hat und nicht hineingekommen ist: fast immer das Passwort, manchmal ein zu weit entfernter Router. Der Versuch hat nichts geändert: Eine Sonde, die vorher ein Netzwerk hatte, hat es noch und kehrt dorthin zurück. Versuchen Sie es erneut.</p>
+<p>Ihr Netzwerk steht nicht in der Liste? Die Sonde hat keinen 5-GHz-Funk, ein Netzwerk nur auf 5 GHz ist also nicht dabei. Ebenso wenig ein Netzwerk, das seinen Namen verbirgt: Wählen Sie <strong>Join other…</strong> und geben Sie den Namen ein.</p>
+<p>Das Passwortfeld verbirgt, was Sie eingeben. Name und Passwort gehen durch das Kabel zur Platine, die sie in ihrem eigenen Speicher behält und das Passwort in kein Log schreibt.</p>
+<h3>Ohne die Liste</h3>
+<p>Bietet das Installationsprogramm kein <strong>Connect to Wi-Fi</strong> an, hat es die Sonde nicht antworten hören: Schließen Sie sein Fenster, klicken Sie erneut auf die Installationsschaltfläche und wählen Sie den Port.</p>
+<p>Die Sonde kann ihr Netzwerk auch an ihrer Konsole bekommen, unter <strong>Logs &amp; Console</strong> oder in einem beliebigen Terminalprogramm an ihrem Port. Geben Sie <code>wifi</code> ein und drücken Sie die Eingabetaste (Return). Die Zeilen, die mit <code>&gt;</code> beginnen, sind das, was Sie eingeben:</p>
+<pre><code>&gt; wifi
+Network name? Type it and press Return.
+&gt; My network
+Password? The probe does not write it back. Return alone for a network without one.
+&gt; my password
+stored: &quot;My network&quot;, with a password of 11 characters.
+Restarting to join it. The light stays on once it has.</code></pre>
+<p>Nichts braucht Anführungszeichen, und Buchstaben wie å, ä und ö sind in Ordnung. Die Sonde gibt das Passwort nicht wieder aus. Die Seite dagegen zeigt es an, während Sie tippen, und behält es in ihrem Log, bis Sie das Fenster schließen: Es ist Ihr eigener Bildschirm, schauen Sie also zuerst über Ihre Schulter.</p>
+<p>Bekommt die Sonde ein Netzwerk auf diesem Weg, startet sie neu, um ihm beizutreten, und hat es vorher nicht ausprobiert. Kehrt ihre LED zu einem kurzen Blinken alle zwei Sekunden zurück, hat sie es zehnmal versucht, konnte nicht beitreten und hat das Netzwerk vergessen.</p>
 <hr>
-<h2>Schritt 2 — Raspberry Pi OS flashen</h2>
-<ol><li>Installieren Sie den <strong>Raspberry Pi Imager</strong>.</li><li>Wählen Sie <strong>Raspberry Pi OS Lite (64-bit)</strong>. Lite — einen Desktop brauchen Sie nicht.</li><li>Klicken Sie <em>vor</em> dem Schreiben auf das Zahnrad bzw. <strong>Edit Settings</strong> und stellen Sie ein: - hostname: <code>threadmapper-probe</code> - <strong>Enable SSH</strong>, mit Passwort oder Schlüssel - Benutzername und Passwort - WLAN-Zugangsdaten, falls Sie kein Ethernet nutzen</li><li>Schreiben Sie die Karte, stecken Sie sie in den Pi, schließen Sie den Dongle an und schalten Sie ein.</li></ol>
-<p>Ethernet ist hier zuverlässiger als WLAN, und ein Border Router profitiert von einer stabilen Anbindung. Nutzen Sie es, wenn Sie können.</p>
+<h2>Schritt 3 — Die App verbinden</h2>
+<p>Warten Sie, bis die LED dauerhaft leuchtet. Öffnen Sie auf dem iPhone ThreadMapper und gehen Sie zu <strong>Einstellungen → ThreadMapper-Sonde</strong>. Ist das Telefon im selben WLAN, steht die Sonde unter <strong>In diesem Netzwerk</strong>: Wählen Sie sie aus. <strong>Verbindung testen</strong> sagt dann, was die Sonde ist und wie es um sie steht.</p>
+<p>Listet die App sie nicht auf, fragen Sie die Sonde, wo sie ist: Schließen Sie das Fenster des Installationsprogramms, klicken Sie erneut auf die Installationsschaltfläche, wählen Sie den Port, öffnen Sie <strong>Logs &amp; Console</strong> und geben Sie <code>status</code> ein. Eine der Zeilen ist die Adresse, die Sie in die App eingeben:</p>
+<pre><code>in the app: http://192.168.1.50:8099</code></pre>
+<p>Ihr Router gibt der Sonde vielleicht eines Tages eine andere Adresse. Die App erkennt die Sonde an mehr als ihrer Adresse: Ist die App geöffnet und das Telefon im selben WLAN, findet sie die Sonde von selbst wieder.</p>
+<p>Das Kabel hat seine Arbeit getan. Ziehen Sie die Platine ab und stecken Sie sie an ein Ladegerät, irgendwo in der Mitte des Zuhauses statt hinter dem Router: Die Sonde hört, was in ihrer Nähe ist.</p>
 <hr>
-<h2>Schritt 3 — Anmelden</h2>
-<pre class="lang-bash"><code>ssh &lt;your-username&gt;@threadmapper-probe.local</code></pre>
-<p>Wenn sich der Hostname nicht auflösen lässt, suchen Sie die IP des Pi in der Client-Liste Ihres Routers und nutzen Sie stattdessen <code>ssh &lt;user&gt;@&lt;ip&gt;</code>.</p>
-<p>Vergewissern Sie sich, dass der Dongle sichtbar ist, bevor Sie weitermachen:</p>
-<pre class="lang-bash"><code>ls -l /dev/serial/by-id/</code></pre>
-<p>Sie sollten einen Eintrag sehen, der Ihren Dongle nennt. <strong>Wenn hier nichts steht, hören Sie auf</strong> — der Rest funktioniert dann nicht. Stecken Sie ihn neu ein, probieren Sie einen anderen USB-Anschluss und prüfen Sie Schritt 1 noch einmal.</p>
+<h2>Schritt 4 — Ihrem iPhone den Schlüssel geben</h2>
+<p>Eine Sonde ohne Schlüssel antwortet jedem in Ihrem WLAN. Das schließt die Namen der WLAN-Netzwerke ein, die sie hört, und Anfragen, die ihr Funkmodul jeweils für Sekunden vom Kanal Ihres Netzes nehmen.</p>
+<p>Drücken Sie die Taste <strong>B</strong> der Platine zweimal direkt hintereinander. (Nicht <strong>R</strong>: Die startet die Sonde neu.) Die LED blinkt zweimal pro Sekunde, drei Minuten lang oder bis ein Telefon den Schlüssel abgerufen hat. Tippen Sie in der App unter <strong>Einstellungen → ThreadMapper-Sonde</strong> auf <strong>Schlüssel abrufen</strong>.</p>
+<p>Von da an tut die Sonde das, was ihre Funkzeit kostet, nur für ein Telefon, das den Schlüssel hat. Der Schlüssel beweist, wer fragt; er verbirgt nichts. Antworten gehen weiterhin unverschlüsselt über Ihr WLAN, und der Schlüssel ebenso, einmal, wenn ein Telefon ihn erhält.</p>
+<p>Immer nur ein Telefon hat den Schlüssel. Ein zweites Telefon, das ihn erhält, nimmt ihn dem ersten.</p>
 <hr>
-<h2>Schritt 4 — Die Sonde installieren</h2>
-<pre class="lang-bash"><code>sudo apt-get update &amp;&amp; sudo apt-get install -y git
-git clone https://github.com/tintronix-lab/ThreadMapper.git
-sudo ./ThreadMapper/tools/pi-image/install.sh</code></pre>
-<p>Es erkennt den Dongle, installiert <code>otbr-agent</code> und den Sonden-Agenten und aktiviert beide als systemd-Dienste.</p>
-<p><strong>Auf einem Pi 4 dauert das etwa 20 Minuten</strong>, fast durchgehend das Kompilieren von <code>otbr-agent</code>. Es hängt nicht. Zum Schluss gibt das Skript die Adresse der Sonde aus.</p>
-<p>Wenn die Erkennung fehlschlägt, Sie den Gerätepfad aber kennen:</p>
-<pre class="lang-bash"><code>sudo ./ThreadMapper/tools/pi-image/install.sh --radio-url spinel+hdlc+uart:///dev/ttyACM0</code></pre>
-<p>Ein erneuter Durchlauf ist unbedenklich — das Skript ist idempotent, und genau so aktualisieren Sie den Agenten später.</p>
+<h2>Schritt 5 — Der Sonde Ihr Thread-Netzwerk geben</h2>
+<p>Überspringen Sie das, wenn Ihr Zuhause die erste Zeile der Tabelle oben ist.</p>
+<p>Die Sonde tritt einem Thread-Netzwerk mit dessen <em>aktivem Datensatz</em> (Active Dataset) bei, einer Zeichenfolge aus rund zweihundert Hexadezimalziffern, die den Schlüssel des Netzwerks enthält.</p>
+<ul><li><strong>Home Assistant:</strong> Öffnen Sie dessen Thread-Seite, <em>Settings → Connectivity → Thread</em>, oder in älteren Versionen <em>Settings → Devices &amp; services → Thread → Configure</em> (die Menünamen sind die englischen von Home Assistant). Neben Ihrem Netzwerk ist eine Informationstaste, und was sie anzeigt, endet mit <strong>Active dataset TLVs</strong>: Kopieren Sie das. Gehört das Netzwerk zu Apple Home, muss Home Assistant es erst bekommen: Öffnen Sie dieselbe Seite in der Companion-App auf Ihrem iPhone und wählen Sie <em>Send credentials to Home Assistant</em>.</li><li><strong>OpenThread Border Router:</strong> <code>sudo ot-ctl dataset active -x</code></li></ul>
+<p>Schließen Sie die Sonde wieder an den Computer an, klicken Sie oben auf die Installationsschaltfläche, wählen Sie ihren Port und öffnen Sie <strong>Logs &amp; Console</strong>, ohne etwas zu installieren. Geben Sie <code>thread dataset</code> ein, drücken Sie die Eingabetaste und fügen Sie den Datensatz ein, wenn die Sonde danach fragt:</p>
+<pre><code>&gt; thread dataset
+Dataset, as hex? The probe does not write it back.
+&gt; 0e080000000000010000000300001935060004001fffe0...
+stored: &quot;MyHome&quot;, channel 25. Restarting to join it.</code></pre>
+<p>Innerhalb weniger Minuten sagt die App unter <strong>Einstellungen → ThreadMapper-Sonde</strong>, dass die Sonde in ihrem Thread-Netz ist.</p>
+<p>Der Datensatz ist der Schlüssel zu Ihrem Thread-Netzwerk. Die Sonde gibt ihn nicht wieder aus, aber die Seite, in die Sie ihn einfügen, zeigt ihn an und behält ihn in ihrem Log, bis Sie das Fenster schließen. Die Sonde behält ihn in ihrem eigenen Speicher, der nicht verschlüsselt ist: Wer die Platine an sich nimmt, kann ihn auslesen.</p>
 <hr>
-<h2>Schritt 5 — In ein Thread-Netzwerk kommen</h2>
-<p>Wählen Sie die Zeile, die unter „Lesen Sie das, bevor Sie etwas kaufen“ auf Sie zutraf.</p>
-<h3>Weg A — Ihrem bestehenden Netzwerk beitreten (was Sie eigentlich wollen)</h3>
-<p>Holen Sie sich das Active Operational Dataset als Hex-String von dem, was Ihre Zugangsdaten bereits vorhält.</p>
-<p>Von einem vorhandenen OTBR (auch dem Add-on von Home Assistant):</p>
-<pre class="lang-bash"><code>curl -s http://&lt;existing-otbr&gt;:8081/node/dataset/active \
-     -H &#x27;Accept: text/plain&#x27;</code></pre>
-<p>Das liefert einen langen Hex-String. Auf dem Pi:</p>
-<pre class="lang-bash"><code>sudo ot-ctl dataset set active &lt;that-long-hex-string&gt;
-sudo ot-ctl ifconfig up
-sudo ot-ctl thread start</code></pre>
-<p>Warten Sie etwa 30 Sekunden, dann:</p>
-<pre class="lang-bash"><code>sudo ot-ctl state</code></pre>
-<p>Erwarten Sie <code>child</code> oder <code>router</code> — dann ist der Beitritt geglückt. <code>leader</code> hieße hier, dass die Sonde stattdessen ein eigenes Netzwerk gebildet hat, was auf diesem Weg nicht gewollt ist.</p>
-<h3>Weg B — Ein neues Netzwerk bilden (zum Testen, oder wenn es keinen Weg zu den Zugangsdaten gibt)</h3>
-<pre class="lang-bash"><code>sudo ot-ctl dataset init new
-sudo ot-ctl dataset commit active
-sudo ot-ctl ifconfig up
-sudo ot-ctl thread start
-sudo ot-ctl state          # expect: leader</code></pre>
-<p>Sie haben jetzt ein leeres Netzwerk mit einem einzigen Knoten. Um etwas Interessantes zu sehen, müssen Sie Zubehör darauf anmelden — was bedeutet, es zuerst aus Ihrem Apple-Netzwerk zu entfernen. <strong>Machen Sie das nicht mit Geräten, auf die Sie angewiesen sind.</strong></p>
-<p>Geben Sie das Dataset aus, wenn Sie später weitere Geräte damit verbinden möchten:</p>
-<pre class="lang-bash"><code>sudo ot-ctl dataset active -x</code></pre>
+<h2>Was Sie bekommen</h2>
+<div class="scroll"><table><thead><tr><th>In der App</th><th>Nur mit WLAN</th><th>Auch mit Ihrem Thread-Netzwerk</th></tr></thead><tbody><tr><td><strong>Kanalscanner</strong>: das gemessene Rauschen auf allen sechzehn Thread-Kanälen</td><td>Ja</td><td>Ja</td></tr><tr><td>Die WLAN-Netzwerke hinter dem Rauschen, mit Name und Kanal</td><td>Ja</td><td>Ja</td></tr><tr><td>Ein Tag Rauschmesswerte, alle fünf Minuten aufgenommen, während die App geschlossen war</td><td>Ja</td><td>Ja</td></tr><tr><td><strong>Sonden-Messwerte</strong>: jeder Router im Netz, die Knoten, die die Sonde hört, mit ihrem gemessenen Signal, und wie das Netz zwischen ihnen routet</td><td>Nein</td><td>Ja</td></tr><tr><td>Auf der Seite eines Geräts: wer es hört und wie gut, und ob es antwortet</td><td>Nein</td><td>Ja</td></tr><tr><td><strong>Netzwerk-Doktor</strong>, für ein netzbetriebenes Thread-Gerät, das Apple Home nicht erreichen kann: ob es im Thread-Netz trotzdem antwortet und, bei einem Matter-Gerät, ob ein Border Router dessen Registrierung noch hat</td><td>Nein</td><td>Ja</td></tr></tbody></table></div>
+<p>Die Namen der WLAN-Netzwerke werden auf dem Telefon angezeigt und nirgends gespeichert.</p>
 <hr>
-<h2>Schritt 6 — Die App darauf ausrichten</h2>
-<pre class="lang-bash"><code>curl http://localhost:8099/health</code></pre>
-<p>Erwarten Sie <code>&quot;otCtlReachable&quot;: true</code> und ein <code>role</code>. Dann auf Ihrem iPhone im selben Netzwerk unter <strong>ThreadMapper → Einstellungen → ThreadMapper-Sonde</strong>:</p>
-<pre><code>http://threadmapper-probe.local:8099</code></pre>
-<p>Nutzen Sie stattdessen die IP-Adresse des Pi, wenn sich <code>.local</code> unter iOS nicht auflösen lässt. Tippen Sie auf <strong>Verbindung testen</strong> — bei einem Problem wird der Fehler benannt, statt nur ein rotes X zu zeigen.</p>
+<h2>Was die LED sagt</h2>
+<div class="scroll"><table><thead><tr><th>LED</th><th>Bedeutung</th></tr></thead><tbody><tr><td>Ein kurzes Blinken alle zwei Sekunden</td><td>Noch kein WLAN-Netzwerk. Schritt 2.</td></tr><tr><td>Blinkt langsam</td><td>Die Sonde hat ein Netzwerk und tritt ihm gerade bei.</td></tr><tr><td>Leuchtet dauerhaft</td><td>Die Sonde ist in Ihrem WLAN. So soll es aussehen.</td></tr><tr><td>Zweimal Blinken pro Sekunde</td><td>Sie haben die Taste zweimal gedrückt: Die Sonde gibt einem Telefon den Schlüssel, drei Minuten lang oder bis eines ihn abgerufen hat.</td></tr><tr><td>Blinkt schnell</td><td>Sie haben die Taste einmal gedrückt. Das öffnet ein Zeitfenster von drei Minuten, das diese Version der App nicht nutzt. Es schließt sich von selbst, und die Sonde startet neu, womit ihr Tag an Messwerten von vorn beginnt.</td></tr><tr><td>Flackert</td><td>Sie halten die Taste seit drei Sekunden gedrückt. Bei zehn wird alles gelöscht, was der Sonde mitgeteilt wurde.</td></tr></tbody></table></div>
 <hr>
-<h2>Schritt 7 — Sehen, was Sie bekommen haben</h2>
-<ul><li><strong>Übersicht → ⋯ → Thread-Netzwerk</strong> — gemessener RSSI je Knoten, Verbindungsqualität und die Routing-Tabelle mit Pfadkosten und nächstem Hop. Knoten erscheinen mit ihrer Thread-Adresse, nicht mit Namen; siehe „Was noch nicht funktioniert“ weiter unten.</li><li><strong>Netz → Werkzeuge → Kanalscanner</strong> — jetzt mit der Kennzeichnung <strong>Gemessen</strong>. Die Balkenhöhe ist der echte Rauschpegel über alle 16 Kanäle, und die empfohlenen Kanäle sind die tatsächlich ruhigsten statt einer Schätzung aus einer Tabelle mit WLAN-Überschneidungen.</li></ul>
-<p>Den Kanalscanner sollten Sie sich zuerst ansehen. Er zeigt am deutlichsten den Unterschied zwischen dem, was die App vorher zeigen konnte, und dem, was sie jetzt zeigt.</p>
+<h2>Aktualisieren</h2>
+<p>Eine neue Firmware erscheint auf dieser Seite. Schließen Sie die Sonde an den Computer an, klicken Sie auf die Installationsschaltfläche und wählen Sie den Port. Das Installationsprogramm sagt, welche Firmware auf der Sonde läuft, und bietet <strong>Update ThreadMapper Probe</strong> an: Klicken Sie darauf und dann auf <strong>Install</strong>. Eine Aktualisierung löscht nichts: Die Sonde behält ihr WLAN, ihren Schlüssel und ihr Thread-Netzwerk.</p>
+<p>Eine Sonde mit einer Firmware vor 0.8.0 sagt dem Installationsprogramm nicht, was sie ist. Das Installationsprogramm bietet dann <strong>Install ThreadMapper Probe</strong> an und fragt, ob das Gerät gelöscht werden soll: Lassen Sie <strong>Erase device</strong> ohne Häkchen.</p>
+<p>Läuft auf der Sonde bereits die neueste Firmware, bietet das Installationsprogramm stattdessen <strong>Erase User Data</strong> an. Das löscht alles, was der Sonde mitgeteilt wurde, genau wie zehn Sekunden langes Gedrückthalten ihrer Taste.</p>
 <hr>
-<h2>Fehlersuche</h2>
-<div class="scroll"><table><thead><tr><th>Symptom</th><th>Ursache und Abhilfe</th></tr></thead><tbody><tr><td><code>install.sh</code> meldet „No 802.15.4 dongle detected“</td><td>Der Dongle fehlt, oder Schritt 1 hat nicht gegriffen. Prüfen Sie <code>ls /dev/serial/by-id/</code>.</td></tr><tr><td>Verbindung testen: <em>„erreicht den Border Router daneben nicht“</em></td><td>Der Agent läuft, <code>otbr-agent</code> aber nicht. <code>sudo systemctl status otbr-agent</code>, dann <code>journalctl -u otbr-agent -n 50</code>. Meist eine falsche Radio-URL oder ein Dongle, der die Stromversorgung verloren hat.</td></tr><tr><td>Verbindung testen: <em>„ist kein ThreadMapper-Sonden-Agent“</em></td><td>Etwas anderes antwortet auf diesem Port. Der Agent lauscht auf 8099; 8081 ist die eigene REST-API des Border Routers.</td></tr><tr><td>Verbindung testen: <em>„Diese Adresse war nicht erreichbar“</em></td><td>Falsche IP, oder das iPhone hängt in einem anderen Subnetz oder einem Gast-VLAN.</td></tr><tr><td><code>ot-ctl state</code> meldet <code>detached</code></td><td>Die Sonde hat Zugangsdaten, findet das Netzwerk aber nicht. Falsches Dataset, oder außer Funkreichweite jedes anderen Knotens.</td></tr><tr><td><code>ot-ctl state</code> meldet <code>disabled</code></td><td><code>ifconfig up</code> bzw. <code>thread start</code> wurde nicht ausgeführt, oder das Funkmodul kam nicht hoch.</td></tr><tr><td>Die Ansicht „Thread-Netzwerk“ zeigt keine anderen Knoten</td><td>Die Sonde ist in ihrem eigenen Netzwerk — prüfen Sie, dass sie nicht <code>leader</code> ist, wenn sie beitreten sollte.</td></tr><tr><td>Alles läuft, stirbt aber nach einem Neustart</td><td><code>systemctl is-enabled otbr-agent threadmapper-probe</code> — beides sollte <code>enabled</code> melden.</td></tr></tbody></table></div>
-<p>Logs beider Dienste zusammen:</p>
-<pre class="lang-bash"><code>journalctl -u threadmapper-probe -u otbr-agent -f</code></pre>
+<h2>Wenn es nicht funktioniert</h2>
+<div class="scroll"><table><thead><tr><th>Was Sie sehen</th><th>Was es ist</th></tr></thead><tbody><tr><td>Die Installationsschaltfläche sagt, dass der Browser nicht unterstützt wird</td><td>Verwenden Sie Chrome, Edge oder Firefox auf einem Computer.</td></tr><tr><td>Der Port steht nicht in der Liste</td><td>Das Kabel überträgt nur Strom, oder ein anderes Programm hat den Port geöffnet.</td></tr><tr><td>Das Installationsprogramm meldet <strong>Unable to connect</strong></td><td>Das Passwort ist falsch, die Sonde ist zu weit vom Router entfernt, oder das Netzwerk ist nur auf 5 GHz. Nichts wurde geändert. Versuchen Sie es erneut.</td></tr><tr><td>Das Installationsprogramm bietet kein <strong>Connect to Wi-Fi</strong> an</td><td>Es hat die Sonde nicht antworten hören. Schließen Sie sein Fenster, klicken Sie erneut auf die Installationsschaltfläche und wählen Sie den Port.</td></tr><tr><td>Die LED zeigt wieder ein kurzes Blinken alle zwei Sekunden</td><td>Einem an der Konsole eingegebenen Netzwerk konnte die Sonde nicht beitreten: Das Passwort ist falsch, oder das Netzwerk ist nur auf 5 GHz. Nach zehn Versuchen hat die Sonde es vergessen. Geben Sie ihr das Netzwerk erneut (Schritt 2).</td></tr><tr><td>Die LED blinkt weiter langsam</td><td>Die Sonde ist diesem Netzwerk schon einmal beigetreten und erreicht es jetzt nicht: Der Router ist aus oder zu weit entfernt, oder sein Passwort hat sich geändert. Hat es sich geändert, geben Sie ihr das Netzwerk erneut (Schritt 2).</td></tr><tr><td>Die Sonde sagt, der Datensatz sei abgeschnitten oder habe die falsche Länge</td><td>Beim Einfügen eines langen Texts kann unterwegs ein Stück verloren gehen. Fügen Sie ihn noch einmal ein.</td></tr><tr><td>Die App listet die Sonde nicht auf</td><td>Das Telefon ist in einem anderen WLAN oder in einem Gastnetzwerk, das Geräte voneinander trennt. Geben Sie die Adresse aus <code>status</code> ein.</td></tr><tr><td>Die App sagt, die Sonde habe einen Schlüssel, den dieses iPhone nicht hat</td><td>Ein anderes Telefon hat den Schlüssel abgerufen, oder die Sonde wurde von Grund auf neu gestartet. Drücken Sie zweimal <strong>B</strong> und tippen Sie erneut auf <strong>Schlüssel abrufen</strong>.</td></tr><tr><td>Die App sagt, die Sonde sei nicht in ihrem Thread-Netz</td><td>Sie hat einen Datensatz und findet das Netzwerk nicht: Der Datensatz gehört zu einem anderen Netzwerk, oder kein Router ist in Reichweite.</td></tr><tr><td>Sie möchten von vorn beginnen</td><td>Halten Sie die Taste <strong>B</strong> zehn Sekunden lang gedrückt.</td></tr></tbody></table></div>
 <hr>
-<h2>Was noch nicht funktioniert</h2>
-<p><strong>Knoten erscheinen ohne Namen.</strong> Thread identifiziert einen Knoten über seine erweiterte Adresse; HomeKit identifiziert Zubehör über eine undurchsichtige Kennung, und nichts verbindet die beiden. Sie sehen also eine echte, korrekte Topologie aus anonymen Knoten statt „die Küchenlampe“.</p>
-<p>Die Lösung ist angelegt, aber nicht fertig: Der Endpunkt <code>/traffic</code> des Agenten meldet Aktivität je Knoten, sodass sich beide verknüpfen ließen, indem man ein Gerät über HomeKit schaltet und beobachtet, welcher Knoten antwortet. Für diese Interaktion braucht die Entwicklung echtes Zubehör in einem echten Netz — genau das, was Sie haben werden, sobald das hier läuft. Erfasst als <strong>H1</strong> in <code>WORKPLAN.md</code>.</p>
-<p><strong>Der Tab „Netz“ bleibt abgeleitet.</strong> Sein Graph wird aus HomeKit-Zubehör aufgebaut und kann daher keine Sondendaten nutzen, solange das Obige nicht gelöst ist. Messwerte zeigen die Ansicht „Thread-Netzwerk“ und der Kanalscanner.</p>
-<hr>
-<h2>Wenn hier etwas falsch ist</h2>
-<p>Diese Anleitung wurde noch nicht von Anfang bis Ende an echter Hardware durchlaufen — niemand im Projekt hat bisher einen Pi oder einen Dongle. Das Provisionierungsskript ist gegen Debian Bookworm arm64 getestet, und jeder Endpunkt des Agenten ist gegen einen echten <code>otbr-agent</code> an einem simulierten Funkmodul getestet, aber die praktischen Schritte oben sind aus der Herstellerdokumentation geschrieben und nicht aus eigener Erfahrung.</p>
-<p>Wenn ein Schritt falsch ist, lohnt es sich, das in dieser Datei zu korrigieren.</p>
+<h2>Was Sie wissen sollten</h2>
+<ul><li>Die Sonde öffnet keine Verbindung ins Internet. Sie antwortet in Ihrem eigenen Netzwerk, auf Port 8099, über einfaches HTTP, und kündigt sich dort mit Namen an.</li><li>Was ihr mitgeteilt wurde – Name und Passwort Ihres WLANs, der Schlüssel und der Thread-Datensatz, falls Sie ihr einen gegeben haben –, behält sie in ihrem eigenen Speicher, nicht verschlüsselt. Die Taste zehn Sekunden lang gedrückt zu halten löscht alles davon.</li><li>Den Tag an Messwerten hält die Sonde in einem Speicher, den ein Neustart leert, und ein Stromausfall ebenso.</li><li>Sie ist ein Eigenbau für alle, die einen wollen, kein Produkt. Sie ist nicht Thread-zertifiziert.</li><li>Das Installationsprogramm auf dieser Seite ist ESP Web Tools von ESPHome, unter der <a href="https://tintronix-lab.github.io/ThreadMapper/flasher/LICENSE.txt">Apache License 2.0</a>. Es läuft in Ihrem Browser und wird von dieser Website ausgeliefert. Es lädt die Firmware von dieser Website und sendet nirgendwohin etwas. Was Sie ihm für das WLAN der Sonde geben, geht durch das Kabel zur Platine; es vermerkt außerdem, was es sendet, als Zahlen, in der Entwicklerkonsole des Browsers, bis der Tab geschlossen wird.</li><li>Die Firmware baut auf Open-Source-Software von Espressif und anderen auf. Deren Lizenzen stehen in <a href="https://tintronix-lab.github.io/ThreadMapper/firmware/NOTICES.txt">NOTICES.txt</a>, und die Bedingungen für das Image selbst in <a href="https://tintronix-lab.github.io/ThreadMapper/firmware/LICENSE.txt">LICENSE.txt</a>.</li></ul>
 
 <footer>
   <a href="index.html">Startseite</a>

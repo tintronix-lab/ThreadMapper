@@ -351,7 +351,7 @@
     <p class="eyebrow">La sonde</p>
     <h2>Un petit boîtier qui met fin aux suppositions.</h2>
     <p class="section-lede">
-      Faites tourner un agent léger sur un Raspberry Pi muni d’un dongle 802.15.4 : il rejoint votre réseau Thread comme un nœud à part entière. De l’intérieur, tout ce que le téléphone ne peut pas voir devient lisible — et comme il ne dort jamais, il voit les pannes de 3 h du matin que vous ne voyez pas.
+      Installez notre micrologiciel sur une petite carte ESP32-C6, depuis le navigateur d’un ordinateur, et laissez-la sur un chargeur. Elle mesure chaque canal Thread toutes les cinq minutes, ce qu’aucun téléphone ne peut faire, et conserve une journée de mesures pendant que l’app est fermée. Là où elle peut rejoindre votre maillage Thread, elle lit le maillage de l’intérieur, comme un vrai nœud.
     </p>
 
     <div class="readout" role="img" aria-label="Exemple de sortie de sonde montrant un routeur à moins 20 dBm avec une qualité de liaison de 3 sur 3, et une route au coût du chemin de 0.">
@@ -381,7 +381,7 @@
       </div>
       <div class="compare-row">
         <div class="compare-cell without"><b>Quand l’app est ouverte</b>Le téléphone ne surveille que lorsque vous le regardez.</div>
-        <div class="compare-cell with"><b>En continu</b>Enregistré sur disque : la partition survenue dans la nuit est encore là au matin.</div>
+        <div class="compare-cell with"><b>En continu</b>Enregistré sur la sonde pendant un jour : la nuit dernière est encore là au matin.</div>
       </div>
     </div>
 
@@ -405,10 +405,10 @@
     </div>
 
     <p style="margin:1.75rem 0 0;color:var(--muted);font-size:.93rem">
-      L’agent est open source et tourne sur un Raspberry Pi 4 ou 5 que vous possédez peut-être déjà — le dongle 802.15.4 dont il a besoin coûte environ 10 à 25 $. <a href="probe-setup.html">Guide d’installation →</a>
+      La carte est une Seeed XIAO ESP32C6, environ 5 à 8 $, et le micrologiciel s’installe en une dizaine de minutes. La sonde fait partie de ThreadMapper Pro. <a href="probe-setup.html">Guide d’installation →</a>
       <br>
       <span style="font-size:.88rem">
-        À lire avant de vous lancer : un Raspberry Pi n’a pas de radio Thread propre, et rejoindre un réseau Apple ou Google existant demande des identifiants que ces plateformes ne permettent pas encore d’exporter. Ce n’est pas un produit que l’on achète — c’est un montage à faire soi-même.
+        À lire avant de vous lancer : dans une maison dont tous les routeurs de bordure sont ceux d’Apple ou de Google, la sonde ne peut rejoindre le maillage que si Home Assistant lui transmet les identifiants. Sinon, elle mesure les canaux et le Wi-Fi qui s’y trouve, et ne lit pas le maillage. Ce n’est pas un produit que l’on achète — c’est un montage à faire soi-même.
       </span>
     </p>
   </section>
@@ -477,12 +477,6 @@
         <li><strong>Interventions et fiches de preuve</strong> — une page qui montre au client exactement ce qu’une visite a changé, et une page par appareil pour une réclamation de garantie.</li>
         <li><strong>Ce que disent les radios</strong> — pourquoi un appareil a redémarré, combien de fois il a changé de routeur parent, et combien de foyers peuvent le commander.</li>
       </ul>
-      <div class="note">
-        <p><strong>Les fonctions liées à la sonde ne sont pas payantes.</strong></p>
-        <p>
-          Si vous avez pris la peine de construire une sonde, vous heurter à un second péage serait une bien mauvaise façon de vous remercier. Tout ce que la sonde débloque est inclus.
-        </p>
-      </div>
     </div>
   </section>
 

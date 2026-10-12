@@ -351,7 +351,7 @@
     <p class="eyebrow">Sonden</p>
     <h2>En liten låda som gör slut på gissandet.</h2>
     <p class="section-lede">
-      Kör en lättviktsagent på en Raspberry Pi med en 802.15.4-dongel, så ansluter den sig till ditt Thread-mesh-nät som en riktig nod. Inifrån blir allt som telefonen inte kan se läsbart — och eftersom den aldrig sover ser den de avbrott klockan tre på natten som du missar.
+      Lägg vår firmware på ett litet ESP32-C6-kort, från en dators webbläsare, och låt det sitta i en laddare. Det mäter varje Thread-kanal var femte minut, vilket ingen telefon kan, och behåller ett dygns mätvärden medan appen är stängd. Där det kan ansluta till ditt Thread-mesh-nät läser det av mesh-nätet inifrån, som en riktig nod.
     </p>
 
     <div class="readout" role="img" aria-label="Exempel på utdata från en sond som visar en router på minus 20 dBm med länkkvalitet 3 av 3, och en rutt med vägkostnad 0.">
@@ -381,7 +381,7 @@
       </div>
       <div class="compare-row">
         <div class="compare-cell without"><b>Medan appen är öppen</b>Telefonen tittar bara när du tittar på den.</div>
-        <div class="compare-cell with"><b>Kontinuerligt</b>Registrerat till disk, så att nattens uppdelning av mesh-nätet finns kvar på morgonen.</div>
+        <div class="compare-cell with"><b>Kontinuerligt</b>Registrerat i sonden i ett dygn, så att natten finns kvar på morgonen.</div>
       </div>
     </div>
 
@@ -405,10 +405,10 @@
     </div>
 
     <p style="margin:1.75rem 0 0;color:var(--muted);font-size:.93rem">
-      Agenten är öppen källkod och kör på en Raspberry Pi 4 eller 5 som du kanske redan har — 802.15.4-dongeln den behöver kostar runt 10–25 dollar. <a href="probe-setup.html">Installationsguide →</a>
+      Kortet är en Seeed XIAO ESP32C6, runt 5–8 dollar, och firmwaren installeras på ungefär tio minuter. Sonden ingår i ThreadMapper Pro. <a href="probe-setup.html">Installationsguide →</a>
       <br>
       <span style="font-size:.88rem">
-        Läs den först: en Raspberry Pi har ingen egen Thread-radio, och att gå med i ett befintligt mesh-nät från Apple eller Google kräver autentiseringsuppgifter som de plattformarna ännu inte låter dig exportera. Det är ingen produkt du kan köpa — det är ett bygge.
+        Läs den först: i ett hem där alla gränsroutrar är Apples eller Googles kan sonden ansluta till mesh-nätet bara om Home Assistant lämnar över autentiseringsuppgifterna till den. Annars mäter den kanalerna och Wi-Fi-näten på dem, och läser inte av mesh-nätet. Det är ingen produkt du kan köpa — det är ett bygge.
       </span>
     </p>
   </section>
@@ -477,12 +477,6 @@
         <li><strong>Jobb och underlag</strong> — en sida till kunden som säger exakt vad besöket ändrade, och en sida per enhet för ett garantiärende.</li>
         <li><strong>Vad radion säger</strong> — varför en enhet startade om, hur ofta den har bytt föräldrarouter och hur många hushåll som kan styra den.</li>
       </ul>
-      <div class="note">
-        <p><strong>Sondfunktionerna ligger inte bakom betalväggen.</strong></p>
-        <p>
-          Har du väl gjort dig besväret att bygga en sond vore ännu en betalvägg ett dåligt sätt att säga tack. Allt som sonden låser upp ingår.
-        </p>
-      </div>
     </div>
   </section>
 

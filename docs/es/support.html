@@ -83,7 +83,7 @@
     Conectar un router de borde OpenThread te da datos reales de la <em>red</em> (nombre, canal, PAN ID), pero no enrutamiento. Sus endpoints de diagnóstico no devuelven datos por nodo: los probamos contra una malla real y las peticiones se completan sin nada dentro.
   </p>
   <p>
-    El enrutamiento real necesita una <a href="probe-setup.html">sonda de ThreadMapper</a>: un pequeño agente en una Raspberry Pi que se une a la malla y lee la tabla de rutas directamente. Con una conectada, la pantalla Red Thread muestra la señal medida, la calidad de enlace, el siguiente salto y el coste de ruta. Esos nodos aparecen por dirección Thread y no por los nombres de tus dispositivos: todavía no hay nada que relacione una dirección Thread con un accesorio de HomeKit.
+    El enrutamiento real necesita una <a href="probe-setup.html">sonda de ThreadMapper</a>: una placa pequeña en tu wifi que se une a la malla, allí donde tu casa se lo permite, y lee la tabla de rutas directamente. Con una en la malla, la pantalla Lecturas de la sonda muestra la señal medida, la calidad de enlace, el siguiente salto y el coste de ruta. Un nodo lleva el nombre de tu dispositivo solo cuando el dispositivo ha declarado su propia dirección Thread; los demás aparecen por su dirección Thread.
   </p>
 </details>
 

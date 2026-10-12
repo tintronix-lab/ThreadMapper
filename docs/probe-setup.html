@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Build a ThreadMapper probe — ThreadMapper</title>
-<meta name="description" content="Step by step: turn a Raspberry Pi and an 802.15.4 dongle into a ThreadMapper probe, so the app can show measured Thread signal, routing and interference.">
+<meta name="description" content="Step by step: put the ThreadMapper firmware on a Seeed XIAO ESP32C6 from your browser, so the app can show measured channel noise, the Wi-Fi behind it, and the Thread mesh the board has joined.">
 <meta name="theme-color" content="#0B1020">
-<!-- Generated from tools/pi-image/SETUP.md by tools/build-docs.py — edit the Markdown, not this file. -->
+<!-- Generated from tools/probe-esp32c6/SETUP.md by tools/build-docs.py — edit the Markdown, not this file. -->
 <link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/probe-setup.html">
 <link rel="alternate" hreflang="en" href="https://tintronix-lab.github.io/ThreadMapper/probe-setup.html">
 <link rel="alternate" hreflang="sv" href="https://tintronix-lab.github.io/ThreadMapper/sv/probe-setup.html">
@@ -18,6 +18,7 @@
 <link rel="alternate" hreflang="nl" href="https://tintronix-lab.github.io/ThreadMapper/nl/probe-setup.html">
 <link rel="alternate" hreflang="pt-BR" href="https://tintronix-lab.github.io/ThreadMapper/pt-br/probe-setup.html">
 <link rel="alternate" hreflang="x-default" href="https://tintronix-lab.github.io/ThreadMapper/probe-setup.html">
+<script type="module" src="flasher/install-button.js"></script>
 <style>
   :root {
     color-scheme: light dark;
@@ -90,6 +91,18 @@
      nothing for kana. */
   :lang(ja) h1, :lang(ja) h2 { letter-spacing:0; }
 
+  /* The install button (#391). The button itself is this page's own, handed
+     to the installer in a slot, so it takes this page's look. */
+  .install { margin:1.6rem 0 1.8rem; }
+  .install button { font:600 1rem/1.2 var(--sans); color:var(--paper); background:var(--signal);
+                     border:0; border-radius:.6rem; padding:.85rem 1.3rem; cursor:pointer; }
+  .install button:focus-visible { outline:2px solid var(--ink); outline-offset:3px; }
+  .install span { display:block; padding:.8rem 1rem; border:1px solid var(--line);
+                   border-radius:.6rem; background:var(--surface); color:var(--body); }
+  /* Until the installer has loaded, its two apologies are not yet its to
+     show or hide, and would both stand under the button. */
+  esp-web-install-button:not(:defined) span { display:none; }
+
   /* Language switcher: a plain link row, no JS. */
   .langs { margin-top:1rem; display:flex; flex-wrap:wrap; gap:.35rem 1.1rem; }
   .langs a { margin-right:0; text-decoration:none; }
@@ -102,110 +115,99 @@
 <div class="top"><div class="wrap"><a href="index.html">← ThreadMapper</a></div></div>
 
 <div class="wrap">
-<h1>Setting up a ThreadMapper probe on a Raspberry Pi</h1>
-<p>Step by step, from an empty desk to measured Thread data in the app.</p>
-<p>Budget an evening. Most of it is waiting for downloads and one ~20 minute build.</p>
+<h1>Build a ThreadMapper probe</h1>
+<p>A probe is a small board on your Wi-Fi that measures the radio your smart home shares: how busy each Thread channel is, which Wi-Fi networks sit on it, and, where it can join your Thread mesh, the mesh as its own routers report it. ThreadMapper reads it over your own network.</p>
+<p>One part, about ten minutes, no soldering. The probe is part of <strong>ThreadMapper Pro</strong>.</p>
 <hr>
-<h2>Read this before you buy anything</h2>
-<p>Two things decide whether this is worth doing for <em>your</em> setup. Both are easy to miss until the parts arrive.</p>
-<h3>1. A Raspberry Pi cannot do Thread on its own</h3>
-<p>There is no 802.15.4 radio in a Raspberry Pi. Wi-Fi and Bluetooth are different radios and cannot speak Thread. <strong>You need a USB dongle</strong>, and it needs RCP firmware on it — which is not what these dongles ship with.</p>
-<h3>2. Joining <em>your</em> Thread network is the hard part</h3>
-<p>A border router that forms its own new network will sit there seeing nothing but itself. Your actual devices are on the network your HomePod, Apple TV or Nest hub created, and to observe them the probe has to <strong>join that network</strong> — which means getting its credentials (the Active Operational Dataset).</p>
-<div class="scroll"><table><thead><tr><th>Your setup</th><th>Can the probe join your real network?</th></tr></thead><tbody><tr><td>You run <strong>Home Assistant</strong></td><td><strong>Yes.</strong> HA&#x27;s iOS Companion app can pull Apple&#x27;s Thread credentials — <em>Settings → Devices &amp; services → Thread → Configure → Send credentials to Home Assistant</em> — and you can hand the dataset to the probe from there.</td></tr><tr><td>You already run an <strong>OTBR</strong> (e.g. HA&#x27;s add-on)</td><td><strong>Yes.</strong> Read the dataset off it directly.</td></tr><tr><td><strong>Apple or Google border routers only</strong>, no Home Assistant</td><td><strong>Not today.</strong> There is no user-facing way to export Apple&#x27;s Thread credentials. You can still form a <em>new</em> network on the probe and commission some accessories onto it to see the app working end to end, but it will not show you your existing mesh.</td></tr></tbody></table></div>
-<p>That third row is a real wall, and it is not one this project can knock down from the outside: the sanctioned route is Apple&#x27;s <code>com.apple.developer.thread-network-credentials</code> entitlement, which ThreadMapper has applied for but does not hold. If that comes through, the app can hand your credentials to the probe directly and this whole section disappears.</p>
-<p><strong>If you are in the third row and only want to monitor your existing Apple mesh, consider stopping here until that entitlement lands.</strong></p>
+<h2>Read this before you buy the board</h2>
+<h3>What you need</h3>
+<div class="scroll"><table><thead><tr><th>Part</th><th>Notes</th></tr></thead><tbody><tr><td><strong>Seeed Studio XIAO ESP32C6</strong></td><td>About $5–8. The firmware is built for this board and no other: it drives this board&#x27;s antenna switch, its light and its button.</td></tr><tr><td>A USB-C cable that carries data</td><td>Many cables that come with chargers carry power only. If the computer does not see the board, try another cable first.</td></tr><tr><td>A computer with <strong>Chrome</strong>, <strong>Edge</strong> or <strong>Firefox</strong></td><td>For the install only. Safari cannot reach a USB serial port, and neither can an iPhone or an iPad.</td></tr><tr><td>Wi-Fi on <strong>2.4 GHz</strong></td><td>The board has no 5 GHz radio. A network that offers both bands under one name is fine.</td></tr><tr><td>A USB charger</td><td>Any. That is where the probe lives once it is set up.</td></tr></tbody></table></div>
+<h3>What it can read in your home</h3>
+<p>The measuring works in every home. Reading the mesh needs the probe to <em>join</em> your Thread network, and whether it can depends on what runs that network.</p>
+<div class="scroll"><table><thead><tr><th>Your home</th><th>Channel noise, and the Wi-Fi on each channel</th><th>The Thread mesh itself</th></tr></thead><tbody><tr><td>Border routers from Apple or Google, and nothing else</td><td><strong>Yes</strong></td><td><strong>No.</strong> Neither lets you take your Thread network&#x27;s credentials out. Apple gives an app the right to read them only when its maker also makes a certified border router, and ThreadMapper&#x27;s does not.</td></tr><tr><td>The same, with <strong>Home Assistant</strong></td><td><strong>Yes</strong></td><td><strong>Yes.</strong> Home Assistant&#x27;s Companion app can copy the credentials in, and you copy them from there to the probe (step 5).</td></tr><tr><td>An <strong>OpenThread Border Router</strong> of your own</td><td><strong>Yes</strong></td><td><strong>Yes.</strong> Read them off it (step 5).</td></tr></tbody></table></div>
+<p><strong>If the first row is your home, the probe will not draw your mesh.</strong> It still measures what no phone can: the noise on each of the sixteen Thread channels, every five minutes, and which Wi-Fi networks are behind it. Decide on that before you buy.</p>
 <hr>
-<h2>Shopping list</h2>
-<div class="scroll"><table><thead><tr><th>Item</th><th>Notes</th></tr></thead><tbody><tr><td>Raspberry Pi 4 or 5</td><td>2 GB RAM is plenty. A Pi Zero 2 W will work but the build in step 4 takes far longer.</td></tr><tr><td>microSD card, 16 GB+</td><td>Anything reputable.</td></tr><tr><td>USB-C power supply</td><td>The official one; Thread dongles are picky about brown-outs.</td></tr><tr><td><strong>An 802.15.4 dongle</strong></td><td>Pick one — see below.</td></tr></tbody></table></div>
-<p><strong>Dongle options</strong>, either is fine:</p>
-<ul><li><strong>Nordic nRF52840 dongle</strong> (~$10) — cheapest, and the firmware is built from source so there is no hunting for a download.</li><li><strong>SkyConnect / Sonoff ZBDongle-E</strong> (~$25) — Silicon Labs. If you already own one for Home Assistant, use it. Flashing is a one-line tool.</li></ul>
+<h2>Step 1 — Install the firmware</h2>
+<ol><li>Plug the board into the computer.</li><li>Press <strong>Install the probe firmware</strong> below and choose the port named <strong>USB JTAG/serial debug unit</strong>.</li><li>Press <strong>Install ThreadMapper Probe</strong>. It asks whether to erase the device: for a new board, tick <strong>Erase device</strong>. Then <strong>Next</strong>, and <strong>Install</strong>.</li></ol>
+<p>Only for a new board. Erasing takes everything a probe was told with it: its Wi-Fi, its key and its Thread network. A probe that already works is updated instead (see <em>Updating</em>), and if the installer asks this of one, leave the box unticked.</p>
+<div class="install">
+<esp-web-install-button manifest="firmware/manifest.json">
+<button slot="activate">Install the probe firmware</button>
+<span slot="unsupported">This browser cannot reach a USB serial port. Open this page in Chrome, Edge or Firefox, on a computer.</span>
+<span slot="not-allowed">The installer only works on a page opened over HTTPS.</span>
+</esp-web-install-button>
+</div>
+<p>It takes a minute or two and ends with <strong>Installation complete!</strong> Press <strong>Next</strong>. The installer&#x27;s own window is in English.</p>
+<p>If the port is not in the list, it is nearly always the cable. Failing that, hold the board&#x27;s <strong>B</strong> button while you plug it in, and try again.</p>
+<p>None of those browsers? Espressif&#x27;s <code>esptool</code> does the same. A first install, which erases whatever the board held:</p>
+<pre><code>esptool.py --chip esp32c6 write_flash 0x0 threadmapper-probe-full.bin</code></pre>
+<p>An update, which leaves the probe what it was told:</p>
+<pre><code>esptool.py --chip esp32c6 write_flash 0x20000 threadmapper-probe.bin</code></pre>
+<p>The two images are <a href="https://tintronix-lab.github.io/ThreadMapper/firmware/threadmapper-probe-full.bin">threadmapper-probe-full.bin</a> and <a href="https://tintronix-lab.github.io/ThreadMapper/firmware/threadmapper-probe.bin">threadmapper-probe.bin</a>. Then open the board&#x27;s serial port with any terminal program, and give the probe its Wi-Fi by typing (step 2, <em>Without the list</em>).</p>
 <hr>
-<h2>Step 1 — Put RCP firmware on the dongle</h2>
-<p>Do this <strong>before</strong> touching the Pi, on your Mac or PC. It is the only step the installer deliberately does not automate: flashing the wrong image bricks the dongle, and the vendor tools do it properly.</p>
-<p>RCP (&quot;Radio Co-Processor&quot;) firmware makes the dongle a dumb radio that <code>otbr-agent</code> drives. A dongle shipped for Zigbee has different firmware and will not work until reflashed.</p>
-<h3>Silicon Labs (SkyConnect, Sonoff ZBDongle-E)</h3>
-<pre class="lang-bash"><code>pipx install universal-silabs-flasher     # or: pip install universal-silabs-flasher
-universal-silabs-flasher --device /dev/tty.usbserial-XXXX probe
-universal-silabs-flasher --device /dev/tty.usbserial-XXXX flash --firmware &lt;ot-rcp-firmware.gbl&gt;</code></pre>
-<p>Get the <code>ot-rcp</code> <code>.gbl</code> from the Home Assistant silabs firmware releases — the same images the OTBR add-on uses. Match the file to your exact dongle model; SkyConnect and ZBDongle-E are <strong>not</strong> interchangeable.</p>
-<h3>Nordic nRF52840</h3>
-<p>Build the firmware from OpenThread&#x27;s Nordic port, then flash over USB DFU:</p>
-<pre class="lang-bash"><code>git clone --recurse-submodules https://github.com/openthread/ot-nrf528xx.git
-cd ot-nrf528xx &amp;&amp; ./script/bootstrap &amp;&amp; ./script/build nrf52840 USB_trans
-# → build/bin/ot-rcp  (convert to .hex/.zip per the repo&#x27;s README, then:)
-nrfutil dfu usb-serial -pkg ot-rcp.zip -p /dev/tty.usbmodemXXXX</code></pre>
-<p>Follow that repo&#x27;s README for the current packaging step — it changes occasionally and is better read there than copied here.</p>
-<p><strong>Check it worked:</strong> plug the dongle into the Pi later and <code>install.sh</code> will report <code>Found &lt;family&gt; radio at /dev/serial/by-id/...</code>. If it finds nothing, the firmware did not take.</p>
+<h2>Step 2 — Give it your Wi-Fi</h2>
+<p>After a first install, with <strong>Erase device</strong> ticked, the installer goes on to <strong>Configure Wi-Fi</strong> by itself. If you are looking at its list of choices instead, press <strong>Connect to Wi-Fi</strong> there.</p>
+<p>The probe lists the networks it hears.</p>
+<ol><li>Under <strong>Network</strong>, choose yours.</li><li>Type its password.</li><li>Press <strong>Connect</strong>.</li></ol>
+<p>The installer says <strong>Trying to connect</strong>, which can take most of a minute, and then <strong>Device connected to the network!</strong> The probe&#x27;s light is then on and stays on. Press <strong>Continue</strong>.</p>
+<p>The probe keeps a network only once it has joined it. <strong>Unable to connect</strong> means it tried and did not get on: nearly always the password, sometimes a router too far away. The try changed nothing: a probe that had a network before still has it, and goes back to it. Try again.</p>
+<p>Your network is not in the list? The probe has no 5 GHz radio, so a network on 5 GHz only is not there. Neither is a network that hides its name: choose <strong>Join other…</strong> and type the name.</p>
+<p>The password field hides what you type. The name and the password go down the cable to the board, which keeps them in its own memory and writes the password in no log.</p>
+<h3>Without the list</h3>
+<p>If the installer offers no <strong>Connect to Wi-Fi</strong>, it did not hear the probe answer: close its window, press the install button again and choose the port.</p>
+<p>The probe can also be given its network at its console, in <strong>Logs &amp; Console</strong> or in any terminal program on its port. Type <code>wifi</code> and press Return. The lines that begin with <code>&gt;</code> are what you type:</p>
+<pre><code>&gt; wifi
+Network name? Type it and press Return.
+&gt; My network
+Password? The probe does not write it back. Return alone for a network without one.
+&gt; my password
+stored: &quot;My network&quot;, with a password of 11 characters.
+Restarting to join it. The light stays on once it has.</code></pre>
+<p>Nothing needs quotes, and letters such as å, ä and ö are fine. The probe does not write the password back. The page does show it as you type, and keeps it in its log until you close the window: it is your own screen, so look over your shoulder first.</p>
+<p>Given a network this way, the probe restarts to join it and has not tried it first. If its light goes back to one short flash every two seconds, it tried ten times, could not join, and has forgotten the network.</p>
 <hr>
-<h2>Step 2 — Flash Raspberry Pi OS</h2>
-<ol><li>Install <strong>Raspberry Pi Imager</strong>.</li><li>Choose <strong>Raspberry Pi OS Lite (64-bit)</strong>. Lite — there is no need for a desktop.</li><li>Click the <strong>gear / Edit Settings</strong> button <em>before</em> writing, and set: - hostname: <code>threadmapper-probe</code> - <strong>Enable SSH</strong>, with password or key - username and password - Wi-Fi credentials, if you are not using Ethernet</li><li>Write the card, put it in the Pi, attach the dongle, power on.</li></ol>
-<p>Ethernet is more reliable than Wi-Fi here, and a border router benefits from a stable uplink. Use it if you can.</p>
+<h2>Step 3 — Connect the app</h2>
+<p>Wait for the light to stay on. On the iPhone, open ThreadMapper and go to <strong>Settings → ThreadMapper Probe</strong>. With the phone on the same Wi-Fi, the probe is listed under <strong>On This Network</strong>: choose it. <strong>Test Connection</strong> then says what the probe is and where it stands.</p>
+<p>If the app does not list it, ask the probe where it is: close the installer&#x27;s window, press the install button again, choose the port, open <strong>Logs &amp; Console</strong> and type <code>status</code>. One of its lines is the address to type into the app:</p>
+<pre><code>in the app: http://192.168.1.50:8099</code></pre>
+<p>Your router may give the probe another address one day. The app knows the probe by more than its address: open, and with the phone on the same Wi-Fi, it finds the probe again by itself.</p>
+<p>The cable has done its work. Unplug the board and put it on a charger, somewhere in the middle of the home rather than behind the router: the probe hears what is near it.</p>
 <hr>
-<h2>Step 3 — Log in</h2>
-<pre class="lang-bash"><code>ssh &lt;your-username&gt;@threadmapper-probe.local</code></pre>
-<p>If the hostname does not resolve, find the Pi&#x27;s IP in your router&#x27;s client list and <code>ssh &lt;user&gt;@&lt;ip&gt;</code> instead.</p>
-<p>Confirm the dongle is visible before going further:</p>
-<pre class="lang-bash"><code>ls -l /dev/serial/by-id/</code></pre>
-<p>You should see one entry naming your dongle. <strong>If this is empty, stop</strong> — the rest will not work. Re-seat it, try another USB port, and re-check step 1.</p>
+<h2>Step 4 — Give your iPhone the key</h2>
+<p>A probe with no key answers anyone on your Wi-Fi. That includes the names of the Wi-Fi networks it hears, and requests that take its radio off your mesh&#x27;s channel for seconds at a time.</p>
+<p>Press the board&#x27;s <strong>B</strong> button twice, one press right after the other. (Not <strong>R</strong>: that one restarts the probe.) The light flashes twice a second, for three minutes or until a phone has taken the key. In the app, under <strong>Settings → ThreadMapper Probe</strong>, tap <strong>Get the Key</strong>.</p>
+<p>From then on the probe does what costs its radio time only for a phone that holds the key. The key proves who is asking; it hides nothing. Answers still cross your Wi-Fi unencrypted, and so does the key, once, when a phone is given it.</p>
+<p>One phone holds the key at a time. A second phone that is given it takes it from the first.</p>
 <hr>
-<h2>Step 4 — Install the probe</h2>
-<pre class="lang-bash"><code>sudo apt-get update &amp;&amp; sudo apt-get install -y git
-git clone https://github.com/tintronix-lab/ThreadMapper.git
-sudo ./ThreadMapper/tools/pi-image/install.sh</code></pre>
-<p>It detects the dongle, installs <code>otbr-agent</code> and the probe agent, and enables both as systemd services.</p>
-<p><strong>This takes ~20 minutes on a Pi 4</strong>, almost all of it compiling <code>otbr-agent</code>. It is not stuck. When it finishes it prints the probe&#x27;s address.</p>
-<p>If detection fails but you know the device path:</p>
-<pre class="lang-bash"><code>sudo ./ThreadMapper/tools/pi-image/install.sh --radio-url spinel+hdlc+uart:///dev/ttyACM0</code></pre>
-<p>Re-running is safe — it is idempotent, and it is how you upgrade the agent later.</p>
+<h2>Step 5 — Give it your Thread network</h2>
+<p>Skip this if your home is the first row of the table above.</p>
+<p>The probe joins a Thread network with that network&#x27;s <em>active dataset</em>, a string of some two hundred hex digits that holds the network&#x27;s key.</p>
+<ul><li><strong>Home Assistant:</strong> open its Thread page, <em>Settings → Connectivity → Thread</em>, or in older versions <em>Settings → Devices &amp; services → Thread → Configure</em>. Beside your network is an information button, and what it shows ends with <strong>Active dataset TLVs</strong>: copy that. If the network belongs to Apple Home, Home Assistant has to be given it first: open the same page in the Companion app on your iPhone and choose <em>Send credentials to Home Assistant</em>.</li><li><strong>OpenThread Border Router:</strong> <code>sudo ot-ctl dataset active -x</code></li></ul>
+<p>Plug the probe into the computer again, press the install button above, choose its port, and open <strong>Logs &amp; Console</strong> without installing anything. Type <code>thread dataset</code>, press Return, and paste the dataset when the probe asks for it:</p>
+<pre><code>&gt; thread dataset
+Dataset, as hex? The probe does not write it back.
+&gt; 0e080000000000010000000300001935060004001fffe0...
+stored: &quot;MyHome&quot;, channel 25. Restarting to join it.</code></pre>
+<p>Within a few minutes the app&#x27;s <strong>Settings → ThreadMapper Probe</strong> says the probe is on its Thread mesh.</p>
+<p>The dataset is the key to your Thread network. The probe does not write it back, but the page you paste it into shows it, and keeps it in its log until you close the window. The probe keeps it in its own memory, which is not encrypted: somebody who takes the board can read it out.</p>
 <hr>
-<h2>Step 5 — Get onto a Thread network</h2>
-<p>Pick the row that matched you in &quot;Before you buy&quot;.</p>
-<h3>Path A — Join your existing network (what you actually want)</h3>
-<p>Get the Active Operational Dataset as a hex string from whatever already holds your credentials.</p>
-<p>From an existing OTBR (including Home Assistant&#x27;s add-on):</p>
-<pre class="lang-bash"><code>curl -s http://&lt;existing-otbr&gt;:8081/node/dataset/active \
-     -H &#x27;Accept: text/plain&#x27;</code></pre>
-<p>That returns one long hex string. On the Pi:</p>
-<pre class="lang-bash"><code>sudo ot-ctl dataset set active &lt;that-long-hex-string&gt;
-sudo ot-ctl ifconfig up
-sudo ot-ctl thread start</code></pre>
-<p>Wait ~30 seconds, then:</p>
-<pre class="lang-bash"><code>sudo ot-ctl state</code></pre>
-<p>Expect <code>child</code> or <code>router</code> — it joined. <code>leader</code> here would mean it formed its own network instead, which is not what you want on this path.</p>
-<h3>Path B — Form a new network (testing, or no way to get credentials)</h3>
-<pre class="lang-bash"><code>sudo ot-ctl dataset init new
-sudo ot-ctl dataset commit active
-sudo ot-ctl ifconfig up
-sudo ot-ctl thread start
-sudo ot-ctl state          # expect: leader</code></pre>
-<p>You now have an empty network with one node. To see anything interesting you must commission accessories onto it — which means removing them from your Apple network first. <strong>Do not do this with devices you rely on.</strong></p>
-<p>Print the dataset if you want to join other things to it later:</p>
-<pre class="lang-bash"><code>sudo ot-ctl dataset active -x</code></pre>
+<h2>What you get</h2>
+<div class="scroll"><table><thead><tr><th>In the app</th><th>With Wi-Fi only</th><th>With your Thread network as well</th></tr></thead><tbody><tr><td><strong>Channel Scanner</strong>: the measured noise on all sixteen Thread channels</td><td>Yes</td><td>Yes</td></tr><tr><td>The Wi-Fi networks behind the noise, by name and channel</td><td>Yes</td><td>Yes</td></tr><tr><td>A day of noise readings, taken every five minutes while the app was closed</td><td>Yes</td><td>Yes</td></tr><tr><td><strong>Probe Readings</strong>: every router in the mesh, the nodes the probe hears with their measured signal, and how the mesh routes between them</td><td>No</td><td>Yes</td></tr><tr><td>On a device&#x27;s page: who hears it and how well, and whether it answers</td><td>No</td><td>Yes</td></tr><tr><td><strong>Network Doctor</strong>, for a mains-powered Thread device Apple Home cannot reach: whether it answers on the mesh all the same, and, for a Matter device, whether a border router still has its registration</td><td>No</td><td>Yes</td></tr></tbody></table></div>
+<p>The names of the Wi-Fi networks are shown on the phone and saved nowhere.</p>
 <hr>
-<h2>Step 6 — Point the app at it</h2>
-<pre class="lang-bash"><code>curl http://localhost:8099/health</code></pre>
-<p>Expect <code>&quot;otCtlReachable&quot;: true</code> and a <code>role</code>. Then, from your phone on the same network, in <strong>ThreadMapper → Settings → ThreadMapper Probe</strong>:</p>
-<pre><code>http://threadmapper-probe.local:8099</code></pre>
-<p>Use the Pi&#x27;s IP address instead if <code>.local</code> does not resolve on iOS. Tap <strong>Test Connection</strong> — it names the failure if something is wrong rather than just showing a red X.</p>
+<h2>What the light says</h2>
+<div class="scroll"><table><thead><tr><th>Light</th><th>Meaning</th></tr></thead><tbody><tr><td>One short flash every two seconds</td><td>No Wi-Fi network yet. Step 2.</td></tr><tr><td>Blinking slowly</td><td>It has a network and is joining it.</td></tr><tr><td>On</td><td>It is on your Wi-Fi. This is how it should look.</td></tr><tr><td>Two flashes a second</td><td>You pressed the button twice: it will give a phone the key, for three minutes or until one has taken it.</td></tr><tr><td>Blinking quickly</td><td>You pressed the button once. That opens a three-minute window this version of the app does not use. It closes by itself and the probe restarts, which starts its day of readings again.</td></tr><tr><td>Flickering</td><td>You have held the button for three seconds. At ten it erases everything the probe was told.</td></tr></tbody></table></div>
 <hr>
-<h2>Step 7 — See what you got</h2>
-<ul><li><strong>Dashboard → ⋯ → Thread Network</strong> — measured per-node RSSI, link quality, and the routing table with path cost and next hop. Nodes appear by Thread address, not by name; see &quot;What will not work yet&quot; below.</li><li><strong>Mesh → tools → Channel Scanner</strong> — now badged <strong>Measured</strong>. Bar height is the real noise floor across all 16 channels, and the recommended channels are the quietest ones actually observed rather than a guess from a table of Wi-Fi overlap.</li></ul>
-<p>The Channel Scanner is the one to look at first. It is the clearest difference between what the app could show before and what it can show now.</p>
+<h2>Updating</h2>
+<p>A new firmware arrives on this page. Plug the probe into the computer, press the install button and choose the port. The installer says which firmware the probe runs and offers <strong>Update ThreadMapper Probe</strong>: press it, and then <strong>Install</strong>. An update erases nothing: the probe keeps its Wi-Fi, its key and its Thread network.</p>
+<p>A probe on a firmware before 0.8.0 does not tell the installer what it is. The installer then offers <strong>Install ThreadMapper Probe</strong> and asks whether to erase the device: leave <strong>Erase device</strong> unticked.</p>
+<p>When the probe already runs the newest firmware the installer offers <strong>Erase User Data</strong> instead. That erases everything the probe was told, as holding its button for ten seconds does.</p>
 <hr>
-<h2>Troubleshooting</h2>
-<div class="scroll"><table><thead><tr><th>Symptom</th><th>Cause and fix</th></tr></thead><tbody><tr><td><code>install.sh</code> says &quot;No 802.15.4 dongle detected&quot;</td><td>The dongle is absent, or step 1 did not take. Check <code>ls /dev/serial/by-id/</code>.</td></tr><tr><td>Test Connection: <em>&quot;can&#x27;t reach the border router beside it&quot;</em></td><td>The agent is up but <code>otbr-agent</code> is not. <code>sudo systemctl status otbr-agent</code>, then <code>journalctl -u otbr-agent -n 50</code>. Usually a wrong radio URL or a dongle that lost power.</td></tr><tr><td>Test Connection: <em>&quot;isn&#x27;t a ThreadMapper probe agent&quot;</em></td><td>Something else is answering on that port. The agent is 8099; 8081 is the border router&#x27;s own REST API.</td></tr><tr><td>Test Connection: <em>&quot;couldn&#x27;t reach that address&quot;</em></td><td>Wrong IP, or the phone is on a different subnet or a guest VLAN.</td></tr><tr><td><code>ot-ctl state</code> says <code>detached</code></td><td>It has credentials but cannot find the network. Wrong dataset, or out of radio range of any other node.</td></tr><tr><td><code>ot-ctl state</code> says <code>disabled</code></td><td><code>ifconfig up</code> / <code>thread start</code> did not run, or the radio failed to come up.</td></tr><tr><td>Thread Network screen is empty of peers</td><td>The probe is on its own network — check you are not <code>leader</code> when you meant to join one.</td></tr><tr><td>Everything works, then dies after a reboot</td><td><code>systemctl is-enabled otbr-agent threadmapper-probe</code> — both should say <code>enabled</code>.</td></tr></tbody></table></div>
-<p>Logs for both services together:</p>
-<pre class="lang-bash"><code>journalctl -u threadmapper-probe -u otbr-agent -f</code></pre>
+<h2>If it does not work</h2>
+<div class="scroll"><table><thead><tr><th>What you see</th><th>What it is</th></tr></thead><tbody><tr><td>The install button says the browser is not supported</td><td>Use Chrome, Edge or Firefox on a computer.</td></tr><tr><td>The port is not in the list</td><td>The cable carries power only, or another program has the port open.</td></tr><tr><td>The installer says <strong>Unable to connect</strong></td><td>The password is wrong, the probe is too far from the router, or the network is on 5 GHz only. Nothing was changed. Try again.</td></tr><tr><td>The installer offers no <strong>Connect to Wi-Fi</strong></td><td>It did not hear the probe answer. Close its window, press the install button again and choose the port.</td></tr><tr><td>The light is back to one short flash every two seconds</td><td>A network typed at the console did not join: the password is wrong, or the network is on 5 GHz only. After ten tries the probe forgot it. Give it the network again (step 2).</td></tr><tr><td>The light keeps blinking slowly</td><td>The probe has joined this network before and cannot reach it now: the router is off or too far away, or its password has changed. If it has, give it the network again (step 2).</td></tr><tr><td>The probe says the dataset is cut short, or the wrong length</td><td>A long paste can lose a piece on the way. Paste it once more.</td></tr><tr><td>The app does not list the probe</td><td>The phone is on another Wi-Fi, or on a guest network that keeps devices apart. Type the address from <code>status</code>.</td></tr><tr><td>The app says the probe has a key this iPhone does not hold</td><td>Another phone took the key, or the probe was started again from nothing. Press <strong>B</strong> twice and tap <strong>Get the Key</strong> again.</td></tr><tr><td>The app says the probe is off its Thread mesh</td><td>It has a dataset and cannot find the network: the dataset is another network&#x27;s, or no router is in range.</td></tr><tr><td>You want to start again</td><td>Hold the <strong>B</strong> button for ten seconds.</td></tr></tbody></table></div>
 <hr>
-<h2>What will not work yet</h2>
-<p><strong>Nodes appear unnamed.</strong> Thread identifies a node by its extended address; HomeKit identifies an accessory by an opaque identifier, and nothing links the two. So you will see a real, correct topology of anonymous nodes rather than &quot;the kitchen lamp&quot;.</p>
-<p>The fix is built but not finished: the agent&#x27;s <code>/traffic</code> endpoint reports per-node activity, so actuating a device through HomeKit and watching which node responds would bind them. That interaction needs real accessories on a real mesh to develop against, which is exactly what you will have once this is running. Tracked as <strong>H1</strong> in <code>WORKPLAN.md</code>.</p>
-<p><strong>The Mesh tab is still inferred.</strong> Its graph is built from HomeKit accessories, so it cannot use probe data until the above is solved. The Thread Network screen and the Channel Scanner are the ones showing measurements.</p>
-<hr>
-<h2>If something here is wrong</h2>
-<p>This guide has not been walked end to end on real hardware — nobody on the project has a Pi or a dongle yet. The provisioning script is tested against Debian Bookworm arm64, and every agent endpoint is tested against a real <code>otbr-agent</code> on a simulated radio, but the physical steps above are written from the vendor documentation rather than from having done them.</p>
-<p>If a step is wrong, that is worth fixing in this file.</p>
+<h2>What to know</h2>
+<ul><li>The probe opens no connection to the internet. It answers on your own network, on port 8099, over plain HTTP, and announces itself there by name.</li><li>It keeps what it was told, your Wi-Fi&#x27;s name and password, the key, and the Thread dataset if you gave it one, in its own memory, not encrypted. Holding the button for ten seconds erases all of it.</li><li>Its day of readings is in memory that a restart empties, and so does a power cut.</li><li>It is a build for people who want one, not a product. It is not Thread certified.</li><li>The installer on this page is ESP Web Tools, by ESPHome, under the <a href="https://tintronix-lab.github.io/ThreadMapper/flasher/LICENSE.txt">Apache License 2.0</a>. It runs in your browser and is served from this site. It fetches the firmware from this site and sends nothing anywhere. What you give it for the probe&#x27;s Wi-Fi goes down the cable to the board; it also notes what it sends, as numbers, in the browser&#x27;s developer console, until the tab is closed.</li><li>The firmware is built on open-source software from Espressif and others. Their licences are in <a href="https://tintronix-lab.github.io/ThreadMapper/firmware/NOTICES.txt">NOTICES.txt</a>, and the terms for the image itself in <a href="https://tintronix-lab.github.io/ThreadMapper/firmware/LICENSE.txt">LICENSE.txt</a>.</li></ul>
 
 <footer>
   <a href="index.html">Home</a>

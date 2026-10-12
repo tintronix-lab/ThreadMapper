@@ -351,7 +351,7 @@
     <p class="eyebrow">De probe</p>
     <h2>Een klein kastje dat een einde maakt aan het gissen.</h2>
     <p class="section-lede">
-      Draai een lichtgewicht agent op een Raspberry Pi met een 802.15.4-dongle en die sluit zich als echt knooppunt aan bij je Thread-mesh. Van binnenuit wordt alles leesbaar wat de telefoon niet kan zien — en omdat hij nooit slaapt, ziet hij de storingen van 3 uur ’s nachts die jij mist.
+      Zet onze firmware op een klein ESP32-C6-printplaatje, vanuit de browser van een computer, en laat het aan een oplader hangen. Het meet elke vijf minuten elk Thread-kanaal, wat geen telefoon kan, en bewaart een dag aan meetwaarden terwijl de app gesloten is. Waar het zich bij je Thread-mesh kan aansluiten, leest het de mesh van binnenuit uit, als echt knooppunt.
     </p>
 
     <div class="readout" role="img" aria-label="Voorbeeld van probe-uitvoer met een router op min 20 dBm, verbindingskwaliteit 3 van 3 en een route met padkosten 0.">
@@ -381,7 +381,7 @@
       </div>
       <div class="compare-row">
         <div class="compare-cell without"><b>Zolang de app open is</b>De telefoon kijkt alleen mee terwijl jij ernaar kijkt.</div>
-        <div class="compare-cell with"><b>Doorlopend</b>Vastgelegd op schijf, zodat de meshsplitsing van vannacht er ’s ochtends nog staat.</div>
+        <div class="compare-cell with"><b>Doorlopend</b>Een dag lang vastgelegd op de probe, zodat vannacht er ’s ochtends nog staat.</div>
       </div>
     </div>
 
@@ -405,10 +405,10 @@
     </div>
 
     <p style="margin:1.75rem 0 0;color:var(--muted);font-size:.93rem">
-      De agent is open source en draait op een Raspberry Pi 4 of 5 die je misschien al hebt — de 802.15.4-dongle die hij nodig heeft kost ongeveer $10–25. <a href="probe-setup.html">Installatiegids →</a>
+      Het printplaatje is een Seeed XIAO ESP32C6, ongeveer $5–8, en de firmware installeer je in ongeveer tien minuten. De probe hoort bij ThreadMapper Pro. <a href="probe-setup.html">Installatiegids →</a>
       <br>
       <span style="font-size:.88rem">
-        Lees die eerst: een Raspberry Pi heeft zelf geen Thread-radio, en aansluiten op een bestaande mesh van Apple of Google vraagt om netwerkgegevens die deze platforms je nog niet laten exporteren. Het is geen product dat je kunt kopen — het is een bouwproject.
+        Lees die eerst: in een huis waar alle border routers van Apple of Google zijn, kan de probe zich alleen bij de mesh aansluiten als Home Assistant hem de inloggegevens geeft. Anders meet hij de kanalen en de wifi daarop, en leest hij de mesh niet uit. Het is geen product dat je kunt kopen — het is een bouwproject.
       </span>
     </p>
   </section>
@@ -477,12 +477,6 @@
         <li><strong>Klussen en bewijsbladen</strong> — voor de klant een pagina die precies zegt wat een bezoek veranderde, en één pagina per apparaat voor een garantieclaim.</li>
         <li><strong>Wat de radio’s zeggen</strong> — waarom een apparaat opnieuw startte, hoe vaak het van ouderrouter is gewisseld en hoeveel huishoudens het kunnen bedienen.</li>
       </ul>
-      <div class="note">
-        <p><strong>Probefuncties zitten niet achter de betaalmuur.</strong></p>
-        <p>
-          Als je de moeite hebt genomen om een probe te bouwen, zou een tweede betaalmuur een schrale manier zijn om je te bedanken. Alles wat de probe ontsluit, zit erbij.
-        </p>
-      </div>
     </div>
   </section>
 

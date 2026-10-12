@@ -83,7 +83,7 @@
     Connecter un routeur de bordure OpenThread vous donne de vraies informations sur le <em>réseau</em> (nom, canal, PAN ID), mais pas le routage. Ses points de terminaison de diagnostic ne renvoient pas de données par nœud — nous les avons testés sur un réseau réel et les requêtes aboutissent sans rien contenir.
   </p>
   <p>
-    Le vrai routage exige une <a href="probe-setup.html">sonde ThreadMapper</a> : un petit agent sur un Raspberry Pi qui rejoint le réseau et lit directement la table de routage. Une fois la sonde connectée, l’écran Réseau Thread affiche le signal mesuré, la qualité de liaison, le saut suivant et le coût du chemin. Ces nœuds apparaissent par adresse Thread plutôt que par les noms de vos appareils — rien ne relie encore une adresse Thread à un accessoire HomeKit.
+    Le vrai routage exige une <a href="probe-setup.html">sonde ThreadMapper</a> : une petite carte électronique sur votre Wi-Fi qui rejoint le maillage, là où votre maison le lui permet, et lit directement la table de routage. Avec une sonde sur le maillage, l’écran Mesures de la sonde affiche le signal mesuré, la qualité de liaison, le saut suivant et le coût du chemin. Un nœud ne porte le nom de votre appareil que là où l’appareil a déclaré sa propre adresse Thread ; les autres apparaissent par adresse Thread.
   </p>
 </details>
 

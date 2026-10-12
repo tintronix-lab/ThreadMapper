@@ -83,7 +83,7 @@
     Att ansluta en OpenThread-gränsrouter ger dig verkliga <em>nätverksfakta</em> (namn, kanal, PAN ID) men inte routing. Dess diagnostikslutpunkter returnerar inga data per nod — vi testade dem mot ett levande mesh-nät, och förfrågningarna går igenom men kommer tillbaka tomma.
   </p>
   <p>
-    Verklig routing kräver en <a href="probe-setup.html">ThreadMapper-sond</a>: en liten agent på en Raspberry Pi som går med i mesh-nätet och läser ruttabellen direkt. Med en ansluten visar skärmen Thread-nätverk uppmätt signal, länkkvalitet, nästa hopp och vägkostnad. De noderna dyker upp med Thread-adress i stället för med dina enhetsnamn — ännu finns det ingenting som kopplar en Thread-adress till ett HomeKit-tillbehör.
+    Verklig routing kräver en <a href="probe-setup.html">ThreadMapper-sond</a>: ett litet kort i ditt Wi-Fi som går med i mesh-nätet, där ditt hem tillåter det, och läser ruttabellen direkt. Med en sond i mesh-nätet visar skärmen Sondmätvärden uppmätt signal, länkkvalitet, nästa hopp och vägkostnad. En nod bär din enhets namn bara där enheten har angett sin egen Thread-adress; de övriga visas med Thread-adress.
   </p>
 </details>
 

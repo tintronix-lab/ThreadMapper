@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bouw een ThreadMapper-probe — ThreadMapper</title>
-<meta name="description" content="Stap voor stap: maak van een Raspberry Pi en een 802.15.4-dongle een ThreadMapper-probe, zodat de app gemeten Thread-signaal, routering en interferentie kan tonen.">
+<meta name="description" content="Stap voor stap: zet de ThreadMapper-firmware vanuit je browser op een Seeed XIAO ESP32C6, zodat de app gemeten kanaalruis kan tonen, de wifi daarachter en de Thread-mesh waarbij het printplaatje zich heeft aangesloten.">
 <meta name="theme-color" content="#0B1020">
-<!-- Generated from tools/pi-image/SETUP.nl.md by tools/build-docs.py — edit the Markdown, not this file. -->
+<!-- Generated from tools/probe-esp32c6/SETUP.nl.md by tools/build-docs.py — edit the Markdown, not this file. -->
 <link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/nl/probe-setup.html">
 <link rel="alternate" hreflang="en" href="https://tintronix-lab.github.io/ThreadMapper/probe-setup.html">
 <link rel="alternate" hreflang="sv" href="https://tintronix-lab.github.io/ThreadMapper/sv/probe-setup.html">
@@ -18,6 +18,7 @@
 <link rel="alternate" hreflang="nl" href="https://tintronix-lab.github.io/ThreadMapper/nl/probe-setup.html">
 <link rel="alternate" hreflang="pt-BR" href="https://tintronix-lab.github.io/ThreadMapper/pt-br/probe-setup.html">
 <link rel="alternate" hreflang="x-default" href="https://tintronix-lab.github.io/ThreadMapper/probe-setup.html">
+<script type="module" src="../flasher/install-button.js"></script>
 <style>
   :root {
     color-scheme: light dark;
@@ -90,6 +91,18 @@
      nothing for kana. */
   :lang(ja) h1, :lang(ja) h2 { letter-spacing:0; }
 
+  /* The install button (#391). The button itself is this page's own, handed
+     to the installer in a slot, so it takes this page's look. */
+  .install { margin:1.6rem 0 1.8rem; }
+  .install button { font:600 1rem/1.2 var(--sans); color:var(--paper); background:var(--signal);
+                     border:0; border-radius:.6rem; padding:.85rem 1.3rem; cursor:pointer; }
+  .install button:focus-visible { outline:2px solid var(--ink); outline-offset:3px; }
+  .install span { display:block; padding:.8rem 1rem; border:1px solid var(--line);
+                   border-radius:.6rem; background:var(--surface); color:var(--body); }
+  /* Until the installer has loaded, its two apologies are not yet its to
+     show or hide, and would both stand under the button. */
+  esp-web-install-button:not(:defined) span { display:none; }
+
   /* Language switcher: a plain link row, no JS. */
   .langs { margin-top:1rem; display:flex; flex-wrap:wrap; gap:.35rem 1.1rem; }
   .langs a { margin-right:0; text-decoration:none; }
@@ -102,110 +115,99 @@
 <div class="top"><div class="wrap"><a href="index.html">← ThreadMapper</a></div></div>
 
 <div class="wrap">
-<h1>Een ThreadMapper-probe opzetten op een Raspberry Pi</h1>
-<p>Stap voor stap, van een leeg bureau tot gemeten Thread-gegevens in de app.</p>
-<p>Reken op een avond. Het grootste deel daarvan is wachten op downloads en op één build van ongeveer 20 minuten.</p>
+<h1>Bouw een ThreadMapper-probe</h1>
+<p>Een probe is een klein printplaatje op je wifi dat de radio meet die je smarthome deelt: hoe druk elk Thread-kanaal is, welke wifi-netwerken erop zitten en, waar hij zich bij je Thread-mesh kan aansluiten, de mesh zoals de eigen routers ervan die melden. ThreadMapper leest hem uit via je eigen netwerk.</p>
+<p>Eén onderdeel, ongeveer tien minuten, geen soldeerwerk. De probe hoort bij <strong>ThreadMapper Pro</strong>.</p>
 <hr>
-<h2>Lees dit voordat je iets koopt</h2>
-<p>Twee dingen bepalen of dit de moeite waard is voor <em>jouw</em> opstelling. Beide zie je makkelijk over het hoofd tot de onderdelen binnen zijn.</p>
-<h3>1. Een Raspberry Pi kan zelf geen Thread</h3>
-<p>Een Raspberry Pi heeft geen 802.15.4-radio. Wifi en Bluetooth zijn andere radio’s en spreken geen Thread. <strong>Je hebt een USB-dongle nodig</strong>, en daar moet RCP-firmware op staan — en dat is niet wat er standaard op zit.</p>
-<h3>2. Aansluiten op <em>jouw</em> Thread-netwerk is het lastige deel</h3>
-<p>Een border router die zijn eigen nieuwe netwerk vormt, ziet daar niets anders dan zichzelf. Je echte apparaten zitten op het netwerk dat je HomePod, Apple TV of Nest hub heeft aangemaakt, en om ze te kunnen zien moet de probe <strong>zich bij dat netwerk aansluiten</strong> — en daarvoor heb je de netwerkgegevens nodig (de Active Operational Dataset).</p>
-<div class="scroll"><table><thead><tr><th>Jouw opstelling</th><th>Kan de probe zich bij je echte netwerk aansluiten?</th></tr></thead><tbody><tr><td>Je draait <strong>Home Assistant</strong></td><td><strong>Ja.</strong> De iOS Companion-app van HA kan de Thread-netwerkgegevens van Apple ophalen — <em>Settings → Devices &amp; services → Thread → Configure → Send credentials to Home Assistant</em> — en van daaruit geef je de dataset door aan de probe.</td></tr><tr><td>Je draait al een <strong>OTBR</strong> (bijv. de add-on van HA)</td><td><strong>Ja.</strong> Lees de dataset daar rechtstreeks uit.</td></tr><tr><td><strong>Alleen border routers van Apple of Google</strong>, geen Home Assistant</td><td><strong>Nu nog niet.</strong> Er is geen weg via de gebruikersinterface om de Thread-netwerkgegevens van Apple te exporteren. Je kunt op de probe wel een <em>nieuw</em> netwerk vormen en er een paar accessoires op aanmelden om de app van begin tot eind te zien werken, maar je bestaande mesh laat het je niet zien.</td></tr></tbody></table></div>
-<p>Die derde rij is een echte muur, en niet een die dit project van buitenaf kan omvertrekken: de officiële weg is Apples entitlement <code>com.apple.developer.thread-network-credentials</code>, die ThreadMapper heeft aangevraagd maar niet bezit. Komt die er, dan kan de app je netwerkgegevens rechtstreeks aan de probe doorgeven en verdwijnt dit hele onderdeel.</p>
-<p><strong>Val je in de derde rij en wil je alleen je bestaande Apple-mesh in de gaten houden, overweeg dan om hier te stoppen tot dat entitlement er is.</strong></p>
+<h2>Lees dit voordat je het printplaatje koopt</h2>
+<h3>Wat je nodig hebt</h3>
+<div class="scroll"><table><thead><tr><th>Onderdeel</th><th>Opmerkingen</th></tr></thead><tbody><tr><td><strong>Seeed Studio XIAO ESP32C6</strong></td><td>Ongeveer $5–8. De firmware is gebouwd voor dit printplaatje en geen ander: die stuurt de antenneschakelaar, het lampje en de knop van dit printplaatje aan.</td></tr><tr><td>Een USB-C-kabel die data doorgeeft</td><td>Veel kabels die bij opladers worden geleverd, geven alleen stroom door. Ziet de computer het printplaatje niet, probeer dan eerst een andere kabel.</td></tr><tr><td>Een computer met <strong>Chrome</strong>, <strong>Edge</strong> of <strong>Firefox</strong></td><td>Alleen voor de installatie. Safari kan geen seriële USB-poort bereiken, en een iPhone of een iPad kan dat ook niet.</td></tr><tr><td>Wifi op <strong>2,4 GHz</strong></td><td>Het printplaatje heeft geen 5 GHz-radio. Een netwerk dat beide banden onder één naam aanbiedt, is prima.</td></tr><tr><td>Een USB-oplader</td><td>Welke dan ook. Daar woont de probe zodra hij is ingesteld.</td></tr></tbody></table></div>
+<h3>Wat hij in je huis kan uitlezen</h3>
+<p>Het meten werkt in elk huis. Om de mesh uit te lezen moet de probe zich bij je Thread-netwerk <em>aansluiten</em>, en of dat kan, hangt af van wat dat netwerk beheert.</p>
+<div class="scroll"><table><thead><tr><th>Je huis</th><th>Kanaalruis, en de wifi op elk kanaal</th><th>De Thread-mesh zelf</th></tr></thead><tbody><tr><td>Border routers van Apple of Google, en verder niets</td><td><strong>Ja</strong></td><td><strong>Nee.</strong> Geen van beide laat je de inloggegevens van je Thread-netwerk eruit halen. Apple geeft een app alleen het recht om ze te lezen als de maker van die app ook een gecertificeerde border router maakt, en de maker van ThreadMapper doet dat niet.</td></tr><tr><td>Hetzelfde, met <strong>Home Assistant</strong></td><td><strong>Ja</strong></td><td><strong>Ja.</strong> De Companion-app van Home Assistant kan de inloggegevens erin kopiëren, en van daaruit kopieer jij ze naar de probe (stap 5).</td></tr><tr><td>Een eigen <strong>OpenThread border router</strong></td><td><strong>Ja</strong></td><td><strong>Ja.</strong> Lees ze daar uit (stap 5).</td></tr></tbody></table></div>
+<p><strong>Als de eerste rij jouw huis is, tekent de probe je mesh niet.</strong> Hij meet dan nog steeds wat geen telefoon kan: de ruis op elk van de zestien Thread-kanalen, elke vijf minuten, en welke wifi-netwerken daarachter zitten. Beslis op basis daarvan voordat je koopt.</p>
 <hr>
-<h2>Boodschappenlijst</h2>
-<div class="scroll"><table><thead><tr><th>Onderdeel</th><th>Opmerkingen</th></tr></thead><tbody><tr><td>Raspberry Pi 4 of 5</td><td>2 GB RAM is ruim voldoende. Een Pi Zero 2 W werkt ook, maar de build in stap 4 duurt dan veel langer.</td></tr><tr><td>microSD-kaart, 16 GB+</td><td>Elk degelijk merk.</td></tr><tr><td>USB-C-voeding</td><td>De officiële; Thread-dongles zijn kieskeurig als de spanning wegzakt.</td></tr><tr><td><strong>Een 802.15.4-dongle</strong></td><td>Kies er een — zie hieronder.</td></tr></tbody></table></div>
-<p><strong>Dongle-opties</strong>, allebei prima:</p>
-<ul><li><strong>Nordic nRF52840-dongle</strong> (~$10) — de goedkoopste, en de firmware wordt uit de broncode gebouwd, dus je hoeft geen download te zoeken.</li><li><strong>SkyConnect / Sonoff ZBDongle-E</strong> (~$25) — Silicon Labs. Heb je er al een voor Home Assistant, gebruik die dan. Flashen gaat met één regel.</li></ul>
+<h2>Stap 1 — Installeer de firmware</h2>
+<ol><li>Sluit het printplaatje aan op de computer.</li><li>Druk hieronder op <strong>Installeer de probe-firmware</strong> en kies de poort met de naam <strong>USB JTAG/serial debug unit</strong>.</li><li>Druk op <strong>Install ThreadMapper Probe</strong>. Het installatieprogramma vraagt of het apparaat moet worden gewist: vink bij een nieuw printplaatje <strong>Erase device</strong> aan. Daarna <strong>Next</strong>, en <strong>Install</strong>.</li></ol>
+<p>Alleen bij een nieuw printplaatje. Wissen neemt alles mee wat een probe is verteld: zijn wifi, zijn sleutel en zijn Thread-netwerk. Een probe die al werkt, wordt in plaats daarvan bijgewerkt (zie <em>Bijwerken</em>), en als het installatieprogramma dit bij zo’n probe vraagt, laat je het vakje leeg.</p>
+<div class="install">
+<esp-web-install-button manifest="../firmware/manifest.json">
+<button slot="activate">Installeer de probe-firmware</button>
+<span slot="unsupported">Deze browser kan geen seriële USB-poort bereiken. Open deze pagina in Chrome, Edge of Firefox, op een computer.</span>
+<span slot="not-allowed">Het installatieprogramma werkt alleen op een pagina die via HTTPS is geopend.</span>
+</esp-web-install-button>
+</div>
+<p>Het duurt een minuut of twee en eindigt met <strong>Installation complete!</strong> Druk op <strong>Next</strong>. Het eigen venster van het installatieprogramma is in het Engels.</p>
+<p>Staat de poort niet in de lijst, dan ligt het bijna altijd aan de kabel. Is het dat niet, houd dan de knop <strong>B</strong> van het printplaatje ingedrukt terwijl je het aansluit, en probeer het opnieuw.</p>
+<p>Geen van die browsers? <code>esptool</code> van Espressif doet hetzelfde. Een eerste installatie, die wist wat er op het printplaatje stond:</p>
+<pre><code>esptool.py --chip esp32c6 write_flash 0x0 threadmapper-probe-full.bin</code></pre>
+<p>Een update, die de probe laat houden wat hem is verteld:</p>
+<pre><code>esptool.py --chip esp32c6 write_flash 0x20000 threadmapper-probe.bin</code></pre>
+<p>De twee images zijn <a href="https://tintronix-lab.github.io/ThreadMapper/firmware/threadmapper-probe-full.bin">threadmapper-probe-full.bin</a> en <a href="https://tintronix-lab.github.io/ThreadMapper/firmware/threadmapper-probe.bin">threadmapper-probe.bin</a>. Open daarna de seriële poort van het printplaatje met een terminalprogramma naar keuze, en geef de probe zijn wifi door te typen (stap 2, <em>Zonder de lijst</em>).</p>
 <hr>
-<h2>Stap 1 — Zet RCP-firmware op de dongle</h2>
-<p>Doe dit <strong>voordat</strong> je de Pi aanraakt, op je Mac of pc. Het is de enige stap die het installatiescript bewust niet automatiseert: het verkeerde image flashen maakt de dongle onbruikbaar, en de tools van de fabrikant doen het goed.</p>
-<p>RCP-firmware (‘Radio Co-Processor’) maakt van de dongle een domme radio die door <code>otbr-agent</code> wordt aangestuurd. Een dongle die voor Zigbee is geleverd, heeft andere firmware en werkt pas na opnieuw flashen.</p>
-<h3>Silicon Labs (SkyConnect, Sonoff ZBDongle-E)</h3>
-<pre class="lang-bash"><code>pipx install universal-silabs-flasher     # or: pip install universal-silabs-flasher
-universal-silabs-flasher --device /dev/tty.usbserial-XXXX probe
-universal-silabs-flasher --device /dev/tty.usbserial-XXXX flash --firmware &lt;ot-rcp-firmware.gbl&gt;</code></pre>
-<p>Haal de <code>ot-rcp</code>-<code>.gbl</code> uit de silabs-firmwarereleases van Home Assistant — dezelfde images die de OTBR-add-on gebruikt. Zoek het bestand dat bij precies jouw donglemodel hoort; SkyConnect en ZBDongle-E zijn <strong>niet</strong> uitwisselbaar.</p>
-<h3>Nordic nRF52840</h3>
-<p>Bouw de firmware uit de Nordic-port van OpenThread en flash die vervolgens via USB DFU:</p>
-<pre class="lang-bash"><code>git clone --recurse-submodules https://github.com/openthread/ot-nrf528xx.git
-cd ot-nrf528xx &amp;&amp; ./script/bootstrap &amp;&amp; ./script/build nrf52840 USB_trans
-# → build/bin/ot-rcp  (convert to .hex/.zip per the repo&#x27;s README, then:)
-nrfutil dfu usb-serial -pkg ot-rcp.zip -p /dev/tty.usbmodemXXXX</code></pre>
-<p>Volg de README van die repository voor de actuele verpakkingsstap — die verandert af en toe en kun je beter daar lezen dan hier gekopieerd.</p>
-<p><strong>Controleer of het gelukt is:</strong> steek de dongle straks in de Pi en <code>install.sh</code> meldt <code>Found &lt;family&gt; radio at /dev/serial/by-id/...</code>. Vindt het script niets, dan is de firmware er niet op gekomen.</p>
+<h2>Stap 2 — Geef hem je wifi</h2>
+<p>Na een eerste installatie, met <strong>Erase device</strong> aangevinkt, gaat het installatieprogramma vanzelf verder met <strong>Configure Wi-Fi</strong>. Zie je in plaats daarvan de lijst met keuzes, druk daar dan op <strong>Connect to Wi-Fi</strong>.</p>
+<p>De probe toont de netwerken die hij hoort.</p>
+<ol><li>Kies onder <strong>Network</strong> jouw netwerk.</li><li>Typ het wachtwoord ervan.</li><li>Druk op <strong>Connect</strong>.</li></ol>
+<p>Het installatieprogramma zegt <strong>Trying to connect</strong>, wat bijna een minuut kan duren, en daarna <strong>Device connected to the network!</strong> Het lampje van de probe is dan aan en blijft aan. Druk op <strong>Continue</strong>.</p>
+<p>De probe bewaart een netwerk pas als hij er verbinding mee heeft gemaakt. <strong>Unable to connect</strong> betekent dat hij het heeft geprobeerd en er niet op kwam: bijna altijd het wachtwoord, soms een router die te ver weg staat. De poging heeft niets veranderd: een probe die al een netwerk had, heeft dat nog en gaat ernaar terug. Probeer het opnieuw.</p>
+<p>Staat je netwerk niet in de lijst? De probe heeft geen 5 GHz-radio, dus een netwerk dat alleen op 5 GHz zit, staat er niet in. Een netwerk dat zijn naam verbergt ook niet: kies <strong>Join other…</strong> en typ de naam.</p>
+<p>Het wachtwoordveld verbergt wat je typt. De naam en het wachtwoord gaan via de kabel naar het printplaatje, dat ze in zijn eigen geheugen bewaart en het wachtwoord in geen enkele log schrijft.</p>
+<h3>Zonder de lijst</h3>
+<p>Biedt het installatieprogramma geen <strong>Connect to Wi-Fi</strong> aan, dan heeft het de probe niet horen antwoorden: sluit het venster, druk opnieuw op de installatieknop en kies de poort.</p>
+<p>De probe kan zijn netwerk ook krijgen via zijn console, in <strong>Logs &amp; Console</strong> of in een terminalprogramma naar keuze op zijn poort. Typ <code>wifi</code> en druk op Return. De regels die met <code>&gt;</code> beginnen, zijn wat jij typt:</p>
+<pre><code>&gt; wifi
+Network name? Type it and press Return.
+&gt; My network
+Password? The probe does not write it back. Return alone for a network without one.
+&gt; my password
+stored: &quot;My network&quot;, with a password of 11 characters.
+Restarting to join it. The light stays on once it has.</code></pre>
+<p>Niets heeft aanhalingstekens nodig, en letters als å, ä en ö zijn geen probleem. De probe schrijft het wachtwoord niet terug. De pagina toont het wel terwijl je typt, en bewaart het in haar log tot je het venster sluit: het is je eigen scherm, dus kijk eerst even over je schouder.</p>
+<p>Krijgt de probe op deze manier een netwerk, dan start hij opnieuw op om er verbinding mee te maken, en heeft hij het niet eerst geprobeerd. Gaat zijn lampje terug naar één korte flits elke twee seconden, dan heeft hij het tien keer geprobeerd, kon hij geen verbinding maken en is hij het netwerk vergeten.</p>
 <hr>
-<h2>Stap 2 — Raspberry Pi OS flashen</h2>
-<ol><li>Installeer <strong>Raspberry Pi Imager</strong>.</li><li>Kies <strong>Raspberry Pi OS Lite (64-bit)</strong>. Lite — een bureaublad heb je hier niet nodig.</li><li>Klik op de knop <strong>tandwiel / Edit Settings</strong> <em>voordat</em> je schrijft, en stel in: - hostnaam: <code>threadmapper-probe</code> - <strong>Enable SSH</strong>, met wachtwoord of sleutel - gebruikersnaam en wachtwoord - wifigegevens, als je geen ethernet gebruikt</li><li>Schrijf de kaart, doe hem in de Pi, sluit de dongle aan en zet hem aan.</li></ol>
-<p>Ethernet is hier betrouwbaarder dan wifi, en een border router heeft baat bij een stabiele uplink. Gebruik het als het kan.</p>
+<h2>Stap 3 — Verbind de app</h2>
+<p>Wacht tot het lampje blijft branden. Open ThreadMapper op de iPhone en ga naar <strong>Instellingen → ThreadMapper-probe</strong>. Zit de telefoon op dezelfde wifi, dan staat de probe onder <strong>Op dit netwerk</strong>: kies hem. <strong>Test verbinding</strong> zegt daarna wat de probe is en hoe hij ervoor staat.</p>
+<p>Toont de app hem niet, vraag de probe dan waar hij is: sluit het venster van het installatieprogramma, druk opnieuw op de installatieknop, kies de poort, open <strong>Logs &amp; Console</strong> en typ <code>status</code>. Een van de regels is het adres dat je in de app typt:</p>
+<pre><code>in the app: http://192.168.1.50:8099</code></pre>
+<p>Je router kan de probe op een dag een ander adres geven. De app kent de probe aan meer dan zijn adres: is de app open en zit de telefoon op dezelfde wifi, dan vindt de app de probe vanzelf terug.</p>
+<p>De kabel heeft zijn werk gedaan. Koppel het printplaatje los en hang het aan een oplader, ergens midden in huis in plaats van achter de router: de probe hoort wat er dicht bij hem is.</p>
 <hr>
-<h2>Stap 3 — Inloggen</h2>
-<pre class="lang-bash"><code>ssh &lt;your-username&gt;@threadmapper-probe.local</code></pre>
-<p>Lost de hostnaam niet op, zoek dan het IP-adres van de Pi in de clientlijst van je router en gebruik <code>ssh &lt;user&gt;@&lt;ip&gt;</code>.</p>
-<p>Controleer dat de dongle zichtbaar is voordat je verdergaat:</p>
-<pre class="lang-bash"><code>ls -l /dev/serial/by-id/</code></pre>
-<p>Je hoort één regel te zien met de naam van je dongle. <strong>Is dit leeg, stop dan</strong> — de rest werkt niet. Steek hem opnieuw in, probeer een andere USB-poort en loop stap 1 nog eens na.</p>
+<h2>Stap 4 — Geef je iPhone de sleutel</h2>
+<p>Een probe zonder sleutel antwoordt iedereen op je wifi. Dat geldt ook voor de namen van de wifi-netwerken die hij hoort, en voor verzoeken die zijn radio seconden achter elkaar van het kanaal van je mesh halen.</p>
+<p>Druk twee keer op de knop <strong>B</strong> van het printplaatje, direct na elkaar. (Niet <strong>R</strong>: die start de probe opnieuw op.) Het lampje knippert twee keer per seconde, drie minuten lang of tot een telefoon de sleutel heeft opgehaald. Tik in de app, onder <strong>Instellingen → ThreadMapper-probe</strong>, op <strong>Haal de sleutel op</strong>.</p>
+<p>Vanaf dan doet de probe wat zijn radio tijd kost alleen voor een telefoon die de sleutel heeft. De sleutel bewijst wie er vraagt; hij verbergt niets. Antwoorden gaan nog steeds onversleuteld over je wifi, en dat doet ook de sleutel, één keer, wanneer een telefoon hem krijgt.</p>
+<p>Eén telefoon tegelijk heeft de sleutel. Een tweede telefoon die hem krijgt, neemt hem van de eerste af.</p>
 <hr>
-<h2>Stap 4 — De probe installeren</h2>
-<pre class="lang-bash"><code>sudo apt-get update &amp;&amp; sudo apt-get install -y git
-git clone https://github.com/tintronix-lab/ThreadMapper.git
-sudo ./ThreadMapper/tools/pi-image/install.sh</code></pre>
-<p>Het script detecteert de dongle, installeert <code>otbr-agent</code> en de probe-agent, en schakelt beide in als systemd-services.</p>
-<p><strong>Op een Pi 4 duurt dit ongeveer 20 minuten</strong>, waarvan bijna alles opgaat aan het compileren van <code>otbr-agent</code>. Het hangt niet. Als het klaar is, drukt het script het adres van de probe af.</p>
-<p>Lukt de detectie niet, maar ken je het apparaatpad wel:</p>
-<pre class="lang-bash"><code>sudo ./ThreadMapper/tools/pi-image/install.sh --radio-url spinel+hdlc+uart:///dev/ttyACM0</code></pre>
-<p>Opnieuw draaien is veilig — het script is idempotent, en zo werk je de agent later bij.</p>
+<h2>Stap 5 — Geef hem je Thread-netwerk</h2>
+<p>Sla dit over als je huis de eerste rij van de tabel hierboven is.</p>
+<p>De probe sluit zich bij een Thread-netwerk aan met de <em>actieve dataset</em> van dat netwerk, een reeks van zo’n tweehonderd hexadecimale cijfers die de sleutel van het netwerk bevat.</p>
+<ul><li><strong>Home Assistant:</strong> open de Thread-pagina, <em>Settings → Connectivity → Thread</em>, of in oudere versies <em>Settings → Devices &amp; services → Thread → Configure</em> (de menunamen zijn de Engelse van Home Assistant). Naast je netwerk staat een informatieknop, en wat die toont, eindigt met <strong>Active dataset TLVs</strong>: kopieer dat. Is het netwerk van Apple Home, dan moet Home Assistant het eerst krijgen: open dezelfde pagina in de Companion-app op je iPhone en kies <em>Send credentials to Home Assistant</em>.</li><li><strong>OpenThread border router:</strong> <code>sudo ot-ctl dataset active -x</code></li></ul>
+<p>Sluit de probe weer aan op de computer, druk op de installatieknop hierboven, kies zijn poort en open <strong>Logs &amp; Console</strong> zonder iets te installeren. Typ <code>thread dataset</code>, druk op Return en plak de dataset wanneer de probe erom vraagt:</p>
+<pre><code>&gt; thread dataset
+Dataset, as hex? The probe does not write it back.
+&gt; 0e080000000000010000000300001935060004001fffe0...
+stored: &quot;MyHome&quot;, channel 25. Restarting to join it.</code></pre>
+<p>Binnen een paar minuten zegt <strong>Instellingen → ThreadMapper-probe</strong> in de app dat de probe op zijn Thread-mesh zit.</p>
+<p>De dataset is de sleutel tot je Thread-netwerk. De probe schrijft hem niet terug, maar de pagina waarin je hem plakt, toont hem wel en bewaart hem in haar log tot je het venster sluit. De probe bewaart hem in zijn eigen geheugen, dat niet versleuteld is: wie het printplaatje meeneemt, kan hem eruit lezen.</p>
 <hr>
-<h2>Stap 5 — Op een Thread-netwerk komen</h2>
-<p>Kies de rij die bij jou paste onder ‘Lees dit voordat je iets koopt’.</p>
-<h3>Route A — Aansluiten op je bestaande netwerk (wat je eigenlijk wilt)</h3>
-<p>Haal de Active Operational Dataset als hexstring op uit wat je netwerkgegevens al bevat.</p>
-<p>Vanaf een bestaande OTBR (ook de add-on van Home Assistant):</p>
-<pre class="lang-bash"><code>curl -s http://&lt;existing-otbr&gt;:8081/node/dataset/active \
-     -H &#x27;Accept: text/plain&#x27;</code></pre>
-<p>Dat levert één lange hexstring op. Op de Pi:</p>
-<pre class="lang-bash"><code>sudo ot-ctl dataset set active &lt;that-long-hex-string&gt;
-sudo ot-ctl ifconfig up
-sudo ot-ctl thread start</code></pre>
-<p>Wacht ongeveer 30 seconden en dan:</p>
-<pre class="lang-bash"><code>sudo ot-ctl state</code></pre>
-<p>Verwacht <code>child</code> of <code>router</code> — dan is hij aangesloten. <code>leader</code> zou hier betekenen dat hij juist zijn eigen netwerk heeft gevormd, en dat is niet wat je op deze route wilt.</p>
-<h3>Route B — Een nieuw netwerk vormen (om te testen, of als je niet aan de netwerkgegevens komt)</h3>
-<pre class="lang-bash"><code>sudo ot-ctl dataset init new
-sudo ot-ctl dataset commit active
-sudo ot-ctl ifconfig up
-sudo ot-ctl thread start
-sudo ot-ctl state          # expect: leader</code></pre>
-<p>Je hebt nu een leeg netwerk met één knooppunt. Om iets interessants te zien moet je er accessoires op aanmelden — en die moet je eerst uit je Apple-netwerk verwijderen. <strong>Doe dit niet met apparaten waarop je vertrouwt.</strong></p>
-<p>Druk de dataset af als je er later andere dingen op wilt aansluiten:</p>
-<pre class="lang-bash"><code>sudo ot-ctl dataset active -x</code></pre>
+<h2>Wat je krijgt</h2>
+<div class="scroll"><table><thead><tr><th>In de app</th><th>Met alleen wifi</th><th>Met ook je Thread-netwerk</th></tr></thead><tbody><tr><td><strong>Kanaalscanner</strong>: de gemeten ruis op alle zestien Thread-kanalen</td><td>Ja</td><td>Ja</td></tr><tr><td>De wifi-netwerken achter de ruis, met naam en kanaal</td><td>Ja</td><td>Ja</td></tr><tr><td>Een dag aan ruismeetwaarden, elke vijf minuten genomen terwijl de app gesloten was</td><td>Ja</td><td>Ja</td></tr><tr><td><strong>Probe-meetwaarden</strong>: elke router in de mesh, de knooppunten die de probe hoort met hun gemeten signaal, en hoe de mesh tussen hen routeert</td><td>Nee</td><td>Ja</td></tr><tr><td>Op de pagina van een apparaat: wie het hoort en hoe goed, en of het antwoordt</td><td>Nee</td><td>Ja</td></tr><tr><td><strong>Netwerkdokter</strong>, voor een Thread-apparaat op netstroom dat Apple Home niet kan bereiken: of het toch antwoordt op de mesh en, bij een Matter-apparaat, of een border router de registratie ervan nog heeft</td><td>Nee</td><td>Ja</td></tr></tbody></table></div>
+<p>De namen van de wifi-netwerken worden op de telefoon getoond en nergens bewaard.</p>
 <hr>
-<h2>Stap 6 — De app erop richten</h2>
-<pre class="lang-bash"><code>curl http://localhost:8099/health</code></pre>
-<p>Verwacht <code>&quot;otCtlReachable&quot;: true</code> en een <code>role</code>. Ga daarna op je telefoon, op hetzelfde netwerk, naar <strong>ThreadMapper → Instellingen → ThreadMapper-probe</strong>:</p>
-<pre><code>http://threadmapper-probe.local:8099</code></pre>
-<p>Gebruik het IP-adres van de Pi als <code>.local</code> niet oplost op iOS. Tik op <strong>Test verbinding</strong> — bij een probleem noemt de app de oorzaak in plaats van alleen een rood kruis te tonen.</p>
+<h2>Wat het lampje zegt</h2>
+<div class="scroll"><table><thead><tr><th>Lampje</th><th>Betekenis</th></tr></thead><tbody><tr><td>Eén korte flits elke twee seconden</td><td>Nog geen wifi-netwerk. Stap 2.</td></tr><tr><td>Knippert langzaam</td><td>Hij heeft een netwerk en maakt er verbinding mee.</td></tr><tr><td>Aan</td><td>Hij zit op je wifi. Zo hoort het eruit te zien.</td></tr><tr><td>Twee flitsen per seconde</td><td>Je hebt twee keer op de knop gedrukt: hij geeft een telefoon de sleutel, drie minuten lang of tot er een de sleutel heeft opgehaald.</td></tr><tr><td>Knippert snel</td><td>Je hebt één keer op de knop gedrukt. Dat opent een venster van drie minuten dat deze versie van de app niet gebruikt. Het sluit vanzelf en de probe start opnieuw op, waardoor zijn dag aan meetwaarden opnieuw begint.</td></tr><tr><td>Flikkert</td><td>Je houdt de knop al drie seconden ingedrukt. Bij tien wist hij alles wat de probe is verteld.</td></tr></tbody></table></div>
 <hr>
-<h2>Stap 7 — Kijken wat je hebt</h2>
-<ul><li><strong>Overzicht → ⋯ → Thread-netwerk</strong> — gemeten RSSI per knooppunt, verbindingskwaliteit en de routeringstabel met padkosten en volgende hop. Knooppunten verschijnen op Thread-adres, niet op naam; zie ‘Wat nog niet werkt’ hieronder.</li><li><strong>Mesh → Gereedschap → Kanaalscanner</strong> — nu met het label <strong>Gemeten</strong>. De staafhoogte is de echte ruisvloer over alle 16 kanalen, en de aanbevolen kanalen zijn de rustigste die echt zijn waargenomen in plaats van een gok uit een tabel met wifi-overlap.</li></ul>
-<p>Kijk eerst naar de Kanaalscanner. Daar is het verschil het duidelijkst tussen wat de app eerder kon tonen en wat hij nu kan tonen.</p>
+<h2>Bijwerken</h2>
+<p>Een nieuwe firmware verschijnt op deze pagina. Sluit de probe aan op de computer, druk op de installatieknop en kies de poort. Het installatieprogramma zegt welke firmware de probe draait en biedt <strong>Update ThreadMapper Probe</strong> aan: druk daarop, en daarna op <strong>Install</strong>. Een update wist niets: de probe houdt zijn wifi, zijn sleutel en zijn Thread-netwerk.</p>
+<p>Een probe met een firmware van vóór 0.8.0 vertelt het installatieprogramma niet wat hij is. Het installatieprogramma biedt dan <strong>Install ThreadMapper Probe</strong> aan en vraagt of het apparaat moet worden gewist: laat <strong>Erase device</strong> uitgevinkt.</p>
+<p>Draait de probe al de nieuwste firmware, dan biedt het installatieprogramma in plaats daarvan <strong>Erase User Data</strong> aan. Dat wist alles wat de probe is verteld, net als wanneer je zijn knop tien seconden ingedrukt houdt.</p>
 <hr>
-<h2>Problemen oplossen</h2>
-<div class="scroll"><table><thead><tr><th>Symptoom</th><th>Oorzaak en oplossing</th></tr></thead><tbody><tr><td><code>install.sh</code> zegt ‘No 802.15.4 dongle detected’</td><td>De dongle zit er niet in, of stap 1 is niet gelukt. Controleer <code>ls /dev/serial/by-id/</code>.</td></tr><tr><td>Test verbinding: <em>‘bereikt de border router ernaast niet’</em></td><td>De agent draait, maar <code>otbr-agent</code> niet. <code>sudo systemctl status otbr-agent</code>, daarna <code>journalctl -u otbr-agent -n 50</code>. Meestal een verkeerde radio-URL of een dongle die zonder stroom kwam te zitten.</td></tr><tr><td>Test verbinding: <em>‘het is geen ThreadMapper-probe-agent’</em></td><td>Er antwoordt iets anders op die poort. De agent zit op 8099; 8081 is de eigen REST-API van de border router.</td></tr><tr><td>Test verbinding: <em>‘Kon dat adres niet bereiken’</em></td><td>Verkeerd IP-adres, of de telefoon zit op een ander subnet of op een gast-VLAN.</td></tr><tr><td><code>ot-ctl state</code> zegt <code>detached</code></td><td>Hij heeft netwerkgegevens maar vindt het netwerk niet. Verkeerde dataset, of buiten radiobereik van elk ander knooppunt.</td></tr><tr><td><code>ot-ctl state</code> zegt <code>disabled</code></td><td><code>ifconfig up</code> / <code>thread start</code> is niet uitgevoerd, of de radio kwam niet op.</td></tr><tr><td>Het scherm Thread-netwerk toont geen peers</td><td>De probe zit op zijn eigen netwerk — controleer dat hij geen <code>leader</code> is terwijl je wilde aansluiten.</td></tr><tr><td>Alles werkt, en na een herstart is het weg</td><td><code>systemctl is-enabled otbr-agent threadmapper-probe</code> — beide horen <code>enabled</code> te zeggen.</td></tr></tbody></table></div>
-<p>Logs van beide services samen:</p>
-<pre class="lang-bash"><code>journalctl -u threadmapper-probe -u otbr-agent -f</code></pre>
+<h2>Als het niet werkt</h2>
+<div class="scroll"><table><thead><tr><th>Wat je ziet</th><th>Wat het is</th></tr></thead><tbody><tr><td>De installatieknop zegt dat de browser niet wordt ondersteund</td><td>Gebruik Chrome, Edge of Firefox op een computer.</td></tr><tr><td>De poort staat niet in de lijst</td><td>De kabel geeft alleen stroom door, of een ander programma heeft de poort open.</td></tr><tr><td>Het installatieprogramma zegt <strong>Unable to connect</strong></td><td>Het wachtwoord klopt niet, de probe staat te ver van de router, of het netwerk zit alleen op 5 GHz. Er is niets veranderd. Probeer het opnieuw.</td></tr><tr><td>Het installatieprogramma biedt geen <strong>Connect to Wi-Fi</strong> aan</td><td>Het heeft de probe niet horen antwoorden. Sluit het venster, druk opnieuw op de installatieknop en kies de poort.</td></tr><tr><td>Het lampje is terug bij één korte flits elke twee seconden</td><td>Met een netwerk dat via de console is getypt, kwam geen verbinding tot stand: het wachtwoord klopt niet, of het netwerk zit alleen op 5 GHz. Na tien pogingen is de probe het vergeten. Geef hem het netwerk opnieuw (stap 2).</td></tr><tr><td>Het lampje blijft langzaam knipperen</td><td>De probe heeft eerder verbinding gehad met dit netwerk en kan het nu niet bereiken: de router staat uit of te ver weg, of het wachtwoord is veranderd. Is dat zo, geef hem het netwerk dan opnieuw (stap 2).</td></tr><tr><td>De probe zegt dat de dataset is afgekapt, of de verkeerde lengte heeft</td><td>Een lange tekst die je plakt, kan onderweg een stuk kwijtraken. Plak de dataset nog een keer.</td></tr><tr><td>De app toont de probe niet</td><td>De telefoon zit op een andere wifi, of op een gastnetwerk dat apparaten van elkaar gescheiden houdt. Typ het adres uit <code>status</code>.</td></tr><tr><td>De app zegt dat de probe een sleutel heeft die deze iPhone niet heeft</td><td>Een andere telefoon heeft de sleutel opgehaald, of de probe is helemaal opnieuw begonnen. Druk twee keer op <strong>B</strong> en tik opnieuw op <strong>Haal de sleutel op</strong>.</td></tr><tr><td>De app zegt dat de probe van zijn Thread-mesh af is</td><td>Hij heeft een dataset en kan het netwerk niet vinden: de dataset is van een ander netwerk, of er is geen router binnen bereik.</td></tr><tr><td>Je wilt opnieuw beginnen</td><td>Houd de knop <strong>B</strong> tien seconden ingedrukt.</td></tr></tbody></table></div>
 <hr>
-<h2>Wat nog niet werkt</h2>
-<p><strong>Knooppunten verschijnen zonder naam.</strong> Thread identificeert een knooppunt aan zijn extended address; HomeKit identificeert een accessoire aan een ondoorzichtige identifier, en niets koppelt die twee aan elkaar. Je krijgt dus een echte, kloppende topologie van anonieme knooppunten in plaats van ‘de keukenlamp’.</p>
-<p>De oplossing is gebouwd maar niet af: het endpoint <code>/traffic</code> van de agent meldt activiteit per knooppunt, dus door een apparaat via HomeKit te bedienen en te kijken welk knooppunt reageert, zou je ze aan elkaar kunnen koppelen. Om die interactie te ontwikkelen zijn echte accessoires op een echte mesh nodig, en dat is precies wat je hebt zodra dit draait. Bijgehouden als <strong>H1</strong> in <code>WORKPLAN.md</code>.</p>
-<p><strong>Het Mesh-tabblad blijft afgeleid.</strong> De graaf daar wordt opgebouwd uit HomeKit-accessoires, dus die kan geen probegegevens gebruiken zolang het bovenstaande niet is opgelost. Het scherm Thread-netwerk en de Kanaalscanner zijn de plekken waar metingen staan.</p>
-<hr>
-<h2>Als hier iets niet klopt</h2>
-<p>Deze gids is niet van begin tot eind op echte hardware doorlopen — niemand op het project heeft al een Pi of een dongle. Het inrichtingsscript is getest tegen Debian Bookworm arm64, en elk endpoint van de agent is getest tegen een echte <code>otbr-agent</code> op een gesimuleerde radio, maar de fysieke stappen hierboven zijn geschreven vanuit de documentatie van de fabrikanten en niet omdat iemand ze heeft uitgevoerd.</p>
-<p>Klopt een stap niet, dan is het de moeite waard om dat in dit bestand recht te zetten.</p>
+<h2>Goed om te weten</h2>
+<ul><li>De probe opent geen verbinding met internet. Hij antwoordt op je eigen netwerk, op poort 8099, via gewone HTTP, en kondigt zich daar met zijn naam aan.</li><li>Hij bewaart wat hem is verteld, de naam en het wachtwoord van je wifi, de sleutel, en de Thread-dataset als je hem die hebt gegeven, in zijn eigen geheugen, niet versleuteld. De knop tien seconden ingedrukt houden wist alles.</li><li>Zijn dag aan meetwaarden staat in geheugen dat bij een herstart wordt geleegd, en bij een stroomstoring ook.</li><li>Het is een bouwproject voor wie er een wil, geen product. Hij is niet Thread-gecertificeerd.</li><li>Het installatieprogramma op deze pagina is ESP Web Tools, van ESPHome, onder de <a href="https://tintronix-lab.github.io/ThreadMapper/flasher/LICENSE.txt">Apache License 2.0</a>. Het draait in je browser en wordt vanaf deze site aangeboden. Het haalt de firmware van deze site en stuurt nergens iets naartoe. Wat je het geeft voor de wifi van de probe, gaat via de kabel naar het printplaatje; het noteert ook wat het verstuurt, als getallen, in de ontwikkelaarsconsole van de browser, tot het tabblad wordt gesloten.</li><li>De firmware is gebouwd op opensourcesoftware van Espressif en anderen. Hun licenties staan in <a href="https://tintronix-lab.github.io/ThreadMapper/firmware/NOTICES.txt">NOTICES.txt</a>, en de voorwaarden voor de image zelf in <a href="https://tintronix-lab.github.io/ThreadMapper/firmware/LICENSE.txt">LICENSE.txt</a>.</li></ul>
 
 <footer>
   <a href="index.html">Home</a>

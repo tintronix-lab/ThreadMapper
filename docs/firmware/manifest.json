@@ -1,0 +1,28 @@
+{
+  "name": "ThreadMapper Probe",
+  "version": "0.9.0",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32-C6",
+      "parts": [
+        {
+          "path": "bootloader.bin",
+          "offset": 0
+        },
+        {
+          "path": "partition-table.bin",
+          "offset": 32768
+        },
+        {
+          "path": "ota-data.bin",
+          "offset": 61440
+        },
+        {
+          "path": "threadmapper-probe.bin",
+          "offset": 131072
+        }
+      ]
+    }
+  ]
+}

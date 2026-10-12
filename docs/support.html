@@ -83,7 +83,7 @@
     Connecting an OpenThread Border Router gets you real <em>network</em> facts (name, channel, PAN ID) but not routing. Its diagnostics endpoints do not return per-node data — we tested them against a live mesh and the requests complete with nothing in them.
   </p>
   <p>
-    Real routing needs a <a href="probe-setup.html">ThreadMapper probe</a>: a small agent on a Raspberry Pi that joins the mesh and reads the route table directly. With one connected, the Thread Network screen shows measured signal, link quality, next hop and path cost. Those nodes appear by Thread address rather than by your device names — nothing links a Thread address to a HomeKit accessory yet.
+    Real routing needs a <a href="probe-setup.html">ThreadMapper probe</a>: a small board on your Wi-Fi that joins the mesh, where your home lets it, and reads the route table directly. With one on the mesh, the Probe Readings screen shows measured signal, link quality, next hop and path cost. A node carries your device's name only where the device has stated its own Thread address; the others appear by Thread address.
   </p>
 </details>
 

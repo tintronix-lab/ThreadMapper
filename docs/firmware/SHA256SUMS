@@ -1,0 +1,7 @@
+# ThreadMapper Probe firmware 0.9.0, built with ESP-IDF v5.5.5
+# from d791356d85a1e58653d189bc6ade3c45327344d1
+71324232379ad2bb3212820c3c99aa6cfed723291f97240eff443b7eb17dda93  bootloader.bin
+7d2c7ac4888bfd75cd5f56e8d61f69595121183afc81556c876732fd3782c62f  ota-data.bin
+1b86379629900670bd43147c3a873a424695a67765fd1bdb28b1bffc21be137a  partition-table.bin
+3fee76472be00efb8f9ed825b85be0761cf05b0e97f385236805588b116573f3  threadmapper-probe-full.bin
+1201a6a700ccfb00fb209d9210300fa24ec31ed9aa43dc92c71274c49fa770b6  threadmapper-probe.bin

@@ -53,7 +53,7 @@
 <body>
 
 <h1>Integritetspolicy</h1>
-<p class="updated">ThreadMapper · Senast uppdaterad 6 oktober 2026</p>
+<p class="updated">ThreadMapper · Senast uppdaterad 12 oktober 2026</p>
 
 <div class="highlight">
   <strong>ThreadMapper varken samlar in, överför eller säljer dina personuppgifter.</strong> Det finns inga konton, inga analys-SDK:er och inga tredjepartsspårare. Allt appen registrerar stannar på din enhet — eller, om du använder någon av de tre valfria iCloud-funktionerna, i ditt eget iCloud-konto. Hur som helst når det aldrig oss.
@@ -95,8 +95,8 @@
   <li><strong>Lyssnar efter enheter som annonserar sig på ditt lokala nätverk</strong> — den vanliga Bonjour-upptäckt som iOS tillhandahåller. Det är så appen hittar gränsroutrar och Matter-enheter, inklusive sådana som Apple Home inte listar. Den läser vad de enheterna sänder ut om sig själva. För att kontrollera att en tjänst som den har hittat svarar, ansluter den till den adress som tjänsten annonserade och stänger sedan anslutningen direkt utan att skicka något;</li>
   <li><strong>Anropar adresserna på ditt Wi-Fi</strong> för att se vilka enheter som svarar: högst två pingar till varje adress medan skärmen Lokalt nätverk är öppen, och en enda hälsning som Xiaomi-gateways svarar på när den skärmen eller vyn Allt som finns här öppnas. Sedan frågar den din router, och ingen annan server, vad routern kallar varje enhet som svarade. Har du Pro och Apple Home tappar kontakten med ett tillbehör medan appen är öppen, frågas tillbehörets egen adress på ditt Wi-Fi på samma sätt. Inget av detta sker i bakgrunden;</li>
   <li><strong>Kontrollerar en enskild enhet, på dess sida, när du trycker</strong>: fem pingar till var och en av dess adresser, och ett anslutningsförsök till varje port på en lista med vanliga portar för smarta hem och till varje port som enheten själv annonserar, där varje anslutning stängs direkt. En säker port som svarar tillfrågas om det certifikat den visar upp, som läses och sedan avvisas;</li>
-  <li>Ansluter till en <strong>OpenThread-gränsrouter</strong>, om du ställer in en — på ditt eget lokala nätverk, på en adress du själv anger;</li>
-  <li>Ansluter till en <strong>ThreadMapper-sond</strong>, om du kör en — också på ditt eget lokala nätverk, på en adress du själv anger;</li>
+  <li>Ansluter till en <strong>OpenThread-gränsrouter</strong>, om du ställer in en — på ditt eget lokala nätverk, på en adress som du skriver in eller väljer bland dem som appen har hittat där. När du trycker på Sök i det här nätverket frågar den varje gränsrouter och Home Assistant-värd som den har hört på ditt nätverk, en gång, om den svarar som en OpenThread-gränsrouter;</li>
+  <li>Ansluter till en <strong>ThreadMapper-sond</strong>, om du kör en — också på ditt eget lokala nätverk, på en adress som du skriver in eller väljer bland dem som appen har hittat där. En sond listar de Wi-Fi-nätverk den hör; deras namn visas i Kanalskannern och appen sparar dem ingenstans;</li>
   <li>Ansluter till en <strong>Philips Hue-brygga</strong>, om du parkopplar en — på ditt eget lokala nätverk, för att läsa vilka lampor den fortfarande når via Zigbee. Nyckeln som bryggan utfärdar stannar i den här enhetens nyckelring och skickas aldrig någonstans;</li>
   <li>Når <strong>Apples iCloud</strong>, bara för de tre valfria funktionerna ovan, och bara ditt eget konto.</li>
 </ul>

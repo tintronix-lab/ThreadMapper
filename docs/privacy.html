@@ -53,7 +53,7 @@
 <body>
 
 <h1>Privacy Policy</h1>
-<p class="updated">ThreadMapper · Last updated 6 October 2026</p>
+<p class="updated">ThreadMapper · Last updated 12 October 2026</p>
 
 <div class="highlight">
   <strong>ThreadMapper does not collect, transmit, or sell your personal data.</strong> There are no accounts, no analytics SDKs, and no third-party trackers. Everything the app records stays on your device — or, if you use one of the three optional iCloud features, in your own iCloud account. Either way it never reaches us.
@@ -95,8 +95,8 @@
   <li><strong>Listens for devices advertising themselves on your local network</strong> — the standard Bonjour discovery iOS provides. This is how the app finds border routers and Matter devices, including ones Apple Home does not list. It reads what those devices broadcast about themselves. To check that a service it found answers, it connects to the address the service advertised, then closes the connection at once without sending anything;</li>
   <li><strong>Calls out to the addresses on your Wi-Fi</strong> to see which devices answer: at most two pings to each, while the Local Network screen is open, and a single hello that Xiaomi gateways reply to, when that screen or Everything Here opens. It then asks your router, and no other server, what it calls each device that answered. With Pro, when Apple Home loses an accessory while the app is open, that accessory's own address on your Wi-Fi is asked the same way. None of this happens in the background;</li>
   <li><strong>Checks a single device, on its page, when you tap</strong>: five pings to each of its addresses, and one connection attempt to each of a list of common smart-home ports and to any port the device itself advertises, each closed at once. A secure port that answers is asked for the certificate it presents, which is read and then refused;</li>
-  <li>Connects to an <strong>OpenThread Border Router</strong>, if you configure one — on your own local network, at an address you enter yourself;</li>
-  <li>Connects to a <strong>ThreadMapper probe</strong>, if you run one — also on your own local network, at an address you enter yourself;</li>
+  <li>Connects to an <strong>OpenThread Border Router</strong>, if you configure one — on your own local network, at an address you type or choose from those the app found there. When you tap Search This Network, it asks each border router and Home Assistant host it has heard on your network, once, whether it answers as one;</li>
+  <li>Connects to a <strong>ThreadMapper probe</strong>, if you run one — also on your own local network, at an address you type or choose from those the app found there. A probe lists the Wi-Fi networks it hears; their names are shown in the Channel Scanner and the app saves them nowhere;</li>
   <li>Connects to a <strong>Philips Hue bridge</strong>, if you pair one — on your own local network, to read which lights it still reaches over Zigbee. The key the bridge issues is kept in this device's keychain and is never sent anywhere else;</li>
   <li>Reaches <strong>Apple's iCloud</strong>, only for the three optional features above, and only your own account.</li>
 </ul>

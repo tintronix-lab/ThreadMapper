@@ -351,7 +351,7 @@
     <p class="eyebrow">The probe</p>
     <h2>A small box that stops the guessing.</h2>
     <p class="section-lede">
-      Run a lightweight agent on a Raspberry Pi with an 802.15.4 dongle and it joins your Thread mesh as a real node. From inside, everything the phone cannot see becomes readable — and because it never sleeps, it sees the 3 a.m. failures you don't.
+      Put our firmware on a small ESP32-C6 board, from a computer's browser, and leave it on a charger. It measures every Thread channel every five minutes, which no phone can, and keeps a day of readings while the app is closed. Where it can join your Thread mesh it reads the mesh from inside, as a real node.
     </p>
 
     <div class="readout" role="img" aria-label="Example probe output showing a router at minus 20 dBm with link quality 3 of 3, and a route with path cost 0.">
@@ -381,7 +381,7 @@
       </div>
       <div class="compare-row">
         <div class="compare-cell without"><b>While the app is open</b>The phone only watches when you're looking at it.</div>
-        <div class="compare-cell with"><b>Continuously</b>Recorded to disk, so the overnight partition is still there in the morning.</div>
+        <div class="compare-cell with"><b>Continuously</b>Recorded on the probe for a day, so last night is still there in the morning.</div>
       </div>
     </div>
 
@@ -405,10 +405,10 @@
     </div>
 
     <p style="margin:1.75rem 0 0;color:var(--muted);font-size:.93rem">
-      The agent is open source and runs on a Raspberry Pi 4 or 5 you may already own — the 802.15.4 dongle it needs costs about $10–25. <a href="probe-setup.html">Setup guide →</a>
+      The board is a Seeed XIAO ESP32C6, about $5–8, and the firmware installs in about ten minutes. The probe is part of ThreadMapper Pro. <a href="probe-setup.html">Setup guide →</a>
       <br>
       <span style="font-size:.88rem">
-        Read that first: a Raspberry Pi has no Thread radio of its own, and joining an existing Apple or Google mesh needs credentials those platforms don't yet let you export. It is not a product you can buy — it's a build.
+        Read that first: in a home whose border routers are all Apple's or Google's, the probe can join the mesh only if Home Assistant hands it the credentials. Otherwise it measures the channels and the Wi-Fi on them, and does not read the mesh. It is not a product you can buy — it's a build.
       </span>
     </p>
   </section>
@@ -477,12 +477,6 @@
         <li><strong>Jobs and evidence sheets</strong> — a page for a client showing exactly what a visit changed, and a page per device for a warranty claim.</li>
         <li><strong>What the radios say</strong> — why a device rebooted, how often it has changed parent router, and how many households can control it.</li>
       </ul>
-      <div class="note">
-        <p><strong>Probe features aren't behind the paywall.</strong></p>
-        <p>
-          If you've gone to the trouble of building a probe, hitting a second paywall would be a poor way to say thank you. Everything the probe unlocks is included.
-        </p>
-      </div>
     </div>
   </section>
 

@@ -351,7 +351,7 @@
     <p class="eyebrow">La sonda</p>
     <h2>Una scatoletta che mette fine alle supposizioni.</h2>
     <p class="section-lede">
-      Fai girare un agente leggero su un Raspberry Pi con una chiavetta 802.15.4 ed entra nella tua mesh Thread come nodo vero. Da dentro, tutto quello che il telefono non vede diventa leggibile — e siccome non dorme mai, vede i guasti delle 3 di notte che tu non vedi.
+      Metti il nostro firmware su una piccola scheda ESP32-C6, dal browser di un computer, e lasciala attaccata a un caricabatterie. Misura ogni canale Thread ogni cinque minuti, cosa che nessun telefono può fare, e conserva un giorno di misure mentre l’app è chiusa. Dove può entrare nella tua mesh Thread, legge la mesh dall’interno, come un nodo vero.
     </p>
 
     <div class="readout" role="img" aria-label="Esempio di output della sonda: un router a meno 20 dBm con qualità del collegamento 3 su 3 e una rotta con costo del percorso 0.">
@@ -381,7 +381,7 @@
       </div>
       <div class="compare-row">
         <div class="compare-cell without"><b>Mentre l’app è aperta</b>Il telefono osserva solo quando lo stai guardando.</div>
-        <div class="compare-cell with"><b>Di continuo</b>Registrato su disco: la mesh che si è divisa nella notte è ancora lì al mattino.</div>
+        <div class="compare-cell with"><b>Di continuo</b>Registrato sulla sonda per un giorno: la notte appena passata è ancora lì al mattino.</div>
       </div>
     </div>
 
@@ -405,10 +405,10 @@
     </div>
 
     <p style="margin:1.75rem 0 0;color:var(--muted);font-size:.93rem">
-      L’agente è open source e gira su un Raspberry Pi 4 o 5 che forse hai già — la chiavetta 802.15.4 che gli serve costa circa 10–25 $. <a href="probe-setup.html">Guida alla configurazione →</a>
+      La scheda è una Seeed XIAO ESP32C6, circa 5–8 $, e il firmware si installa in circa dieci minuti. La sonda fa parte di ThreadMapper Pro. <a href="probe-setup.html">Guida alla configurazione →</a>
       <br>
       <span style="font-size:.88rem">
-        Leggila prima: un Raspberry Pi non ha una radio Thread propria, e per entrare in una mesh Apple o Google esistente servono credenziali che quelle piattaforme non permettono ancora di esportare. Non è un prodotto che puoi comprare: è qualcosa da costruire.
+        Leggila prima: in una casa i cui border router sono tutti di Apple o di Google, la sonda può entrare nella mesh solo se Home Assistant le passa le credenziali. Altrimenti misura i canali e il Wi-Fi che li occupa, e non legge la mesh. Non è un prodotto che puoi comprare: è qualcosa da costruire.
       </span>
     </p>
   </section>
@@ -477,12 +477,6 @@
         <li><strong>Lavori e schede di prova</strong> — una pagina per il cliente che dice esattamente cosa è cambiato durante una visita, e una pagina per dispositivo per un reclamo in garanzia.</li>
         <li><strong>Quello che dicono le radio</strong> — perché un dispositivo si è riavviato, quante volte ha cambiato router genitore e quante famiglie possono controllarlo.</li>
       </ul>
-      <div class="note">
-        <p><strong>Le funzioni della sonda non sono dietro il paywall.</strong></p>
-        <p>
-          Se ti sei preso la briga di costruire una sonda, sbattere contro un secondo paywall sarebbe un brutto modo di dirti grazie. Tutto quello che la sonda sblocca è incluso.
-        </p>
-      </div>
     </div>
   </section>
 

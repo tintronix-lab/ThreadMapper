@@ -53,7 +53,7 @@
 <body>
 
 <h1>Política de Privacidade</h1>
-<p class="updated">ThreadMapper · Última atualização em 6 de outubro de 2026</p>
+<p class="updated">ThreadMapper · Última atualização em 12 de outubro de 2026</p>
 
 <div class="highlight">
   <strong>O ThreadMapper não coleta, não transmite nem vende seus dados pessoais.</strong> Não há contas, nem SDKs de análise, nem rastreadores de terceiros. Tudo o que o app registra fica no seu dispositivo — ou, se você usar um dos três recursos opcionais de iCloud, na sua própria conta do iCloud. De um jeito ou de outro, nada disso chega até nós.
@@ -95,8 +95,8 @@
   <li><strong>Escuta os dispositivos que se anunciam na sua rede local</strong> — a descoberta Bonjour padrão que o iOS oferece. É assim que o app encontra roteadores de borda e dispositivos Matter, inclusive os que o Apple Home não lista. Ele lê o que esses dispositivos transmitem sobre si mesmos. Para conferir se um serviço encontrado responde, ele se conecta ao endereço que o serviço anunciou e fecha a conexão na hora, sem enviar nada;</li>
   <li><strong>Consulta os endereços do seu Wi-Fi</strong> para ver quais dispositivos respondem: no máximo dois pings para cada um, enquanto a tela Rede local está aberta, e um único hello, ao qual os gateways da Xiaomi respondem, quando essa tela ou a tela Tudo o que há aqui é aberta. Depois, pergunta ao seu roteador, e a nenhum outro servidor, que nome ele dá a cada dispositivo que respondeu. Com o Pro, quando o Apple Home perde o contato com um acessório enquanto o ThreadMapper está aberto, o próprio endereço desse acessório no seu Wi-Fi é consultado da mesma forma. Nada disso acontece em segundo plano;</li>
   <li><strong>Verifica um único dispositivo, na página dele, quando você toca</strong>: cinco pings para cada um dos endereços dele e uma tentativa de conexão com cada porta de uma lista de portas comuns em casas inteligentes e com qualquer porta que o próprio dispositivo anuncie, cada uma encerrada na hora. Se uma porta segura responder, o app pede o certificado apresentado por ela, que é lido e depois recusado;</li>
-  <li>Conecta-se a um <strong>OpenThread Border Router</strong>, se você configurar um — na sua própria rede local, em um endereço que você mesmo digita;</li>
-  <li>Conecta-se a uma <strong>sonda do ThreadMapper</strong>, se você tiver uma rodando — também na sua própria rede local, em um endereço que você mesmo digita;</li>
+  <li>Conecta-se a um <strong>OpenThread Border Router</strong>, se você configurar um — na sua própria rede local, em um endereço que você digita ou escolhe entre os que o app encontrou nela. Quando você toca em Buscar nesta rede, ele pergunta uma vez a cada roteador de borda e a cada host do Home Assistant que ouviu na sua rede se responde como um OpenThread Border Router;</li>
+  <li>Conecta-se a uma <strong>sonda do ThreadMapper</strong>, se você tiver uma rodando — também na sua própria rede local, em um endereço que você digita ou escolhe entre os que o app encontrou nela. Uma sonda lista as redes Wi-Fi que ouve; os nomes delas aparecem no Scanner de canais e o app não os salva em lugar nenhum;</li>
   <li>Conecta-se a uma <strong>ponte Philips Hue</strong>, se você parear uma — na sua própria rede local, para ler quais lâmpadas ela ainda alcança por Zigbee. A chave emitida pela ponte fica nas chaves deste dispositivo e nunca é enviada a lugar nenhum;</li>
   <li>Alcança o <strong>iCloud da Apple</strong>, apenas para os três recursos opcionais acima, e apenas a sua própria conta.</li>
 </ul>

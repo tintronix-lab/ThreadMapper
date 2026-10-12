@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Construire une sonde ThreadMapper — ThreadMapper</title>
-<meta name="description" content="Pas à pas : transformez un Raspberry Pi et un dongle 802.15.4 en sonde ThreadMapper, pour que l’app puisse afficher le signal Thread, le routage et les interférences mesurés.">
+<meta name="description" content="Pas à pas : installez le micrologiciel ThreadMapper sur une Seeed XIAO ESP32C6 depuis votre navigateur, pour que l’app puisse afficher le bruit mesuré sur les canaux, le Wi-Fi qui se trouve derrière et le maillage Thread que la carte a rejoint.">
 <meta name="theme-color" content="#0B1020">
-<!-- Generated from tools/pi-image/SETUP.fr.md by tools/build-docs.py — edit the Markdown, not this file. -->
+<!-- Generated from tools/probe-esp32c6/SETUP.fr.md by tools/build-docs.py — edit the Markdown, not this file. -->
 <link rel="canonical" href="https://tintronix-lab.github.io/ThreadMapper/fr/probe-setup.html">
 <link rel="alternate" hreflang="en" href="https://tintronix-lab.github.io/ThreadMapper/probe-setup.html">
 <link rel="alternate" hreflang="sv" href="https://tintronix-lab.github.io/ThreadMapper/sv/probe-setup.html">
@@ -18,6 +18,7 @@
 <link rel="alternate" hreflang="nl" href="https://tintronix-lab.github.io/ThreadMapper/nl/probe-setup.html">
 <link rel="alternate" hreflang="pt-BR" href="https://tintronix-lab.github.io/ThreadMapper/pt-br/probe-setup.html">
 <link rel="alternate" hreflang="x-default" href="https://tintronix-lab.github.io/ThreadMapper/probe-setup.html">
+<script type="module" src="../flasher/install-button.js"></script>
 <style>
   :root {
     color-scheme: light dark;
@@ -90,6 +91,18 @@
      nothing for kana. */
   :lang(ja) h1, :lang(ja) h2 { letter-spacing:0; }
 
+  /* The install button (#391). The button itself is this page's own, handed
+     to the installer in a slot, so it takes this page's look. */
+  .install { margin:1.6rem 0 1.8rem; }
+  .install button { font:600 1rem/1.2 var(--sans); color:var(--paper); background:var(--signal);
+                     border:0; border-radius:.6rem; padding:.85rem 1.3rem; cursor:pointer; }
+  .install button:focus-visible { outline:2px solid var(--ink); outline-offset:3px; }
+  .install span { display:block; padding:.8rem 1rem; border:1px solid var(--line);
+                   border-radius:.6rem; background:var(--surface); color:var(--body); }
+  /* Until the installer has loaded, its two apologies are not yet its to
+     show or hide, and would both stand under the button. */
+  esp-web-install-button:not(:defined) span { display:none; }
+
   /* Language switcher: a plain link row, no JS. */
   .langs { margin-top:1rem; display:flex; flex-wrap:wrap; gap:.35rem 1.1rem; }
   .langs a { margin-right:0; text-decoration:none; }
@@ -102,110 +115,99 @@
 <div class="top"><div class="wrap"><a href="index.html">← ThreadMapper</a></div></div>
 
 <div class="wrap">
-<h1>Installer une sonde ThreadMapper sur un Raspberry Pi</h1>
-<p>Pas à pas, du bureau vide aux données Thread mesurées dans l’app.</p>
-<p>Prévoyez une soirée. L’essentiel du temps se passe à attendre des téléchargements et une compilation d’environ 20 minutes.</p>
+<h1>Construire une sonde ThreadMapper</h1>
+<p>Une sonde est une petite carte électronique sur votre Wi-Fi qui mesure la radio que partage votre maison connectée : à quel point chaque canal Thread est occupé, quels réseaux Wi-Fi s’y trouvent et, là où elle peut rejoindre votre maillage Thread, le maillage tel que ses propres routeurs le rapportent. ThreadMapper la lit sur votre propre réseau.</p>
+<p>Un seul composant, une dizaine de minutes, aucune soudure. La sonde fait partie de <strong>ThreadMapper Pro</strong>.</p>
 <hr>
-<h2>À lire avant d’acheter quoi que ce soit</h2>
-<p>Deux points décident si l’opération en vaut la peine pour <em>votre</em> installation. Tous deux sont faciles à manquer tant que les pièces ne sont pas arrivées.</p>
-<h3>1. Un Raspberry Pi ne sait pas faire du Thread tout seul</h3>
-<p>Il n’y a aucune radio 802.15.4 dans un Raspberry Pi. Le Wi-Fi et le Bluetooth sont des radios différentes et ne savent pas parler Thread. <strong>Il vous faut un dongle USB</strong>, et il lui faut un micrologiciel RCP — ce n’est pas celui avec lequel ces dongles sont livrés.</p>
-<h3>2. Rejoindre <em>votre</em> réseau Thread est le plus difficile</h3>
-<p>Un routeur de bordure qui forme son propre réseau restera là à ne voir que lui-même. Vos vrais appareils, eux, sont sur le réseau créé par votre HomePod, votre Apple TV ou votre hub Nest, et pour les observer la sonde doit <strong>rejoindre ce réseau</strong> — ce qui suppose d’en obtenir les identifiants (le jeu de données opérationnel actif).</p>
-<div class="scroll"><table><thead><tr><th>Votre installation</th><th>La sonde peut-elle rejoindre votre vrai réseau ?</th></tr></thead><tbody><tr><td>Vous utilisez <strong>Home Assistant</strong></td><td><strong>Oui.</strong> L’app Companion iOS de HA sait récupérer les identifiants Thread d’Apple — <em>Paramètres → Appareils et services → Thread → Configurer → Envoyer les identifiants à Home Assistant</em> — et vous pouvez ensuite transmettre le jeu de données à la sonde.</td></tr><tr><td>Vous utilisez déjà un <strong>OTBR</strong> (par exemple le module complémentaire de HA)</td><td><strong>Oui.</strong> Lisez-y le jeu de données directement.</td></tr><tr><td><strong>Uniquement des routeurs de bordure Apple ou Google</strong>, sans Home Assistant</td><td><strong>Pas aujourd’hui.</strong> Il n’existe aucun moyen offert à l’utilisateur d’exporter les identifiants Thread d’Apple. Vous pouvez tout de même former un <em>nouveau</em> réseau sur la sonde et y appairer quelques accessoires pour voir l’app fonctionner de bout en bout, mais elle ne vous montrera pas votre maillage existant.</td></tr></tbody></table></div>
-<p>Cette troisième ligne est un vrai mur, et ce n’est pas un mur que ce projet peut abattre de l’extérieur : la voie officielle est le droit d’accès <code>com.apple.developer.thread-network-credentials</code> d’Apple, que ThreadMapper a demandé mais n’a pas obtenu. S’il est accordé, l’app pourra transmettre vos identifiants directement à la sonde et toute cette section disparaîtra.</p>
-<p><strong>Si vous êtes dans la troisième ligne et que vous voulez seulement surveiller votre maillage Apple existant, envisagez de vous arrêter ici jusqu’à l’obtention de ce droit d’accès.</strong></p>
+<h2>À lire avant d’acheter la carte</h2>
+<h3>Ce qu’il vous faut</h3>
+<div class="scroll"><table><thead><tr><th>Élément</th><th>Remarques</th></tr></thead><tbody><tr><td><strong>Seeed Studio XIAO ESP32C6</strong></td><td>Environ 5 à 8 $. Le micrologiciel est conçu pour cette carte et aucune autre : il pilote le commutateur d’antenne de cette carte, son voyant et son bouton.</td></tr><tr><td>Un câble USB-C qui transporte les données</td><td>Beaucoup de câbles fournis avec des chargeurs ne transportent que l’alimentation. Si l’ordinateur ne voit pas la carte, essayez d’abord un autre câble.</td></tr><tr><td>Un ordinateur avec <strong>Chrome</strong>, <strong>Edge</strong> ou <strong>Firefox</strong></td><td>Uniquement pour l’installation. Safari ne peut pas accéder à un port série USB, et un iPhone ou un iPad non plus.</td></tr><tr><td>Du Wi-Fi en <strong>2,4 GHz</strong></td><td>La carte n’a pas de radio 5 GHz. Un réseau qui propose les deux bandes sous un même nom convient.</td></tr><tr><td>Un chargeur USB</td><td>N’importe lequel. C’est là que la sonde reste une fois configurée.</td></tr></tbody></table></div>
+<h3>Ce qu’elle peut lire chez vous</h3>
+<p>La mesure fonctionne dans toutes les maisons. Pour lire le maillage, la sonde doit <em>rejoindre</em> votre réseau Thread, et sa capacité à le faire dépend de ce qui gère ce réseau.</p>
+<div class="scroll"><table><thead><tr><th>Votre maison</th><th>Le bruit des canaux, et le Wi-Fi sur chaque canal</th><th>Le maillage Thread lui-même</th></tr></thead><tbody><tr><td>Des routeurs de bordure Apple ou Google, et rien d’autre</td><td><strong>Oui</strong></td><td><strong>Non.</strong> Ni Apple ni Google ne vous laissent sortir les identifiants de votre réseau Thread. Apple ne donne à une app le droit de les lire que si son éditeur fabrique aussi un routeur de bordure certifié, et celui de ThreadMapper n’en fabrique pas.</td></tr><tr><td>Les mêmes, avec <strong>Home Assistant</strong></td><td><strong>Oui</strong></td><td><strong>Oui.</strong> L’app Companion de Home Assistant peut y copier les identifiants, et vous les copiez de là vers la sonde (étape 5).</td></tr><tr><td>Un <strong>routeur de bordure OpenThread</strong> à vous</td><td><strong>Oui</strong></td><td><strong>Oui.</strong> Lisez-les directement dessus (étape 5).</td></tr></tbody></table></div>
+<p><strong>Si la première ligne est votre maison, la sonde ne dessinera pas votre maillage.</strong> Elle mesure tout de même ce qu’aucun téléphone ne peut mesurer : le bruit sur chacun des seize canaux Thread, toutes les cinq minutes, et quels réseaux Wi-Fi se trouvent derrière. Décidez-vous là-dessus avant d’acheter.</p>
 <hr>
-<h2>Liste de courses</h2>
-<div class="scroll"><table><thead><tr><th>Élément</th><th>Remarques</th></tr></thead><tbody><tr><td>Raspberry Pi 4 ou 5</td><td>2 Go de RAM suffisent largement. Un Pi Zero 2 W fonctionne, mais la compilation de l’étape 4 y est bien plus longue.</td></tr><tr><td>Carte microSD, 16 Go ou plus</td><td>N’importe quelle marque sérieuse.</td></tr><tr><td>Alimentation USB-C</td><td>L’officielle ; les dongles Thread supportent mal les baisses de tension.</td></tr><tr><td><strong>Un dongle 802.15.4</strong></td><td>Choisissez-en un — voir ci-dessous.</td></tr></tbody></table></div>
-<p><strong>Options de dongle</strong>, les deux conviennent :</p>
-<ul><li><strong>Dongle Nordic nRF52840</strong> (environ 10 $) — le moins cher, et le micrologiciel se compile depuis les sources, donc pas de téléchargement à chercher.</li><li><strong>SkyConnect / Sonoff ZBDongle-E</strong> (environ 25 $) — Silicon Labs. Si vous en possédez déjà un pour Home Assistant, utilisez-le. Le flashage tient en une ligne de commande.</li></ul>
+<h2>Étape 1 — Installer le micrologiciel</h2>
+<ol><li>Branchez la carte sur l’ordinateur.</li><li>Cliquez sur <strong>Installer le micrologiciel de la sonde</strong> ci-dessous et choisissez le port nommé <strong>USB JTAG/serial debug unit</strong>.</li><li>Cliquez sur <strong>Install ThreadMapper Probe</strong>. Le programme d’installation demande s’il faut effacer l’appareil : pour une carte neuve, cochez <strong>Erase device</strong>. Puis <strong>Next</strong>, et <strong>Install</strong>.</li></ol>
+<p>Uniquement pour une carte neuve. L’effacement emporte tout ce qu’une sonde a reçu : son Wi-Fi, sa clé et son réseau Thread. Une sonde qui fonctionne déjà se met à jour à la place (voir <em>Mise à jour</em>), et si le programme d’installation pose cette question pour l’une d’elles, laissez la case décochée.</p>
+<div class="install">
+<esp-web-install-button manifest="../firmware/manifest.json">
+<button slot="activate">Installer le micrologiciel de la sonde</button>
+<span slot="unsupported">Ce navigateur ne peut pas accéder à un port série USB. Ouvrez cette page dans Chrome, Edge ou Firefox, sur un ordinateur.</span>
+<span slot="not-allowed">Le programme d’installation ne fonctionne que sur une page ouverte en HTTPS.</span>
+</esp-web-install-button>
+</div>
+<p>L’opération prend une minute ou deux et se termine par <strong>Installation complete!</strong> Cliquez sur <strong>Next</strong>. La fenêtre du programme d’installation est en anglais.</p>
+<p>Si le port n’est pas dans la liste, c’est presque toujours le câble. Sinon, maintenez le bouton <strong>B</strong> de la carte enfoncé pendant que vous la branchez, puis réessayez.</p>
+<p>Aucun de ces navigateurs ? <code>esptool</code>, d’Espressif, fait la même chose. Une première installation, qui efface tout ce que contenait la carte :</p>
+<pre><code>esptool.py --chip esp32c6 write_flash 0x0 threadmapper-probe-full.bin</code></pre>
+<p>Une mise à jour, qui laisse à la sonde ce qu’elle a reçu :</p>
+<pre><code>esptool.py --chip esp32c6 write_flash 0x20000 threadmapper-probe.bin</code></pre>
+<p>Les deux images sont <a href="https://tintronix-lab.github.io/ThreadMapper/firmware/threadmapper-probe-full.bin">threadmapper-probe-full.bin</a> et <a href="https://tintronix-lab.github.io/ThreadMapper/firmware/threadmapper-probe.bin">threadmapper-probe.bin</a>. Ouvrez ensuite le port série de la carte avec n’importe quel programme de terminal, et donnez son Wi-Fi à la sonde en le tapant (étape 2, <em>Sans la liste</em>).</p>
 <hr>
-<h2>Étape 1 — Installer le micrologiciel RCP sur le dongle</h2>
-<p>Faites-le <strong>avant</strong> de toucher au Pi, depuis votre Mac ou votre PC. C’est la seule étape que le script d’installation n’automatise délibérément pas : flasher la mauvaise image rend le dongle inutilisable, et les outils du fabricant font le travail correctement.</p>
-<p>Le micrologiciel RCP (« Radio Co-Processor ») fait du dongle une simple radio pilotée par <code>otbr-agent</code>. Un dongle livré pour Zigbee a un micrologiciel différent et ne fonctionnera pas tant qu’il n’est pas reflashé.</p>
-<h3>Silicon Labs (SkyConnect, Sonoff ZBDongle-E)</h3>
-<pre class="lang-bash"><code>pipx install universal-silabs-flasher     # or: pip install universal-silabs-flasher
-universal-silabs-flasher --device /dev/tty.usbserial-XXXX probe
-universal-silabs-flasher --device /dev/tty.usbserial-XXXX flash --firmware &lt;ot-rcp-firmware.gbl&gt;</code></pre>
-<p>Récupérez le <code>.gbl</code> <code>ot-rcp</code> dans les versions publiées du micrologiciel silabs de Home Assistant — les mêmes images que celles employées par le module complémentaire OTBR. Faites correspondre le fichier au modèle exact de votre dongle ; le SkyConnect et le ZBDongle-E ne sont <strong>pas</strong> interchangeables.</p>
-<h3>Nordic nRF52840</h3>
-<p>Compilez le micrologiciel depuis le portage Nordic d’OpenThread, puis flashez-le par USB DFU :</p>
-<pre class="lang-bash"><code>git clone --recurse-submodules https://github.com/openthread/ot-nrf528xx.git
-cd ot-nrf528xx &amp;&amp; ./script/bootstrap &amp;&amp; ./script/build nrf52840 USB_trans
-# → build/bin/ot-rcp  (convert to .hex/.zip per the repo&#x27;s README, then:)
-nrfutil dfu usb-serial -pkg ot-rcp.zip -p /dev/tty.usbmodemXXXX</code></pre>
-<p>Suivez le README de ce dépôt pour l’étape d’empaquetage actuelle — elle change de temps en temps et il vaut mieux la lire là-bas que la recopier ici.</p>
-<p><strong>Vérifiez que ça a marché :</strong> branchez plus tard le dongle sur le Pi et <code>install.sh</code> signalera <code>Found &lt;family&gt; radio at /dev/serial/by-id/...</code>. S’il ne trouve rien, le micrologiciel n’est pas passé.</p>
+<h2>Étape 2 — Lui donner votre Wi-Fi</h2>
+<p>Après une première installation, avec <strong>Erase device</strong> coché, le programme d’installation passe de lui-même à <strong>Configure Wi-Fi</strong>. Si vous voyez plutôt sa liste de choix, cliquez-y sur <strong>Connect to Wi-Fi</strong>.</p>
+<p>La sonde liste les réseaux qu’elle entend.</p>
+<ol><li>Sous <strong>Network</strong>, choisissez le vôtre.</li><li>Saisissez son mot de passe.</li><li>Cliquez sur <strong>Connect</strong>.</li></ol>
+<p>Le programme d’installation affiche <strong>Trying to connect</strong>, ce qui peut durer presque une minute, puis <strong>Device connected to the network!</strong> Le voyant de la sonde est alors allumé et le reste. Cliquez sur <strong>Continue</strong>.</p>
+<p>La sonde ne garde un réseau qu’une fois qu’elle l’a rejoint. <strong>Unable to connect</strong> signifie qu’elle a essayé sans y parvenir : presque toujours le mot de passe, parfois un routeur trop éloigné. L’essai n’a rien changé : une sonde qui avait un réseau auparavant l’a toujours, et y retourne. Réessayez.</p>
+<p>Votre réseau n’est pas dans la liste ? La sonde n’a pas de radio 5 GHz : un réseau uniquement en 5 GHz n’y figure donc pas. Un réseau qui masque son nom non plus : choisissez <strong>Join other…</strong> et saisissez le nom.</p>
+<p>Le champ du mot de passe masque ce que vous saisissez. Le nom et le mot de passe descendent par le câble jusqu’à la carte, qui les garde dans sa propre mémoire et n’écrit le mot de passe dans aucun journal.</p>
+<h3>Sans la liste</h3>
+<p>Si le programme d’installation ne propose pas <strong>Connect to Wi-Fi</strong>, c’est qu’il n’a pas entendu la sonde répondre : fermez sa fenêtre, cliquez de nouveau sur le bouton d’installation et choisissez le port.</p>
+<p>La sonde peut aussi recevoir son réseau depuis sa console, dans <strong>Logs &amp; Console</strong> ou dans n’importe quel programme de terminal ouvert sur son port. Tapez <code>wifi</code> et appuyez sur Entrée. Les lignes qui commencent par <code>&gt;</code> sont ce que vous tapez :</p>
+<pre><code>&gt; wifi
+Network name? Type it and press Return.
+&gt; My network
+Password? The probe does not write it back. Return alone for a network without one.
+&gt; my password
+stored: &quot;My network&quot;, with a password of 11 characters.
+Restarting to join it. The light stays on once it has.</code></pre>
+<p>Rien n’a besoin de guillemets, et les lettres accentuées comme é, à ou ç ne posent pas de problème. La sonde ne réaffiche pas le mot de passe. La page, elle, l’affiche pendant que vous le tapez, et le garde dans son journal jusqu’à ce que vous fermiez la fenêtre : c’est votre propre écran, alors regardez d’abord par-dessus votre épaule.</p>
+<p>Quand elle reçoit un réseau de cette façon, la sonde redémarre pour le rejoindre sans l’avoir essayé au préalable. Si son voyant revient à un bref clignotement toutes les deux secondes, c’est qu’elle a essayé dix fois, n’a pas pu le rejoindre et a oublié le réseau.</p>
 <hr>
-<h2>Étape 2 — Flasher Raspberry Pi OS</h2>
-<ol><li>Installez <strong>Raspberry Pi Imager</strong>.</li><li>Choisissez <strong>Raspberry Pi OS Lite (64-bit)</strong>. Lite — un bureau n’a aucune utilité ici.</li><li>Cliquez sur le bouton <strong>engrenage / Edit Settings</strong> <em>avant</em> d’écrire la carte, et renseignez : - nom d’hôte : <code>threadmapper-probe</code> - <strong>Activez SSH</strong>, par mot de passe ou par clé - nom d’utilisateur et mot de passe - identifiants Wi-Fi, si vous n’utilisez pas l’Ethernet</li><li>Écrivez la carte, insérez-la dans le Pi, branchez le dongle, mettez sous tension.</li></ol>
-<p>L’Ethernet est plus fiable que le Wi-Fi ici, et un routeur de bordure gagne à disposer d’un lien montant stable. Utilisez-le si vous le pouvez.</p>
+<h2>Étape 3 — Connecter l’app</h2>
+<p>Attendez que le voyant reste allumé. Sur l’iPhone, ouvrez ThreadMapper et allez dans <strong>Réglages → Sonde ThreadMapper</strong>. Quand le téléphone est sur le même Wi-Fi, la sonde figure sous <strong>Sur ce réseau</strong> : choisissez-la. <strong>Tester la connexion</strong> indique alors ce qu’est la sonde et où elle en est.</p>
+<p>Si l’app ne la liste pas, demandez à la sonde où elle se trouve : fermez la fenêtre du programme d’installation, cliquez de nouveau sur le bouton d’installation, choisissez le port, ouvrez <strong>Logs &amp; Console</strong> et tapez <code>status</code>. L’une de ses lignes est l’adresse à saisir dans l’app :</p>
+<pre><code>in the app: http://192.168.1.50:8099</code></pre>
+<p>Votre routeur donnera peut-être un jour une autre adresse à la sonde. L’app connaît la sonde par autre chose que son adresse : une fois ouverte, et avec le téléphone sur le même Wi-Fi, elle retrouve la sonde toute seule.</p>
+<p>Le câble a fait son travail. Débranchez la carte et mettez-la sur un chargeur, quelque part au milieu de la maison plutôt que derrière le routeur : la sonde entend ce qui est près d’elle.</p>
 <hr>
-<h2>Étape 3 — Se connecter</h2>
-<pre class="lang-bash"><code>ssh &lt;your-username&gt;@threadmapper-probe.local</code></pre>
-<p>Si le nom d’hôte ne se résout pas, trouvez l’IP du Pi dans la liste des clients de votre routeur et faites plutôt <code>ssh &lt;user&gt;@&lt;ip&gt;</code>.</p>
-<p>Vérifiez que le dongle est visible avant d’aller plus loin :</p>
-<pre class="lang-bash"><code>ls -l /dev/serial/by-id/</code></pre>
-<p>Vous devriez voir une entrée portant le nom de votre dongle. <strong>Si c’est vide, arrêtez-vous</strong> — la suite ne fonctionnera pas. Rebranchez-le, essayez un autre port USB et reprenez l’étape 1.</p>
+<h2>Étape 4 — Donner la clé à votre iPhone</h2>
+<p>Une sonde sans clé répond à n’importe qui sur votre Wi-Fi. Cela comprend les noms des réseaux Wi-Fi qu’elle entend, et des demandes qui éloignent sa radio du canal de votre maillage pendant plusieurs secondes à chaque fois.</p>
+<p>Appuyez deux fois sur le bouton <strong>B</strong> de la carte, coup sur coup. (Pas <strong>R</strong> : celui-là redémarre la sonde.) Le voyant clignote deux fois par seconde, pendant trois minutes ou jusqu’à ce qu’un téléphone ait pris la clé. Dans l’app, sous <strong>Réglages → Sonde ThreadMapper</strong>, touchez <strong>Obtenir la clé</strong>.</p>
+<p>Dès lors, la sonde ne fait ce qui coûte du temps à sa radio que pour un téléphone qui détient la clé. La clé prouve qui demande ; elle ne cache rien. Les réponses continuent de traverser votre Wi-Fi sans être chiffrées, et la clé aussi, une fois, quand un téléphone la reçoit.</p>
+<p>Un seul téléphone détient la clé à la fois. Un second téléphone qui la reçoit la prend au premier.</p>
 <hr>
-<h2>Étape 4 — Installer la sonde</h2>
-<pre class="lang-bash"><code>sudo apt-get update &amp;&amp; sudo apt-get install -y git
-git clone https://github.com/tintronix-lab/ThreadMapper.git
-sudo ./ThreadMapper/tools/pi-image/install.sh</code></pre>
-<p>Il détecte le dongle, installe <code>otbr-agent</code> et l’agent de la sonde, puis active les deux comme services systemd.</p>
-<p><strong>Comptez environ 20 minutes sur un Pi 4</strong>, presque entièrement consacrées à la compilation d’<code>otbr-agent</code>. Il n’est pas bloqué. À la fin, il affiche l’adresse de la sonde.</p>
-<p>Si la détection échoue mais que vous connaissez le chemin du périphérique :</p>
-<pre class="lang-bash"><code>sudo ./ThreadMapper/tools/pi-image/install.sh --radio-url spinel+hdlc+uart:///dev/ttyACM0</code></pre>
-<p>Le relancer est sans risque — le script est idempotent, et c’est ainsi que vous mettrez l’agent à jour par la suite.</p>
+<h2>Étape 5 — Lui donner votre réseau Thread</h2>
+<p>Passez cette étape si votre maison est la première ligne du tableau ci-dessus.</p>
+<p>La sonde rejoint un réseau Thread avec le <em>jeu de données actif</em> (« active dataset ») de ce réseau, une chaîne de quelque deux cents chiffres hexadécimaux qui contient la clé du réseau.</p>
+<ul><li><strong>Home Assistant :</strong> ouvrez sa page Thread, <em>Settings → Connectivity → Thread</em>, ou dans les versions plus anciennes <em>Settings → Devices &amp; services → Thread → Configure</em> (ce sont les noms de menus de Home Assistant en anglais). À côté de votre réseau se trouve un bouton d’information, et ce qu’il affiche se termine par <strong>Active dataset TLVs</strong> : copiez cela. Si le réseau appartient à Apple Home, il faut d’abord le donner à Home Assistant : ouvrez la même page dans l’app Companion sur votre iPhone et choisissez <em>Send credentials to Home Assistant</em>.</li><li><strong>Routeur de bordure OpenThread :</strong> <code>sudo ot-ctl dataset active -x</code></li></ul>
+<p>Rebranchez la sonde sur l’ordinateur, cliquez sur le bouton d’installation ci-dessus, choisissez son port et ouvrez <strong>Logs &amp; Console</strong> sans rien installer. Tapez <code>thread dataset</code>, appuyez sur Entrée, et collez le jeu de données quand la sonde le demande :</p>
+<pre><code>&gt; thread dataset
+Dataset, as hex? The probe does not write it back.
+&gt; 0e080000000000010000000300001935060004001fffe0...
+stored: &quot;MyHome&quot;, channel 25. Restarting to join it.</code></pre>
+<p>En quelques minutes, <strong>Réglages → Sonde ThreadMapper</strong>, dans l’app, indique que la sonde est sur son maillage Thread.</p>
+<p>Le jeu de données est la clé de votre réseau Thread. La sonde ne le réaffiche pas, mais la page dans laquelle vous le collez l’affiche, et le garde dans son journal jusqu’à ce que vous fermiez la fenêtre. La sonde le garde dans sa propre mémoire, qui n’est pas chiffrée : quelqu’un qui emporte la carte peut l’en extraire.</p>
 <hr>
-<h2>Étape 5 — Mettre la sonde sur un réseau Thread</h2>
-<p>Choisissez la ligne qui vous correspondait dans « À lire avant d’acheter ».</p>
-<h3>Voie A — Rejoindre votre réseau existant (ce que vous voulez vraiment)</h3>
-<p>Récupérez le jeu de données opérationnel actif sous forme de chaîne hexadécimale depuis ce qui détient déjà vos identifiants.</p>
-<p>Depuis un OTBR existant (y compris le module complémentaire de Home Assistant) :</p>
-<pre class="lang-bash"><code>curl -s http://&lt;existing-otbr&gt;:8081/node/dataset/active \
-     -H &#x27;Accept: text/plain&#x27;</code></pre>
-<p>Cela renvoie une longue chaîne hexadécimale. Sur le Pi :</p>
-<pre class="lang-bash"><code>sudo ot-ctl dataset set active &lt;that-long-hex-string&gt;
-sudo ot-ctl ifconfig up
-sudo ot-ctl thread start</code></pre>
-<p>Attendez environ 30 secondes, puis :</p>
-<pre class="lang-bash"><code>sudo ot-ctl state</code></pre>
-<p>Attendez-vous à <code>child</code> ou <code>router</code> — elle a rejoint le réseau. <code>leader</code> signifierait ici qu’elle a formé son propre réseau, ce qui n’est pas le but sur cette voie.</p>
-<h3>Voie B — Former un nouveau réseau (test, ou aucun moyen d’obtenir les identifiants)</h3>
-<pre class="lang-bash"><code>sudo ot-ctl dataset init new
-sudo ot-ctl dataset commit active
-sudo ot-ctl ifconfig up
-sudo ot-ctl thread start
-sudo ot-ctl state          # expect: leader</code></pre>
-<p>Vous avez maintenant un réseau vide avec un seul nœud. Pour y voir quoi que ce soit d’intéressant, vous devez y appairer des accessoires — ce qui suppose de les retirer d’abord de votre réseau Apple. <strong>Ne faites pas cela avec des appareils dont vous dépendez.</strong></p>
-<p>Affichez le jeu de données si vous voulez y raccorder d’autres appareils plus tard :</p>
-<pre class="lang-bash"><code>sudo ot-ctl dataset active -x</code></pre>
+<h2>Ce que vous obtenez</h2>
+<div class="scroll"><table><thead><tr><th>Dans l’app</th><th>Avec le Wi-Fi seul</th><th>Avec votre réseau Thread en plus</th></tr></thead><tbody><tr><td><strong>Scanner de canaux</strong> : le bruit mesuré sur les seize canaux Thread</td><td>Oui</td><td>Oui</td></tr><tr><td>Les réseaux Wi-Fi derrière le bruit, par nom et par canal</td><td>Oui</td><td>Oui</td></tr><tr><td>Une journée de mesures de bruit, prises toutes les cinq minutes pendant que l’app était fermée</td><td>Oui</td><td>Oui</td></tr><tr><td><strong>Mesures de la sonde</strong> : chaque routeur du maillage, les nœuds que la sonde entend avec leur signal mesuré, et la façon dont le maillage route entre eux</td><td>Non</td><td>Oui</td></tr><tr><td>Sur la page d’un appareil : qui l’entend et à quel point, et s’il répond</td><td>Non</td><td>Oui</td></tr><tr><td><strong>Docteur Réseau</strong>, pour un appareil Thread sur secteur qu’Apple Home ne parvient pas à joindre : s’il répond malgré tout sur le maillage et, pour un appareil Matter, si un routeur de bordure détient encore son enregistrement</td><td>Non</td><td>Oui</td></tr></tbody></table></div>
+<p>Les noms des réseaux Wi-Fi sont affichés sur le téléphone et ne sont enregistrés nulle part.</p>
 <hr>
-<h2>Étape 6 — Diriger l’app vers la sonde</h2>
-<pre class="lang-bash"><code>curl http://localhost:8099/health</code></pre>
-<p>Attendez-vous à <code>&quot;otCtlReachable&quot;: true</code> et à un <code>role</code>. Ensuite, depuis votre téléphone connecté au même réseau, dans <strong>ThreadMapper → Réglages → Sonde ThreadMapper</strong> :</p>
-<pre><code>http://threadmapper-probe.local:8099</code></pre>
-<p>Utilisez plutôt l’adresse IP du Pi si <code>.local</code> ne se résout pas sur iOS. Touchez <strong>Tester la connexion</strong> — en cas de problème, l’app nomme l’échec au lieu d’afficher seulement une croix rouge.</p>
+<h2>Ce que dit le voyant</h2>
+<div class="scroll"><table><thead><tr><th>Voyant</th><th>Signification</th></tr></thead><tbody><tr><td>Un bref clignotement toutes les deux secondes</td><td>Pas encore de réseau Wi-Fi. Étape 2.</td></tr><tr><td>Clignote lentement</td><td>Elle a un réseau et le rejoint.</td></tr><tr><td>Allumé</td><td>Elle est sur votre Wi-Fi. C’est ainsi que le voyant doit se présenter.</td></tr><tr><td>Deux clignotements par seconde</td><td>Vous avez appuyé deux fois sur le bouton : elle donnera la clé à un téléphone, pendant trois minutes ou jusqu’à ce que l’un d’eux l’ait prise.</td></tr><tr><td>Clignote rapidement</td><td>Vous avez appuyé une fois sur le bouton. Cela ouvre une fenêtre de trois minutes que cette version de l’app n’utilise pas. Elle se referme toute seule et la sonde redémarre, ce qui fait repartir de zéro sa journée de mesures.</td></tr><tr><td>Scintille</td><td>Vous maintenez le bouton enfoncé depuis trois secondes. À dix, tout ce que la sonde a reçu est effacé.</td></tr></tbody></table></div>
 <hr>
-<h2>Étape 7 — Voir ce que vous avez obtenu</h2>
-<ul><li><strong>Tableau de bord → ⋯ → Réseau Thread</strong> — le RSSI mesuré par nœud, la qualité de liaison et la table de routage avec coût du chemin et saut suivant. Les nœuds apparaissent par adresse Thread, pas par nom ; voir « Ce qui ne fonctionne pas encore » plus bas.</li><li><strong>Réseau → outils → Scanner de canaux</strong> — désormais marqué du badge <strong>Mesuré</strong>. La hauteur des barres correspond au plancher de bruit réel sur les 16 canaux, et les canaux recommandés sont les plus calmes réellement observés plutôt qu’une supposition tirée d’un tableau de chevauchement Wi-Fi.</li></ul>
-<p>Le scanner de canaux est le premier à regarder. C’est la différence la plus nette entre ce que l’app pouvait montrer avant et ce qu’elle peut montrer maintenant.</p>
+<h2>Mise à jour</h2>
+<p>Un nouveau micrologiciel arrive sur cette page. Branchez la sonde sur l’ordinateur, cliquez sur le bouton d’installation et choisissez le port. Le programme d’installation indique quel micrologiciel tourne sur la sonde et propose <strong>Update ThreadMapper Probe</strong> : cliquez dessus, puis sur <strong>Install</strong>. Une mise à jour n’efface rien : la sonde garde son Wi-Fi, sa clé et son réseau Thread.</p>
+<p>Une sonde dont le micrologiciel est antérieur au 0.8.0 ne dit pas au programme d’installation ce qu’elle est. Celui-ci propose alors <strong>Install ThreadMapper Probe</strong> et demande s’il faut effacer l’appareil : laissez <strong>Erase device</strong> décoché.</p>
+<p>Quand la sonde utilise déjà le micrologiciel le plus récent, le programme d’installation propose à la place <strong>Erase User Data</strong>. Cela efface tout ce que la sonde a reçu, comme le fait de maintenir son bouton enfoncé dix secondes.</p>
 <hr>
-<h2>Dépannage</h2>
-<div class="scroll"><table><thead><tr><th>Symptôme</th><th>Cause et correctif</th></tr></thead><tbody><tr><td><code>install.sh</code> affiche « No 802.15.4 dongle detected »</td><td>Le dongle est absent, ou l’étape 1 n’a pas pris. Vérifiez avec <code>ls /dev/serial/by-id/</code>.</td></tr><tr><td>Tester la connexion : <em>« il ne joint pas le routeur de bordure voisin »</em></td><td>L’agent tourne, mais pas <code>otbr-agent</code>. Faites <code>sudo systemctl status otbr-agent</code>, puis <code>journalctl -u otbr-agent -n 50</code>. En général une mauvaise URL de radio ou un dongle qui a perdu son alimentation.</td></tr><tr><td>Tester la connexion : <em>« ce n’est pas un agent de sonde ThreadMapper »</em></td><td>Autre chose répond sur ce port. L’agent est sur le 8099 ; le 8081 est l’API REST du routeur de bordure lui-même.</td></tr><tr><td>Tester la connexion : <em>« adresse injoignable »</em></td><td>Mauvaise IP, ou le téléphone est sur un autre sous-réseau ou un VLAN invité.</td></tr><tr><td><code>ot-ctl state</code> affiche <code>detached</code></td><td>Elle a des identifiants mais ne trouve pas le réseau. Mauvais jeu de données, ou hors de portée radio de tout autre nœud.</td></tr><tr><td><code>ot-ctl state</code> affiche <code>disabled</code></td><td><code>ifconfig up</code> / <code>thread start</code> n’ont pas été exécutés, ou la radio n’a pas démarré.</td></tr><tr><td>L’écran Réseau Thread ne montre aucun pair</td><td>La sonde est sur son propre réseau — vérifiez que vous n’êtes pas <code>leader</code> alors que vous vouliez en rejoindre un.</td></tr><tr><td>Tout fonctionne, puis meurt après un redémarrage</td><td><code>systemctl is-enabled otbr-agent threadmapper-probe</code> — les deux doivent répondre <code>enabled</code>.</td></tr></tbody></table></div>
-<p>Les journaux des deux services ensemble :</p>
-<pre class="lang-bash"><code>journalctl -u threadmapper-probe -u otbr-agent -f</code></pre>
+<h2>Si cela ne fonctionne pas</h2>
+<div class="scroll"><table><thead><tr><th>Ce que vous voyez</th><th>Ce que c’est</th></tr></thead><tbody><tr><td>Le bouton d’installation indique que le navigateur n’est pas pris en charge</td><td>Utilisez Chrome, Edge ou Firefox sur un ordinateur.</td></tr><tr><td>Le port n’est pas dans la liste</td><td>Le câble ne transporte que l’alimentation, ou un autre programme a ouvert le port.</td></tr><tr><td>Le programme d’installation affiche <strong>Unable to connect</strong></td><td>Le mot de passe est faux, la sonde est trop loin du routeur, ou le réseau est uniquement en 5 GHz. Rien n’a été modifié. Réessayez.</td></tr><tr><td>Le programme d’installation ne propose pas <strong>Connect to Wi-Fi</strong></td><td>Il n’a pas entendu la sonde répondre. Fermez sa fenêtre, cliquez de nouveau sur le bouton d’installation et choisissez le port.</td></tr><tr><td>Le voyant est revenu à un bref clignotement toutes les deux secondes</td><td>Un réseau saisi dans la console n’a pas pu être rejoint : le mot de passe est faux, ou le réseau est uniquement en 5 GHz. Après dix essais, la sonde l’a oublié. Redonnez-lui le réseau (étape 2).</td></tr><tr><td>Le voyant continue de clignoter lentement</td><td>La sonde a déjà rejoint ce réseau et ne parvient plus à le joindre : le routeur est éteint ou trop loin, ou son mot de passe a changé. Si c’est le cas, redonnez-lui le réseau (étape 2).</td></tr><tr><td>La sonde dit que le jeu de données est tronqué, ou de la mauvaise longueur</td><td>Un long collage peut perdre un morceau en route. Collez-le une nouvelle fois.</td></tr><tr><td>L’app ne liste pas la sonde</td><td>Le téléphone est sur un autre Wi-Fi, ou sur un réseau invité qui isole les appareils les uns des autres. Saisissez l’adresse donnée par <code>status</code>.</td></tr><tr><td>L’app indique que la sonde a une clé que cet iPhone ne détient pas</td><td>Un autre téléphone a pris la clé, ou la sonde est repartie de zéro. Appuyez deux fois sur <strong>B</strong> et touchez de nouveau <strong>Obtenir la clé</strong>.</td></tr><tr><td>L’app indique que la sonde est hors de son maillage Thread</td><td>Elle a un jeu de données et ne trouve pas le réseau : le jeu de données est celui d’un autre réseau, ou aucun routeur n’est à portée.</td></tr><tr><td>Vous voulez tout recommencer</td><td>Maintenez le bouton <strong>B</strong> enfoncé pendant dix secondes.</td></tr></tbody></table></div>
 <hr>
-<h2>Ce qui ne fonctionne pas encore</h2>
-<p><strong>Les nœuds apparaissent sans nom.</strong> Thread identifie un nœud par son adresse étendue ; HomeKit identifie un accessoire par un identifiant opaque, et rien ne relie les deux. Vous verrez donc une topologie réelle et exacte de nœuds anonymes plutôt que « la lampe de la cuisine ».</p>
-<p>Le correctif est écrit mais pas terminé : le point de terminaison <code>/traffic</code> de l’agent rapporte l’activité par nœud, donc actionner un appareil via HomeKit en observant quel nœud répond permettrait de les associer. Développer cette interaction demande de vrais accessoires sur un vrai maillage, ce que vous aurez précisément une fois tout ceci en marche. Suivi sous <strong>H1</strong> dans <code>WORKPLAN.md</code>.</p>
-<p><strong>L’onglet Réseau reste déduit.</strong> Son graphe est construit à partir des accessoires HomeKit, il ne peut donc pas exploiter les données de la sonde tant que le point ci-dessus n’est pas résolu. Ce sont l’écran Réseau Thread et le scanner de canaux qui affichent des mesures.</p>
-<hr>
-<h2>Si quelque chose ici est faux</h2>
-<p>Ce guide n’a pas été parcouru de bout en bout sur du matériel réel — personne sur le projet ne possède encore de Pi ni de dongle. Le script de provisionnement est testé sur Debian Bookworm arm64, et chaque point de terminaison de l’agent est testé face à un vrai <code>otbr-agent</code> sur une radio simulée, mais les étapes physiques ci-dessus sont écrites d’après la documentation des fabricants plutôt que par expérience.</p>
-<p>Si une étape est fausse, cela vaut la peine d’être corrigé dans ce fichier.</p>
+<h2>À savoir</h2>
+<ul><li>La sonde n’ouvre aucune connexion vers Internet. Elle répond sur votre propre réseau, sur le port 8099, en simple HTTP, et s’y annonce par son nom.</li><li>Elle garde ce qu’elle a reçu, le nom et le mot de passe de votre Wi-Fi, la clé, et le jeu de données Thread si vous lui en avez donné un, dans sa propre mémoire, non chiffrée. Maintenir le bouton enfoncé dix secondes efface le tout.</li><li>Sa journée de mesures se trouve dans une mémoire qu’un redémarrage vide, tout comme une coupure de courant.</li><li>C’est un montage pour qui en veut un, pas un produit. Elle n’est pas certifiée Thread.</li><li>Le programme d’installation de cette page est ESP Web Tools, d’ESPHome, sous <a href="https://tintronix-lab.github.io/ThreadMapper/flasher/LICENSE.txt">Apache License 2.0</a>. Il s’exécute dans votre navigateur et est servi depuis ce site. Il récupère le micrologiciel sur ce site et n’envoie rien nulle part. Ce que vous lui donnez pour le Wi-Fi de la sonde descend par le câble jusqu’à la carte ; il note aussi ce qu’il envoie, sous forme de nombres, dans la console de développement du navigateur, jusqu’à la fermeture de l’onglet.</li><li>Le micrologiciel repose sur des logiciels open source d’Espressif et d’autres. Leurs licences se trouvent dans <a href="https://tintronix-lab.github.io/ThreadMapper/firmware/NOTICES.txt">NOTICES.txt</a>, et les conditions de l’image elle-même dans <a href="https://tintronix-lab.github.io/ThreadMapper/firmware/LICENSE.txt">LICENSE.txt</a>.</li></ul>
 
 <footer>
   <a href="index.html">Accueil</a>

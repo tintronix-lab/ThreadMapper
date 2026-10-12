@@ -53,7 +53,7 @@
 <body>
 
 <h1>Datenschutzerklärung</h1>
-<p class="updated">ThreadMapper · Zuletzt aktualisiert am 6. Oktober 2026</p>
+<p class="updated">ThreadMapper · Zuletzt aktualisiert am 12. Oktober 2026</p>
 
 <div class="highlight">
   <strong>ThreadMapper erhebt Ihre personenbezogenen Daten nicht, überträgt sie nicht und verkauft sie nicht.</strong> Es gibt keine Accounts, keine Analyse-SDKs und keine Tracker von Drittanbietern. Alles, was die App aufzeichnet, bleibt auf Ihrem Gerät – oder, wenn Sie eine der drei optionalen iCloud-Funktionen nutzen, in Ihrem eigenen iCloud-Account. In beiden Fällen erreicht es uns nie.
@@ -95,8 +95,8 @@
   <li><strong>Hört auf Geräte, die sich in Ihrem lokalen Netzwerk ankündigen</strong> – die Standard-Bonjour-Erkennung, die iOS bereitstellt. So findet die App Border Router und Matter-Geräte, auch solche, die Apple Home nicht auflistet. Sie liest, was diese Geräte über sich aussenden. Um zu prüfen, ob ein gefundener Dienst antwortet, verbindet sie sich mit der Adresse, die der Dienst angekündigt hat, und schließt die Verbindung sofort wieder, ohne etwas zu senden;</li>
   <li><strong>Spricht die Adressen in Ihrem WLAN an</strong>, um zu sehen, welche Geräte antworten: höchstens zwei Pings an jede, solange die Ansicht „Lokales Netzwerk“ geöffnet ist, und eine einzelne Hallo-Nachricht, auf die Xiaomi-Gateways antworten, wenn diese Ansicht oder „Alles hier“ geöffnet wird. Danach fragt sie Ihren Router – und keinen anderen Server –, unter welchem Namen er jedes Gerät kennt, das geantwortet hat. Verliert Apple Home ein Zubehör, während die App geöffnet ist, wird mit Pro dessen eigene Adresse in Ihrem WLAN auf dieselbe Weise angesprochen. Nichts davon geschieht im Hintergrund;</li>
   <li><strong>Prüft ein einzelnes Gerät auf dessen Seite, wenn Sie dort tippen</strong>: fünf Pings an jede seiner Adressen und ein Verbindungsversuch zu jedem Port einer Liste gängiger Smart-Home-Ports sowie zu jedem Port, den das Gerät selbst ankündigt, jeweils sofort wieder geschlossen. Ein verschlüsselter Port, der antwortet, wird nach dem Zertifikat gefragt, das er vorlegt – es wird gelesen und dann abgelehnt;</li>
-  <li>Verbindet sich mit einem <strong>OpenThread Border Router</strong>, falls Sie einen einrichten – in Ihrem eigenen lokalen Netzwerk, unter einer Adresse, die Sie selbst eingeben;</li>
-  <li>Verbindet sich mit einer <strong>ThreadMapper-Sonde</strong>, falls Sie eine betreiben – ebenfalls in Ihrem eigenen lokalen Netzwerk, unter einer Adresse, die Sie selbst eingeben;</li>
+  <li>Verbindet sich mit einem <strong>OpenThread Border Router</strong>, falls Sie einen einrichten – in Ihrem eigenen lokalen Netzwerk, unter einer Adresse, die Sie eingeben oder aus denen auswählen, die die App dort gefunden hat. Wenn Sie auf „In diesem Netzwerk suchen“ tippen, fragt sie jeden Border Router und jeden Host mit Home Assistant, den sie in Ihrem Netzwerk gehört hat, einmal, ob er als OpenThread Border Router antwortet;</li>
+  <li>Verbindet sich mit einer <strong>ThreadMapper-Sonde</strong>, falls Sie eine betreiben – ebenfalls in Ihrem eigenen lokalen Netzwerk, unter einer Adresse, die Sie eingeben oder aus denen auswählen, die die App dort gefunden hat. Eine Sonde listet die WLAN-Netzwerke auf, die sie hört; ihre Namen werden im Kanalscanner angezeigt, und die App speichert sie nirgends;</li>
   <li>Verbindet sich mit einer <strong>Philips Hue Bridge</strong>, falls Sie eine koppeln – in Ihrem eigenen lokalen Netzwerk, um zu lesen, welche Lampen sie über Zigbee noch erreicht. Der von der Bridge ausgestellte Schlüssel bleibt im Schlüsselbund dieses Geräts und wird nirgendwohin gesendet;</li>
   <li>Erreicht <strong>Apples iCloud</strong>, nur für die drei optionalen Funktionen oben und nur Ihren eigenen Account.</li>
 </ul>

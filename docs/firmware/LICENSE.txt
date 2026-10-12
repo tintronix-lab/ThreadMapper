@@ -1,0 +1,48 @@
+ThreadMapper Probe firmware: the licence for the image
+
+Copyright (c) 2026 Tintin Razavian. All rights reserved.
+
+This licence covers the firmware image "threadmapper-probe.bin" as a whole,
+and the parts of it that were written for ThreadMapper.
+
+1. What you may do
+
+   You may download the image, install it on boards that are yours, and run
+   it there, free of charge, for use with the ThreadMapper app. You may pass
+   on unchanged copies of the image, free of charge, together with this file
+   and NOTICES.txt.
+
+2. What you may not do
+
+   You may not sell the image or charge for access to it, pass on a changed
+   image under the ThreadMapper name, or remove this licence or the notices
+   that come with the image.
+
+3. Other people's software
+
+   The image contains open-source software, listed with its licences in
+   NOTICES.txt. Those parts stay under their own licences. Nothing here
+   limits a right one of those licences gives you, and where this licence
+   and one of them say different things about such a part, theirs holds.
+
+4. No source code
+
+   The parts written for ThreadMapper are provided in binary form only.
+
+5. No warranty
+
+   THE IMAGE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+   PARTICULAR PURPOSE AND NONINFRINGEMENT. It is a build for people who want
+   one, not a product. It is not a Thread Certified product. You install it
+   and run it at your own risk.
+
+6. Liability
+
+   TO THE EXTENT THE LAW ALLOWS, THE COPYRIGHT HOLDER IS NOT LIABLE FOR ANY
+   CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM THE IMAGE OR FROM ITS USE.
+
+7. The name
+
+   "ThreadMapper" is the name of the app and of this firmware. This licence
+   gives no right to use the name for anything else.

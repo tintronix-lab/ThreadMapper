@@ -351,7 +351,7 @@
     <p class="eyebrow">La sonda</p>
     <h2>Una cajita que acaba con las suposiciones.</h2>
     <p class="section-lede">
-      Ejecuta un agente ligero en una Raspberry Pi con un adaptador 802.15.4 y se unirá a tu malla Thread como un nodo real. Desde dentro, todo lo que el teléfono no puede ver se vuelve legible; y como nunca duerme, ve los fallos de las 3 a. m. que tú no ves.
+      Pon nuestro firmware en una pequeña placa ESP32-C6, desde el navegador de un ordenador, y déjala en un cargador. Mide todos los canales Thread cada cinco minutos, algo que ningún teléfono puede hacer, y guarda un día de lecturas mientras la app está cerrada. Allí donde puede unirse a tu malla Thread, lee la malla desde dentro, como un nodo real.
     </p>
 
     <div class="readout" role="img" aria-label="Ejemplo de salida de una sonda: un router a menos 20 dBm con calidad de enlace 3 de 3, y una ruta con coste de ruta 0.">
@@ -381,7 +381,7 @@
       </div>
       <div class="compare-row">
         <div class="compare-cell without"><b>Con la app abierta</b>El teléfono solo vigila mientras tú lo estás mirando.</div>
-        <div class="compare-cell with"><b>De forma continua</b>Se graba en disco, así que la partición de la madrugada sigue ahí por la mañana.</div>
+        <div class="compare-cell with"><b>De forma continua</b>Se graba en la sonda durante un día, así que lo de anoche sigue ahí por la mañana.</div>
       </div>
     </div>
 
@@ -405,10 +405,10 @@
     </div>
 
     <p style="margin:1.75rem 0 0;color:var(--muted);font-size:.93rem">
-      El agente es de código abierto y funciona en una Raspberry Pi 4 o 5 que quizá ya tengas; el adaptador 802.15.4 que necesita cuesta unos 10–25 $. <a href="probe-setup.html">Guía de instalación →</a>
+      La placa es una Seeed XIAO ESP32C6, que cuesta unos 5–8 $, y el firmware se instala en unos diez minutos. La sonda forma parte de ThreadMapper Pro. <a href="probe-setup.html">Guía de configuración →</a>
       <br>
       <span style="font-size:.88rem">
-        Léela primero: una Raspberry Pi no tiene radio Thread propia, y unirse a una malla Apple o Google existente exige credenciales que esas plataformas todavía no te dejan exportar. No es un producto que puedas comprar: es algo que te montas tú.
+        Léela primero: en una casa cuyos routers de borde son todos de Apple o de Google, la sonda solo puede unirse a la malla si Home Assistant le pasa las credenciales. Si no, mide los canales y el wifi que hay en ellos, y no lee la malla. No es un producto que puedas comprar: es algo que te montas tú.
       </span>
     </p>
   </section>
@@ -477,12 +477,6 @@
         <li><strong>Trabajos y hojas de pruebas</strong>: una página para el cliente con exactamente lo que cambió en la visita, y una página por dispositivo para una reclamación de garantía.</li>
         <li><strong>Lo que dicen las radios</strong>: por qué se reinició un dispositivo, cuántas veces ha cambiado de router padre y cuántos hogares pueden controlarlo.</li>
       </ul>
-      <div class="note">
-        <p><strong>Las funciones de la sonda no están tras el muro de pago.</strong></p>
-        <p>
-          Si te has tomado la molestia de montar una sonda, encontrarte con un segundo muro de pago sería una mala forma de darte las gracias. Todo lo que la sonda desbloquea está incluido.
-        </p>
-      </div>
     </div>
   </section>
 

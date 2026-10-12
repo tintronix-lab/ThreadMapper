@@ -351,7 +351,7 @@
     <p class="eyebrow">Die Sonde</p>
     <h2>Eine kleine Box, die das Raten beendet.</h2>
     <p class="section-lede">
-      Ein schlanker Agent auf einem Raspberry Pi mit 802.15.4-Dongle tritt Ihrem Thread-Netz als echter Knoten bei. Von innen wird alles lesbar, was das iPhone nicht sehen kann – und weil er nie schläft, sieht er die Ausfälle um 3 Uhr nachts, die Sie verschlafen.
+      Spielen Sie unsere Firmware über den Browser eines Computers auf eine kleine ESP32-C6-Platine und lassen Sie sie an einem Ladegerät. Sie misst alle fünf Minuten jeden Thread-Kanal, was kein Telefon kann, und bewahrt die Messwerte eines Tages auf, während die App geschlossen ist. Wo sie Ihrem Thread-Netz beitreten kann, liest sie das Netz von innen, als echter Knoten.
     </p>
 
     <div class="readout" role="img" aria-label="Beispielausgabe einer Sonde: ein Router bei minus 20 dBm mit Verbindungsqualität 3 von 3 und eine Route mit Pfadkosten 0.">
@@ -381,7 +381,7 @@
       </div>
       <div class="compare-row">
         <div class="compare-cell without"><b>Solange die App offen ist</b>Das iPhone schaut nur hin, solange Sie hinschauen.</div>
-        <div class="compare-cell with"><b>Durchgehend</b>Auf Datenträger aufgezeichnet, damit die nächtliche Partition morgens noch da ist.</div>
+        <div class="compare-cell with"><b>Durchgehend</b>Einen Tag lang auf der Sonde aufgezeichnet, damit die letzte Nacht morgens noch da ist.</div>
       </div>
     </div>
 
@@ -405,10 +405,10 @@
     </div>
 
     <p style="margin:1.75rem 0 0;color:var(--muted);font-size:.93rem">
-      Der Agent ist Open Source und läuft auf einem Raspberry Pi 4 oder 5, den Sie vielleicht schon haben – der nötige 802.15.4-Dongle kostet etwa 10–25 $. <a href="probe-setup.html">Einrichtungsanleitung →</a>
+      Die Platine ist ein Seeed XIAO ESP32C6 für etwa 5–8 $, und die Firmware ist in etwa zehn Minuten installiert. Die Sonde gehört zu ThreadMapper Pro. <a href="probe-setup.html">Einrichtungsanleitung →</a>
       <br>
       <span style="font-size:.88rem">
-        Lesen Sie die Anleitung zuerst: Ein Raspberry Pi hat kein eigenes Thread-Funkmodul, und der Beitritt zu einem bestehenden Apple- oder Google-Netz braucht Zugangsdaten, die sich aus diesen Plattformen noch nicht exportieren lassen. Es ist kein Produkt, das man kaufen kann – es ist ein Eigenbau.
+        Lesen Sie die Anleitung zuerst: In einem Zuhause, dessen Border Router alle von Apple oder Google stammen, kann die Sonde dem Netz nur beitreten, wenn Home Assistant ihr die Zugangsdaten übergibt. Andernfalls misst sie die Kanäle und das WLAN darauf und liest das Netz nicht aus. Es ist kein Produkt, das man kaufen kann – es ist ein Eigenbau.
       </span>
     </p>
   </section>
@@ -477,12 +477,6 @@
         <li><strong>Aufträge und Nachweisblätter</strong> – eine Seite für den Kunden, die genau sagt, was ein Besuch verändert hat, und eine Seite pro Gerät für einen Garantiefall.</li>
         <li><strong>Was die Funkmodule sagen</strong> – warum ein Gerät neu startete, wie oft es den Elternrouter gewechselt hat und wie viele Haushalte es steuern können.</li>
       </ul>
-      <div class="note">
-        <p><strong>Sonden-Funktionen liegen nicht hinter der Bezahlschranke.</strong></p>
-        <p>
-          Wenn Sie sich schon die Mühe machen, eine Sonde zu bauen, wäre eine zweite Bezahlschranke ein schlechtes Dankeschön. Alles, was die Sonde freischaltet, ist enthalten.
-        </p>
-      </div>
     </div>
   </section>
 

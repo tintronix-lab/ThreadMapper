@@ -53,7 +53,7 @@
 <body>
 
 <h1>Privacybeleid</h1>
-<p class="updated">ThreadMapper · Laatst bijgewerkt 6 oktober 2026</p>
+<p class="updated">ThreadMapper · Laatst bijgewerkt 12 oktober 2026</p>
 
 <div class="highlight">
   <strong>ThreadMapper verzamelt, verzendt of verkoopt je persoonsgegevens niet.</strong> Er zijn geen accounts, geen analytics-SDK’s en geen trackers van derden. Alles wat de app vastlegt blijft op je apparaat — of, als je een van de drie optionele iCloud-functies gebruikt, in je eigen iCloud-account. Hoe dan ook bereikt het ons nooit.
@@ -95,8 +95,8 @@
   <li><strong>Luistert naar apparaten die zichzelf op je lokale netwerk aankondigen</strong> — de standaard Bonjour-detectie die iOS biedt. Zo vindt de app border routers en Matter-apparaten, ook die welke Apple Home niet toont. Het leest wat die apparaten over zichzelf uitzenden. Om te controleren of een gevonden service antwoordt, maakt het verbinding met het adres dat de service heeft aangekondigd en sluit het die verbinding meteen, zonder iets te versturen;</li>
   <li><strong>Roept de adressen op je wifi aan</strong> om te zien welke apparaten antwoorden: maximaal twee pings naar elk adres, zolang het scherm Lokaal netwerk open staat, en één enkele hello waarop Xiaomi-gateways antwoorden, wanneer dat scherm of Alles hier wordt geopend. Daarna vraagt het je router, en geen andere server, hoe die elk apparaat noemt dat antwoordde. Verliest Apple Home het contact met een accessoire terwijl de app open is, dan wordt met Pro het eigen adres van dat accessoire op je wifi net zo aangeroepen. Niets hiervan gebeurt op de achtergrond;</li>
   <li><strong>Controleert één apparaat, op zijn eigen pagina, wanneer je tikt</strong>: vijf pings naar elk van zijn adressen, en één verbindingspoging naar elke poort uit een lijst van gangbare smarthome-poorten en naar elke poort die het apparaat zelf aankondigt, telkens meteen weer gesloten. Van een beveiligde poort die antwoordt, wordt het certificaat dat hij aanbiedt opgevraagd, gelezen en daarna geweigerd;</li>
-  <li>Maakt verbinding met een <strong>OpenThread border router</strong>, als je er een instelt — op je eigen lokale netwerk, op een adres dat je zelf invoert;</li>
-  <li>Maakt verbinding met een <strong>ThreadMapper-probe</strong>, als je er een draait — ook op je eigen lokale netwerk, op een adres dat je zelf invoert;</li>
+  <li>Maakt verbinding met een <strong>OpenThread border router</strong>, als je er een instelt — op je eigen lokale netwerk, op een adres dat je zelf invoert of kiest uit de adressen die de app daar heeft gevonden. Tik je op ‘Zoek op dit netwerk’, dan vraagt het elke border router en elke Home Assistant-host die het op je netwerk heeft gehoord, één keer, of die als zo’n router antwoordt;</li>
+  <li>Maakt verbinding met een <strong>ThreadMapper-probe</strong>, als je er een draait — ook op je eigen lokale netwerk, op een adres dat je zelf invoert of kiest uit de adressen die de app daar heeft gevonden. Een probe somt de wifi-netwerken op die hij hoort; hun namen worden getoond in de Kanaalscanner en de app bewaart ze nergens;</li>
   <li>Maakt verbinding met een <strong>Philips Hue-bridge</strong>, als je er een koppelt — op je eigen lokale netwerk, om te lezen welke lampen hij via Zigbee nog bereikt. De sleutel die de bridge uitgeeft blijft in de sleutelhanger van dit apparaat en wordt nergens heen gestuurd;</li>
   <li>Bereikt <strong>Apple’s iCloud</strong>, alleen voor de drie optionele functies hierboven, en alleen je eigen account.</li>
 </ul>
